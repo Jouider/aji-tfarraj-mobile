@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/app_shell.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/features/splash/splash_screen.dart';
 import 'package:aji_tfarraj/features/language/language_selection_screen.dart';
 import 'package:aji_tfarraj/features/auth/presentation/login_screen.dart';
@@ -16,11 +18,94 @@ import 'package:aji_tfarraj/features/ticket/ticket_screen.dart';
 import 'package:aji_tfarraj/features/profile/profile_screen.dart';
 import 'package:aji_tfarraj/features/error/error_screen.dart';
 import 'package:aji_tfarraj/features/show/sold_out_screen.dart';
+import 'package:aji_tfarraj/app/design_system/demo_screen.dart';
+
+/// Routes that require authentication
+const _protectedRoutes = [
+  Routes.home,
+  Routes.myReservations,
+  Routes.ticket,
+  Routes.profile,
+];
+
+/// Routes that should redirect to home if already authenticated
+const _authRoutes = [
+  Routes.login,
+  Routes.register,
+];
+
+/// Listenable that triggers router refresh on auth state changes
+class AuthNotifierListenable extends ChangeNotifier {
+  AuthNotifierListenable(this._ref) {
+    _ref.listen(authStateProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+
+  final Ref _ref;
+}
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final authNotifier = AuthNotifierListenable(ref);
+
   return GoRouter(
     initialLocation: Routes.splash,
+    refreshListenable: authNotifier,
+    redirect: (context, state) {
+      final authState = ref.read(authStateProvider);
+      final currentPath = state.matchedLocation;
+
+      // Check if trying to access a protected route
+      final isProtectedRoute = _protectedRoutes.any((route) => 
+          currentPath == route || currentPath.startsWith('$route/'));
+      
+      // Also protect show detail and reservation routes
+      final isShowRoute = currentPath.startsWith('/show/');
+      final isReservationRoute = currentPath.startsWith('/reservation/');
+      final needsAuth = isProtectedRoute || isShowRoute || isReservationRoute;
+      
+      // Check if trying to access auth routes (login/register) while authenticated
+      final isAuthRoute = _authRoutes.contains(currentPath);
+
+      // Determine authentication status
+      // For AsyncValue: check if we have a non-null, non-empty token
+      final bool isAuthenticated;
+      if (authState.isLoading) {
+        // Still loading - don't redirect yet, let the current navigation proceed
+        // The router will refresh when loading completes
+        return null;
+      } else if (authState.hasError) {
+        // Error reading token - treat as not authenticated
+        isAuthenticated = false;
+      } else {
+        // Check if token exists and is not empty
+        final token = authState.valueOrNull;
+        isAuthenticated = token != null && token.isNotEmpty;
+      }
+
+      // If not authenticated and trying to access protected route -> redirect to login
+      if (!isAuthenticated && needsAuth) {
+        return Routes.login;
+      }
+
+      // If authenticated and trying to access login/register -> redirect to home
+      if (isAuthenticated && isAuthRoute) {
+        return Routes.home;
+      }
+
+      // No redirect needed
+      return null;
+    },
     routes: [
+      // ============================================
+      // Design System Demo (for development)
+      // ============================================
+      GoRoute(
+        path: '/design-system',
+        name: 'designSystem',
+        builder: (context, state) => const DesignSystemDemoScreen(),
+      ),
+
       // ============================================
       // Auth Flow (outside shell - no bottom nav)
       // ============================================

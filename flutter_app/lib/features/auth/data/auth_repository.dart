@@ -4,6 +4,9 @@ import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/features/auth/domain/user.dart';
 
+// Re-export the token-based auth state provider for router to use
+export 'package:aji_tfarraj/app/auth/token_storage.dart' show authStateProvider;
+
 /// Authentication repository for login, register, logout
 class AuthRepository {
   final Dio _dio;
@@ -128,8 +131,9 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
   final TokenStorage _tokenStorage;
+  final Ref _ref;
 
-  AuthNotifier(this._repository, this._tokenStorage) : super(const AuthState()) {
+  AuthNotifier(this._repository, this._tokenStorage, this._ref) : super(const AuthState()) {
     _checkAuthStatus();
   }
 
@@ -163,6 +167,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         email: email,
         password: password,
       );
+      
+      // Notify the token-based auth provider that router listens to
+      await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
+      
       state = AuthState(
         status: AuthStatus.authenticated,
         user: authResponse.user,
@@ -198,6 +206,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         password: password,
         passwordConfirmation: passwordConfirmation,
       );
+      
+      // Notify the token-based auth provider that router listens to
+      await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
+      
       state = AuthState(
         status: AuthStatus.authenticated,
         user: authResponse.user,
@@ -227,6 +239,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Logout
   Future<void> logout() async {
     await _repository.logout();
+    // Notify the token-based auth provider that router listens to
+    await _ref.read(authStateProvider.notifier).clearToken();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
@@ -236,9 +250,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-/// Provider for auth state
-final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+/// Provider for auth state (login/register UI state)
+final loginAuthStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   final tokenStorage = ref.watch(tokenStorageProvider);
-  return AuthNotifier(repository, tokenStorage);
+  return AuthNotifier(repository, tokenStorage, ref);
 });

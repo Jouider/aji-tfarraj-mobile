@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
 /// Profile Screen
 /// TODO: Display user information
 /// TODO: Add language selection option
-/// TODO: Add logout functionality
 /// TODO: Add other settings (notifications, help, about)
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mon profil'),
@@ -74,13 +75,16 @@ class ProfileScreen extends StatelessWidget {
           ),
           const Divider(),
           const SizedBox(height: 24),
-          // TODO: Add logout button
+          // Logout button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
-              onPressed: () {
-                // TODO: Implement logout
-                context.go(Routes.login);
+              onPressed: () async {
+                // Clear token and logout
+                await ref.read(loginAuthStateProvider.notifier).logout();
+                if (context.mounted) {
+                  context.go(Routes.login);
+                }
               },
               style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Se déconnecter'),

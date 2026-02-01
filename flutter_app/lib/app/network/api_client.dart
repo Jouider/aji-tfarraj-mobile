@@ -8,9 +8,11 @@ import 'package:aji_tfarraj/app/auth/token_storage.dart';
 class ApiClient {
   final Dio _dio;
   final TokenStorage _tokenStorage;
+  final Ref _ref;
 
-  ApiClient({required TokenStorage tokenStorage})
+  ApiClient({required TokenStorage tokenStorage, required Ref ref})
       : _tokenStorage = tokenStorage,
+        _ref = ref,
         _dio = Dio(BaseOptions(
           baseUrl: AppConfig.currentBaseUrl,
           connectTimeout: const Duration(seconds: 30),
@@ -53,7 +55,7 @@ class ApiClient {
         }
         handler.next(response);
       },
-      onError: (error, handler) {
+      onError: (error, handler) async {
         // Debug logging
         if (kDebugMode) {
           print('┌─────────────────────────────────────────');
@@ -65,9 +67,33 @@ class ApiClient {
           }
           print('└─────────────────────────────────────────');
         }
+
+        // Handle 401 Unauthorized - auto logout
+        if (error.response?.statusCode == 401) {
+          await _handleUnauthorized();
+        }
+
         handler.next(error);
       },
     ));
+  }
+
+  /// Handle 401 response by clearing token and updating auth state
+  /// Navigation will be triggered through router refresh listener
+  Future<void> _handleUnauthorized() async {
+    // Clear token from secure storage
+    await _tokenStorage.clearToken();
+    
+    // Update auth state to logged out (triggers router refresh)
+    final authNotifier = _ref.read(authStateProvider.notifier);
+    await authNotifier.clearToken();
+    
+    if (kDebugMode) {
+      print('┌─────────────────────────────────────────');
+      print('│ 🔐 401 Unauthorized - Session cleared');
+      print('│ 🔄 Router will redirect to login');
+      print('└─────────────────────────────────────────');
+    }
   }
 
   /// GET request
@@ -132,7 +158,7 @@ class ApiClient {
 /// Provider for API Client
 final apiClientProvider = Provider<ApiClient>((ref) {
   final tokenStorage = ref.watch(tokenStorageProvider);
-  return ApiClient(tokenStorage: tokenStorage);
+  return ApiClient(tokenStorage: tokenStorage, ref: ref);
 });
 
 /// API Exception for handling errors

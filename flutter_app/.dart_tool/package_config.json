@@ -230,6 +230,12 @@
       "languageVersion": "3.1"
     },
     {
+      "name": "flutter_localizations",
+      "rootUri": "file:///opt/homebrew/share/flutter/packages/flutter_localizations",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
       "name": "flutter_riverpod",
       "rootUri": "file:///Users/mouadsmac/.pub-cache/hosted/pub.dev/flutter_riverpod-2.6.1",
       "packageUri": "lib/",
@@ -308,6 +314,12 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "google_fonts",
+      "rootUri": "file:///Users/mouadsmac/.pub-cache/hosted/pub.dev/google_fonts-6.3.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
       "name": "graphs",
       "rootUri": "file:///Users/mouadsmac/.pub-cache/hosted/pub.dev/graphs-2.3.2",
       "packageUri": "lib/",
@@ -339,9 +351,9 @@
     },
     {
       "name": "intl",
-      "rootUri": "file:///Users/mouadsmac/.pub-cache/hosted/pub.dev/intl-0.19.0",
+      "rootUri": "file:///Users/mouadsmac/.pub-cache/hosted/pub.dev/intl-0.20.2",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.3"
     },
     {
       "name": "io",

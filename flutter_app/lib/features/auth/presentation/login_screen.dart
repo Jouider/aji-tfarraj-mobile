@@ -27,10 +27,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authStateProvider);
+    final authState = ref.watch(loginAuthStateProvider);
 
     // Listen for auth state changes and navigate on success
-    ref.listen<AuthState>(authStateProvider, (previous, next) {
+    ref.listen<AuthState>(loginAuthStateProvider, (previous, next) {
       if (next.isAuthenticated) {
         context.go(Routes.home);
       }
@@ -188,17 +188,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 24),
-
-                // Skip login (browse shows)
-                TextButton(
-                  onPressed: () => context.go(Routes.home),
-                  child: Text(
-                    'Continuer sans compte',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ),
               ],
             ),
           ),
@@ -210,10 +199,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    ref.read(authStateProvider.notifier).clearError();
+    ref.read(loginAuthStateProvider.notifier).clearError();
 
     try {
-      await ref.read(authStateProvider.notifier).login(
+      await ref.read(loginAuthStateProvider.notifier).login(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
