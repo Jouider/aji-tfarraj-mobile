@@ -47,13 +47,23 @@ class AppShell extends StatelessWidget {
 
   int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
-    if (location.startsWith(Routes.home)) return 0;
+    if (location.startsWith(Routes.home)) {
+      return 0;
+    }
     if (location.startsWith(Routes.myReservations) || 
-        location.startsWith(Routes.reservation)) return 1;
-    if (location.startsWith(Routes.ticket)) return 2;
-    if (location.startsWith(Routes.profile)) return 3;
+        location.startsWith(Routes.reservation)) {
+      return 1;
+    }
+    if (location.startsWith(Routes.ticket)) {
+      return 2;
+    }
+    if (location.startsWith(Routes.profile)) {
+      return 3;
+    }
     // Show detail pages - keep Home tab selected
-    if (location.startsWith(Routes.show)) return 0;
+    if (location.startsWith(Routes.show)) {
+      return 0;
+    }
     return 0;
   }
 
