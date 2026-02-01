@@ -7,6 +7,7 @@ class Routes {
   static const splash = '/';
   static const language = '/language';
   static const login = '/login';
+  static const register = '/register';
 
   // Tab roots (inside shell)
   static const home = '/home';

@@ -4,7 +4,8 @@ import 'package:aji_tfarraj/app/app_shell.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/splash/splash_screen.dart';
 import 'package:aji_tfarraj/features/language/language_selection_screen.dart';
-import 'package:aji_tfarraj/features/auth/login_screen.dart';
+import 'package:aji_tfarraj/features/auth/presentation/login_screen.dart';
+import 'package:aji_tfarraj/features/auth/presentation/register_screen.dart';
 import 'package:aji_tfarraj/features/home/home_screen.dart';
 import 'package:aji_tfarraj/features/show/show_detail_screen.dart';
 import 'package:aji_tfarraj/features/reservation/reserve_seats_screen.dart';
@@ -37,6 +38,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.login,
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: Routes.register,
+        name: 'register',
+        builder: (context, state) => const RegisterScreen(),
       ),
 
       // ============================================
