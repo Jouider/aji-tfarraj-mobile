@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/buttons.dart';
+import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/spacing.dart';
+import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
 /// Login Screen
@@ -39,7 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Form(
             key: _formKey,
             child: Column(
@@ -50,51 +54,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Icon(
                   Icons.tv,
                   size: 80,
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.primary,
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                const SizedBox(height: AppSpacing.lg),
+                Text(
                   'Aji Tfarraj',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTypography.h1,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   'Connectez-vous pour réserver',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textMuted,
                   ),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: AppSpacing.xxxl),
 
                 // Error message
                 if (authState.errorMessage != null) ...[
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
-                      color: Colors.red[50],
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red[200]!),
+                      color: AppColors.errorLight,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red[700], size: 20),
-                        const SizedBox(width: 8),
+                        Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                        const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: Text(
                             authState.errorMessage!,
-                            style: TextStyle(color: Colors.red[700]),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.error,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
 
                 // Email field
@@ -102,11 +104,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
+                  enabled: !authState.isLoading,
+                  decoration: InputDecoration(
                     labelText: 'Email',
                     hintText: 'votre@email.com',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -118,20 +131,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
 
                 // Password field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
+                  enabled: !authState.isLoading,
                   decoration: InputDecoration(
                     labelText: 'Mot de passe',
                     prefixIcon: const Icon(Icons.lock_outlined),
-                    border: const OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        color: AppColors.textMuted,
                       ),
                       onPressed: () {
                         setState(() => _obscurePassword = !_obscurePassword);
@@ -146,33 +171,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   },
                   onFieldSubmitted: (_) => _submit(),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
 
-                // Login button
+                // Login button using design system
                 SizedBox(
-                  height: 56,
-                  child: ElevatedButton(
+                  width: double.infinity,
+                  child: AppButton(
+                    text: 'Se connecter',
+                    isLoading: authState.isLoading,
                     onPressed: authState.isLoading ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black87,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: authState.isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'Se connecter',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
 
                 // Register link
                 Row(
@@ -180,11 +190,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     Text(
                       'Pas encore de compte ?',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textMuted,
+                      ),
                     ),
-                    TextButton(
-                      onPressed: () => context.go(Routes.register),
-                      child: const Text('S\'inscrire'),
+                    AppButtonText(
+                      text: 'S\'inscrire',
+                      onPressed: authState.isLoading ? null : () => context.go(Routes.register),
                     ),
                   ],
                 ),

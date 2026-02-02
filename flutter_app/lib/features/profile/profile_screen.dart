@@ -1,42 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/buttons.dart';
+import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
 /// Profile Screen
-/// TODO: Display user information
-/// TODO: Add language selection option
-/// TODO: Add other settings (notifications, help, about)
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isLoggingOut = false;
+
+  Future<void> _handleLogout() async {
+    setState(() => _isLoggingOut = true);
+    
+    try {
+      // Clear token and logout - router refresh will handle navigation
+      await ref.read(loginAuthStateProvider.notifier).logout();
+      // Navigation happens automatically via router refresh on auth state change
+    } finally {
+      if (mounted) {
+        setState(() => _isLoggingOut = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(loginAuthStateProvider);
+    final user = authState.user;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mon profil'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          // TODO: Add user avatar and info
+          // User avatar and info
           const CircleAvatar(
             radius: 50,
-            child: Icon(Icons.person, size: 50),
+            backgroundColor: AppColors.backgroundGrey,
+            child: Icon(Icons.person, size: 50, color: AppColors.textMuted),
           ),
-          const SizedBox(height: 16),
-          const Center(
+          const SizedBox(height: AppSpacing.lg),
+          Center(
             child: Text(
-              'Nom d\'utilisateur',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              user?.name ?? 'Utilisateur',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
-          const Center(
-            child: Text('+212 XXX XXX XXX'),
-          ),
-          const SizedBox(height: 32),
-          // TODO: Add profile options
+          if (user?.email != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Center(
+              child: Text(
+                user!.email,
+                style: TextStyle(color: AppColors.textMuted),
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.xxl),
+          
+          // Profile options
           ListTile(
             leading: const Icon(Icons.language),
             title: const Text('Langue'),
@@ -74,20 +104,16 @@ class ProfileScreen extends ConsumerWidget {
             },
           ),
           const Divider(),
-          const SizedBox(height: 24),
-          // Logout button
+          const SizedBox(height: AppSpacing.xl),
+          
+          // Logout button using design system
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () async {
-                // Clear token and logout
-                await ref.read(loginAuthStateProvider.notifier).logout();
-                if (context.mounted) {
-                  context.go(Routes.login);
-                }
-              },
-              style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Se déconnecter'),
+            child: AppButtonSecondary(
+              text: 'Se déconnecter',
+              icon: Icons.logout,
+              isLoading: _isLoggingOut,
+              onPressed: _isLoggingOut ? null : _handleLogout,
             ),
           ),
         ],

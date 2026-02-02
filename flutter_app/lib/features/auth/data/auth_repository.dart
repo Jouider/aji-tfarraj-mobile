@@ -54,19 +54,53 @@ class AuthRepository {
     return authResponse;
   }
 
-  /// Get current authenticated user
+  /// Get current authenticated user (GET /api/auth/me)
+  /// Returns the user if authenticated, throws on 401 or network error
+  Future<User> me() async {
+    final token = await _tokenStorage.readToken();
+    if (token == null || token.isEmpty) {
+      throw DioException(
+        requestOptions: RequestOptions(path: '/api/auth/me'),
+        type: DioExceptionType.unknown,
+        error: 'No token available',
+      );
+    }
+    
+    // Add token to request since authDio doesn't have interceptor
+    final response = await _dio.get(
+      '/api/auth/me',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    return User.fromJson(response.data['data'] ?? response.data);
+  }
+
+  /// Get current authenticated user (alias for backward compatibility)
   Future<User> getCurrentUser() async {
-    final response = await _dio.get('/api/auth/me');
-    return User.fromJson(response.data);
+    return me();
   }
 
   /// Logout and clear token
+  /// Calls backend logout endpoint best-effort, but ALWAYS clears token locally
   Future<void> logout() async {
-    try {
-      await _dio.post('/api/auth/logout');
-    } catch (_) {
-      // Ignore errors on logout, still clear token
+    final token = await _tokenStorage.readToken();
+    
+    // Best-effort backend logout call
+    if (token != null && token.isNotEmpty) {
+      try {
+        await _dio.post(
+          '/api/auth/logout',
+          options: Options(
+            headers: {'Authorization': 'Bearer $token'},
+          ),
+        );
+      } catch (_) {
+        // Ignore errors on logout - always clear token locally
+      }
     }
+    
+    // ALWAYS clear token locally regardless of backend response
     await _tokenStorage.clearToken();
   }
 
@@ -138,21 +172,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Check if user is already logged in on app start
+  /// Validates token by calling GET /api/auth/me
   Future<void> _checkAuthStatus() async {
+    state = state.copyWith(status: AuthStatus.loading);
+    
     try {
       final token = await _tokenStorage.readToken();
-      if (token != null) {
-        // Try to get current user to validate token
-        final user = await _repository.getCurrentUser();
+      if (token != null && token.isNotEmpty) {
+        // Validate token by fetching current user
+        final user = await _repository.me();
+        
+        // Sync with router's auth state provider
+        await _ref.read(authStateProvider.notifier).setToken(token);
+        
         state = AuthState(status: AuthStatus.authenticated, user: user);
       } else {
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
+    } on DioException catch (e) {
+      // Token invalid, expired, or network error
+      if (e.response?.statusCode == 401) {
+        // Token is invalid - clear it
+        await _tokenStorage.clearToken();
+        await _ref.read(authStateProvider.notifier).clearToken();
+      }
+      state = const AuthState(status: AuthStatus.unauthenticated);
     } catch (_) {
-      // Token invalid or expired
+      // Any other error - treat as unauthenticated
       await _tokenStorage.clearToken();
+      await _ref.read(authStateProvider.notifier).clearToken();
       state = const AuthState(status: AuthStatus.unauthenticated);
     }
+  }
+
+  /// Refresh session - can be called manually to re-validate token
+  Future<void> refreshSession() async {
+    await _checkAuthStatus();
   }
 
   /// Login with email and password
@@ -176,12 +231,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: authResponse.user,
       );
     } on DioException catch (e) {
-      String message = 'Erreur de connexion';
-      if (e.response?.statusCode == 401) {
-        message = 'Email ou mot de passe incorrect';
-      } else if (e.response?.data is Map) {
-        message = e.response?.data['message'] ?? message;
+      String message;
+      
+      // Handle different error types with friendly messages
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        message = 'La connexion a expiré. Veuillez réessayer.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        message = 'Impossible de se connecter. Vérifiez votre connexion internet.';
+      } else if (e.response?.statusCode == 401) {
+        message = 'Email ou mot de passe incorrect.';
+      } else if (e.response?.statusCode == 422) {
+        // Validation error
+        final data = e.response?.data;
+        if (data is Map && data['message'] != null) {
+          message = data['message'];
+        } else {
+          message = 'Veuillez vérifier vos informations.';
+        }
+      } else if (e.response?.statusCode != null && e.response!.statusCode! >= 500) {
+        message = 'Erreur serveur. Veuillez réessayer plus tard.';
+      } else if (e.response?.data is Map && e.response?.data['message'] != null) {
+        message = e.response?.data['message'];
+      } else {
+        message = 'Erreur de connexion. Veuillez réessayer.';
       }
+      
       state = AuthState(
         status: AuthStatus.unauthenticated,
         errorMessage: message,
@@ -238,9 +314,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Logout
   Future<void> logout() async {
+    state = state.copyWith(status: AuthStatus.loading);
+    
     await _repository.logout();
+    
     // Notify the token-based auth provider that router listens to
     await _ref.read(authStateProvider.notifier).clearToken();
+    
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
