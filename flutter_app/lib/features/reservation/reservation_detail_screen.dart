@@ -161,6 +161,15 @@ class ReservationDetailScreen extends ConsumerWidget {
                         label: 'Date de réservation',
                         value: DateFormat('dd/MM/yyyy').format(reservation.createdAt.toLocal()),
                       ),
+                      // Show expiration date if available
+                      if (reservation.expiresAt != null) ...[
+                        const Divider(height: 24),
+                        _DetailRow(
+                          label: statusHelper.isExpired ? 'Expirée le' : 'Expire le',
+                          value: DateFormat('dd/MM/yyyy à HH:mm').format(reservation.expiresAt!.toLocal()),
+                          valueColor: statusHelper.isExpired ? Colors.brown : Colors.orange,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -202,9 +211,84 @@ class ReservationDetailScreen extends ConsumerWidget {
                   ),
                 ],
 
+                // Expired status info box
+                if (statusHelper.isExpired) ...[
+                  const SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.brown[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.brown[200]!),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.timer_off, color: Colors.brown[700]),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Réservation expirée',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.brown[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Cette réservation a expiré car elle n\'a pas été confirmée à temps. Vous pouvez faire une nouvelle réservation pour une autre émission.',
+                          style: TextStyle(color: Colors.brown[700]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Checked-in status info box
+                if (statusHelper.isCheckedIn) ...[
+                  const SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.teal[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.teal[200]!),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.verified, color: Colors.teal[700]),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Entrée validée',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.teal[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Votre billet a été utilisé pour accéder à l\'émission. Merci de votre participation !',
+                          style: TextStyle(color: Colors.teal[700]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: 32),
 
                 // Actions
+                // Show ticket button only for approved (not checked_in, as ticket is already used)
                 if (statusHelper.isApproved) ...[
                   SizedBox(
                     width: double.infinity,
@@ -219,6 +303,43 @@ class ReservationDetailScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                ],
+
+                // View used ticket for checked_in
+                if (statusHelper.isCheckedIn) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.go(Routes.ticket),
+                      icon: const Icon(Icons.confirmation_number_outlined),
+                      label: const Text('Voir le billet utilisé'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.teal,
+                        side: const BorderSide(color: Colors.teal),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                // Reserve again button for expired/rejected
+                if (statusHelper.isExpired || statusHelper.isRejected) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton.icon(
+                      onPressed: () => context.go(Routes.home),
+                      icon: const Icon(Icons.search),
+                      label: const Text('Découvrir les émissions'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                 ],
 
                 if (statusHelper.canCancel) ...[
@@ -258,7 +379,7 @@ class ReservationDetailScreen extends ConsumerWidget {
     } else if (helper.isCancelled) {
       return 'Vous avez annulé cette réservation.';
     } else if (helper.isExpired) {
-      return 'Cette réservation a expiré.';
+      return 'Cette réservation a expiré. Vous pouvez réserver une autre émission.';
     }
     return '';
   }
@@ -329,8 +450,9 @@ class _InfoRow extends StatelessWidget {
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
+  final Color? valueColor;
 
-  const _DetailRow({required this.label, required this.value});
+  const _DetailRow({required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +465,10 @@ class _DetailRow extends StatelessWidget {
         ),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: valueColor,
+          ),
         ),
       ],
     );

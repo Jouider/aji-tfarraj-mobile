@@ -15,6 +15,9 @@ class Routes {
   static const ticket = '/ticket';
   static const profile = '/profile';
 
+  // Notifications
+  static const notifications = '/notifications';
+
   // Show routes (inside shell, independent of tabs)
   static const show = '/show';
   static String showDetail(String showId) => '/show/$showId';
@@ -27,5 +30,6 @@ class Routes {
 
   // Full screen routes (outside shell)
   static const reservationSuccess = '/reservation-success';
+  static String reservationResult(String reservationId) => '/reservation-result/$reservationId';
   static const error = '/error';
 }

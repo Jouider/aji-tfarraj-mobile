@@ -1,4 +1,5 @@
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
+import 'package:aji_tfarraj/features/tickets/domain/ticket.dart';
 
 /// Reservation model matching backend API response
 class Reservation {
@@ -12,6 +13,7 @@ class Reservation {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final Show? show;
+  final Ticket? ticket;
 
   Reservation({
     required this.id,
@@ -24,10 +26,31 @@ class Reservation {
     required this.createdAt,
     this.updatedAt,
     this.show,
+    this.ticket,
   });
 
   /// Create Reservation from JSON (snake_case from API)
   factory Reservation.fromJson(Map<String, dynamic> json) {
+    // Parse show first so we can use it for ticket context
+    final show = json['show'] != null
+        ? Show.fromJson(json['show'] as Map<String, dynamic>)
+        : null;
+
+    // Build ticket with reservation context if present
+    Ticket? ticket;
+    if (json['ticket'] != null) {
+      final ticketJson = json['ticket'] as Map<String, dynamic>;
+      // Create a reservation context for the ticket
+      final reservationContext = {
+        'id': json['id'],
+        'show_id': json['show_id'],
+        'seats': json['seats'],
+        'status': json['status'],
+        'show': json['show'],
+      };
+      ticket = Ticket.fromJsonWithReservationContext(ticketJson, reservationContext);
+    }
+
     return Reservation(
       id: json['id'] as int,
       userId: json['user_id'] as int,
@@ -42,9 +65,8 @@ class Reservation {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
-      show: json['show'] != null
-          ? Show.fromJson(json['show'] as Map<String, dynamic>)
-          : null,
+      show: show,
+      ticket: ticket,
     );
   }
 
@@ -61,6 +83,7 @@ class Reservation {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'show': show?.toJson(),
+      'ticket': ticket?.toJson(),
     };
   }
 

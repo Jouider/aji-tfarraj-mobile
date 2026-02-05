@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/buttons.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
+import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 
 /// Profile Screen
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -34,6 +37,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(loginAuthStateProvider);
     final user = authState.user;
+    final unreadCount = ref.watch(unreadNotificationsCountProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -78,12 +82,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.notifications_outlined),
+            leading: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.notifications_outlined),
+                if (unreadCount > 0)
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        unreadCount > 9 ? '9+' : unreadCount.toString(),
+                        style: const TextStyle(
+                          color: AppColors.backgroundWhite,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             title: const Text('Notifications'),
+            subtitle: unreadCount > 0 
+                ? Text('$unreadCount non lue${unreadCount > 1 ? 's' : ''}')
+                : null,
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: Navigate to notification settings
-            },
+            onTap: () => context.push(Routes.notifications),
           ),
           const Divider(),
           ListTile(

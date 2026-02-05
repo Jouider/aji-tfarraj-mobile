@@ -11,13 +11,29 @@ class ReservationsRepository {
   ReservationsRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Fetch all reservations for the authenticated user
+  /// Handles both paginated { data: [...] } and legacy array responses
   Future<List<Reservation>> fetchMyReservations() async {
     try {
       final response = await _apiClient.get(AppConfig.myReservations);
-      final List<dynamic> data = response.data as List<dynamic>;
-      return data
-          .map((json) => Reservation.fromJson(json as Map<String, dynamic>))
-          .toList();
+      final data = response.data;
+
+      // Handle paginated response: { data: [...], meta: {...} }
+      if (data is Map<String, dynamic> && data.containsKey('data')) {
+        final List<dynamic> reservationsData = data['data'] as List<dynamic>;
+        return reservationsData
+            .map((json) => Reservation.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+
+      // Handle non-paginated response: direct array
+      if (data is List<dynamic>) {
+        return data
+            .map((json) => Reservation.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+
+      // Fallback: return empty list
+      return [];
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -36,7 +52,14 @@ class ReservationsRepository {
           'seats': seats,
         },
       );
-      return Reservation.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data;
+      
+      // Handle wrapped response: { data: {...} }
+      if (data is Map<String, dynamic> && data.containsKey('data') && data['data'] is Map) {
+        return Reservation.fromJson(data['data'] as Map<String, dynamic>);
+      }
+      
+      return Reservation.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -46,7 +69,14 @@ class ReservationsRepository {
   Future<Reservation> fetchReservationDetail(int id) async {
     try {
       final response = await _apiClient.get(AppConfig.reservationDetail(id));
-      return Reservation.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data;
+      
+      // Handle wrapped response: { data: {...} }
+      if (data is Map<String, dynamic> && data.containsKey('data') && data['data'] is Map) {
+        return Reservation.fromJson(data['data'] as Map<String, dynamic>);
+      }
+      
+      return Reservation.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }

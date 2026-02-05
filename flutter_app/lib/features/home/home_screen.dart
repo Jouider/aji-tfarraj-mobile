@@ -12,6 +12,7 @@ import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
+import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 
 /// Home Screen - List of available TV shows with filters and pagination
 class HomeScreen extends ConsumerStatefulWidget {
@@ -23,17 +24,27 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+
+    // Sync search controller with current filter state
+    final currentSearch = ref.read(showsFilterProvider).searchQuery;
+    if (currentSearch != null) {
+      _searchController.text = currentSearch;
+    }
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -44,11 +55,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  void _onSearchChanged(String value) {
+    // Use debounced search to avoid API spam
+    ref.read(showsFilterProvider.notifier).setSearchDebounced(value);
+  }
+
+  void _onSearchSubmitted(String value) {
+    // Immediate search on submit
+    ref.read(showsFilterProvider.notifier).setSearchImmediate(value);
+    _searchFocusNode.unfocus();
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    ref.read(showsFilterProvider.notifier).clearSearch();
+    _searchFocusNode.unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final showsState = ref.watch(showsListProvider);
     final filteredShows = ref.watch(filteredShowsProvider);
     final filterState = ref.watch(showsFilterProvider);
+    final unreadCount = ref.watch(unreadNotificationsCountProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -57,9 +86,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         actions: [
+          // Notification bell icon with badge
+          _NotificationBellButton(unreadCount: unreadCount),
           if (filterState.hasFilters)
             TextButton(
-              onPressed: () => ref.read(showsFilterProvider.notifier).clearAll(),
+              onPressed: () {
+                _searchController.clear();
+                ref.read(showsFilterProvider.notifier).clearAll();
+              },
               child: Text(
                 'Effacer',
                 style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
@@ -69,6 +103,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: Column(
         children: [
+          // Search input
+          _SearchInput(
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            onChanged: _onSearchChanged,
+            onSubmitted: _onSearchSubmitted,
+            onClear: _clearSearch,
+          ),
+
           // Filter chips section
           if (!showsState.isLoading && showsState.items.isNotEmpty)
             _FiltersSection(
@@ -104,21 +147,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    // Empty state
-    if (showsState.items.isEmpty) {
+    // Empty state (no shows at all)
+    if (showsState.items.isEmpty && !showsState.hasFilters) {
       return EmptyState.noShows(
         onAction: () => ref.read(showsListProvider.notifier).refresh(),
       );
     }
 
-    // Filtered empty state
+    // Filtered empty state (filters applied but no results)
     if (filteredShows.isEmpty) {
       return EmptyState(
-        icon: Icons.filter_list_off,
+        icon: Icons.search_off,
         title: 'Aucun résultat',
-        description: 'Aucune émission ne correspond aux filtres sélectionnés.',
+        description: 'Aucune émission ne correspond à votre recherche.',
         actionText: 'Effacer les filtres',
-        onAction: () => ref.read(showsFilterProvider.notifier).clearAll(),
+        onAction: () {
+          _searchController.clear();
+          ref.read(showsFilterProvider.notifier).clearAll();
+        },
       );
     }
 
@@ -139,6 +185,93 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: _ShowListItem(show: filteredShows[index]),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Search input widget with icon and clear button
+class _SearchInput extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
+  final VoidCallback onClear;
+
+  const _SearchInput({
+    required this.controller,
+    required this.focusNode,
+    required this.onChanged,
+    required this.onSubmitted,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.backgroundWhite,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        textInputAction: TextInputAction.search,
+        style: AppTypography.bodyMedium,
+        decoration: InputDecoration(
+          hintText: 'Rechercher une émission...',
+          hintStyle: AppTypography.bodyMedium.copyWith(
+            color: AppColors.textMuted,
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: AppColors.textMuted,
+            size: 22,
+          ),
+          suffixIcon: ListenableBuilder(
+            listenable: controller,
+            builder: (context, _) {
+              if (controller.text.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                icon: const Icon(
+                  Icons.close,
+                  color: AppColors.textMuted,
+                  size: 20,
+                ),
+                onPressed: onClear,
+                tooltip: 'Effacer la recherche',
+              );
+            },
+          ),
+          filled: true,
+          fillColor: AppColors.backgroundLight,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderSide: const BorderSide(
+              color: AppColors.primary,
+              width: 1.5,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -370,6 +503,52 @@ class _ShowListItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Notification bell button with unread badge
+class _NotificationBellButton extends StatelessWidget {
+  final int unreadCount;
+
+  const _NotificationBellButton({required this.unreadCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.notifications_outlined),
+          if (unreadCount > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 18,
+                  minHeight: 18,
+                ),
+                child: Text(
+                  unreadCount > 99 ? '99+' : unreadCount.toString(),
+                  style: const TextStyle(
+                    color: AppColors.backgroundWhite,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      ),
+      tooltip: 'Notifications',
+      onPressed: () => context.push(Routes.notifications),
     );
   }
 }

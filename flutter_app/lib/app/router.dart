@@ -19,6 +19,8 @@ import 'package:aji_tfarraj/features/profile/profile_screen.dart';
 import 'package:aji_tfarraj/features/error/error_screen.dart';
 import 'package:aji_tfarraj/features/show/sold_out_screen.dart';
 import 'package:aji_tfarraj/app/design_system/demo_screen.dart';
+import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart';
+import 'package:aji_tfarraj/features/notifications/presentation/notification_center_screen.dart';
 
 /// Routes that require authentication
 const _protectedRoutes = [
@@ -26,6 +28,7 @@ const _protectedRoutes = [
   Routes.myReservations,
   Routes.ticket,
   Routes.profile,
+  Routes.notifications,
 ];
 
 /// Routes that should redirect to home if already authenticated
@@ -202,9 +205,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Full Screen Routes (outside shell - no bottom nav)
       // ============================================
       GoRoute(
+        path: Routes.notifications,
+        name: 'notifications',
+        builder: (context, state) => const NotificationCenterScreen(),
+      ),
+      GoRoute(
         path: Routes.reservationSuccess,
         name: 'reservationSuccess',
         builder: (context, state) => const ReservationSuccessScreen(),
+      ),
+      GoRoute(
+        path: '/reservation-result/:reservationId',
+        name: 'reservationResult',
+        builder: (context, state) {
+          final reservationId = state.pathParameters['reservationId']!;
+          return ReservationResultScreen(reservationId: reservationId);
+        },
       ),
       GoRoute(
         path: Routes.error,
