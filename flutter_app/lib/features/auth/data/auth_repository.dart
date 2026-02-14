@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
+import 'package:aji_tfarraj/app/push/push_token_provider.dart';
 import 'package:aji_tfarraj/features/auth/domain/user.dart';
 
 // Re-export the token-based auth state provider for router to use
@@ -186,6 +187,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _ref.read(authStateProvider.notifier).setToken(token);
         
         state = AuthState(status: AuthStatus.authenticated, user: user);
+        
+        // Register device for push notifications (user already authenticated)
+        _registerDeviceToken();
       } else {
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
@@ -202,6 +206,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _tokenStorage.clearToken();
       await _ref.read(authStateProvider.notifier).clearToken();
       state = const AuthState(status: AuthStatus.unauthenticated);
+    }
+  }
+
+  /// Register device token for push notifications
+  /// Called after successful login, registration, or app start with valid session
+  Future<void> _registerDeviceToken() async {
+    try {
+      await _ref.read(pushTokenProvider.notifier).initialize();
+    } catch (e) {
+      // Don't fail auth flow if push token registration fails
+      // Push notifications are not critical for app functionality
     }
   }
 
@@ -230,6 +245,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         status: AuthStatus.authenticated,
         user: authResponse.user,
       );
+      
+      // Register device for push notifications after successful login
+      _registerDeviceToken();
     } on DioException catch (e) {
       String message;
       
@@ -290,6 +308,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         status: AuthStatus.authenticated,
         user: authResponse.user,
       );
+      
+      // Register device for push notifications after successful registration
+      _registerDeviceToken();
     } on DioException catch (e) {
       String message = 'Erreur lors de l\'inscription';
       if (e.response?.data is Map) {
@@ -315,6 +336,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Logout
   Future<void> logout() async {
     state = state.copyWith(status: AuthStatus.loading);
+    
+    // Clear push token first (unregister from backend)
+    try {
+      await _ref.read(pushTokenProvider.notifier).clearToken();
+    } catch (_) {
+      // Don't fail logout if push token clearing fails
+    }
     
     await _repository.logout();
     

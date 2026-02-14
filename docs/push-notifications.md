@@ -4,6 +4,11 @@
 
 This document describes the complete push notification system implemented for the **Aji Tfarraj** mobile application. The system uses Firebase Cloud Messaging (FCM) for both iOS and Android platforms.
 
+**Backend Status: ✅ PRODUCTION READY**
+- Backend URL: `https://aji-tfarraj-backend-production.up.railway.app`
+- Device registration endpoint: `POST /api/devices/register`
+- Push notifications sent automatically when reservation is approved
+
 ---
 
 ## Table of Contents
@@ -12,7 +17,7 @@ This document describes the complete push notification system implemented for th
 2. [Files Structure](#files-structure)
 3. [Firebase Configuration](#firebase-configuration)
 4. [Flutter Implementation](#flutter-implementation)
-5. [Backend API Requirements](#backend-api-requirements)
+5. [Backend API (Production)](#backend-api-production)
 6. [Notification Payload Formats](#notification-payload-formats)
 7. [Deep Linking](#deep-linking)
 8. [Testing Guide](#testing-guide)
@@ -50,10 +55,13 @@ This document describes the complete push notification system implemented for th
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      BACKEND API                                 │
-│              (Device Registration Endpoints)                     │
-│                    POST /api/devices/register                    │
-│                  DELETE /api/devices/unregister                  │
+│              PRODUCTION BACKEND (Railway)                        │
+│      https://aji-tfarraj-backend-production.up.railway.app      │
+│                                                                  │
+│  POST /api/devices/register    ← Register FCM token             │
+│  DELETE /api/devices/unregister ← Unregister on logout          │
+│                                                                  │
+│  PushNotificationService → Sends FCM when reservation approved  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -61,15 +69,19 @@ This document describes the complete push notification system implemented for th
 
 ## Files Structure
 
-### Created Files
+### Push Notification Files
 
 | File Path | Purpose |
 |-----------|---------|
-| `lib/firebase_options.dart` | Firebase configuration for iOS/Android |
 | `lib/app/push/push_service.dart` | Main FCM service (handles all notification events) |
 | `lib/app/push/push_router.dart` | Deep link navigation handler |
-| `lib/app/push/push_token_provider.dart` | FCM token state management |
-| `lib/app/push/device_repository.dart` | Backend device registration |
+| `lib/app/push/push_token_provider.dart` | FCM token state management & backend registration |
+| `lib/app/push/device_repository.dart` | Backend API calls for device registration |
+
+### Notification Feature Files
+
+| File Path | Purpose |
+|-----------|---------|
 | `lib/features/notifications/domain/app_notification.dart` | Notification data model |
 | `lib/features/notifications/data/notification_repository.dart` | Local storage persistence |
 | `lib/features/notifications/presentation/providers/notifications_provider.dart` | Riverpod state management |
@@ -80,15 +92,8 @@ This document describes the complete push notification system implemented for th
 
 | File Path | Changes Made |
 |-----------|--------------|
-| `lib/main.dart` | Added Firebase initialization, SharedPreferences override, PushService setup |
-| `lib/app/routes.dart` | Added `/notifications` route constant |
-| `lib/app/router.dart` | Added NotificationCenterScreen route, protected route |
-| `lib/features/home/home_screen.dart` | Added notification bell icon with unread badge |
-| `lib/features/profile/profile_screen.dart` | Added notifications link with badge |
-| `pubspec.yaml` | Added firebase_core, firebase_messaging, flutter_local_notifications dependencies |
-| `android/build.gradle.kts` | Added Google services plugin declaration |
-| `android/app/build.gradle.kts` | Applied Google services plugin |
-| `ios/Podfile` | Added static linkage fix for Firebase, iOS platform 13.0 |
+| `lib/features/auth/data/auth_repository.dart` | Registers device token after login/registration, clears on logout |
+| `lib/main.dart` | Firebase initialization, SharedPreferences override, PushService setup |
 
 ---
 
@@ -212,12 +217,11 @@ void main() async {
 | `pushServiceProvider` | `Provider<PushService>` | PushService singleton instance |
 | `pushTokenProvider` | `StateNotifierProvider` | FCM token state management |
 | `fcmTokenProvider` | `Provider<String?>` | Current FCM token accessor |
+| `isTokenRegisteredProvider` | `Provider<bool>` | Check if token registered with backend |
 | `notificationsProvider` | `StateNotifierProvider` | Notifications list state |
 | `unreadNotificationsCountProvider` | `Provider<int>` | Unread count for badges |
 | `hasUnreadNotificationsProvider` | `Provider<bool>` | Boolean for unread status |
-| `notificationRepositoryProvider` | `Provider` | Local storage repository |
 | `deviceRepositoryProvider` | `Provider` | Backend registration repository |
-| `sharedPreferencesProvider` | `Provider` | SharedPreferences instance |
 
 ### Notification Types
 
@@ -249,11 +253,11 @@ class AppNotification {
 
 ---
 
-## Backend API Requirements
+## Backend API (Production)
 
 ### POST /api/devices/register
 
-Register a device token for push notifications.
+Register a device token for push notifications. **Called automatically after login/registration.**
 
 **Headers:**
 ```
@@ -276,17 +280,15 @@ Content-Type: application/json
 | `platform` | string | Yes | `"ios"` or `"android"` |
 | `device_name` | string | No | Human-readable device name |
 
-**Response (Success - 200/201):**
-```json
-{
-  "success": true,
-  "device_id": "uuid-of-registered-device"
-}
-```
+**Backend Behavior:**
+- Saves FCM token into `devices` table
+- Associates token with authenticated user
+- Updates existing token if already exists
+- Removes invalid tokens automatically when detected
 
 ### DELETE /api/devices/unregister
 
-Unregister a device token (called on logout).
+Unregister a device token. **Called automatically on logout.**
 
 **Headers:**
 ```
@@ -301,90 +303,40 @@ Content-Type: application/json
 }
 ```
 
-**Response (Success - 200):**
-```json
-{
-  "success": true
-}
-```
-
-### Backend Implementation Notes
-
-1. **Store tokens per user** - One user can have multiple devices
-2. **Handle token updates** - Same device may get a new token
-3. **Remove stale tokens** - When FCM returns "not registered" error
-4. **Send targeted notifications** - Use stored tokens to send to specific users
-
 ---
 
 ## Notification Payload Formats
 
-### Reservation Notification
+The backend sends notifications in three formats:
 
+### Format A: Reservation Notification
 ```json
 {
-  "notification": {
-    "title": "Réservation confirmée",
-    "body": "Votre réservation pour 'Emission XYZ' est confirmée"
-  },
-  "data": {
-    "type": "reservation",
-    "reservation_id": "123",
-    "title": "Réservation confirmée",
-    "body": "Votre réservation pour 'Emission XYZ' est confirmée"
-  }
+  "type": "reservation",
+  "reservation_id": "123",
+  "title": "Réservation confirmée",
+  "body": "Votre billet est prêt"
 }
 ```
+**Navigation:** `/reservation/123`
 
-### Ticket Ready Notification
-
+### Format B: Ticket Notification
 ```json
 {
-  "notification": {
-    "title": "Votre billet est prêt",
-    "body": "Téléchargez votre billet pour 'Emission XYZ'"
-  },
-  "data": {
-    "type": "ticket",
-    "ticket_code": "ABC123",
-    "title": "Votre billet est prêt",
-    "body": "Téléchargez votre billet pour 'Emission XYZ'"
-  }
+  "type": "ticket",
+  "title": "Votre billet est prêt",
+  "body": "Vous pouvez accéder à votre billet"
 }
 ```
+**Navigation:** `/ticket`
 
-### System Notification
-
+### Format C: Deep Link Notification
 ```json
 {
-  "notification": {
-    "title": "Mise à jour importante",
-    "body": "Une nouvelle version de l'application est disponible"
-  },
-  "data": {
-    "type": "system",
-    "title": "Mise à jour importante",
-    "body": "Une nouvelle version de l'application est disponible"
-  }
+  "deep_link": "/reservation/123"
 }
 ```
-
-### Deep Link Notification
-
-```json
-{
-  "notification": {
-    "title": "Nouveau spectacle",
-    "body": "Découvrez notre nouveau spectacle"
-  },
-  "data": {
-    "type": "reservation",
-    "deep_link": "/show/456",
-    "title": "Nouveau spectacle",
-    "body": "Découvrez notre nouveau spectacle"
-  }
-}
-```
+**Navigation:** Uses the provided deep link directly
 
 ---
 
@@ -401,154 +353,120 @@ Content-Type: application/json
 | `/notifications` | Notification center |
 | `/show/{showId}` | Show detail screen |
 | `/reservation/{reservationId}` | Reservation detail screen |
-| `/reservation-result/{reservationId}` | Reservation result screen |
-
-### Deep Link Formats Supported
-
-```
-/reservation/123           → Reservation detail
-/show/456                  → Show detail
-ajitfarraj://show/456      → App scheme URL
-https://app.ajitfarraj.com/show/456  → Web URL
-```
 
 ### Navigation Priority
 
-1. **Deep link** (if provided in payload)
+1. **Deep link** (if `deep_link` provided in payload)
 2. **Type-based routing**:
-   - `reservation` → `/reservation/{id}` or `/my-reservations`
-   - `ticket` → `/ticket`
-   - `system` → `/home`
-   - `unknown` → `/home`
+   - `type: "reservation"` + `reservation_id` → `/reservation/{id}`
+   - `type: "reservation"` (no id) → `/my-reservations`
+   - `type: "ticket"` → `/ticket`
+   - `type: "system"` → `/home`
 
 ---
 
 ## Testing Guide
 
-### Testing on Simulator (Limited)
+### Testing on Physical Device (Required for Real Push)
 
-⚠️ **Push notifications do NOT work on iOS Simulator** - APNs is not supported.
-
-The app will run but FCM token retrieval will fail silently.
-
-### Testing on Physical Device
-
-1. **Build and run on device:**
+1. **Connect device via USB**
+2. **Run the app:**
    ```bash
    flutter run -d <device_id>
    ```
-
-2. **Send test notification from Firebase Console:**
-   - Go to Firebase Console → Cloud Messaging
-   - Click "Send your first message"
-   - Enter title and body
-   - Target your app
-   - Send test message
-
-3. **Send test notification via FCM API:**
-   ```bash
-   curl -X POST \
-     -H "Authorization: Bearer <SERVER_KEY>" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "to": "<FCM_DEVICE_TOKEN>",
-       "notification": {
-         "title": "Test Notification",
-         "body": "This is a test"
-       },
-       "data": {
-         "type": "reservation",
-         "reservation_id": "123"
-       }
-     }' \
-     https://fcm.googleapis.com/fcm/send
+3. **Login to the app** - device token will be registered automatically
+4. **Check console logs for:**
    ```
+   [PushTokenNotifier] FCM Token obtained: ...
+   [DeviceRepository] Registering device with backend: platform=ios
+   [DeviceRepository] Device registered successfully with backend
+   ```
+5. **Trigger a notification from backend** (approve a reservation)
 
-### Testing Scenarios
+### Testing Notification UI (Simulator)
 
-| Scenario | Expected Behavior |
-|----------|-------------------|
-| App in foreground | Material banner + local notification |
-| App in background | System notification, tap opens app and navigates |
-| App terminated | System notification, tap launches app and navigates |
-| Notification tap | Marks as read, navigates to appropriate screen |
-| Badge count | Updates in real-time on bell icon |
+Even without real push notifications, you can test:
+- ✅ Notification Center screen (`/notifications`)
+- ✅ Bell icon with badge
+- ✅ Mark as read functionality
+- ✅ Delete notifications
+
+### Console Logs to Verify
+
+**On Login:**
+```
+[PushTokenNotifier] FCM Token obtained: abc123...
+[DeviceRepository] Registering device with backend: platform=ios
+[DeviceRepository] Device registered successfully with backend
+[PushTokenNotifier] Backend registration: success
+```
+
+**On Push Received (Foreground):**
+```
+[PushService] Foreground message received: msg123
+[PushService] Showing foreground notification
+```
+
+**On Push Tap:**
+```
+[PushRouter] Navigating to route: /reservation/123
+```
+
+**On Logout:**
+```
+[PushTokenNotifier] Token cleared and unregistered
+[DeviceRepository] Device unregistered successfully
+```
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
-
-#### 1. Firebase initialization fails
-
-**Error:** `Firebase app has not been initialized`
-
-**Solution:** Ensure `Firebase.initializeApp()` is called before any Firebase services.
-
-#### 2. iOS build fails with non-modular header error
-
-**Error:** `Include of non-modular header inside framework module`
-
-**Solution:** Add to `ios/Podfile`:
-```ruby
-use_frameworks! :linkage => :static
-
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-    end
-  end
-end
-```
-
-#### 3. FCM token is null
+### FCM Token is null
 
 **Possible causes:**
-- Running on simulator (not supported)
+- Running on iOS simulator (APNs not supported)
+- Push Notifications capability not added in Xcode
 - Firebase not properly configured
-- Network connectivity issues
 
-**Solution:** Test on physical device with proper Firebase setup.
+**Solution:** Test on physical device with proper setup.
 
-#### 4. Notifications not appearing on iOS
+### Device registration returns 401
 
-**Checklist:**
-- ✅ Push Notifications capability added in Xcode
-- ✅ Background Modes → Remote notifications enabled
+**Cause:** User not authenticated or token expired.
+
+**Solution:** Device registration only works for authenticated users. Ensure login was successful.
+
+### Notifications not appearing
+
+**iOS Checklist:**
+- ✅ Push Notifications capability in Xcode
+- ✅ Background Modes → Remote notifications
 - ✅ APNs key uploaded to Firebase Console
-- ✅ Running on physical device (not simulator)
+- ✅ Physical device (not simulator)
 
-#### 5. Android notifications not showing
-
-**Checklist:**
+**Android Checklist:**
 - ✅ `google-services.json` in `android/app/`
-- ✅ Google services plugin applied in Gradle
+- ✅ Google services plugin applied
 - ✅ Notification channel created
-- ✅ App has notification permissions
+
+### Token not refreshing
+
+The `onTokenRefresh` listener automatically handles token refresh. If issues persist:
+```dart
+// Manual refresh
+ref.read(pushTokenProvider.notifier).refreshToken();
+```
 
 ---
 
-## iOS Xcode Configuration Required
+## TODO(Backend - Abdellah)
 
-### Add Capabilities in Xcode
-
-1. Open `ios/Runner.xcworkspace` in Xcode
-2. Select **Runner** target
-3. Go to **Signing & Capabilities**
-4. Click **+ Capability**
-5. Add:
-   - **Push Notifications**
-   - **Background Modes** → Check **Remote notifications**
-
-### Upload APNs Key to Firebase
-
-1. Go to [Apple Developer Portal](https://developer.apple.com)
-2. Create APNs Authentication Key
-3. Download the `.p8` file
-4. Go to Firebase Console → Project Settings → Cloud Messaging
-5. Upload the APNs key under "Apple app configuration"
+This endpoint is implemented in production.
+In staging environment, ensure FIREBASE credentials are configured:
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_PRIVATE_KEY`
+- `FIREBASE_CLIENT_EMAIL`
 
 ---
 
@@ -556,6 +474,7 @@ end
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-02-06 | 1.1.0 | Production backend integration |
 | 2026-02-05 | 1.0.0 | Initial implementation |
 
 ---

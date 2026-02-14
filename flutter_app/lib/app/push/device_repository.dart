@@ -25,8 +25,8 @@ class DeviceRegistration {
 
 /// Repository for device registration with backend
 /// 
-/// TODO BACKEND (Abdellah):
-/// Implement the following endpoints:
+/// Backend endpoint is implemented and deployed in PRODUCTION:
+/// https://aji-tfarraj-backend-production.up.railway.app
 /// 
 /// POST /api/devices/register
 /// Headers: Authorization: Bearer {token}
@@ -35,73 +35,79 @@ class DeviceRegistration {
 ///   "platform": "ios" | "android",
 ///   "device_name": "optional_device_name"
 /// }
-/// Response: { "success": true, "device_id": "uuid" }
 /// 
-/// DELETE /api/devices/unregister
-/// Headers: Authorization: Bearer {token}
-/// Body: { "token": "fcm_token_string" }
-/// Response: { "success": true }
+/// The backend:
+/// - Saves FCM token into devices table
+/// - Associates token with authenticated user
+/// - Updates existing token if already exists
+/// - Removes invalid tokens automatically when detected
 /// 
-/// The backend should:
-/// 1. Store device tokens per user (one user can have multiple devices)
-/// 2. Handle token updates (same device, new token)
-/// 3. Remove stale tokens when push fails
-/// 4. Use tokens to send targeted push notifications
+/// TODO(Backend - Abdellah):
+/// This endpoint is implemented in production.
+/// In staging environment, ensure FIREBASE credentials are configured.
 class DeviceRepository {
-  // ignore: unused_field - Will be used when backend endpoint is ready
   final ApiClient _apiClient;
 
   DeviceRepository(this._apiClient);
 
   /// Register device token with backend
-  /// Call this after login and when FCM token refreshes
+  /// Call this after login, after registration, and when FCM token refreshes
   Future<bool> registerDevice(String fcmToken, {String? deviceName}) async {
     try {
       final platform = Platform.isIOS ? 'ios' : 'android';
       
-      // Prepared for backend integration
       final registrationData = {
         'token': fcmToken,
         'platform': platform,
         if (deviceName != null) 'device_name': deviceName,
       };
 
-      _debugLog('Registering device: platform=$platform, data=$registrationData');
+      _debugLog('Registering device with backend: platform=$platform');
 
-      // TODO BACKEND (Abdellah): Uncomment when endpoint is ready
-      // final response = await _apiClient.post(
-      //   '/api/devices/register',
-      //   data: registrationData,
-      // );
-      // return response.statusCode == 200 || response.statusCode == 201;
+      final response = await _apiClient.post(
+        '/api/devices/register',
+        data: registrationData,
+      );
 
-      // Placeholder until backend is ready
-      _debugLog('Device registration endpoint not yet implemented on backend');
-      return true;
+      final success = response.statusCode == 200 || response.statusCode == 201;
+      
+      if (success) {
+        _debugLog('Device registered successfully with backend');
+      } else {
+        _debugLog('Device registration failed: ${response.statusCode}');
+      }
+      
+      return success;
     } catch (e) {
       _debugLog('Error registering device: $e');
+      // Don't throw - device registration failure shouldn't break the app
       return false;
     }
   }
 
   /// Unregister device token from backend
-  /// Call this on logout
+  /// Call this on logout to stop receiving push notifications
   Future<bool> unregisterDevice(String fcmToken) async {
     try {
-      _debugLog('Unregistering device');
+      _debugLog('Unregistering device from backend');
 
-      // TODO BACKEND (Abdellah): Uncomment when endpoint is ready
-      // final response = await _apiClient.delete(
-      //   '/api/devices/unregister',
-      //   data: {'token': fcmToken},
-      // );
-      // return response.statusCode == 200;
+      final response = await _apiClient.delete(
+        '/api/devices/unregister',
+        data: {'token': fcmToken},
+      );
 
-      // Placeholder until backend is ready
-      _debugLog('Device unregistration endpoint not yet implemented on backend');
-      return true;
+      final success = response.statusCode == 200;
+      
+      if (success) {
+        _debugLog('Device unregistered successfully');
+      } else {
+        _debugLog('Device unregistration failed: ${response.statusCode}');
+      }
+      
+      return success;
     } catch (e) {
       _debugLog('Error unregistering device: $e');
+      // Don't throw - unregistration failure shouldn't block logout
       return false;
     }
   }

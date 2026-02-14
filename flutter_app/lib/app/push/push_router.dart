@@ -5,7 +5,12 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/notifications/domain/app_notification.dart';
 
 /// Push Router - Handles navigation from push notifications
-/// Converts AppNotification to route paths for GoRouter
+/// 
+/// Supports backend payload formats:
+/// 
+/// Format A: { "type": "reservation", "reservation_id": "123", "title": "...", "body": "..." }
+/// Format B: { "type": "ticket", "title": "...", "body": "..." }
+/// Format C: { "deep_link": "/reservation/123" }
 class PushRouter {
   PushRouter._();
 
@@ -13,7 +18,7 @@ class PushRouter {
   /// Returns the route path to navigate to
   static String getRouteForNotification(AppNotification notification) {
     try {
-      // Priority 1: Deep link if provided
+      // Priority 1: Deep link if provided (Format C)
       if (notification.deepLink != null && notification.deepLink!.isNotEmpty) {
         final deepLink = notification.deepLink!;
         
@@ -25,7 +30,7 @@ class PushRouter {
         _debugLog('Invalid deep link format: $deepLink');
       }
 
-      // Priority 2: Type-based routing
+      // Priority 2: Type-based routing (Format A & B)
       switch (notification.type) {
         case NotificationType.reservation:
           if (notification.reservationId != null && 
@@ -51,6 +56,40 @@ class PushRouter {
     }
   }
 
+  /// Navigate directly from raw push data
+  /// Use this when you have the raw FCM data payload
+  static String getRouteFromData(Map<String, dynamic> data) {
+    try {
+      // Check for deep_link first (Format C)
+      final deepLink = data['deep_link']?.toString();
+      if (deepLink != null && deepLink.isNotEmpty) {
+        if (deepLink.startsWith('/')) {
+          return _validateAndSanitizeRoute(deepLink);
+        }
+      }
+
+      // Check type-based routing (Format A & B)
+      final type = data['type']?.toString();
+      
+      if (type == 'reservation') {
+        final reservationId = data['reservation_id']?.toString();
+        if (reservationId != null && reservationId.isNotEmpty) {
+          return Routes.reservationDetail(reservationId);
+        }
+        return Routes.myReservations;
+      }
+      
+      if (type == 'ticket') {
+        return Routes.ticket;
+      }
+
+      return Routes.home;
+    } catch (e) {
+      _debugLog('Error getting route from data: $e');
+      return Routes.home;
+    }
+  }
+
   /// Navigate using GoRouter instance
   /// Safe navigation that handles errors gracefully
   static void navigateToNotification(
@@ -69,6 +108,20 @@ class PushRouter {
       } catch (_) {
         // Ignore if even home navigation fails
       }
+    }
+  }
+
+  /// Navigate using GoRouter instance from raw data
+  static void navigateFromData(GoRouter router, Map<String, dynamic> data) {
+    try {
+      final route = getRouteFromData(data);
+      _debugLog('Navigating to route from data: $route');
+      router.go(route);
+    } catch (e) {
+      _debugLog('Error navigating from data: $e');
+      try {
+        router.go(Routes.home);
+      } catch (_) {}
     }
   }
 

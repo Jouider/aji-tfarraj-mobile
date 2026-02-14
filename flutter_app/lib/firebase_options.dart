@@ -7,15 +7,28 @@ import 'package:flutter/foundation.dart'
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
+/// API keys are loaded from environment variables using --dart-define.
+///
+/// To run the app:
+/// ```bash
+/// flutter run \
+///   --dart-define=FIREBASE_ANDROID_API_KEY=your_android_key \
+///   --dart-define=FIREBASE_IOS_API_KEY=your_ios_key
 /// ```
+///
+/// Or create a `.env` file and use a package like flutter_dotenv.
 class DefaultFirebaseOptions {
+  // Environment variables for API keys
+  static const String _androidApiKey = String.fromEnvironment(
+    'FIREBASE_ANDROID_API_KEY',
+    defaultValue: '',
+  );
+
+  static const String _iosApiKey = String.fromEnvironment(
+    'FIREBASE_IOS_API_KEY',
+    defaultValue: '',
+  );
+
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
       throw UnsupportedError(
@@ -52,22 +65,30 @@ class DefaultFirebaseOptions {
 
   // Firebase Android configuration
   // Package: com.ajitfarraj.aji_tfarraj
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCuYhmJhfJFbH2etFL60WCN_2bSK2OsRvo',
-    appId: '1:600996591716:android:c408a5cfb10172a6728771',
-    messagingSenderId: '600996591716',
-    projectId: 'aji-tfarraj',
-    storageBucket: 'aji-tfarraj.firebasestorage.app',
-  );
+  static FirebaseOptions get android {
+    assert(_androidApiKey.isNotEmpty,
+        'FIREBASE_ANDROID_API_KEY not set. Run with --dart-define=FIREBASE_ANDROID_API_KEY=your_key');
+    return FirebaseOptions(
+      apiKey: _androidApiKey,
+      appId: '1:600996591716:android:c408a5cfb10172a6728771',
+      messagingSenderId: '600996591716',
+      projectId: 'aji-tfarraj',
+      storageBucket: 'aji-tfarraj.firebasestorage.app',
+    );
+  }
 
   // Firebase iOS configuration
   // Bundle ID: com.ajitfarraj.ajiTfarraj
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBRbKSIKFb5qWrdUer3MznKsaK21efIueg',
-    appId: '1:600996591716:ios:27e2a179987a6331728771',
-    messagingSenderId: '600996591716',
-    projectId: 'aji-tfarraj',
-    storageBucket: 'aji-tfarraj.firebasestorage.app',
-    iosBundleId: 'com.ajitfarraj.ajiTfarraj',
-  );
+  static FirebaseOptions get ios {
+    assert(_iosApiKey.isNotEmpty,
+        'FIREBASE_IOS_API_KEY not set. Run with --dart-define=FIREBASE_IOS_API_KEY=your_key');
+    return FirebaseOptions(
+      apiKey: _iosApiKey,
+      appId: '1:600996591716:ios:27e2a179987a6331728771',
+      messagingSenderId: '600996591716',
+      projectId: 'aji-tfarraj',
+      storageBucket: 'aji-tfarraj.firebasestorage.app',
+      iosBundleId: 'com.ajitfarraj.ajiTfarraj',
+    );
+  }
 }
