@@ -22,6 +22,11 @@ class CopyFr {
   // Rules Page
   // ============================================
   static const rules = RulesCopyFr();
+
+  // ============================================
+  // Loyalty / Fidélité
+  // ============================================
+  static const loyalty = LoyaltyCopyFr();
 }
 
 /// Button labels in French
@@ -130,6 +135,20 @@ class RulesCopyFr {
 
   String get acceptance =>
       'J\'ai lu et j\'accepte le règlement du spectacle.';
+}
+
+/// Loyalty copy in French
+class LoyaltyCopyFr {
+  const LoyaltyCopyFr();
+
+  String get loyaltyTitle => 'Fidélité';
+  String get pointsTotal => 'Points';
+  String get pointsSubtitle => 'Gagnez des points après chaque check-in';
+  String get history => 'Historique';
+  String get rewards => 'Récompenses';
+  String get comingSoon => 'Bientôt disponible';
+  String get noPointsYet => 'Aucun point pour le moment';
+  String get attendanceLabel => 'Présence';
 }
 
 /// Rule item model

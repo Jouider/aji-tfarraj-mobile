@@ -18,6 +18,9 @@ class Routes {
   // Notifications
   static const notifications = '/notifications';
 
+  // Loyalty
+  static const loyalty = '/loyalty';
+
   // Show routes (inside shell, independent of tabs)
   static const show = '/show';
   static String showDetail(String showId) => '/show/$showId';

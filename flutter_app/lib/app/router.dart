@@ -21,6 +21,7 @@ import 'package:aji_tfarraj/features/show/sold_out_screen.dart';
 import 'package:aji_tfarraj/app/design_system/demo_screen.dart';
 import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/notification_center_screen.dart';
+import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 
 /// Routes that require authentication
 const _protectedRoutes = [
@@ -29,6 +30,7 @@ const _protectedRoutes = [
   Routes.ticket,
   Routes.profile,
   Routes.notifications,
+  Routes.loyalty,
 ];
 
 /// Routes that should redirect to home if already authenticated
@@ -208,6 +210,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.notifications,
         name: 'notifications',
         builder: (context, state) => const NotificationCenterScreen(),
+      ),
+      GoRoute(
+        path: Routes.loyalty,
+        name: 'loyalty',
+        builder: (context, state) => const LoyaltyScreen(),
       ),
       GoRoute(
         path: Routes.reservationSuccess,

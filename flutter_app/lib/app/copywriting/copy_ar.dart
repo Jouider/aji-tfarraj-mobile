@@ -22,6 +22,11 @@ class CopyAr {
   // Rules Page
   // ============================================
   static const rules = RulesCopyAr();
+
+  // ============================================
+  // Loyalty / الولاء
+  // ============================================
+  static const loyalty = LoyaltyCopyAr();
 }
 
 /// Button labels in Arabic
@@ -141,4 +146,18 @@ class RuleItemAr {
     required this.title,
     required this.description,
   });
+}
+
+/// Loyalty copy in Arabic
+class LoyaltyCopyAr {
+  const LoyaltyCopyAr();
+
+  String get loyaltyTitle => 'الولاء';
+  String get pointsTotal => 'النقاط';
+  String get pointsSubtitle => 'اكسب نقاطًا بعد كل تسجيل حضور';
+  String get history => 'السجل';
+  String get rewards => 'المكافآت';
+  String get comingSoon => 'قريبًا';
+  String get noPointsYet => 'لا توجد نقاط حتى الآن';
+  String get attendanceLabel => 'الحضور';
 }

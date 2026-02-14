@@ -121,4 +121,39 @@ class AppStrings {
   String get rulesAcceptance => locale == AppLocale.fr 
       ? CopyFr.rules.acceptance 
       : CopyAr.rules.acceptance;
+
+  // ============================================
+  // Loyalty
+  // ============================================
+  String get loyaltyTitle => locale == AppLocale.fr
+      ? CopyFr.loyalty.loyaltyTitle
+      : CopyAr.loyalty.loyaltyTitle;
+
+  String get pointsTotal => locale == AppLocale.fr
+      ? CopyFr.loyalty.pointsTotal
+      : CopyAr.loyalty.pointsTotal;
+
+  String get pointsSubtitle => locale == AppLocale.fr
+      ? CopyFr.loyalty.pointsSubtitle
+      : CopyAr.loyalty.pointsSubtitle;
+
+  String get history => locale == AppLocale.fr
+      ? CopyFr.loyalty.history
+      : CopyAr.loyalty.history;
+
+  String get rewards => locale == AppLocale.fr
+      ? CopyFr.loyalty.rewards
+      : CopyAr.loyalty.rewards;
+
+  String get comingSoon => locale == AppLocale.fr
+      ? CopyFr.loyalty.comingSoon
+      : CopyAr.loyalty.comingSoon;
+
+  String get noPointsYet => locale == AppLocale.fr
+      ? CopyFr.loyalty.noPointsYet
+      : CopyAr.loyalty.noPointsYet;
+
+  String get attendanceLabel => locale == AppLocale.fr
+      ? CopyFr.loyalty.attendanceLabel
+      : CopyAr.loyalty.attendanceLabel;
 }

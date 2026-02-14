@@ -5,8 +5,10 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/buttons.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
+import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:aji_tfarraj/features/loyalty/data/loyalty_repository.dart';
 
 /// Profile Screen
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -38,6 +40,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final authState = ref.watch(loginAuthStateProvider);
     final user = authState.user;
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
+    final pointsAsync = ref.watch(myPointsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -79,6 +82,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onTap: () {
               // TODO: Show language selection dialog
             },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.star_outline),
+            title: const Text('Fidélité'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                pointsAsync.when(
+                  data: (summary) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryLight.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                    ),
+                    child: Text(
+                      '${summary.balance} pts',
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.secondaryDark,
+                        fontWeight: AppTypography.medium,
+                      ),
+                    ),
+                  ),
+                  loading: () => const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.secondary),
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+            onTap: () => context.push(Routes.loyalty),
           ),
           const Divider(),
           ListTile(
