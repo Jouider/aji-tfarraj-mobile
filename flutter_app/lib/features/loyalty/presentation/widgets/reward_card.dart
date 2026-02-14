@@ -60,7 +60,8 @@ class RewardCard extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                color: _isUnlocked ? AppColors.secondaryDark : AppColors.textMuted,
+                color:
+                    _isUnlocked ? AppColors.secondaryDark : AppColors.textMuted,
                 size: AppSpacing.iconLg,
               ),
             ),
@@ -75,7 +76,9 @@ class RewardCard extends StatelessWidget {
                   Text(
                     '$requiredPoints pts',
                     style: AppTypography.bodySmall.copyWith(
-                      color: _isUnlocked ? AppColors.secondary : AppColors.textMuted,
+                      color: _isUnlocked
+                          ? AppColors.secondary
+                          : AppColors.textMuted,
                       fontWeight: AppTypography.medium,
                     ),
                   ),

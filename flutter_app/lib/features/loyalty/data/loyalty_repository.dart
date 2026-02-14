@@ -38,7 +38,8 @@ class LoyaltyRepository {
       // If we have a cached value, return it for offline-like UX
       if (_cachedSummary != null) {
         if (kDebugMode) {
-          debugPrint('[LoyaltyRepository] Network error – returning cached data');
+          debugPrint(
+              '[LoyaltyRepository] Network error – returning cached data');
         }
         return _cachedSummary!;
       }

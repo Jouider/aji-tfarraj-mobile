@@ -23,7 +23,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _handleLogout() async {
     setState(() => _isLoggingOut = true);
-    
+
     try {
       // Clear token and logout - router refresh will handle navigation
       await ref.read(loginAuthStateProvider.notifier).logout();
@@ -72,7 +72,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ],
           const SizedBox(height: AppSpacing.xxl),
-          
+
           // Profile options
           ListTile(
             leading: const Icon(Icons.language),
@@ -98,7 +98,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.secondaryLight.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusFull),
                     ),
                     child: Text(
                       '${summary.balance} pts',
@@ -111,7 +112,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   loading: () => const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.secondary),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: AppColors.secondary),
                   ),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
@@ -155,7 +157,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
             title: const Text('Notifications'),
-            subtitle: unreadCount > 0 
+            subtitle: unreadCount > 0
                 ? Text('$unreadCount non lue${unreadCount > 1 ? 's' : ''}')
                 : null,
             trailing: const Icon(Icons.chevron_right),
@@ -181,7 +183,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const Divider(),
           const SizedBox(height: AppSpacing.xl),
-          
+
           // Logout button using design system
           SizedBox(
             width: double.infinity,

@@ -13,113 +13,106 @@ class AppStrings {
   // ============================================
   // Buttons
   // ============================================
-  String get login => locale == AppLocale.fr 
-      ? CopyFr.buttons.login 
-      : CopyAr.buttons.login;
+  String get login =>
+      locale == AppLocale.fr ? CopyFr.buttons.login : CopyAr.buttons.login;
 
-  String get register => locale == AppLocale.fr 
-      ? CopyFr.buttons.register 
+  String get register => locale == AppLocale.fr
+      ? CopyFr.buttons.register
       : CopyAr.buttons.register;
 
-  String get reserve => locale == AppLocale.fr 
-      ? CopyFr.buttons.reserve 
-      : CopyAr.buttons.reserve;
+  String get reserve =>
+      locale == AppLocale.fr ? CopyFr.buttons.reserve : CopyAr.buttons.reserve;
 
-  String get confirm => locale == AppLocale.fr 
-      ? CopyFr.buttons.confirm 
-      : CopyAr.buttons.confirm;
+  String get confirm =>
+      locale == AppLocale.fr ? CopyFr.buttons.confirm : CopyAr.buttons.confirm;
 
-  String get cancel => locale == AppLocale.fr 
-      ? CopyFr.buttons.cancel 
-      : CopyAr.buttons.cancel;
+  String get cancel =>
+      locale == AppLocale.fr ? CopyFr.buttons.cancel : CopyAr.buttons.cancel;
 
-  String get logout => locale == AppLocale.fr 
-      ? CopyFr.buttons.logout 
-      : CopyAr.buttons.logout;
+  String get logout =>
+      locale == AppLocale.fr ? CopyFr.buttons.logout : CopyAr.buttons.logout;
 
-  String get viewTicket => locale == AppLocale.fr 
-      ? CopyFr.buttons.viewTicket 
+  String get viewTicket => locale == AppLocale.fr
+      ? CopyFr.buttons.viewTicket
       : CopyAr.buttons.viewTicket;
 
   // ============================================
   // Statuses
   // ============================================
-  String get pendingReview => locale == AppLocale.fr 
-      ? CopyFr.statuses.pendingReview 
+  String get pendingReview => locale == AppLocale.fr
+      ? CopyFr.statuses.pendingReview
       : CopyAr.statuses.pendingReview;
 
-  String get contacting => locale == AppLocale.fr 
-      ? CopyFr.statuses.contacting 
+  String get contacting => locale == AppLocale.fr
+      ? CopyFr.statuses.contacting
       : CopyAr.statuses.contacting;
 
-  String get approved => locale == AppLocale.fr 
-      ? CopyFr.statuses.approved 
+  String get approved => locale == AppLocale.fr
+      ? CopyFr.statuses.approved
       : CopyAr.statuses.approved;
 
-  String get rejected => locale == AppLocale.fr 
-      ? CopyFr.statuses.rejected 
+  String get rejected => locale == AppLocale.fr
+      ? CopyFr.statuses.rejected
       : CopyAr.statuses.rejected;
 
-  String get cancelled => locale == AppLocale.fr 
-      ? CopyFr.statuses.cancelled 
+  String get cancelled => locale == AppLocale.fr
+      ? CopyFr.statuses.cancelled
       : CopyAr.statuses.cancelled;
 
-  String get expired => locale == AppLocale.fr 
-      ? CopyFr.statuses.expired 
+  String get expired => locale == AppLocale.fr
+      ? CopyFr.statuses.expired
       : CopyAr.statuses.expired;
 
-  String get checkedIn => locale == AppLocale.fr 
-      ? CopyFr.statuses.checkedIn 
+  String get checkedIn => locale == AppLocale.fr
+      ? CopyFr.statuses.checkedIn
       : CopyAr.statuses.checkedIn;
 
-  String statusByKey(String key) => locale == AppLocale.fr 
-      ? CopyFr.statuses.byKey(key) 
+  String statusByKey(String key) => locale == AppLocale.fr
+      ? CopyFr.statuses.byKey(key)
       : CopyAr.statuses.byKey(key);
 
   // ============================================
   // Errors
   // ============================================
-  String get networkError => locale == AppLocale.fr 
-      ? CopyFr.errors.networkError 
+  String get networkError => locale == AppLocale.fr
+      ? CopyFr.errors.networkError
       : CopyAr.errors.networkError;
 
-  String get unauthorized => locale == AppLocale.fr 
-      ? CopyFr.errors.unauthorized 
+  String get unauthorized => locale == AppLocale.fr
+      ? CopyFr.errors.unauthorized
       : CopyAr.errors.unauthorized;
 
-  String get soldOut => locale == AppLocale.fr 
-      ? CopyFr.errors.soldOut 
-      : CopyAr.errors.soldOut;
+  String get soldOut =>
+      locale == AppLocale.fr ? CopyFr.errors.soldOut : CopyAr.errors.soldOut;
 
-  String get unknownError => locale == AppLocale.fr 
-      ? CopyFr.errors.unknownError 
+  String get unknownError => locale == AppLocale.fr
+      ? CopyFr.errors.unknownError
       : CopyAr.errors.unknownError;
 
-  String get invalidCredentials => locale == AppLocale.fr 
-      ? CopyFr.errors.invalidCredentials 
+  String get invalidCredentials => locale == AppLocale.fr
+      ? CopyFr.errors.invalidCredentials
       : CopyAr.errors.invalidCredentials;
 
-  String get emailAlreadyExists => locale == AppLocale.fr 
-      ? CopyFr.errors.emailAlreadyExists 
+  String get emailAlreadyExists => locale == AppLocale.fr
+      ? CopyFr.errors.emailAlreadyExists
       : CopyAr.errors.emailAlreadyExists;
 
-  String get validationError => locale == AppLocale.fr 
-      ? CopyFr.errors.validationError 
+  String get validationError => locale == AppLocale.fr
+      ? CopyFr.errors.validationError
       : CopyAr.errors.validationError;
 
   // ============================================
   // Rules
   // ============================================
-  String get rulesTitle => locale == AppLocale.fr 
-      ? CopyFr.rules.title 
-      : CopyAr.rules.title;
+  String get rulesTitle =>
+      locale == AppLocale.fr ? CopyFr.rules.title : CopyAr.rules.title;
 
-  String get rulesIntroduction => locale == AppLocale.fr 
-      ? CopyFr.rules.introduction 
+  String get rulesIntroduction => locale == AppLocale.fr
+      ? CopyFr.rules.introduction
       : CopyAr.rules.introduction;
 
-  String get rulesAcceptance => locale == AppLocale.fr 
-      ? CopyFr.rules.acceptance 
+  String get rulesAcceptance => locale == AppLocale.fr
+      ? CopyFr.rules.acceptance
       : CopyAr.rules.acceptance;
 
   // ============================================
@@ -137,13 +130,11 @@ class AppStrings {
       ? CopyFr.loyalty.pointsSubtitle
       : CopyAr.loyalty.pointsSubtitle;
 
-  String get history => locale == AppLocale.fr
-      ? CopyFr.loyalty.history
-      : CopyAr.loyalty.history;
+  String get history =>
+      locale == AppLocale.fr ? CopyFr.loyalty.history : CopyAr.loyalty.history;
 
-  String get rewards => locale == AppLocale.fr
-      ? CopyFr.loyalty.rewards
-      : CopyAr.loyalty.rewards;
+  String get rewards =>
+      locale == AppLocale.fr ? CopyFr.loyalty.rewards : CopyAr.loyalty.rewards;
 
   String get comingSoon => locale == AppLocale.fr
       ? CopyFr.loyalty.comingSoon

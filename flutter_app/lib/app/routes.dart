@@ -29,10 +29,12 @@ class Routes {
 
   // Reservation routes (inside shell, independent of tabs)
   static const reservation = '/reservation';
-  static String reservationDetail(String reservationId) => '/reservation/$reservationId';
+  static String reservationDetail(String reservationId) =>
+      '/reservation/$reservationId';
 
   // Full screen routes (outside shell)
   static const reservationSuccess = '/reservation-success';
-  static String reservationResult(String reservationId) => '/reservation-result/$reservationId';
+  static String reservationResult(String reservationId) =>
+      '/reservation-result/$reservationId';
   static const error = '/error';
 }

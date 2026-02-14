@@ -85,16 +85,12 @@ class ErrorsCopyFr {
       'Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet.';
   String get unauthorized =>
       'Votre session a expiré. Veuillez vous reconnecter.';
-  String get soldOut =>
-      'Ce spectacle est complet. Aucune place disponible.';
+  String get soldOut => 'Ce spectacle est complet. Aucune place disponible.';
   String get unknownError =>
       'Une erreur inattendue est survenue. Veuillez réessayer.';
-  String get invalidCredentials =>
-      'Email ou mot de passe incorrect.';
-  String get emailAlreadyExists =>
-      'Un compte avec cet email existe déjà.';
-  String get validationError =>
-      'Veuillez vérifier les informations saisies.';
+  String get invalidCredentials => 'Email ou mot de passe incorrect.';
+  String get emailAlreadyExists => 'Un compte avec cet email existe déjà.';
+  String get validationError => 'Veuillez vérifier les informations saisies.';
 }
 
 /// Rules page content in French
@@ -133,8 +129,7 @@ class RulesCopyFr {
         ),
       ];
 
-  String get acceptance =>
-      'J\'ai lu et j\'accepte le règlement du spectacle.';
+  String get acceptance => 'J\'ai lu et j\'accepte le règlement du spectacle.';
 }
 
 /// Loyalty copy in French

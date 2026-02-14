@@ -67,7 +67,8 @@ class _HistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormatted = DateFormat('dd MMM yyyy', 'fr').format(entry.createdAt);
+    final dateFormatted =
+        DateFormat('dd MMM yyyy', 'fr').format(entry.createdAt);
     final isPositive = entry.isPositive;
 
     return Padding(
@@ -79,13 +80,13 @@ class _HistoryTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: isPositive
-                  ? AppColors.successLight
-                  : AppColors.errorLight,
+              color: isPositive ? AppColors.successLight : AppColors.errorLight,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Icon(
-              isPositive ? Icons.add_circle_outline : Icons.remove_circle_outline,
+              isPositive
+                  ? Icons.add_circle_outline
+                  : Icons.remove_circle_outline,
               color: isPositive ? AppColors.success : AppColors.error,
               size: AppSpacing.iconMd,
             ),

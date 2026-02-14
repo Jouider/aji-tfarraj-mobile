@@ -61,14 +61,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       final currentPath = state.matchedLocation;
 
       // Check if trying to access a protected route
-      final isProtectedRoute = _protectedRoutes.any((route) => 
-          currentPath == route || currentPath.startsWith('$route/'));
-      
+      final isProtectedRoute = _protectedRoutes.any(
+          (route) => currentPath == route || currentPath.startsWith('$route/'));
+
       // Also protect show detail and reservation routes
       final isShowRoute = currentPath.startsWith('/show/');
       final isReservationRoute = currentPath.startsWith('/reservation/');
       final needsAuth = isProtectedRoute || isShowRoute || isReservationRoute;
-      
+
       // Check if trying to access auth routes (login/register) while authenticated
       final isAuthRoute = _authRoutes.contains(currentPath);
 

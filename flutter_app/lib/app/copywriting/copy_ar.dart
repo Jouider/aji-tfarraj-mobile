@@ -83,18 +83,13 @@ class ErrorsCopyAr {
 
   String get networkError =>
       'تعذر الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.';
-  String get unauthorized =>
-      'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.';
-  String get soldOut =>
-      'هذا العرض مكتمل. لا توجد أماكن متاحة.';
-  String get unknownError =>
-      'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+  String get unauthorized => 'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.';
+  String get soldOut => 'هذا العرض مكتمل. لا توجد أماكن متاحة.';
+  String get unknownError => 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
   String get invalidCredentials =>
       'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
-  String get emailAlreadyExists =>
-      'يوجد حساب مسجل بهذا البريد الإلكتروني.';
-  String get validationError =>
-      'يرجى التحقق من المعلومات المدخلة.';
+  String get emailAlreadyExists => 'يوجد حساب مسجل بهذا البريد الإلكتروني.';
+  String get validationError => 'يرجى التحقق من المعلومات المدخلة.';
 }
 
 /// Rules page content in Arabic
@@ -102,14 +97,12 @@ class RulesCopyAr {
   const RulesCopyAr();
 
   String get title => 'قواعد العرض';
-  String get introduction =>
-      'بحجزك لمكان، فإنك توافق على الشروط التالية:';
+  String get introduction => 'بحجزك لمكان، فإنك توافق على الشروط التالية:';
 
   List<RuleItemAr> get items => const [
         RuleItemAr(
           title: 'شرط السن',
-          description:
-              'الدخول مخصص للأشخاص الذين تبلغ أعمارهم 16 سنة فما فوق.',
+          description: 'الدخول مخصص للأشخاص الذين تبلغ أعمارهم 16 سنة فما فوق.',
         ),
         RuleItemAr(
           title: 'التحقق من الهوية',
@@ -128,13 +121,11 @@ class RulesCopyAr {
         ),
         RuleItemAr(
           title: 'احترام التعليمات',
-          description:
-              'يرجى الالتزام بتعليمات الموظفين وأعوان الأمن.',
+          description: 'يرجى الالتزام بتعليمات الموظفين وأعوان الأمن.',
         ),
       ];
 
-  String get acceptance =>
-      'لقد قرأت وأوافق على قواعد العرض.';
+  String get acceptance => 'لقد قرأت وأوافق على قواعد العرض.';
 }
 
 /// Rule item model for Arabic
