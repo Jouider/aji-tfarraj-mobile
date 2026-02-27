@@ -10,6 +10,7 @@ import 'package:aji_tfarraj/app/design_system/buttons.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
 import 'package:aji_tfarraj/app/design_system/components/loading/skeleton_loader.dart';
+import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
@@ -140,20 +141,32 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
 
   Future<void> _submitReservation(BuildContext context) async {
     final router = GoRouter.of(context);
+    final analytics = ref.read(analyticsServiceProvider);
+    final showId = int.parse(widget.showId);
 
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
+    // Fire before the API call
+    analytics.logReserveAttempt(showId: showId, seats: _selectedSeats);
+
     try {
       final reservation = await ref.read(myReservationsProvider.notifier).createReservation(
-            showId: int.parse(widget.showId),
+            showId: showId,
             seats: _selectedSeats,
           );
 
       if (!mounted) return;
-      
+
+      // Fire after successful API response
+      analytics.logReserveSuccess(
+        showId: showId,
+        reservationId: reservation.id,
+        seats: _selectedSeats,
+      );
+
       // Navigate to result screen with reservation ID
       router.go(Routes.reservationResult(reservation.id.toString()));
     } on ApiException catch (e) {

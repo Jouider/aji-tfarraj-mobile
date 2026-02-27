@@ -11,6 +11,7 @@ class Show {
   final int reservedSeats;
   final bool isActive;
   final String? imageUrl;
+  final int? rewardPoints;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -26,12 +27,16 @@ class Show {
     required this.reservedSeats,
     required this.isActive,
     this.imageUrl,
+    this.rewardPoints,
     this.createdAt,
     this.updatedAt,
   });
 
   /// Available seats count
   int get availableSeats => capacity - reservedSeats;
+
+  /// Points awarded on check-in. Falls back to 20 if not set by backend.
+  int get effectiveRewardPoints => rewardPoints ?? 20;
 
   /// Check if show is sold out
   bool get isSoldOut => availableSeats <= 0;
@@ -50,6 +55,7 @@ class Show {
       reservedSeats: json['reserved_seats'] as int,
       isActive: json['is_active'] as bool,
       imageUrl: json['image_url'] as String?,
+      rewardPoints: json['reward_points'] as int?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -73,6 +79,7 @@ class Show {
       'reserved_seats': reservedSeats,
       'is_active': isActive,
       'image_url': imageUrl,
+      'reward_points': rewardPoints,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };

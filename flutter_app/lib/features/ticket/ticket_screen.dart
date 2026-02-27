@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -25,6 +26,8 @@ class TicketScreen extends ConsumerStatefulWidget {
 
 class _TicketScreenState extends ConsumerState<TicketScreen> {
   late PageController _pageController;
+  bool _ticketEventFired = false;
+  bool _checkinEventFired = false;
 
   @override
   void initState() {
@@ -57,13 +60,45 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
           onRetry: () => ref.read(myTicketsProvider.notifier).refresh(),
         ),
         data: (ticketsState) {
+          if (!ticketsState.isEmpty) {
+            final analytics = ref.read(analyticsServiceProvider);
+
+            // ticket_generated — first time user sees a valid ticket
+            if (!_ticketEventFired) {
+              _ticketEventFired = true;
+              final first = ticketsState.tickets.first;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                analytics.logTicketGenerated(
+                  ticketCode: first.ticketCode,
+                  showId: first.show?.id ?? 0,
+                );
+              });
+            }
+
+            // checkin_success — first time a checked-in ticket is detected
+            if (!_checkinEventFired) {
+              final checkedIn = ticketsState.tickets
+                  .where((t) => t.isCheckedIn)
+                  .firstOrNull;
+              if (checkedIn != null) {
+                _checkinEventFired = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  analytics.logCheckinSuccess(
+                    ticketCode: checkedIn.ticketCode,
+                    showId: checkedIn.show?.id ?? 0,
+                  );
+                });
+              }
+            }
+          }
+
           if (ticketsState.isEmpty) {
             return _TicketLockedView(
               isRefreshing: ticketsState.isRefreshing,
               onRefresh: () => ref.read(myTicketsProvider.notifier).refresh(),
             );
           }
-          
+
           return _TicketsContentView(
             ticketsState: ticketsState,
             pageController: _pageController,

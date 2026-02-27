@@ -13,18 +13,39 @@ import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
 import 'package:aji_tfarraj/app/design_system/components/loading/skeleton_loader.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart';
+import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
 
 /// Show Detail Screen with hero image, info sections, rules, and sticky CTA
-class ShowDetailScreen extends ConsumerWidget {
+class ShowDetailScreen extends ConsumerStatefulWidget {
   final String showId;
 
   const ShowDetailScreen({super.key, required this.showId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showAsync = ref.watch(showDetailProvider(int.parse(showId)));
+  ConsumerState<ShowDetailScreen> createState() => _ShowDetailScreenState();
+}
+
+class _ShowDetailScreenState extends ConsumerState<ShowDetailScreen> {
+  bool _viewEventFired = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final showAsync = ref.watch(showDetailProvider(int.parse(widget.showId)));
+
+    // Fire view_show once when show data first loads
+    ref.listen(showDetailProvider(int.parse(widget.showId)), (_, next) {
+      if (!_viewEventFired) {
+        next.whenData((show) {
+          _viewEventFired = true;
+          ref.read(analyticsServiceProvider).logViewShow(
+            showId: show.id,
+            showTitle: show.title,
+          );
+        });
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -32,10 +53,10 @@ class ShowDetailScreen extends ConsumerWidget {
         loading: () => const _ShowDetailSkeleton(),
         error: (error, stack) => _ErrorView(
           message: error.toString(),
-          onRetry: () => ref.refresh(showDetailProvider(int.parse(showId))),
+          onRetry: () => ref.refresh(showDetailProvider(int.parse(widget.showId))),
           onBack: () => context.go(Routes.home),
         ),
-        data: (show) => _ShowDetailContent(show: show, showId: showId),
+        data: (show) => _ShowDetailContent(show: show, showId: widget.showId),
       ),
     );
   }

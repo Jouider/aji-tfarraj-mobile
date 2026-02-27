@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/colors.dart';
 
-/// App Shell with Bottom Navigation Bar
-/// Contains the main navigation tabs: Home, MyReservations, Ticket, Profile
+/// App Shell with Bottom Navigation Bar — dark premium styling
+/// Tabs: Émissions (0) | Explorer (1) | Réservations (2) | Billet (3) | Profil (4)
 class AppShell extends StatelessWidget {
   final Widget child;
 
@@ -12,35 +13,53 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundWhite,
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _calculateSelectedIndex(context),
-        onTap: (index) => _onItemTapped(index, context),
-        selectedItemColor: Colors.black87,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Émissions', // TODO: Add localization
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.backgroundWhite,
+          border: Border(
+            top: BorderSide(color: AppColors.border, width: 0.5),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            activeIcon: Icon(Icons.calendar_today),
-            label: 'Réservations', // TODO: Add localization
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.confirmation_number_outlined),
-            activeIcon: Icon(Icons.confirmation_number),
-            label: 'Billet', // TODO: Add localization
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profil', // TODO: Add localization
-          ),
-        ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: AppColors.backgroundWhite,
+          currentIndex: _calculateSelectedIndex(context),
+          onTap: (index) => _onItemTapped(index, context),
+          selectedItemColor: AppColors.secondary,
+          unselectedItemColor: AppColors.textLight,
+          selectedFontSize: 11,
+          unselectedFontSize: 11,
+          elevation: 0,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.movie_outlined),
+              activeIcon: Icon(Icons.movie),
+              label: 'Émissions',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.explore_outlined),
+              activeIcon: Icon(Icons.explore),
+              label: 'Explorer',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today_outlined),
+              activeIcon: Icon(Icons.calendar_today),
+              label: 'Réservations',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.confirmation_number_outlined),
+              activeIcon: Icon(Icons.confirmation_number),
+              label: 'Billet',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
+              label: 'Profil',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -50,17 +69,20 @@ class AppShell extends StatelessWidget {
     if (location.startsWith(Routes.home)) {
       return 0;
     }
-    if (location.startsWith(Routes.myReservations) || 
-        location.startsWith(Routes.reservation)) {
+    if (location.startsWith(Routes.browse)) {
       return 1;
     }
-    if (location.startsWith(Routes.ticket)) {
+    if (location.startsWith(Routes.myReservations) ||
+        location.startsWith(Routes.reservation)) {
       return 2;
     }
-    if (location.startsWith(Routes.profile)) {
+    if (location.startsWith(Routes.ticket)) {
       return 3;
     }
-    // Show detail pages - keep Home tab selected
+    if (location.startsWith(Routes.profile)) {
+      return 4;
+    }
+    // Show detail pages — keep Home tab selected
     if (location.startsWith(Routes.show)) {
       return 0;
     }
@@ -73,12 +95,15 @@ class AppShell extends StatelessWidget {
         context.go(Routes.home);
         break;
       case 1:
-        context.go(Routes.myReservations);
+        context.go(Routes.browse);
         break;
       case 2:
-        context.go(Routes.ticket);
+        context.go(Routes.myReservations);
         break;
       case 3:
+        context.go(Routes.ticket);
+        break;
+      case 4:
         context.go(Routes.profile);
         break;
     }

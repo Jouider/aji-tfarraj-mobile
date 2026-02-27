@@ -49,20 +49,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 60),
-                // Logo/Title
-                Icon(
-                  Icons.tv,
-                  size: 80,
-                  color: AppColors.primary,
+                const SizedBox(height: 40),
+                // Logo
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 180,
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Aji Tfarraj',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.h1,
-                ),
-                const SizedBox(height: AppSpacing.sm),
                 Text(
                   'Connectez-vous pour réserver',
                   textAlign: TextAlign.center,

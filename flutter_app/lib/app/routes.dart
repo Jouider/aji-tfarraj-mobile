@@ -11,6 +11,7 @@ class Routes {
 
   // Tab roots (inside shell)
   static const home = '/home';
+  static const browse = '/browse';
   static const myReservations = '/my-reservations';
   static const ticket = '/ticket';
   static const profile = '/profile';

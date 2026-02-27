@@ -9,6 +9,7 @@ import 'package:aji_tfarraj/app/router.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/push/push_service.dart';
 import 'package:aji_tfarraj/app/push/push_token_provider.dart';
+import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/features/notifications/data/notification_repository.dart';
 
 void main() async {
@@ -102,8 +103,64 @@ class _AjiTfarrajAppState extends ConsumerState<AjiTfarrajApp> {
           GlobalCupertinoLocalizations.delegate,
         ],
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: AppColors.backgroundWhite,
+          colorScheme: const ColorScheme.dark(
+            primary: AppColors.primary,
+            secondary: AppColors.secondary,
+            surface: AppColors.backgroundGrey,
+            onPrimary: Colors.white,
+            onSecondary: Colors.black,
+            onSurface: AppColors.textPrimary,
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: AppColors.backgroundWhite,
+            foregroundColor: AppColors.textPrimary,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            iconTheme: IconThemeData(color: AppColors.textPrimary),
+          ),
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            backgroundColor: AppColors.backgroundWhite,
+            selectedItemColor: AppColors.secondary,
+            unselectedItemColor: AppColors.textLight,
+            elevation: 0,
+            type: BottomNavigationBarType.fixed,
+          ),
+          cardTheme: const CardThemeData(
+            color: AppColors.backgroundGrey,
+            elevation: 0,
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: AppColors.backgroundGrey,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+            ),
+            hintStyle: const TextStyle(color: AppColors.textLight),
+          ),
+          dividerTheme: const DividerThemeData(
+            color: AppColors.divider,
+            space: 1,
+            thickness: 1,
+          ),
+          chipTheme: ChipThemeData(
+            backgroundColor: AppColors.backgroundGrey,
+            selectedColor: AppColors.primary,
+            labelStyle: const TextStyle(color: AppColors.textSecondary),
+            side: const BorderSide(color: AppColors.border),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+          ),
         ),
         routerConfig: router,
       ),

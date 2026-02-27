@@ -22,10 +22,12 @@ import 'package:aji_tfarraj/app/design_system/demo_screen.dart';
 import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/notification_center_screen.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
+import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
 
 /// Routes that require authentication
 const _protectedRoutes = [
   Routes.home,
+  Routes.browse,
   Routes.myReservations,
   Routes.ticket,
   Routes.profile,
@@ -146,6 +148,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: Routes.home,
             name: 'home',
             builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: Routes.browse,
+            name: 'browse',
+            builder: (context, state) => const ShowsBrowseScreen(),
           ),
           GoRoute(
             path: Routes.myReservations,

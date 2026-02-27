@@ -291,6 +291,7 @@ GET /api/shows?city=Casablanca&channel=2M&q=show&per_page=10
       "starts_at": "2026-02-15T20:00:00.000000Z",
       "capacity": 150,
       "reserved_seats": 45,
+      "reward_points": 50,
       "is_active": true,
       "image_url": "https://aji-tfarraj-backend-production.up.railway.app/media/shows/lalla-laaroussa.jpg",
       "created_at": "2026-01-15T09:00:00.000000Z",
@@ -306,6 +307,7 @@ GET /api/shows?city=Casablanca&channel=2M&q=show&per_page=10
       "starts_at": "2026-02-20T21:30:00.000000Z",
       "capacity": 200,
       "reserved_seats": 78,
+      "reward_points": null,
       "is_active": true,
       "image_url": null,
       "created_at": "2026-01-10T11:00:00.000000Z",
@@ -398,11 +400,15 @@ GET /api/shows/{id}
   "starts_at": "2026-02-15T20:00:00.000000Z",
   "capacity": 150,
   "reserved_seats": 45,
+  "reward_points": 50,
   "is_active": true,
   "image_url": "https://aji-tfarraj-backend-production.up.railway.app/storage/shows/lalla-laaroussa.jpg",
   "created_at": "2026-01-15T09:00:00.000000Z",
   "updated_at": "2026-01-20T14:30:00.000000Z"
 }
+```
+
+> **Note:** `reward_points` may be `null`. If null, the default reward (20 points) is used when the user checks in.
 ```
 
 **Error Response** `404 Not Found`
@@ -728,6 +734,70 @@ null
 
 ---
 
+## Devices
+
+### Register Device
+
+Register a device for push notifications. If the device token already exists, it will be updated with the new user and details.
+
+```
+POST /api/devices/register
+```
+
+🔒 **Requires Authentication**
+
+**Request Body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| token | string | ✅ | FCM/APNs device token |
+| platform | string | ✅ | Device platform: `ios` or `android` |
+| device_name | string | ❌ | Optional device name (e.g., "iPhone 15 Pro") |
+
+**Request Example**
+
+```json
+{
+  "token": "fcm-token-abc123xyz...",
+  "platform": "ios",
+  "device_name": "iPhone 15 Pro"
+}
+```
+
+**Success Response** `200 OK`
+
+```json
+{
+  "success": true
+}
+```
+
+**Error Response** `401 Unauthenticated`
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+**Error Response** `422 Unprocessable Entity` (validation)
+
+```json
+{
+  "message": "The platform field must be ios or android.",
+  "errors": {
+    "platform": ["The platform field must be ios or android."]
+  }
+}
+```
+
+**Notes:**
+- Call this endpoint after user login and whenever the device token changes
+- The same token can only be associated with one user at a time
+- If a token is re-registered by a different user, ownership transfers to the new user
+
+---
+
 ## Staff Check-in
 
 ### Check-in Ticket
@@ -940,10 +1010,152 @@ Currently, list endpoints return all results. Pagination may be added in future 
 
 ---
 
+## Push Notifications
+
+### Overview
+
+The app receives push notifications for important events. Notifications are sent via Firebase Cloud Messaging (FCM).
+
+### Notification Types
+
+| Type | Trigger | Description |
+|------|---------|-------------|
+| `reservation` | Reservation approved | Sent when a reservation status changes to `approved` |
+
+### Payload Format
+
+```json
+{
+  "notification": {
+    "title": "Reservation Approved! 🎉",
+    "body": "Your reservation for \"Show Title\" has been approved. Your ticket is ready!"
+  },
+  "data": {
+    "type": "reservation",
+    "reservation_id": "123"
+  }
+}
+```
+
+### Mobile App Handling
+
+When receiving a push notification:
+
+1. Parse the `data.type` field to determine the notification type
+2. For `reservation` type:
+   - Navigate to the ticket screen or reservation details
+   - Use `data.reservation_id` to fetch updated reservation info
+3. Refresh relevant data (reservations list, ticket status)
+
+---
+
+## Points Ledger
+
+### Overview
+
+Users earn points for attending shows. Points are awarded automatically when staff checks in a ticket at the venue.
+
+### Points Earning
+
+| Activity | Points | Trigger |
+|----------|--------|---------|
+| Attendance | Show's `reward_points` or 20 (default) | Ticket check-in at venue |
+
+> **Note:** Each show can have a custom `reward_points` value. If not set, the default of 20 points is awarded.
+
+### Important Notes
+
+- **Immutable Ledger**: Points ledger entries cannot be updated or deleted. If a correction is needed, a compensating entry must be created.
+- **Idempotent**: Points are awarded only once per reservation. Duplicate check-in attempts will not create duplicate points.
+- **Automatic**: Points are awarded automatically during the check-in process—no additional API calls needed.
+
+---
+
+### Get My Points
+
+Retrieve the authenticated user's points balance and transaction history.
+
+```
+GET /api/me/points
+```
+
+🔒 **Requires Authentication**
+
+**Success Response** `200 OK`
+
+```json
+{
+  "balance": 90,
+  "history": [
+    {
+      "id": 3,
+      "type": "attendance",
+      "points": 50,
+      "meta": {
+        "show_id": 5,
+        "ticket_code": "AT-2026-000012",
+        "checked_in_at": "2026-02-06T20:15:00.000000Z",
+        "points_awarded": 50
+      },
+      "created_at": "2026-02-06T20:15:00.000000Z"
+    },
+    {
+      "id": 2,
+      "type": "attendance",
+      "points": 20,
+      "meta": {
+        "show_id": 3,
+        "ticket_code": "AT-2026-000008",
+        "checked_in_at": "2026-02-01T19:30:00.000000Z",
+        "points_awarded": 20
+      },
+      "created_at": "2026-02-01T19:30:00.000000Z"
+    },
+    {
+      "id": 1,
+      "type": "attendance",
+      "points": 20,
+      "meta": {
+        "show_id": 1,
+        "ticket_code": "AT-2026-000003",
+        "checked_in_at": "2026-01-25T20:00:00.000000Z",
+        "points_awarded": 20
+      },
+      "created_at": "2026-01-25T20:00:00.000000Z"
+    }
+  ]
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| balance | integer | Total points balance (sum of all points) |
+| history | array | Latest 50 ledger entries, ordered by created_at desc |
+| history[].id | integer | Ledger entry ID |
+| history[].type | string | Entry type (e.g., `attendance`) |
+| history[].points | integer | Points amount (positive = earned) |
+| history[].meta | object | Additional context (show_id, ticket_code, checked_in_at, points_awarded) |
+| history[].created_at | string | ISO 8601 timestamp |
+
+**Error Response** `401 Unauthenticated`
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+---
+
 ## Changelog
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.5.1 | 2026-02-06 | Added per-show `reward_points` field; points ledger meta now includes `points_awarded` |
+| 1.5.0 | 2026-02-06 | Added Points Ledger system with `GET /api/me/points` endpoint; points awarded on check-in |
+| 1.4.0 | 2026-02-05 | Added `POST /api/devices/register` endpoint for push notification device registration |
 | 1.3.0 | 2026-02-03 | Added `POST /api/staff/check-in` endpoint for ticket validation |
 | 1.2.0 | 2026-01-30 | Added `image_url` field to Show responses (optional show images) |
 | 1.1.0 | 2026-01-30 | Added production Railway URL, admin panel credentials |

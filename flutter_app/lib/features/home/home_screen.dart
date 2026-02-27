@@ -8,13 +8,11 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
-import 'package:aji_tfarraj/app/design_system/loaders.dart';
-import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 
-/// Home Screen - List of available TV shows with filters and pagination
+/// Home Screen — Cinematic discovery layout inspired by premium streaming apps
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -24,27 +22,17 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-
-    // Sync search controller with current filter state
-    final currentSearch = ref.read(showsFilterProvider).searchQuery;
-    if (currentSearch != null) {
-      _searchController.text = currentSearch;
-    }
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    _searchController.dispose();
-    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -55,90 +43,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  void _onSearchChanged(String value) {
-    // Use debounced search to avoid API spam
-    ref.read(showsFilterProvider.notifier).setSearchDebounced(value);
-  }
-
-  void _onSearchSubmitted(String value) {
-    // Immediate search on submit
-    ref.read(showsFilterProvider.notifier).setSearchImmediate(value);
-    _searchFocusNode.unfocus();
-  }
-
-  void _clearSearch() {
-    _searchController.clear();
-    ref.read(showsFilterProvider.notifier).clearSearch();
-    _searchFocusNode.unfocus();
-  }
-
   @override
   Widget build(BuildContext context) {
     final showsState = ref.watch(showsListProvider);
-    final filteredShows = ref.watch(filteredShowsProvider);
-    final filterState = ref.watch(showsFilterProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(
-        title: Text('Émissions', style: AppTypography.h3),
-        backgroundColor: AppColors.backgroundWhite,
-        elevation: 0,
-        actions: [
-          // Notification bell icon with badge
-          _NotificationBellButton(unreadCount: unreadCount),
-          if (filterState.hasFilters)
-            TextButton(
-              onPressed: () {
-                _searchController.clear();
-                ref.read(showsFilterProvider.notifier).clearAll();
-              },
-              child: Text(
-                'Effacer',
-                style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
-              ),
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search input
-          _SearchInput(
-            controller: _searchController,
-            focusNode: _searchFocusNode,
-            onChanged: _onSearchChanged,
-            onSubmitted: _onSearchSubmitted,
-            onClear: _clearSearch,
-          ),
-
-          // Filter chips section
-          if (!showsState.isLoading && showsState.items.isNotEmpty)
-            _FiltersSection(
-              cities: showsState.uniqueCities,
-              channels: showsState.uniqueChannels,
-              selectedCity: filterState.selectedCity,
-              selectedChannel: filterState.selectedChannel,
-              onCityChanged: (city) => ref.read(showsFilterProvider.notifier).setCity(city),
-              onChannelChanged: (channel) => ref.read(showsFilterProvider.notifier).setChannel(channel),
-            ),
-
-          // Content
-          Expanded(
-            child: _buildContent(showsState, filteredShows),
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.backgroundWhite,
+      extendBodyBehindAppBar: true,
+      appBar: _buildAppBar(unreadCount),
+      body: _buildBody(showsState),
     );
   }
 
-  Widget _buildContent(ShowsListState showsState, List<Show> filteredShows) {
-    // Loading state
+  PreferredSizeWidget _buildAppBar(int unreadCount) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xE6000000), // 90% black
+              Colors.transparent,
+            ],
+          ),
+        ),
+      ),
+      title: Image.asset(
+        'assets/images/logo.png',
+        height: 98,
+        fit: BoxFit.contain,
+        alignment: Alignment.centerLeft,
+      ),
+      actions: [
+        _NotificationBellButton(unreadCount: unreadCount),
+        const SizedBox(width: AppSpacing.xs),
+      ],
+    );
+  }
+
+  Widget _buildBody(ShowsListState showsState) {
     if (showsState.isLoading) {
-      return const ShowsListSkeleton(itemCount: 6);
+      return const _HomeLoadingSkeleton();
     }
 
-    // Error state
     if (showsState.error != null) {
       return ErrorState(
         message: showsState.error!,
@@ -147,42 +99,407 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    // Empty state (no shows at all)
-    if (showsState.items.isEmpty && !showsState.hasFilters) {
+    final allShows = showsState.items;
+
+    if (allShows.isEmpty) {
       return EmptyState.noShows(
         onAction: () => ref.read(showsListProvider.notifier).refresh(),
       );
     }
 
-    // Filtered empty state (filters applied but no results)
-    if (filteredShows.isEmpty) {
-      return EmptyState(
-        icon: Icons.search_off,
-        title: 'Aucun résultat',
-        description: 'Aucune émission ne correspond à votre recherche.',
-        actionText: 'Effacer les filtres',
-        onAction: () {
-          _searchController.clear();
-          ref.read(showsFilterProvider.notifier).clearAll();
-        },
-      );
-    }
+    final now = DateTime.now();
+    final upcoming60Days = now.add(const Duration(days: 60));
 
-    // Shows list
+    // Hero show: first upcoming active show
+    final Show? heroShow = allShows
+        .where((s) => s.startsAt.isAfter(now) && s.isActive)
+        .fold<Show?>(null, (prev, s) {
+      if (prev == null) return s;
+      return s.startsAt.isBefore(prev.startsAt) ? s : prev;
+    });
+
+    // Prochains spectacles: upcoming within 60 days, excluding hero
+    final prochains = allShows
+        .where(
+          (s) =>
+              s.startsAt.isAfter(now) &&
+              s.startsAt.isBefore(upcoming60Days) &&
+              s.isActive &&
+              s.id != heroShow?.id,
+        )
+        .toList()
+      ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+
+    // Bientôt disponible: beyond 60 days or inactive
+    final bientot = allShows
+        .where((s) => !s.isActive || (s.startsAt.isAfter(upcoming60Days)))
+        .toList()
+      ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+
+    // Les plus demandés: sorted by reserved seats descending
+    final populaires = List<Show>.from(allShows)
+      ..sort((a, b) => b.reservedSeats.compareTo(a.reservedSeats));
+
     return RefreshIndicator(
       onRefresh: () => ref.read(showsListProvider.notifier).refresh(),
-      color: AppColors.primary,
-      child: ListView.builder(
+      color: AppColors.secondary,
+      backgroundColor: AppColors.backgroundGrey,
+      child: CustomScrollView(
         controller: _scrollController,
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        itemCount: filteredShows.length + (showsState.isLoadingMore ? 1 : 0),
+        slivers: [
+          // Hero show
+          if (heroShow != null)
+            SliverToBoxAdapter(child: _HeroShowCard(show: heroShow)),
+
+          // Prochains spectacles section
+          if (prochains.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                title: 'Prochains spectacles',
+                onSeeAll: () => context.push(Routes.browse),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _ShowsHorizontalSection(shows: prochains),
+            ),
+          ],
+
+          // Bientôt disponible section
+          if (bientot.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                title: 'Bientôt disponible',
+                onSeeAll: () => context.push(Routes.browse),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _ShowsHorizontalSection(
+                shows: bientot,
+                isComingSoon: true,
+              ),
+            ),
+          ],
+
+          // Les plus demandés section
+          if (populaires.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                title: 'Les plus demandés',
+                onSeeAll: () => context.push(Routes.browse),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _ShowsHorizontalSection(
+                shows: populaires.take(10).toList(),
+              ),
+            ),
+          ],
+
+          // Bottom padding for nav bar
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxxl)),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────
+// Hero Show Card
+// ─────────────────────────────────────────────────────
+
+class _HeroShowCard extends StatelessWidget {
+  final Show show;
+
+  const _HeroShowCard({required this.show});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+
+    return GestureDetector(
+      onTap: () => context.push(Routes.showDetail(show.id.toString())),
+      child: SizedBox(
+        height: 420,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background image
+            show.imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: show.imageUrl!,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) =>
+                        Container(color: AppColors.backgroundGrey),
+                    errorWidget: (_, __, ___) => _HeroPlaceholder(),
+                  )
+                : _HeroPlaceholder(),
+
+            // Gradient overlay — top (for AppBar legibility)
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment(0, 0.3),
+                  colors: [Color(0xCC000000), Colors.transparent],
+                ),
+              ),
+            ),
+
+            // Gradient overlay — bottom (for content legibility)
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment(0, 0.1),
+                  colors: [Color(0xFF000000), Colors.transparent],
+                ),
+              ),
+            ),
+
+            // Content at bottom
+            Positioned(
+              left: AppSpacing.lg,
+              right: AppSpacing.lg,
+              bottom: AppSpacing.xl,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Channel badge
+                  if (show.channel != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSm,
+                        ),
+                      ),
+                      child: Text(
+                        show.channel!.toUpperCase(),
+                        style: AppTypography.labelSmall.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+
+                  // Title
+                  Text(
+                    show.title,
+                    style: AppTypography.h1.copyWith(
+                      color: Colors.white,
+                      height: 1.1,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // Date + City row
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 13,
+                        color: AppColors.textMuted,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        dateFormat.format(show.startsAt.toLocal()),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 13,
+                        color: AppColors.textMuted,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        show.city,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // CTA row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () => context.push(
+                            Routes.showDetail(show.id.toString()),
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.secondary,
+                            foregroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMd,
+                              ),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.confirmation_number_outlined,
+                            size: 18,
+                          ),
+                          label: Text(
+                            show.isSoldOut ? 'Complet' : 'Réserver',
+                            style: AppTypography.buttonMedium.copyWith(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: AppSpacing.md),
+
+                      // Seats pill
+                      if (!show.isSoldOut)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundGrey,
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMd,
+                            ),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Text(
+                            '${show.availableSeats} places',
+                            style: AppTypography.labelMedium.copyWith(
+                              color: AppColors.success,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.backgroundGrey,
+      child: const Center(
+        child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────
+// Section Header
+// ─────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final VoidCallback onSeeAll;
+
+  const _SectionHeader({required this.title, required this.onSeeAll});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.sm,
+        AppSpacing.md,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            style: AppTypography.h3.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const Spacer(),
+          TextButton.icon(
+            onPressed: onSeeAll,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.secondary,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            label: const Icon(Icons.chevron_right, size: 20),
+            icon: Text(
+              'Voir tout',
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.secondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────
+// Horizontal Section
+// ─────────────────────────────────────────────────────
+
+class _ShowsHorizontalSection extends StatelessWidget {
+  final List<Show> shows;
+  final bool isComingSoon;
+
+  const _ShowsHorizontalSection({
+    required this.shows,
+    this.isComingSoon = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.sm,
+        ),
+        itemCount: shows.length,
         itemBuilder: (context, index) {
-          if (index == filteredShows.length) {
-            return const _LoadingMoreIndicator();
-          }
           return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-            child: _ShowListItem(show: filteredShows[index]),
+            padding: const EdgeInsets.only(right: AppSpacing.md),
+            child: _ShowHorizontalCard(
+              show: shows[index],
+              isComingSoon: isComingSoon,
+            ),
           );
         },
       ),
@@ -190,324 +507,190 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// Search input widget with icon and clear button
-class _SearchInput extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  final ValueChanged<String> onSubmitted;
-  final VoidCallback onClear;
+// ─────────────────────────────────────────────────────
+// Horizontal Show Card
+// ─────────────────────────────────────────────────────
 
-  const _SearchInput({
-    required this.controller,
-    required this.focusNode,
-    required this.onChanged,
-    required this.onSubmitted,
-    required this.onClear,
-  });
+class _ShowHorizontalCard extends StatelessWidget {
+  final Show show;
+  final bool isComingSoon;
+
+  const _ShowHorizontalCard({required this.show, this.isComingSoon = false});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.backgroundWhite,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
-        AppSpacing.md,
-      ),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-        textInputAction: TextInputAction.search,
-        style: AppTypography.bodyMedium,
-        decoration: InputDecoration(
-          hintText: 'Rechercher une émission...',
-          hintStyle: AppTypography.bodyMedium.copyWith(
-            color: AppColors.textMuted,
-          ),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: AppColors.textMuted,
-            size: 22,
-          ),
-          suffixIcon: ListenableBuilder(
-            listenable: controller,
-            builder: (context, _) {
-              if (controller.text.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return IconButton(
-                icon: const Icon(
-                  Icons.close,
-                  color: AppColors.textMuted,
-                  size: 20,
+    final dateFormat = DateFormat('d MMM', 'fr_FR');
+
+    return GestureDetector(
+      onTap: () => context.push(Routes.showDetail(show.id.toString())),
+      child: SizedBox(
+        width: 150,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              child: SizedBox(
+                height: 170,
+                width: 150,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Image
+                    show.imageUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: show.imageUrl!,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) =>
+                                Container(color: AppColors.backgroundGrey),
+                            errorWidget: (_, __, ___) => Container(
+                              color: AppColors.backgroundGrey,
+                              child: const Icon(
+                                Icons.tv,
+                                size: 32,
+                                color: AppColors.textLight,
+                              ),
+                            ),
+                          )
+                        : Container(
+                            color: AppColors.backgroundGrey,
+                            child: const Icon(
+                              Icons.tv,
+                              size: 32,
+                              color: AppColors.textLight,
+                            ),
+                          ),
+
+                    // Sold-out overlay
+                    if (show.isSoldOut)
+                      Container(
+                        color: Colors.black54,
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSm,
+                            ),
+                          ),
+                          child: Text(
+                            'COMPLET',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Coming soon overlay
+                    if (isComingSoon && !show.isSoldOut)
+                      Positioned(
+                        bottom: AppSpacing.sm,
+                        left: AppSpacing.sm,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary,
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSm,
+                            ),
+                          ),
+                          child: Text(
+                            'BIENTÔT',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 9,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Channel badge — top right
+                    if (show.channel != null)
+                      Positioned(
+                        top: AppSpacing.sm,
+                        right: AppSpacing.sm,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSm,
+                            ),
+                          ),
+                          child: Text(
+                            show.channel!,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                onPressed: onClear,
-                tooltip: 'Effacer la recherche',
-              );
-            },
-          ),
-          filled: true,
-          fillColor: AppColors.backgroundLight,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: const BorderSide(
-              color: AppColors.primary,
-              width: 1.5,
+              ),
             ),
-          ),
+
+            const SizedBox(height: AppSpacing.sm),
+
+            // Title
+            Text(
+              show.title,
+              style: AppTypography.labelMedium.copyWith(
+                color: AppColors.textPrimary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            const SizedBox(height: 2),
+
+            // Date or "Bientôt"
+            Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  size: 11,
+                  color: AppColors.textLight,
+                ),
+                const SizedBox(width: 3),
+                Text(
+                  isComingSoon && !show.isActive
+                      ? 'Date à confirmer'
+                      : dateFormat.format(show.startsAt.toLocal()),
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.textLight,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Filters section with city and channel chips
-class _FiltersSection extends StatelessWidget {
-  final List<String> cities;
-  final List<String> channels;
-  final String? selectedCity;
-  final String? selectedChannel;
-  final ValueChanged<String?> onCityChanged;
-  final ValueChanged<String?> onChannelChanged;
+// ─────────────────────────────────────────────────────
+// Notification Bell Button
+// ─────────────────────────────────────────────────────
 
-  const _FiltersSection({
-    required this.cities,
-    required this.channels,
-    this.selectedCity,
-    this.selectedChannel,
-    required this.onCityChanged,
-    required this.onChannelChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.backgroundWhite,
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (cities.isNotEmpty) ...[
-            FilterChipGroup(
-              title: 'Ville',
-              options: cities,
-              selectedValue: selectedCity,
-              onSelected: onCityChanged,
-              allLabel: 'Toutes',
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          if (channels.isNotEmpty)
-            FilterChipGroup(
-              title: 'Chaîne',
-              options: channels,
-              selectedValue: selectedChannel,
-              onSelected: onChannelChanged,
-              allLabel: 'Toutes',
-            ),
-          // TODO: Add category filter when Show model has category field
-        ],
-      ),
-    );
-  }
-}
-
-/// Show list item with horizontal layout using design system
-class _ShowListItem extends StatelessWidget {
-  final Show show;
-
-  const _ShowListItem({required this.show});
-
-  @override
-  Widget build(BuildContext context) {
-    final dateFormat = DateFormat('dd MMM yyyy • HH:mm', 'fr_FR');
-
-    return AppCard(
-      padding: EdgeInsets.zero,
-      onTap: () => context.go(Routes.showDetail(show.id.toString())),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left: Image (cached, rounded corners)
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(AppSpacing.cardRadius),
-              bottomLeft: Radius.circular(AppSpacing.cardRadius),
-            ),
-            child: SizedBox(
-              width: 120,
-              height: 120,
-              child: show.imageUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: show.imageUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: AppColors.backgroundGrey,
-                        child: const Center(
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: AppColors.backgroundGrey,
-                        child: const Icon(
-                          Icons.tv,
-                          size: 40,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    )
-                  : Container(
-                      color: AppColors.backgroundGrey,
-                      child: const Icon(
-                        Icons.tv,
-                        size: 40,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-            ),
-          ),
-
-          // Right: Show info
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title (bold)
-                  Text(
-                    show.title,
-                    style: AppTypography.h4,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-
-                  // City + Channel
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: AppColors.textMuted,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        show.city,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                      if (show.channel != null) ...[
-                        const SizedBox(width: AppSpacing.md),
-                        Icon(
-                          Icons.tv_outlined,
-                          size: 14,
-                          color: AppColors.textMuted,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Flexible(
-                          child: Text(
-                            show.channel!,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textMuted,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-
-                  // Date formatted
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 14,
-                        color: AppColors.textMuted,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        dateFormat.format(show.startsAt.toLocal()),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // Availability badge
-                  if (show.isSoldOut)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: AppSpacing.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.errorLight,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                      ),
-                      child: Text(
-                        'COMPLET',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: AppColors.error,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  else
-                    Text(
-                      '${show.availableSeats} places disponibles',
-                      style: AppTypography.labelSmall.copyWith(
-                        color: AppColors.success,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-
-          // Chevron indicator
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: Icon(
-              Icons.chevron_right,
-              color: AppColors.textMuted,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Notification bell button with unread badge
 class _NotificationBellButton extends StatelessWidget {
   final int unreadCount;
 
@@ -519,7 +702,10 @@ class _NotificationBellButton extends StatelessWidget {
       icon: Stack(
         clipBehavior: Clip.none,
         children: [
-          const Icon(Icons.notifications_outlined),
+          const Icon(
+            Icons.notifications_outlined,
+            color: AppColors.textPrimary,
+          ),
           if (unreadCount > 0)
             Positioned(
               right: -4,
@@ -527,17 +713,14 @@ class _NotificationBellButton extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                  color: AppColors.secondary,
                   shape: BoxShape.circle,
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 18,
-                  minHeight: 18,
-                ),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                 child: Text(
                   unreadCount > 99 ? '99+' : unreadCount.toString(),
                   style: const TextStyle(
-                    color: AppColors.backgroundWhite,
+                    color: Colors.black,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -553,35 +736,63 @@ class _NotificationBellButton extends StatelessWidget {
   }
 }
 
-/// Loading more indicator at bottom of list
-class _LoadingMoreIndicator extends StatelessWidget {
-  const _LoadingMoreIndicator();
+// ─────────────────────────────────────────────────────
+// Loading Skeleton
+// ─────────────────────────────────────────────────────
+
+class _HomeLoadingSkeleton extends StatelessWidget {
+  const _HomeLoadingSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(
-              width: 20,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hero skeleton
+          Container(
+            height: 420,
+            width: double.infinity,
+            color: AppColors.backgroundGrey,
+          ),
+
+          const SizedBox(height: AppSpacing.xl),
+
+          // Section label
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Container(
               height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.secondary,
+              width: 180,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundGrey,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
-            Text(
-              'Chargement...',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textMuted,
+          ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // Horizontal cards skeleton
+          SizedBox(
+            height: 240,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              itemCount: 5,
+              itemBuilder: (_, __) => Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.md),
+                child: Container(
+                  width: 150,
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundGrey,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
