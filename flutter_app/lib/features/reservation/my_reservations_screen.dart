@@ -10,6 +10,7 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
 import 'package:aji_tfarraj/app/design_system/components/loading/skeleton_loader.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
 import 'package:aji_tfarraj/features/reservations/domain/reservation.dart';
@@ -43,10 +44,12 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
   Widget build(BuildContext context) {
     final reservationsAsync = ref.watch(myReservationsProvider);
 
+    final s = ref.watch(stringsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: Text('Mes réservations', style: AppTypography.h3),
+        title: Text(s.myReservationsTitle, style: AppTypography.h3),
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         bottom: PreferredSize(
@@ -65,7 +68,7 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
         loading: () => const _ReservationsSkeleton(),
         error: (error, stack) => ErrorState(
           message: error.toString(),
-          retryText: 'Réessayer',
+          retryText: s.myResRetryLabel,
           onRetry: () => ref.read(myReservationsProvider.notifier).refresh(),
         ),
         data: (reservations) => _buildTabContent(reservations),
@@ -74,6 +77,7 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
   }
 
   Widget _buildTabBar(int pending, int approved, int past) {
+    final s = ref.read(stringsProvider);
     return Container(
       color: AppColors.backgroundWhite,
       child: TabBar(
@@ -85,9 +89,9 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
         labelStyle: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600),
         unselectedLabelStyle: AppTypography.labelMedium,
         tabs: [
-          Tab(text: 'En attente${pending > 0 ? ' ($pending)' : ''}'),
-          Tab(text: 'Approuvées${approved > 0 ? ' ($approved)' : ''}'),
-          Tab(text: 'Passées${past > 0 ? ' ($past)' : ''}'),
+          Tab(text: '${s.myResTabPending}${pending > 0 ? ' ($pending)' : ''}'),
+          Tab(text: '${s.myResTabApproved}${approved > 0 ? ' ($approved)' : ''}'),
+          Tab(text: '${s.myResTabPast}${past > 0 ? ' ($past)' : ''}'),
         ],
       ),
     );
@@ -97,26 +101,27 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
     final pending = _filterPending(reservations);
     final approved = _filterApproved(reservations);
     final past = _filterPast(reservations);
+    final s = ref.read(stringsProvider);
 
     return TabBarView(
       controller: _tabController,
       children: [
         _ReservationsList(
           reservations: pending,
-          emptyMessage: 'Aucune réservation en attente',
-          emptySubMessage: 'Vos demandes en cours apparaîtront ici',
+          emptyMessage: s.myResEmptyPending,
+          emptySubMessage: s.myResEmptyPendingSubtitle,
           onRefresh: () => ref.read(myReservationsProvider.notifier).refresh(),
         ),
         _ReservationsList(
           reservations: approved,
-          emptyMessage: 'Aucune réservation approuvée',
-          emptySubMessage: 'Vos réservations confirmées apparaîtront ici',
+          emptyMessage: s.myResEmptyApproved,
+          emptySubMessage: s.myResEmptyApprovedSubtitle,
           onRefresh: () => ref.read(myReservationsProvider.notifier).refresh(),
         ),
         _ReservationsList(
           reservations: past,
-          emptyMessage: 'Aucune réservation passée',
-          emptySubMessage: 'Votre historique apparaîtra ici',
+          emptyMessage: s.myResEmptyPast,
+          emptySubMessage: s.myResEmptyPastSubtitle,
           onRefresh: () => ref.read(myReservationsProvider.notifier).refresh(),
         ),
       ],
@@ -234,6 +239,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
     final reservation = widget.reservation;
     final statusHelper = ReservationStatusHelper(reservation.status);
     final dateFormat = DateFormat('dd MMM yyyy à HH:mm', 'fr_FR');
+    final s = ref.watch(stringsProvider);
 
     return AppCard(
       padding: EdgeInsets.zero,
@@ -333,7 +339,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                         Icon(Icons.event_seat, size: 14, color: AppColors.textMuted),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
-                          '${reservation.seats} ${reservation.seats == 1 ? 'place' : 'places'}',
+                          s.myResSeatCount(reservation.seats),
                           style: AppTypography.labelSmall.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -344,7 +350,9 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                   const SizedBox(width: AppSpacing.sm),
 
                   // Status badge
-                  ReservationStatusBadge(status: reservation.status),
+                  Flexible(
+                    child: ReservationStatusBadge(status: reservation.status),
+                  ),
 
                   const Spacer(),
 
@@ -368,7 +376,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                               ),
                             ),
                             child: Text(
-                              'Annuler',
+                              s.cancel,
                               style: AppTypography.labelMedium.copyWith(
                                 color: AppColors.error,
                               ),
@@ -415,18 +423,19 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                     AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.brown[50],
+                  color: AppColors.warningLight,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.timer_off, size: 16, color: Colors.brown[700]),
+                    const Icon(Icons.timer_off,
+                        size: 16, color: AppColors.warning),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
-                        'Réservation expirée',
+                        s.myResExpiredBanner,
                         style: AppTypography.bodySmall.copyWith(
-                          color: Colors.brown[700],
+                          color: AppColors.warning,
                         ),
                       ),
                     ),
@@ -441,18 +450,19 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                     AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.teal[50],
+                  color: AppColors.successLight,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.verified, size: 16, color: Colors.teal[700]),
+                    const Icon(Icons.verified,
+                        size: 16, color: AppColors.success),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
-                        'Entrée validée - Ticket utilisé',
+                        s.myResCheckedInBanner,
                         style: AppTypography.bodySmall.copyWith(
-                          color: Colors.teal[700],
+                          color: AppColors.success,
                         ),
                       ),
                     ),
@@ -466,14 +476,12 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
   }
 
   Future<void> _showCancelDialog(BuildContext context) async {
+    final s = ref.read(stringsProvider);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Annuler la réservation', style: AppTypography.h3),
-        content: Text(
-          'Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.',
-          style: AppTypography.bodyMedium,
-        ),
+        title: Text(s.myResCancelDialogTitle, style: AppTypography.h3),
+        content: Text(s.myResCancelDialogContent, style: AppTypography.bodyMedium),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
@@ -481,7 +489,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
-              'Non, garder',
+              s.myResCancelDialogKeep,
               style: AppTypography.labelMedium.copyWith(color: AppColors.textMuted),
             ),
           ),
@@ -489,7 +497,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: Text(
-              'Oui, annuler',
+              s.myResCancelDialogConfirm,
               style: AppTypography.labelMedium.copyWith(color: AppColors.error),
             ),
           ),
@@ -506,6 +514,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
     if (_isCancelling) return;
 
     setState(() => _isCancelling = true);
+    final s = ref.read(stringsProvider);
 
     try {
       await ref.read(myReservationsProvider.notifier).cancelReservation(
@@ -516,7 +525,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Réservation annulée', style: AppTypography.bodyMedium),
+          content: Text(s.myResCancelSuccess, style: AppTypography.bodyMedium),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -529,9 +538,9 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
 
       String message;
       if (e.statusCode == 403) {
-        message = 'Vous ne pouvez pas annuler cette réservation.';
+        message = s.myResCancelErrorForbidden;
       } else if (e.statusCode == 409) {
-        message = 'Cette réservation ne peut plus être annulée.';
+        message = s.myResCancelErrorConflict;
       } else {
         message = e.message;
       }
@@ -551,10 +560,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Une erreur est survenue. Veuillez réessayer.',
-            style: AppTypography.bodyMedium,
-          ),
+          content: Text(s.myResCancelErrorGeneric, style: AppTypography.bodyMedium),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

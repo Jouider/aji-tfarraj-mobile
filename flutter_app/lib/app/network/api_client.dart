@@ -139,6 +139,21 @@ class ApiClient {
     );
   }
 
+  /// PATCH request
+  Future<Response<T>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    return await _dio.patch<T>(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+    );
+  }
+
   /// DELETE request
   Future<Response<T>> delete<T>(
     String path, {
@@ -165,17 +180,20 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 class ApiException implements Exception {
   final String message;
   final int? statusCode;
+  final String? code;
   final Map<String, dynamic>? errors;
 
   ApiException({
     required this.message,
     this.statusCode,
+    this.code,
     this.errors,
   });
 
   factory ApiException.fromDioError(DioException error) {
     String message = 'Une erreur est survenue';
     int? statusCode = error.response?.statusCode;
+    String? code;
     Map<String, dynamic>? errors;
 
     switch (error.type) {
@@ -191,6 +209,7 @@ class ApiException implements Exception {
         final data = error.response?.data;
         if (data is Map<String, dynamic>) {
           message = data['message'] ?? message;
+          code = data['code'] as String?;
           errors = data['errors'] as Map<String, dynamic>?;
         }
         break;
@@ -201,6 +220,7 @@ class ApiException implements Exception {
     return ApiException(
       message: message,
       statusCode: statusCode,
+      code: code,
       errors: errors,
     );
   }

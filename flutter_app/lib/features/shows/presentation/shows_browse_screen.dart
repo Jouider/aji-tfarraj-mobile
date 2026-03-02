@@ -8,6 +8,8 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
 
@@ -48,6 +50,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
   }
 
   void _openFilterSheet() {
+    final s = ref.read(stringsProvider);
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surfaceOverlay,
@@ -55,6 +58,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => _FilterSheet(
+        s: s,
         selectedChannel: _selectedChannel,
         channels: ref.read(showsListProvider).uniqueChannels,
         onChannelSelected: (ch) {
@@ -79,6 +83,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
   Widget build(BuildContext context) {
     final showsState = ref.watch(showsListProvider);
     final filteredShows = ref.watch(filteredShowsProvider);
+    final s = ref.watch(stringsProvider);
 
     // Build city list from all loaded shows
     final cities = showsState.uniqueCities;
@@ -90,7 +95,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
-        title: Text('Explorer', style: AppTypography.h3),
+        title: Text(s.browseTitle, style: AppTypography.h3),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => context.pop(),
@@ -102,7 +107,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
             children: [
               IconButton(
                 icon: const Icon(Icons.tune_rounded),
-                tooltip: 'Filtres',
+                tooltip: s.browseFilterTooltip,
                 onPressed: _openFilterSheet,
               ),
               if (_selectedChannel != null)
@@ -127,6 +132,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
         children: [
           // Search bar
           _SearchBar(
+            s: s,
             controller: _searchController,
             focusNode: _searchFocusNode,
             onChanged: _onSearchChanged,
@@ -136,6 +142,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
           // City filter chips
           if (cities.isNotEmpty)
             _CityChipsRow(
+              s: s,
               cities: cities,
               selectedCity: _selectedCity,
               onCitySelected: _selectCity,
@@ -145,7 +152,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
 
           // Content
           Expanded(
-            child: _buildContent(showsState, grouped),
+            child: _buildContent(showsState, grouped, s),
           ),
         ],
       ),
@@ -155,6 +162,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
   Widget _buildContent(
     ShowsListState showsState,
     Map<String, List<Show>> grouped,
+    AppStrings s,
   ) {
     if (showsState.isLoading) {
       return const _BrowseLoadingSkeleton();
@@ -163,7 +171,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
     if (showsState.error != null) {
       return ErrorState(
         message: showsState.error!,
-        retryText: 'Réessayer',
+        retryText: s.retry,
         onRetry: () => ref.read(showsListProvider.notifier).refresh(),
       );
     }
@@ -171,9 +179,9 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
     if (grouped.isEmpty) {
       return EmptyState(
         icon: Icons.search_off_rounded,
-        title: 'Aucun résultat',
-        description: 'Aucune émission ne correspond à votre recherche.',
-        actionText: 'Effacer les filtres',
+        title: s.browseNoResults,
+        description: s.browseNoResultsDesc,
+        actionText: s.browseClearFilters,
         onAction: () {
           setState(() {
             _selectedCity = null;
@@ -196,6 +204,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
           final studioName = grouped.keys.elementAt(index);
           final studioShows = grouped[studioName]!;
           return _StudioSection(
+            s: s,
             studioName: studioName,
             shows: studioShows,
           );
@@ -221,12 +230,14 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
 // ─────────────────────────────────────────────────────
 
 class _SearchBar extends StatelessWidget {
+  final AppStrings s;
   final TextEditingController controller;
   final FocusNode focusNode;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
 
   const _SearchBar({
+    required this.s,
     required this.controller,
     required this.focusNode,
     required this.onChanged,
@@ -250,7 +261,7 @@ class _SearchBar extends StatelessWidget {
         textInputAction: TextInputAction.search,
         style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
         decoration: InputDecoration(
-          hintText: 'Rechercher une émission...',
+          hintText: s.browseSearchHint,
           hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textLight),
           prefixIcon: const Icon(Icons.search, color: AppColors.textLight, size: 22),
           suffixIcon: ListenableBuilder(
@@ -291,11 +302,13 @@ class _SearchBar extends StatelessWidget {
 // ─────────────────────────────────────────────────────
 
 class _CityChipsRow extends StatelessWidget {
+  final AppStrings s;
   final List<String> cities;
   final String? selectedCity;
   final ValueChanged<String?> onCitySelected;
 
   const _CityChipsRow({
+    required this.s,
     required this.cities,
     required this.selectedCity,
     required this.onCitySelected,
@@ -315,7 +328,7 @@ class _CityChipsRow extends StatelessWidget {
         children: [
           // "Toutes" chip
           _CityChip(
-            label: 'Toutes',
+            label: s.browseAllCities,
             isSelected: selectedCity == null,
             onTap: () => onCitySelected(null),
           ),
@@ -379,10 +392,11 @@ class _CityChip extends StatelessWidget {
 // ─────────────────────────────────────────────────────
 
 class _StudioSection extends StatelessWidget {
+  final AppStrings s;
   final String studioName;
   final List<Show> shows;
 
-  const _StudioSection({required this.studioName, required this.shows});
+  const _StudioSection({required this.s, required this.studioName, required this.shows});
 
   @override
   Widget build(BuildContext context) {
@@ -427,7 +441,7 @@ class _StudioSection extends StatelessWidget {
         ),
 
         // Show cards
-        ...shows.map((show) => _BrowseShowCard(show: show)),
+        ...shows.map((show) => _BrowseShowCard(s: s, show: show)),
       ],
     );
   }
@@ -438,9 +452,10 @@ class _StudioSection extends StatelessWidget {
 // ─────────────────────────────────────────────────────
 
 class _BrowseShowCard extends StatelessWidget {
+  final AppStrings s;
   final Show show;
 
-  const _BrowseShowCard({required this.show});
+  const _BrowseShowCard({required this.s, required this.show});
 
   @override
   Widget build(BuildContext context) {
@@ -585,7 +600,7 @@ class _BrowseShowCard extends StatelessWidget {
                                   BorderRadius.circular(AppSpacing.radiusSm),
                             ),
                             child: Text(
-                              'COMPLET',
+                              s.browseSoldOutBadge,
                               style: AppTypography.caption.copyWith(
                                 color: AppColors.error,
                                 fontWeight: FontWeight.w700,
@@ -595,11 +610,35 @@ class _BrowseShowCard extends StatelessWidget {
                             ),
                           )
                         else
-                          Text(
-                            '${show.availableSeats} places',
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.successLight,
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                              border: Border.all(
+                                color: AppColors.success.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.event_seat_outlined,
+                                  size: 11,
+                                  color: AppColors.success,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  s.browseAvailableSeats(show.availableSeats),
+                                  style: AppTypography.caption.copyWith(
+                                    color: AppColors.success,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                       ],
@@ -626,12 +665,14 @@ class _BrowseShowCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────
 
 class _FilterSheet extends StatelessWidget {
+  final AppStrings s;
   final String? selectedChannel;
   final List<String> channels;
   final ValueChanged<String?> onChannelSelected;
   final VoidCallback onClear;
 
   const _FilterSheet({
+    required this.s,
     required this.selectedChannel,
     required this.channels,
     required this.onChannelSelected,
@@ -661,7 +702,7 @@ class _FilterSheet extends StatelessWidget {
             ),
 
             Text(
-              'Filtrer par chaîne',
+              s.browseFilterByChannel,
               style: AppTypography.h4.copyWith(color: AppColors.textPrimary),
             ),
 
@@ -669,7 +710,7 @@ class _FilterSheet extends StatelessWidget {
 
             if (channels.isEmpty)
               Text(
-                'Aucune chaîne disponible',
+                s.browseNoChannels,
                 style: AppTypography.bodyMedium.copyWith(
                   color: AppColors.textMuted,
                 ),
@@ -728,7 +769,7 @@ class _FilterSheet extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Effacer tous les filtres',
+                  s.browseClearAllFilters,
                   style: AppTypography.buttonMedium.copyWith(
                     color: AppColors.textSecondary,
                   ),

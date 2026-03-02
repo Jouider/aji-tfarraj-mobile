@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
 /// App Shell with Bottom Navigation Bar — dark premium styling
 /// Tabs: Émissions (0) | Explorer (1) | Réservations (2) | Billet (3) | Profil (4)
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   final Widget child;
 
   const AppShell({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       body: child,
@@ -32,31 +36,31 @@ class AppShell extends StatelessWidget {
           selectedFontSize: 11,
           unselectedFontSize: 11,
           elevation: 0,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.movie_outlined),
-              activeIcon: Icon(Icons.movie),
-              label: 'Émissions',
+              icon: const Icon(Icons.movie_outlined),
+              activeIcon: const Icon(Icons.movie),
+              label: s.navTabEmissions,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.explore_outlined),
-              activeIcon: Icon(Icons.explore),
-              label: 'Explorer',
+              icon: const Icon(Icons.explore_outlined),
+              activeIcon: const Icon(Icons.explore),
+              label: s.navTabExplorer,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
-              activeIcon: Icon(Icons.calendar_today),
-              label: 'Réservations',
+              icon: const Icon(Icons.calendar_today_outlined),
+              activeIcon: const Icon(Icons.calendar_today),
+              label: s.navTabReservations,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.confirmation_number_outlined),
-              activeIcon: Icon(Icons.confirmation_number),
-              label: 'Billet',
+              icon: const Icon(Icons.confirmation_number_outlined),
+              activeIcon: const Icon(Icons.confirmation_number),
+              label: s.navTabTicket,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profil',
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: s.navTabProfile,
             ),
           ],
         ),

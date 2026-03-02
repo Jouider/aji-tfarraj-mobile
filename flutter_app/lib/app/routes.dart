@@ -6,8 +6,10 @@ class Routes {
   // Auth flow (outside shell)
   static const splash = '/';
   static const language = '/language';
+  static const authLanding = '/auth';
   static const login = '/login';
   static const register = '/register';
+  static const forgotPassword = '/forgot-password';
 
   // Tab roots (inside shell)
   static const home = '/home';
@@ -15,6 +17,9 @@ class Routes {
   static const myReservations = '/my-reservations';
   static const ticket = '/ticket';
   static const profile = '/profile';
+
+  // Profile edit
+  static const editProfile = '/profile/edit';
 
   // Notifications
   static const notifications = '/notifications';

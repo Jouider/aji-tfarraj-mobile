@@ -36,6 +36,10 @@ dependencies:
   flutter_local_notifications: ^18.0.0
   # Analytics
   firebase_analytics: ^11.3.3
+  image_picker: ^1.2.1
+  # Social authentication
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.2
 
 dev_dependencies:
   flutter_test:

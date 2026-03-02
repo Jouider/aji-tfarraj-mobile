@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
 /// Reservation status constants matching backend
 class ReservationStatus {
@@ -62,29 +65,10 @@ class ReservationStatusHelper {
   }
 
   /// Get badge color for status
-  Color get color {
-    switch (status) {
-      case ReservationStatus.pendingReview:
-        return Colors.orange;
-      case ReservationStatus.contacting:
-        return Colors.blue;
-      case ReservationStatus.approved:
-        return Colors.green;
-      case ReservationStatus.rejected:
-        return Colors.red;
-      case ReservationStatus.cancelled:
-        return Colors.grey;
-      case ReservationStatus.expired:
-        return Colors.brown;
-      case ReservationStatus.checkedIn:
-        return Colors.teal;
-      default:
-        return Colors.grey;
-    }
-  }
+  Color get color => AppColors.getStatusColor(status);
 
   /// Get background color (lighter) for badge
-  Color get backgroundColor => color.withValues(alpha: 0.1);
+  Color get backgroundColor => AppColors.getStatusBackgroundColor(status);
 
   /// Get icon for status
   IconData get icon {
@@ -137,7 +121,7 @@ class ReservationStatusHelper {
 }
 
 /// Widget for displaying reservation status badge
-class ReservationStatusBadge extends StatelessWidget {
+class ReservationStatusBadge extends ConsumerWidget {
   final String status;
   final bool showIcon;
 
@@ -148,8 +132,9 @@ class ReservationStatusBadge extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final helper = ReservationStatusHelper(status);
+    final s = ref.watch(stringsProvider);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -165,12 +150,16 @@ class ReservationStatusBadge extends StatelessWidget {
             Icon(helper.icon, size: 14, color: helper.color),
             const SizedBox(width: 6),
           ],
-          Text(
-            helper.label,
-            style: TextStyle(
-              color: helper.color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              s.statusByKey(status),
+              style: TextStyle(
+                color: helper.color,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],

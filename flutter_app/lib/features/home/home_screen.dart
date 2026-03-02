@@ -10,6 +10,8 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 
 /// Home Screen — Cinematic discovery layout inspired by premium streaming apps
@@ -47,16 +49,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final showsState = ref.watch(showsListProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
+    final s = ref.watch(stringsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(unreadCount),
-      body: _buildBody(showsState),
+      appBar: _buildAppBar(unreadCount, s),
+      body: _buildBody(showsState, s),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(int unreadCount) {
+  PreferredSizeWidget _buildAppBar(int unreadCount, AppStrings s) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -80,13 +83,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         alignment: Alignment.centerLeft,
       ),
       actions: [
-        _NotificationBellButton(unreadCount: unreadCount),
+        _NotificationBellButton(unreadCount: unreadCount, s: s),
         const SizedBox(width: AppSpacing.xs),
       ],
     );
   }
 
-  Widget _buildBody(ShowsListState showsState) {
+  Widget _buildBody(ShowsListState showsState, AppStrings s) {
     if (showsState.isLoading) {
       return const _HomeLoadingSkeleton();
     }
@@ -94,7 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (showsState.error != null) {
       return ErrorState(
         message: showsState.error!,
-        retryText: 'Réessayer',
+        retryText: s.retry,
         onRetry: () => ref.read(showsListProvider.notifier).refresh(),
       );
     }
@@ -112,31 +115,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // Hero show: first upcoming active show
     final Show? heroShow = allShows
-        .where((s) => s.startsAt.isAfter(now) && s.isActive)
-        .fold<Show?>(null, (prev, s) {
-      if (prev == null) return s;
-      return s.startsAt.isBefore(prev.startsAt) ? s : prev;
+        .where((show) => show.startsAt.isAfter(now) && show.isActive)
+        .fold<Show?>(null, (prev, show) {
+      if (prev == null) return show;
+      return show.startsAt.isBefore(prev.startsAt) ? show : prev;
     });
 
-    // Prochains spectacles: upcoming within 60 days, excluding hero
+    // Upcoming within 60 days, excluding hero
     final prochains = allShows
         .where(
-          (s) =>
-              s.startsAt.isAfter(now) &&
-              s.startsAt.isBefore(upcoming60Days) &&
-              s.isActive &&
-              s.id != heroShow?.id,
+          (show) =>
+              show.startsAt.isAfter(now) &&
+              show.startsAt.isBefore(upcoming60Days) &&
+              show.isActive &&
+              show.id != heroShow?.id,
         )
         .toList()
       ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
 
-    // Bientôt disponible: beyond 60 days or inactive
+    // Beyond 60 days or inactive
     final bientot = allShows
-        .where((s) => !s.isActive || (s.startsAt.isAfter(upcoming60Days)))
+        .where(
+            (show) => !show.isActive || (show.startsAt.isAfter(upcoming60Days)))
         .toList()
       ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
 
-    // Les plus demandés: sorted by reserved seats descending
+    // Sorted by reserved seats descending
     final populaires = List<Show>.from(allShows)
       ..sort((a, b) => b.reservedSeats.compareTo(a.reservedSeats));
 
@@ -149,26 +153,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         slivers: [
           // Hero show
           if (heroShow != null)
-            SliverToBoxAdapter(child: _HeroShowCard(show: heroShow)),
+            SliverToBoxAdapter(child: _HeroShowCard(show: heroShow, s: s)),
 
-          // Prochains spectacles section
+          // Upcoming section
           if (prochains.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: _SectionHeader(
-                title: 'Prochains spectacles',
+                title: s.homeSectionUpcoming,
+                seeAllText: s.seeAll,
                 onSeeAll: () => context.push(Routes.browse),
               ),
             ),
             SliverToBoxAdapter(
-              child: _ShowsHorizontalSection(shows: prochains),
+              child: _ShowsHorizontalSection(shows: prochains, s: s),
             ),
           ],
 
-          // Bientôt disponible section
+          // Coming soon section
           if (bientot.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: _SectionHeader(
-                title: 'Bientôt disponible',
+                title: s.homeSectionComingSoon,
+                seeAllText: s.seeAll,
                 onSeeAll: () => context.push(Routes.browse),
               ),
             ),
@@ -176,21 +182,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: _ShowsHorizontalSection(
                 shows: bientot,
                 isComingSoon: true,
+                s: s,
               ),
             ),
           ],
 
-          // Les plus demandés section
+          // Popular section
           if (populaires.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: _SectionHeader(
-                title: 'Les plus demandés',
+                title: s.homeSectionPopular,
+                seeAllText: s.seeAll,
                 onSeeAll: () => context.push(Routes.browse),
               ),
             ),
             SliverToBoxAdapter(
               child: _ShowsHorizontalSection(
                 shows: populaires.take(10).toList(),
+                s: s,
               ),
             ),
           ],
@@ -209,8 +218,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 class _HeroShowCard extends StatelessWidget {
   final Show show;
+  final AppStrings s;
 
-  const _HeroShowCard({required this.show});
+  const _HeroShowCard({required this.show, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +368,7 @@ class _HeroShowCard extends StatelessWidget {
                             size: 18,
                           ),
                           label: Text(
-                            show.isSoldOut ? 'Complet' : 'Réserver',
+                            show.isSoldOut ? s.homeSoldOut : s.reserve,
                             style: AppTypography.buttonMedium.copyWith(
                               color: Colors.black,
                               fontWeight: FontWeight.w700,
@@ -377,17 +387,31 @@ class _HeroShowCard extends StatelessWidget {
                             vertical: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.backgroundGrey,
+                            color: AppColors.successLight,
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusMd,
                             ),
-                            border: Border.all(color: AppColors.border),
-                          ),
-                          child: Text(
-                            '${show.availableSeats} places',
-                            style: AppTypography.labelMedium.copyWith(
-                              color: AppColors.success,
+                            border: Border.all(
+                              color: AppColors.success.withValues(alpha: 0.35),
                             ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.event_seat_outlined,
+                                size: 15,
+                                color: AppColors.success,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                '${show.availableSeats}',
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: AppColors.success,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                     ],
@@ -420,9 +444,14 @@ class _HeroPlaceholder extends StatelessWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String title;
+  final String seeAllText;
   final VoidCallback onSeeAll;
 
-  const _SectionHeader({required this.title, required this.onSeeAll});
+  const _SectionHeader({
+    required this.title,
+    required this.seeAllText,
+    required this.onSeeAll,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -457,7 +486,7 @@ class _SectionHeader extends StatelessWidget {
             ),
             label: const Icon(Icons.chevron_right, size: 20),
             icon: Text(
-              'Voir tout',
+              seeAllText,
               style: AppTypography.labelSmall.copyWith(
                 color: AppColors.secondary,
               ),
@@ -476,9 +505,11 @@ class _SectionHeader extends StatelessWidget {
 class _ShowsHorizontalSection extends StatelessWidget {
   final List<Show> shows;
   final bool isComingSoon;
+  final AppStrings s;
 
   const _ShowsHorizontalSection({
     required this.shows,
+    required this.s,
     this.isComingSoon = false,
   });
 
@@ -499,6 +530,7 @@ class _ShowsHorizontalSection extends StatelessWidget {
             child: _ShowHorizontalCard(
               show: shows[index],
               isComingSoon: isComingSoon,
+              s: s,
             ),
           );
         },
@@ -514,8 +546,13 @@ class _ShowsHorizontalSection extends StatelessWidget {
 class _ShowHorizontalCard extends StatelessWidget {
   final Show show;
   final bool isComingSoon;
+  final AppStrings s;
 
-  const _ShowHorizontalCard({required this.show, this.isComingSoon = false});
+  const _ShowHorizontalCard({
+    required this.show,
+    required this.s,
+    this.isComingSoon = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -579,7 +616,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'COMPLET',
+                            s.homeSoldOutBadge,
                             style: AppTypography.labelSmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
@@ -606,7 +643,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'BIENTÔT',
+                            s.homeComingSoonBadge,
                             style: AppTypography.labelSmall.copyWith(
                               color: Colors.black,
                               fontWeight: FontWeight.w700,
@@ -672,7 +709,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                 const SizedBox(width: 3),
                 Text(
                   isComingSoon && !show.isActive
-                      ? 'Date à confirmer'
+                      ? s.homeDateTbc
                       : dateFormat.format(show.startsAt.toLocal()),
                   style: AppTypography.caption.copyWith(
                     color: AppColors.textLight,
@@ -693,8 +730,9 @@ class _ShowHorizontalCard extends StatelessWidget {
 
 class _NotificationBellButton extends StatelessWidget {
   final int unreadCount;
+  final AppStrings s;
 
-  const _NotificationBellButton({required this.unreadCount});
+  const _NotificationBellButton({required this.unreadCount, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -730,7 +768,7 @@ class _NotificationBellButton extends StatelessWidget {
             ),
         ],
       ),
-      tooltip: 'Notifications',
+      tooltip: s.homeNotificationsTooltip,
       onPressed: () => context.push(Routes.notifications),
     );
   }

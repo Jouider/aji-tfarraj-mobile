@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
-import 'package:aji_tfarraj/app/design_system/buttons.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
-import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
 import 'package:aji_tfarraj/app/design_system/components/loading/skeleton_loader.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
 
-/// Reserve Seats Screen with seat picker and constraints
+/// Reserve Seats Screen — dark premium redesign
 class ReserveSeatsScreen extends ConsumerStatefulWidget {
   final String showId;
 
@@ -27,47 +28,46 @@ class ReserveSeatsScreen extends ConsumerStatefulWidget {
 }
 
 class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
-  int _selectedSeats = 1;
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
   Widget build(BuildContext context) {
     final showAsync = ref.watch(showDetailProvider(int.parse(widget.showId)));
+    final s = ref.watch(stringsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
-        title: Text('Réserver des places', style: AppTypography.h3),
-        backgroundColor: AppColors.backgroundWhite,
+        title: Text(s.reserveSeatsTitle, style: AppTypography.h3),
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => context.go(Routes.showDetail(widget.showId)),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(0.5),
+          child: Container(height: 0.5, color: AppColors.border),
         ),
       ),
       body: showAsync.when(
         loading: () => const _ReserveSkeleton(),
         error: (error, stack) => ErrorState(
           message: error.toString(),
-          retryText: 'Réessayer',
+          retryText: s.retry,
           onRetry: () => ref.refresh(showDetailProvider(int.parse(widget.showId))),
         ),
-        data: (show) => _buildContent(context, show),
+        data: (show) => _buildContent(context, show, s),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, Show show) {
+  Widget _buildContent(BuildContext context, Show show, AppStrings s) {
     final seatsLeft = show.availableSeats > 0 ? show.availableSeats : 0;
-    final maxSeats = seatsLeft.clamp(0, 4);
     final isSoldOut = seatsLeft == 0;
-    final dateFormat = DateFormat('dd MMM yyyy à HH:mm', 'fr_FR');
-
-    // Ensure selected seats doesn't exceed max
-    if (_selectedSeats > maxSeats && maxSeats > 0) {
-      _selectedSeats = maxSeats;
-    }
+    final dateFormat = DateFormat('dd MMM yyyy · HH:mm', 'fr_FR');
 
     return Stack(
       children: [
@@ -76,48 +76,17 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Show summary card
-              _ShowSummaryCard(
-                show: show,
-                dateFormat: dateFormat,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-
-              // Seats left indicator
-              _SeatsLeftBadge(seatsLeft: seatsLeft),
-              const SizedBox(height: AppSpacing.xl),
-
-              // Seat picker section
-              Text('Nombre de places', style: AppTypography.h4),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Maximum 4 places par réservation • $seatsLeft restantes',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textMuted,
-                ),
-              ),
+              _ShowSummaryCard(show: show, dateFormat: dateFormat),
               const SizedBox(height: AppSpacing.lg),
-
-              // Seat picker
-              _SeatPicker(
-                selectedSeats: _selectedSeats,
-                maxSeats: maxSeats,
-                isDisabled: _isLoading || isSoldOut,
-                onDecrement: () => setState(() => _selectedSeats--),
-                onIncrement: () => setState(() => _selectedSeats++),
-              ),
+              _SeatsLeftBadge(seatsLeft: seatsLeft, s: s),
               const SizedBox(height: AppSpacing.xl),
 
-              // Error message
               if (_errorMessage != null) ...[
                 _ErrorBanner(message: _errorMessage!),
                 const SizedBox(height: AppSpacing.lg),
               ],
 
-              // Info card
-              _InfoCard(),
-              
-              // Bottom padding for sticky CTA
+              _InfoCard(s: s),
               const SizedBox(height: 120),
             ],
           ),
@@ -129,10 +98,10 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
           right: 0,
           bottom: 0,
           child: _StickyConfirmCTA(
-            selectedSeats: _selectedSeats,
             isLoading: _isLoading,
             isSoldOut: isSoldOut,
             onConfirm: () => _submitReservation(context),
+            s: s,
           ),
         ),
       ],
@@ -149,47 +118,70 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
       _errorMessage = null;
     });
 
-    // Fire before the API call
-    analytics.logReserveAttempt(showId: showId, seats: _selectedSeats);
+    analytics.logReserveAttempt(showId: showId, seats: 1);
 
     try {
       final reservation = await ref.read(myReservationsProvider.notifier).createReservation(
             showId: showId,
-            seats: _selectedSeats,
+            seats: 1,
           );
 
       if (!mounted) return;
 
-      // Fire after successful API response
       analytics.logReserveSuccess(
         showId: showId,
         reservationId: reservation.id,
-        seats: _selectedSeats,
+        seats: 1,
       );
 
-      // Navigate to result screen with reservation ID
       router.go(Routes.reservationResult(reservation.id.toString()));
     } on ApiException catch (e) {
       if (!mounted) return;
-      
+      if (e.statusCode == 409 && e.code == 'PROFILE_INCOMPLETE') {
+        setState(() => _isLoading = false);
+        _showProfileIncompleteDialog();
+        return;
+      }
       setState(() {
         _isLoading = false;
         _errorMessage = _getErrorMessage(e);
       });
     } catch (e) {
       if (!mounted) return;
-      
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Une erreur inattendue est survenue. Veuillez réessayer.';
+        _errorMessage = ref.read(stringsProvider).unknownError;
       });
     }
   }
 
+  void _showProfileIncompleteDialog() {
+    final s = ref.read(stringsProvider);
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text(s.profileIncompleteWarning),
+        content: Text(s.profileIncompleteMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(s.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              context.push(Routes.editProfile);
+            },
+            child: Text(s.completeProfileButton),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _getErrorMessage(ApiException e) {
-    // 401 is handled globally by API client (auto logout)
+    final s = ref.read(stringsProvider);
     if (e.statusCode == 422) {
-      // Validation error
       if (e.errors != null && e.errors!.isNotEmpty) {
         final firstError = e.errors!.values.first;
         if (firstError is List && firstError.isNotEmpty) {
@@ -198,57 +190,79 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
       }
       return e.message;
     }
-    
     if (e.statusCode == 409) {
-      // Conflict - likely sold out or already reserved
-      return 'Places complètes. Pas assez de places disponibles.';
+      return s.reserveSeatsErrSoldOut;
     }
-    
-    if (e.message.toLowerCase().contains('sold') || 
+    if (e.message.toLowerCase().contains('sold') ||
         e.message.toLowerCase().contains('complet') ||
         e.message.toLowerCase().contains('disponible')) {
-      return 'Pas assez de places disponibles.';
+      return s.reserveSeatsErrNotEnough;
     }
-    
     if (e.statusCode == null) {
-      // Network error
-      return 'Problème de connexion. Vérifiez votre connexion internet.';
+      return s.networkError;
     }
-    
     return e.message;
   }
 }
 
-/// Show summary card at top
+// ─────────────────────────────────────────────────────────────────────────────
+// Show Summary Card
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _ShowSummaryCard extends StatelessWidget {
   final Show show;
   final DateFormat dateFormat;
 
-  const _ShowSummaryCard({
-    required this.show,
-    required this.dateFormat,
-  });
+  const _ShowSummaryCard({required this.show, required this.dateFormat});
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundGrey,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
       child: Row(
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: AppColors.backgroundGrey,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            ),
-            child: Icon(Icons.tv, color: AppColors.textMuted, size: 32),
+          // Thumbnail
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            child: show.imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: show.imageUrl!,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => _ThumbPlaceholder(),
+                    errorWidget: (_, __, ___) => _ThumbPlaceholder(),
+                  )
+                : _ThumbPlaceholder(),
           ),
           const SizedBox(width: AppSpacing.md),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Channel badge
+                if (show.channel != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                      border: Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      show.channel!,
+                      style: AppTypography.labelSmall.copyWith(color: AppColors.secondary),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                ],
+
                 Text(
                   show.title,
                   style: AppTypography.h4,
@@ -256,33 +270,28 @@ class _ShowSummaryCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xs),
+
                 Row(
                   children: [
-                    Icon(Icons.calendar_today_outlined, 
-                      size: 14, color: AppColors.textMuted),
-                    const SizedBox(width: AppSpacing.xs),
+                    const Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.textMuted),
+                    const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         dateFormat.format(show.startsAt.toLocal()),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textMuted,
-                        ),
+                        style: AppTypography.bodySmall,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: 2),
                 Row(
                   children: [
-                    Icon(Icons.location_on_outlined, 
-                      size: 14, color: AppColors.textMuted),
-                    const SizedBox(width: AppSpacing.xs),
+                    const Icon(Icons.location_on_outlined, size: 13, color: AppColors.textMuted),
+                    const SizedBox(width: 4),
                     Text(
-                      show.city,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textMuted,
-                      ),
+                      show.studio ?? show.city,
+                      style: AppTypography.bodySmall,
                     ),
                   ],
                 ),
@@ -295,15 +304,48 @@ class _ShowSummaryCard extends StatelessWidget {
   }
 }
 
-/// Seats left badge
+class _ThumbPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      height: 80,
+      color: AppColors.backgroundLight,
+      child: const Icon(Icons.tv_outlined, color: AppColors.textLight, size: 32),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Seats Left Badge
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _SeatsLeftBadge extends StatelessWidget {
   final int seatsLeft;
+  final AppStrings s;
 
-  const _SeatsLeftBadge({required this.seatsLeft});
+  const _SeatsLeftBadge({required this.seatsLeft, required this.s});
 
   @override
   Widget build(BuildContext context) {
     final isSoldOut = seatsLeft == 0;
+    final isLow = seatsLeft > 0 && seatsLeft <= 5;
+
+    final bgColor = isSoldOut
+        ? AppColors.errorLight
+        : isLow
+            ? AppColors.warningLight
+            : AppColors.successLight;
+
+    final fgColor = isSoldOut
+        ? AppColors.error
+        : isLow
+            ? AppColors.warning
+            : AppColors.success;
+
+    final label = isSoldOut
+        ? s.reserveSeatsSoldOutBadge
+        : s.reserveSeatsAvailable(seatsLeft);
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -311,22 +353,23 @@ class _SeatsLeftBadge extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: isSoldOut ? AppColors.errorLight : AppColors.successLight,
+        color: bgColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: fgColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Icon(
-            isSoldOut ? Icons.event_busy : Icons.event_seat,
-            color: isSoldOut ? AppColors.error : AppColors.success,
+            isSoldOut ? Icons.event_busy_outlined : Icons.event_seat_outlined,
+            color: fgColor,
             size: 20,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              isSoldOut ? 'Complet' : '$seatsLeft places restantes',
+              label,
               style: AppTypography.labelMedium.copyWith(
-                color: isSoldOut ? AppColors.error : AppColors.success,
+                color: fgColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -337,104 +380,11 @@ class _SeatsLeftBadge extends StatelessWidget {
   }
 }
 
-/// Seat picker with +/- buttons
-class _SeatPicker extends StatelessWidget {
-  final int selectedSeats;
-  final int maxSeats;
-  final bool isDisabled;
-  final VoidCallback onDecrement;
-  final VoidCallback onIncrement;
 
-  const _SeatPicker({
-    required this.selectedSeats,
-    required this.maxSeats,
-    required this.isDisabled,
-    required this.onDecrement,
-    required this.onIncrement,
-  });
+// ─────────────────────────────────────────────────────────────────────────────
+// Error Banner
+// ─────────────────────────────────────────────────────────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    final canDecrement = selectedSeats > 1 && !isDisabled;
-    final canIncrement = selectedSeats < maxSeats && !isDisabled;
-
-    return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Decrement button
-          _CircleButton(
-            icon: Icons.remove,
-            onPressed: canDecrement ? onDecrement : null,
-          ),
-          const SizedBox(width: AppSpacing.xxl),
-
-          // Seat count display
-          Column(
-            children: [
-              Text(
-                '$selectedSeats',
-                style: AppTypography.h1.copyWith(
-                  fontSize: 56,
-                  color: isDisabled ? AppColors.textMuted : AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                selectedSeats == 1 ? 'place' : 'places',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: AppSpacing.xxl),
-
-          // Increment button
-          _CircleButton(
-            icon: Icons.add,
-            onPressed: canIncrement ? onIncrement : null,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Circle button for seat picker
-class _CircleButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onPressed;
-
-  const _CircleButton({
-    required this.icon,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isEnabled = onPressed != null;
-
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: isEnabled ? AppColors.primary : AppColors.backgroundGrey,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: isEnabled ? AppColors.backgroundWhite : AppColors.textMuted,
-          size: 28,
-        ),
-      ),
-    );
-  }
-}
-
-/// Error banner
 class _ErrorBanner extends StatelessWidget {
   final String message;
 
@@ -451,14 +401,12 @@ class _ErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: AppColors.error, size: 20),
+          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               message,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.error,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           ),
         ],
@@ -467,29 +415,51 @@ class _ErrorBanner extends StatelessWidget {
   }
 }
 
-/// Info card about reservation process
+// ─────────────────────────────────────────────────────────────────────────────
+// Info Card
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _InfoCard extends StatelessWidget {
-  const _InfoCard();
+  final AppStrings s;
+
+  const _InfoCard({required this.s});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: AppColors.backgroundLight,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.secondary.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.info_outline, color: AppColors.secondary, size: 18),
+          ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Text(
-              'Votre demande sera examinée par notre équipe. Vous recevrez une confirmation une fois approuvée.',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.primary,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  s.reserveSeatsInfoTitle,
+                  style: AppTypography.labelMedium.copyWith(color: AppColors.secondary),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  s.reserveSeatsInfoBody,
+                  style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                ),
+              ],
             ),
           ),
         ],
@@ -498,18 +468,21 @@ class _InfoCard extends StatelessWidget {
   }
 }
 
-/// Sticky bottom CTA
+// ─────────────────────────────────────────────────────────────────────────────
+// Sticky Confirm CTA
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _StickyConfirmCTA extends StatelessWidget {
-  final int selectedSeats;
   final bool isLoading;
   final bool isSoldOut;
   final VoidCallback onConfirm;
+  final AppStrings s;
 
   const _StickyConfirmCTA({
-    required this.selectedSeats,
     required this.isLoading,
     required this.isSoldOut,
     required this.onConfirm,
+    required this.s,
   });
 
   @override
@@ -522,11 +495,12 @@ class _StickyConfirmCTA extends StatelessWidget {
         bottom: MediaQuery.of(context).padding.bottom + AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
+        color: AppColors.backgroundLight,
+        border: const Border(top: BorderSide(color: AppColors.border, width: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 16,
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 20,
             offset: const Offset(0, -4),
           ),
         ],
@@ -536,36 +510,65 @@ class _StickyConfirmCTA extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Summary row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Total',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textMuted,
-                  ),
+                  s.reserveSeatsRecap,
+                  style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
                 ),
-                Text(
-                  '$selectedSeats ${selectedSeats == 1 ? 'place' : 'places'}',
-                  style: AppTypography.h4,
+                Row(
+                  children: [
+                    const Icon(Icons.event_seat_outlined, size: 16, color: AppColors.secondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      '1 ${s.place}',
+                      style: AppTypography.h4,
+                    ),
+                  ],
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            
-            // Confirm button
+
             SizedBox(
               width: double.infinity,
+              height: AppSpacing.buttonHeight,
               child: isSoldOut
-                  ? AppButtonSecondary(
-                      text: 'Complet',
+                  ? OutlinedButton(
                       onPressed: null,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textLight,
+                        side: const BorderSide(color: AppColors.border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        ),
+                      ),
+                      child: Text(
+                        s.reserveSeatsSoldOutCta,
+                        style: AppTypography.buttonLarge.copyWith(color: AppColors.textLight),
+                      ),
                     )
-                  : AppButton(
-                      text: 'Confirmer la réservation',
-                      isLoading: isLoading,
+                  : FilledButton(
                       onPressed: isLoading ? null : onConfirm,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.backgroundWhite,
+                        disabledBackgroundColor: AppColors.secondary.withValues(alpha: 0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        ),
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.backgroundWhite,
+                              ),
+                            )
+                          : Text(s.reserveSeatsConfirm, style: AppTypography.buttonLarge),
                     ),
             ),
           ],
@@ -575,7 +578,10 @@ class _StickyConfirmCTA extends StatelessWidget {
   }
 }
 
-/// Skeleton loading state
+// ─────────────────────────────────────────────────────────────────────────────
+// Skeleton Loading
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _ReserveSkeleton extends StatelessWidget {
   const _ReserveSkeleton();
 
@@ -586,21 +592,22 @@ class _ReserveSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Show summary skeleton
           Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.backgroundWhite,
-              borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+              color: AppColors.backgroundGrey,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             ),
             child: Row(
               children: [
-                SkeletonLoader(width: 64, height: 64, borderRadius: AppSpacing.radiusMd),
+                const SkeletonLoader(width: 80, height: 80, borderRadius: AppSpacing.radiusMd),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      SkeletonLoader.text(width: 80, height: 16),
+                      const SizedBox(height: AppSpacing.xs),
                       SkeletonLoader.text(width: double.infinity, height: 20),
                       const SizedBox(height: AppSpacing.sm),
                       SkeletonLoader.text(width: 150, height: 14),
@@ -612,42 +619,9 @@ class _ReserveSkeleton extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
-          
-          // Seats badge skeleton
-          SkeletonLoader.text(width: double.infinity, height: 44),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Section title skeleton
-          SkeletonLoader.text(width: 150, height: 20),
-          const SizedBox(height: AppSpacing.sm),
-          SkeletonLoader.text(width: 250, height: 14),
           const SizedBox(height: AppSpacing.lg),
-
-          // Seat picker skeleton
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundWhite,
-              borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SkeletonLoader.circle(size: 56),
-                const SizedBox(width: AppSpacing.xxl),
-                Column(
-                  children: [
-                    SkeletonLoader.text(width: 60, height: 56),
-                    const SizedBox(height: AppSpacing.xs),
-                    SkeletonLoader.text(width: 50, height: 16),
-                  ],
-                ),
-                const SizedBox(width: AppSpacing.xxl),
-                SkeletonLoader.circle(size: 56),
-              ],
-            ),
-          ),
+          SkeletonLoader.text(width: double.infinity, height: 50),
+          const SizedBox(height: AppSpacing.xl),
         ],
       ),
     );

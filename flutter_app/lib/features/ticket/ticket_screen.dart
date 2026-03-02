@@ -12,7 +12,8 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/buttons.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
-import 'package:aji_tfarraj/app/copywriting/copy_fr.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/tickets/data/ticket_repository.dart';
 import 'package:aji_tfarraj/features/tickets/domain/ticket.dart';
 
@@ -44,19 +45,20 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
   @override
   Widget build(BuildContext context) {
     final ticketsAsync = ref.watch(myTicketsProvider);
+    final s = ref.watch(stringsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: Text('Mes billets', style: AppTypography.h3),
+        title: Text(s.ticketTitle, style: AppTypography.h3),
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
       ),
       body: ticketsAsync.when(
-        loading: () => const _TicketLoadingView(),
+        loading: () => _TicketLoadingView(s: s),
         error: (error, stack) => ErrorState(
           message: error.toString(),
-          retryText: 'Réessayer',
+          retryText: s.retry,
           onRetry: () => ref.read(myTicketsProvider.notifier).refresh(),
         ),
         data: (ticketsState) {
@@ -94,12 +96,14 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
           if (ticketsState.isEmpty) {
             return _TicketLockedView(
+              s: s,
               isRefreshing: ticketsState.isRefreshing,
               onRefresh: () => ref.read(myTicketsProvider.notifier).refresh(),
             );
           }
 
           return _TicketsContentView(
+            s: s,
             ticketsState: ticketsState,
             pageController: _pageController,
             onPageChanged: (page) {
@@ -115,19 +119,21 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
 
 /// Loading view
 class _TicketLoadingView extends StatelessWidget {
-  const _TicketLoadingView();
+  final AppStrings s;
+
+  const _TicketLoadingView({required this.s});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: AppColors.primary),
-          SizedBox(height: AppSpacing.lg),
+          const CircularProgressIndicator(color: AppColors.primary),
+          const SizedBox(height: AppSpacing.lg),
           Text(
-            'Chargement de vos billets...',
-            style: TextStyle(color: AppColors.textMuted),
+            s.ticketLoading,
+            style: const TextStyle(color: AppColors.textMuted),
           ),
         ],
       ),
@@ -137,10 +143,12 @@ class _TicketLoadingView extends StatelessWidget {
 
 /// Widget displayed when no approved tickets are available
 class _TicketLockedView extends StatelessWidget {
+  final AppStrings s;
   final bool isRefreshing;
   final VoidCallback onRefresh;
 
   const _TicketLockedView({
+    required this.s,
     required this.isRefreshing,
     required this.onRefresh,
   });
@@ -157,7 +165,7 @@ class _TicketLockedView extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: AppSpacing.xxl),
-              
+
               // Hourglass icon
               Container(
                 width: 120,
@@ -176,7 +184,7 @@ class _TicketLockedView extends StatelessWidget {
 
               // Title
               Text(
-                'En attente de confirmation',
+                s.ticketPendingTitle,
                 style: AppTypography.h2,
                 textAlign: TextAlign.center,
               ),
@@ -184,7 +192,7 @@ class _TicketLockedView extends StatelessWidget {
 
               // Description
               Text(
-                'Vos billets seront disponibles ici une fois vos réservations approuvées par notre équipe.',
+                s.ticketPendingDesc,
                 style: AppTypography.bodyMedium.copyWith(
                   color: AppColors.textMuted,
                 ),
@@ -196,7 +204,7 @@ class _TicketLockedView extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: AppButton(
-                  text: 'Afficher mes billets',
+                  text: s.ticketShowTickets,
                   icon: Icons.refresh,
                   isLoading: isRefreshing,
                   onPressed: isRefreshing ? null : onRefresh,
@@ -208,7 +216,7 @@ class _TicketLockedView extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: AppButtonSecondary(
-                  text: 'Voir mes réservations',
+                  text: s.ticketViewReservations,
                   icon: Icons.list_alt_outlined,
                   onPressed: () => context.go(Routes.myReservations),
                 ),
@@ -216,7 +224,7 @@ class _TicketLockedView extends StatelessWidget {
               const SizedBox(height: AppSpacing.xxl),
 
               // Rules reminder
-              const _RulesReminderCard(),
+              _RulesReminderCard(s: s),
             ],
           ),
         ),
@@ -227,12 +235,14 @@ class _TicketLockedView extends StatelessWidget {
 
 /// Widget displayed when tickets are available (single or multiple)
 class _TicketsContentView extends StatelessWidget {
+  final AppStrings s;
   final TicketsState ticketsState;
   final PageController pageController;
   final ValueChanged<int> onPageChanged;
   final VoidCallback onRefresh;
 
   const _TicketsContentView({
+    required this.s,
     required this.ticketsState,
     required this.pageController,
     required this.onPageChanged,
@@ -251,10 +261,11 @@ class _TicketsContentView extends StatelessWidget {
           child: Column(
             children: [
               // Offline banner
-              if (ticketsState.isOffline) const _OfflineBanner(),
+              if (ticketsState.isOffline) _OfflineBanner(s: s),
 
               // Refresh button
               _RefreshButton(
+                s: s,
                 isRefreshing: ticketsState.isRefreshing,
                 onRefresh: onRefresh,
               ),
@@ -262,6 +273,7 @@ class _TicketsContentView extends StatelessWidget {
 
               // Ticket count badge
               _TicketCountBadge(
+                s: s,
                 count: ticketsState.ticketCount,
                 currentIndex: ticketsState.currentPage,
               ),
@@ -269,9 +281,10 @@ class _TicketsContentView extends StatelessWidget {
 
               // Tickets swiper or single ticket
               if (ticketsState.hasSingleTicket)
-                _TicketCard(ticket: ticketsState.tickets.first)
+                _TicketCard(s: s, ticket: ticketsState.tickets.first)
               else
                 _TicketSwiper(
+                  s: s,
                   tickets: ticketsState.tickets,
                   pageController: pageController,
                   currentPage: ticketsState.currentPage,
@@ -281,7 +294,7 @@ class _TicketsContentView extends StatelessWidget {
               const SizedBox(height: AppSpacing.xl),
 
               // Rules reminder (shared for all tickets)
-              const _RulesReminderCard(),
+              _RulesReminderCard(s: s),
               const SizedBox(height: AppSpacing.lg),
             ],
           ),
@@ -293,10 +306,12 @@ class _TicketsContentView extends StatelessWidget {
 
 /// Ticket count badge showing total and current position
 class _TicketCountBadge extends StatelessWidget {
+  final AppStrings s;
   final int count;
   final int currentIndex;
 
   const _TicketCountBadge({
+    required this.s,
     required this.count,
     required this.currentIndex,
   });
@@ -315,12 +330,12 @@ class _TicketCountBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.confirmation_number, size: 16, color: AppColors.success),
+          const Icon(Icons.confirmation_number, size: 16, color: AppColors.success),
           const SizedBox(width: AppSpacing.xs),
           Text(
-            count == 1 
-                ? '1 billet approuvé'
-                : '${currentIndex + 1} / $count billets approuvés',
+            count == 1
+                ? s.ticketCountSingle
+                : s.ticketCountMultiple(currentIndex, count),
             style: AppTypography.labelSmall.copyWith(
               color: AppColors.success,
               fontWeight: FontWeight.w600,
@@ -334,12 +349,14 @@ class _TicketCountBadge extends StatelessWidget {
 
 /// Ticket swiper for multiple tickets
 class _TicketSwiper extends StatelessWidget {
+  final AppStrings s;
   final List<Ticket> tickets;
   final PageController pageController;
   final int currentPage;
   final ValueChanged<int> onPageChanged;
 
   const _TicketSwiper({
+    required this.s,
     required this.tickets,
     required this.pageController,
     required this.currentPage,
@@ -360,7 +377,7 @@ class _TicketSwiper extends StatelessWidget {
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                child: _TicketCard(ticket: tickets[index]),
+                child: _TicketCard(s: s, ticket: tickets[index]),
               );
             },
           ),
@@ -376,7 +393,7 @@ class _TicketSwiper extends StatelessWidget {
         // Swipe hint
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Glissez pour voir vos autres billets',
+          s.ticketSwipeHint,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textMuted,
           ),
@@ -419,7 +436,9 @@ class _PageIndicator extends StatelessWidget {
 
 /// Offline mode banner
 class _OfflineBanner extends StatelessWidget {
-  const _OfflineBanner();
+  final AppStrings s;
+
+  const _OfflineBanner({required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -433,7 +452,7 @@ class _OfflineBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.warningLight,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -441,7 +460,7 @@ class _OfflineBanner extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              'Mode hors ligne - Dernière version des billets',
+              s.ticketOfflineBanner,
               style: AppTypography.labelSmall.copyWith(
                 color: AppColors.warning,
               ),
@@ -455,10 +474,12 @@ class _OfflineBanner extends StatelessWidget {
 
 /// Refresh button with loading state
 class _RefreshButton extends StatelessWidget {
+  final AppStrings s;
   final bool isRefreshing;
   final VoidCallback onRefresh;
 
   const _RefreshButton({
+    required this.s,
     required this.isRefreshing,
     required this.onRefresh,
   });
@@ -468,7 +489,7 @@ class _RefreshButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: AppButtonSecondary(
-        text: 'Rafraîchir',
+        text: s.ticketRefresh,
         icon: Icons.refresh,
         isLoading: isRefreshing,
         isSmall: true,
@@ -480,9 +501,10 @@ class _RefreshButton extends StatelessWidget {
 
 /// Main ticket card with QR code
 class _TicketCard extends StatelessWidget {
+  final AppStrings s;
   final Ticket ticket;
 
-  const _TicketCard({required this.ticket});
+  const _TicketCard({required this.s, required this.ticket});
 
   @override
   Widget build(BuildContext context) {
@@ -498,7 +520,7 @@ class _TicketCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -512,7 +534,7 @@ class _TicketCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: isUsed ? Colors.teal : AppColors.success,
+              color: AppColors.success,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(AppSpacing.radiusXl),
               ),
@@ -526,15 +548,15 @@ class _TicketCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  isUsed ? 'Billet utilisé' : 'Billet valide',
+                  isUsed ? s.ticketUsed : s.ticketValid,
                   style: AppTypography.h4.copyWith(color: Colors.white),
                 ),
                 if (isUsed) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Entrée validée',
+                    s.ticketCheckedInLabel,
                     style: AppTypography.bodySmall.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
                 ],
@@ -580,7 +602,7 @@ class _TicketCard extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   _TicketInfoRow(
                     icon: Icons.event_seat,
-                    label: '${ticket.seats} place(s)',
+                    label: s.ticketSeats(ticket.seats),
                   ),
                 ],
               ),
@@ -620,7 +642,7 @@ class _TicketCard extends StatelessWidget {
                         width: 172,
                         height: 172,
                         decoration: BoxDecoration(
-                          color: Colors.teal.withOpacity(0.15),
+                          color: AppColors.success.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                         ),
                         child: Column(
@@ -628,8 +650,8 @@ class _TicketCard extends StatelessWidget {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(10),
-                              decoration: const BoxDecoration(
-                                color: Colors.teal,
+                              decoration: BoxDecoration(
+                                color: AppColors.success,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -640,9 +662,9 @@ class _TicketCard extends StatelessWidget {
                             ),
                             const SizedBox(height: AppSpacing.xs),
                             Text(
-                              'UTILISÉ',
+                              s.ticketUsedLabel,
                               style: AppTypography.labelMedium.copyWith(
-                                color: Colors.teal[700],
+                                color: AppColors.successDark,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 2,
                               ),
@@ -656,6 +678,7 @@ class _TicketCard extends StatelessWidget {
 
                 // Ticket code with copy button
                 _TicketCodeRow(
+                  s: s,
                   ticketCode: ticket.ticketCode,
                   isUsed: isUsed,
                 ),
@@ -663,11 +686,9 @@ class _TicketCard extends StatelessWidget {
 
                 // Instructions
                 Text(
-                  isUsed
-                      ? 'Ce billet a déjà été utilisé'
-                      : 'Présentez ce QR code à l\'entrée',
+                  isUsed ? s.ticketQrHintUsed : s.ticketQrHintValid,
                   style: AppTypography.labelSmall.copyWith(
-                    color: isUsed ? Colors.teal[600] : AppColors.textMuted,
+                    color: isUsed ? AppColors.successDark : AppColors.textMuted,
                     fontWeight: isUsed ? FontWeight.w500 : FontWeight.normal,
                   ),
                 ),
@@ -681,7 +702,7 @@ class _TicketCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Colors.teal[50],
+                color: AppColors.successLight,
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(AppSpacing.radiusXl),
                 ),
@@ -689,12 +710,14 @@ class _TicketCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle, size: 14, color: Colors.teal[700]),
+                  Icon(Icons.check_circle, size: 14, color: AppColors.successDark),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    'Check-in le ${DateFormat('dd/MM/yyyy à HH:mm').format(ticket.checkedInAt!.toLocal())}',
+                    s.ticketCheckinAt(
+                      DateFormat('dd/MM/yyyy à HH:mm').format(ticket.checkedInAt!.toLocal()),
+                    ),
                     style: AppTypography.labelSmall.copyWith(
-                      color: Colors.teal[700],
+                      color: AppColors.successDark,
                     ),
                   ),
                 ],
@@ -708,10 +731,12 @@ class _TicketCard extends StatelessWidget {
 
 /// Ticket code row with copy functionality
 class _TicketCodeRow extends StatelessWidget {
+  final AppStrings s;
   final String ticketCode;
   final bool isUsed;
 
   const _TicketCodeRow({
+    required this.s,
     required this.ticketCode,
     required this.isUsed,
   });
@@ -741,7 +766,7 @@ class _TicketCodeRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Icon(
+            const Icon(
               Icons.copy,
               size: 16,
               color: AppColors.textMuted,
@@ -757,7 +782,7 @@ class _TicketCodeRow extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Code copié: $ticketCode',
+          s.ticketCodeCopied(ticketCode),
           style: AppTypography.bodySmall.copyWith(color: Colors.white),
         ),
         backgroundColor: AppColors.success,
@@ -819,11 +844,13 @@ class _DashedDivider extends StatelessWidget {
 
 /// Rules reminder card
 class _RulesReminderCard extends StatelessWidget {
-  const _RulesReminderCard();
+  final AppStrings s;
+
+  const _RulesReminderCard({required this.s});
 
   @override
   Widget build(BuildContext context) {
-    final rules = CopyFr.rules;
+    final rules = s.rulesItems;
 
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -832,18 +859,18 @@ class _RulesReminderCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.info_outline, size: 20, color: AppColors.primary),
+              const Icon(Icons.info_outline, size: 20, color: AppColors.primary),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'Rappel des règles',
+                s.ticketRulesReminder,
                 style: AppTypography.h4,
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          
+
           // Rules list
-          ...rules.items.map((rule) => Padding(
+          ...rules.map((rule) => Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -852,7 +879,7 @@ class _RulesReminderCard extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 6),
                   width: 6,
                   height: 6,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),

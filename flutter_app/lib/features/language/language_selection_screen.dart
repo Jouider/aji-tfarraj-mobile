@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/spacing.dart';
+import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:aji_tfarraj/app/localization/app_locale.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
-class LanguageSelectionScreen extends StatelessWidget {
+class LanguageSelectionScreen extends ConsumerWidget {
   const LanguageSelectionScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundWhite,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -24,37 +30,40 @@ class LanguageSelectionScreen extends StatelessWidget {
                   width: 200,
                 ),
               ),
-              const SizedBox(height: 48),
-              // Prompt text
-              const Text(
+              const SizedBox(height: AppSpacing.xxxl),
+              // Prompt — bilingual, always shown
+              Text(
                 'Choisissez votre langue',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF444444),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
-              const Text(
+              const SizedBox(height: AppSpacing.xs),
+              Text(
                 'اختر لغتك',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF444444),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSpacing.xxl),
               // French button
               _LanguageButton(
                 label: 'Français',
-                onTap: () => context.go(Routes.login),
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(AppLocale.fr);
+                  context.go(Routes.login);
+                },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               // Arabic button
               _LanguageButton(
                 label: 'العربية',
-                onTap: () => context.go(Routes.login),
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(AppLocale.ar);
+                  context.go(Routes.login);
+                },
               ),
               const Spacer(flex: 2),
             ],
@@ -76,16 +85,20 @@ class _LanguageButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        side: const BorderSide(color: Color(0xFF8B1A1A), width: 1.5),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+        side: const BorderSide(color: AppColors.primary, width: 1.5),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
-        foregroundColor: const Color(0xFF8B1A1A),
+        foregroundColor: AppColors.primary,
+        backgroundColor: AppColors.backgroundGrey,
       ),
       child: Text(
         label,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        style: AppTypography.bodyLarge.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
       ),
     );
   }

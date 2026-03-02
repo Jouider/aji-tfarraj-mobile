@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/app/push/push_token_provider.dart';
@@ -110,6 +112,78 @@ class AuthRepository {
     final token = await _tokenStorage.readToken();
     return token != null;
   }
+
+  /// Sign in with Google.
+  /// Step 1 (client-side) works now: gets the Google ID token.
+  /// Step 2 (backend) is stubbed until POST /api/auth/social is delivered.
+  /// To activate: uncomment the _dio.post block and remove the stub throw.
+  Future<AuthResponse> loginWithGoogle() async {
+    final googleSignIn = GoogleSignIn(scopes: ['email']);
+    final googleUser = await googleSignIn.signIn();
+    if (googleUser == null) throw _cancelledError();
+    final auth = await googleUser.authentication;
+    final idToken = auth.idToken;
+    if (idToken == null) throw _cancelledError();
+
+    // TODO: uncomment when backend delivers POST /api/auth/social
+    // final response = await _dio.post('/api/auth/social', data: {
+    //   'provider': 'google',
+    //   'token': idToken,
+    // });
+    // final authResponse = AuthResponse.fromJson(response.data);
+    // await _tokenStorage.saveToken(authResponse.token);
+    // return authResponse;
+
+    // STUB — remove when backend is ready
+    throw DioException(
+      requestOptions: RequestOptions(path: '/api/auth/social'),
+      response: Response(
+        requestOptions: RequestOptions(path: '/api/auth/social'),
+        statusCode: 501,
+        data: {'message': 'Google Sign-In bientôt disponible.'},
+      ),
+      type: DioExceptionType.badResponse,
+    );
+  }
+
+  /// Sign in with Apple.
+  /// Step 1 (client-side) works now: gets the Apple identity token.
+  /// Step 2 (backend) is stubbed until POST /api/auth/social is delivered.
+  Future<AuthResponse> loginWithApple() async {
+    final credential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+    final identityToken = credential.identityToken;
+    if (identityToken == null) throw _cancelledError();
+
+    // TODO: uncomment when backend delivers POST /api/auth/social
+    // final response = await _dio.post('/api/auth/social', data: {
+    //   'provider': 'apple',
+    //   'token': identityToken,
+    // });
+    // final authResponse = AuthResponse.fromJson(response.data);
+    // await _tokenStorage.saveToken(authResponse.token);
+    // return authResponse;
+
+    // STUB — remove when backend is ready
+    throw DioException(
+      requestOptions: RequestOptions(path: '/api/auth/social'),
+      response: Response(
+        requestOptions: RequestOptions(path: '/api/auth/social'),
+        statusCode: 501,
+        data: {'message': 'Apple Sign-In bientôt disponible.'},
+      ),
+      type: DioExceptionType.badResponse,
+    );
+  }
+
+  DioException _cancelledError() => DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.cancel,
+      );
 }
 
 /// Dio provider for auth (without auth interceptor to avoid circular dependency)
@@ -350,6 +424,70 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _ref.read(authStateProvider.notifier).clearToken();
     
     state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  /// Sign in with Google — calls repository, updates auth state on success.
+  Future<void> loginWithGoogle() async {
+    state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
+    try {
+      final authResponse = await _repository.loginWithGoogle();
+      await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
+      state = AuthState(status: AuthStatus.authenticated, user: authResponse.user);
+      _registerDeviceToken();
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.cancel) {
+        // User cancelled — restore previous state silently
+        state = const AuthState(status: AuthStatus.unauthenticated);
+        return;
+      }
+      final message = (e.response?.data is Map)
+          ? (e.response!.data as Map)['message'] as String? ??
+              'Erreur de connexion'
+          : 'Erreur de connexion';
+      state = AuthState(
+          status: AuthStatus.unauthenticated, errorMessage: message);
+      rethrow;
+    }
+  }
+
+  /// Sign in with Apple — calls repository, updates auth state on success.
+  Future<void> loginWithApple() async {
+    state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
+    try {
+      final authResponse = await _repository.loginWithApple();
+      await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
+      state = AuthState(status: AuthStatus.authenticated, user: authResponse.user);
+      _registerDeviceToken();
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.cancel) {
+        state = const AuthState(status: AuthStatus.unauthenticated);
+        return;
+      }
+      final message = (e.response?.data is Map)
+          ? (e.response!.data as Map)['message'] as String? ??
+              'Erreur de connexion'
+          : 'Erreur de connexion';
+      state = AuthState(
+          status: AuthStatus.unauthenticated, errorMessage: message);
+      rethrow;
+    }
+  }
+
+  /// Update cached user (called after profile edit)
+  void updateUser(User user) {
+    state = state.copyWith(user: user);
+  }
+
+  /// Re-fetch user from GET /api/auth/me and update cached state.
+  /// Use this after profile edits where the mutation response may have stale
+  /// or incorrect computed fields (e.g. profile_complete).
+  Future<void> refreshUser() async {
+    try {
+      final user = await _repository.me();
+      state = state.copyWith(user: user);
+    } catch (_) {
+      // Keep existing state on error — don't break the UI
+    }
   }
 
   /// Clear error message

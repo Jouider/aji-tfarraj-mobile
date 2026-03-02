@@ -6,6 +6,8 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/app/push/push_router.dart';
 import 'package:aji_tfarraj/app/router.dart';
 import 'package:aji_tfarraj/features/notifications/domain/app_notification.dart';
@@ -21,11 +23,12 @@ class NotificationCenterScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsState = ref.watch(notificationsProvider);
     final router = ref.watch(routerProvider);
+    final s = ref.watch(stringsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: Text('Notifications', style: AppTypography.h3),
+        title: Text(s.notificationsTitle, style: AppTypography.h3),
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         leading: IconButton(
@@ -38,13 +41,13 @@ class NotificationCenterScreen extends ConsumerWidget {
             if (notificationsState.hasUnread)
               IconButton(
                 icon: const Icon(Icons.done_all),
-                tooltip: 'Tout marquer comme lu',
+                tooltip: s.notificationsMarkAllRead,
                 onPressed: () {
                   ref.read(notificationsProvider.notifier).markAllAsRead();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Toutes les notifications marquées comme lues'),
-                      duration: Duration(seconds: 2),
+                    SnackBar(
+                      content: Text(s.notificationsMarkAllReadSuccess),
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                 },
@@ -54,17 +57,17 @@ class NotificationCenterScreen extends ConsumerWidget {
               icon: const Icon(Icons.more_vert),
               onSelected: (value) {
                 if (value == 'clear_all') {
-                  _showClearAllDialog(context, ref);
+                  _showClearAllDialog(context, ref, s);
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'clear_all',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_outline, color: AppColors.error),
-                      SizedBox(width: AppSpacing.sm),
-                      Text('Tout supprimer'),
+                      const Icon(Icons.delete_outline, color: AppColors.error),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(s.notificationsDeleteAll),
                     ],
                   ),
                 ),
@@ -73,7 +76,7 @@ class NotificationCenterScreen extends ConsumerWidget {
           ],
         ],
       ),
-      body: _buildContent(context, ref, notificationsState, router),
+      body: _buildContent(context, ref, notificationsState, router, s),
     );
   }
 
@@ -82,15 +85,16 @@ class NotificationCenterScreen extends ConsumerWidget {
     WidgetRef ref,
     NotificationsState state,
     GoRouter router,
+    AppStrings s,
   ) {
     // Loading state
     if (state.isLoading) {
       return ListView.builder(
         padding: const EdgeInsets.all(AppSpacing.lg),
         itemCount: 5,
-        itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-          child: const NotificationCardSkeleton(),
+        itemBuilder: (context, index) => const Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
+          child: NotificationCardSkeleton(),
         ),
       );
     }
@@ -99,7 +103,7 @@ class NotificationCenterScreen extends ConsumerWidget {
     if (state.error != null) {
       return ErrorState(
         message: state.error!,
-        retryText: 'Réessayer',
+        retryText: s.retry,
         onRetry: () => ref.read(notificationsProvider.notifier).refresh(),
       );
     }
@@ -108,8 +112,8 @@ class NotificationCenterScreen extends ConsumerWidget {
     if (!state.hasNotifications) {
       return EmptyState(
         icon: Icons.notifications_none,
-        title: 'Aucune notification',
-        description: 'Vous n\'avez pas encore reçu de notification.',
+        title: s.notificationsEmptyTitle,
+        description: s.notificationsEmptyDesc,
       );
     }
 
@@ -153,16 +157,16 @@ class NotificationCenterScreen extends ConsumerWidget {
     WidgetRef ref,
     AppNotification notification,
   ) {
+    final s = ref.read(stringsProvider);
     ref.read(notificationsProvider.notifier).deleteNotification(notification.id);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Notification supprimée'),
+        content: Text(s.notificationsDismissed),
         duration: const Duration(seconds: 3),
         action: SnackBarAction(
-          label: 'Annuler',
+          label: s.cancel,
           onPressed: () {
-            // Re-add the notification
             ref.read(notificationsProvider.notifier).addNotification(notification);
           },
         ),
@@ -170,33 +174,31 @@ class NotificationCenterScreen extends ConsumerWidget {
     );
   }
 
-  void _showClearAllDialog(BuildContext context, WidgetRef ref) {
+  void _showClearAllDialog(BuildContext context, WidgetRef ref, AppStrings s) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer toutes les notifications'),
-        content: const Text(
-          'Êtes-vous sûr de vouloir supprimer toutes les notifications ? Cette action est irréversible.',
-        ),
+        title: Text(s.notificationsDeleteAllTitle),
+        content: Text(s.notificationsDeleteAllContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annuler'),
+            child: Text(s.cancel),
           ),
           TextButton(
             onPressed: () {
               ref.read(notificationsProvider.notifier).clearAll();
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Toutes les notifications ont été supprimées'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text(s.notificationsDeleteAllSuccess),
+                  duration: const Duration(seconds: 2),
                 ),
               );
             },
-            child: const Text(
-              'Supprimer',
-              style: TextStyle(color: AppColors.error),
+            child: Text(
+              s.notificationsDeleteAllConfirm,
+              style: const TextStyle(color: AppColors.error),
             ),
           ),
         ],

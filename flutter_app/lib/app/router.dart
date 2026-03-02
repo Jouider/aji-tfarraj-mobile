@@ -6,8 +6,10 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/features/splash/splash_screen.dart';
 import 'package:aji_tfarraj/features/language/language_selection_screen.dart';
+import 'package:aji_tfarraj/features/auth/presentation/auth_landing_screen.dart';
 import 'package:aji_tfarraj/features/auth/presentation/login_screen.dart';
 import 'package:aji_tfarraj/features/auth/presentation/register_screen.dart';
+import 'package:aji_tfarraj/features/auth/presentation/forgot_password_screen.dart';
 import 'package:aji_tfarraj/features/home/home_screen.dart';
 import 'package:aji_tfarraj/features/show/show_detail_screen.dart';
 import 'package:aji_tfarraj/features/reservation/reserve_seats_screen.dart';
@@ -16,6 +18,7 @@ import 'package:aji_tfarraj/features/reservation/my_reservations_screen.dart';
 import 'package:aji_tfarraj/features/reservation/reservation_detail_screen.dart';
 import 'package:aji_tfarraj/features/ticket/ticket_screen.dart';
 import 'package:aji_tfarraj/features/profile/profile_screen.dart';
+import 'package:aji_tfarraj/features/profile/presentation/edit_profile_screen.dart';
 import 'package:aji_tfarraj/features/error/error_screen.dart';
 import 'package:aji_tfarraj/features/show/sold_out_screen.dart';
 import 'package:aji_tfarraj/app/design_system/demo_screen.dart';
@@ -37,8 +40,10 @@ const _protectedRoutes = [
 
 /// Routes that should redirect to home if already authenticated
 const _authRoutes = [
+  Routes.authLanding,
   Routes.login,
   Routes.register,
+  Routes.forgotPassword,
 ];
 
 /// Listenable that triggers router refresh on auth state changes
@@ -90,9 +95,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         isAuthenticated = token != null && token.isNotEmpty;
       }
 
-      // If not authenticated and trying to access protected route -> redirect to login
+      // If not authenticated and trying to access protected route -> redirect to landing
       if (!isAuthenticated && needsAuth) {
-        return Routes.login;
+        return Routes.authLanding;
       }
 
       // If authenticated and trying to access login/register -> redirect to home
@@ -127,6 +132,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LanguageSelectionScreen(),
       ),
       GoRoute(
+        path: Routes.authLanding,
+        name: 'authLanding',
+        builder: (context, state) => const AuthLandingScreen(),
+      ),
+      GoRoute(
         path: Routes.login,
         name: 'login',
         builder: (context, state) => const LoginScreen(),
@@ -135,6 +145,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.register,
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: Routes.forgotPassword,
+        name: 'forgotPassword',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
 
       // ============================================
@@ -168,6 +183,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: Routes.profile,
             name: 'profile',
             builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: Routes.editProfile,
+            name: 'editProfile',
+            builder: (context, state) => const EditProfileScreen(),
           ),
 
           // --- Show Routes (independent of tabs, nav stays) ---
