@@ -12,7 +12,16 @@
           "package_name": "com.ajitfarraj.aji_tfarraj"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "600996591716-v823d0alenrthm8t40rdht5qmr3dhqps.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ajitfarraj.aji_tfarraj",
+            "certificate_hash": "0bfbc1ea9b3be439c3a24aa4253119057fb624e07"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCuYhmJhfJFbH2etFL60WCN_2bSK2OsRvo"

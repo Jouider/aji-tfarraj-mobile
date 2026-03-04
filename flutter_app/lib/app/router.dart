@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/app_shell.dart';
 import 'package:aji_tfarraj/app/routes.dart';
-import 'package:aji_tfarraj/app/auth/token_storage.dart';
+import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/splash/splash_screen.dart';
 import 'package:aji_tfarraj/features/language/language_selection_screen.dart';
 import 'package:aji_tfarraj/features/auth/presentation/auth_landing_screen.dart';
@@ -103,6 +103,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       // If authenticated and trying to access login/register -> redirect to home
       if (isAuthenticated && isAuthRoute) {
         return Routes.home;
+      }
+
+      // If authenticated but profile is incomplete -> redirect to edit profile
+      // (except when already on the edit profile screen to avoid redirect loops)
+      if (isAuthenticated && currentPath != Routes.editProfile) {
+        final user = ref.read(loginAuthStateProvider).user;
+        final missingRequired = user?.missingProfileFields
+                .where((f) => f != 'avatar' && f != 'avatar_url')
+                .isNotEmpty ??
+            false;
+        if (user != null && !user.profileComplete && missingRequired) {
+          return Routes.editProfile;
+        }
       }
 
       // No redirect needed

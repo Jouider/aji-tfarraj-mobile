@@ -53,7 +53,6 @@
 	<string>Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil.</string>
-	<!-- Google Sign-In: replace REVERSED_CLIENT_ID with the value from GoogleService-Info.plist (key REVERSED_CLIENT_ID) -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -61,7 +60,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>REVERSED_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d</string>
 			</array>
 		</dict>
 	</array>

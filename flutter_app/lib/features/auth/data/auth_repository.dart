@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -113,42 +114,28 @@ class AuthRepository {
     return token != null;
   }
 
-  /// Sign in with Google.
-  /// Step 1 (client-side) works now: gets the Google ID token.
-  /// Step 2 (backend) is stubbed until POST /api/auth/social is delivered.
-  /// To activate: uncomment the _dio.post block and remove the stub throw.
   Future<AuthResponse> loginWithGoogle() async {
-    final googleSignIn = GoogleSignIn(scopes: ['email']);
+    final googleSignIn = GoogleSignIn(
+      scopes: ['email'],
+      clientId: Platform.isIOS
+          ? '600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d.apps.googleusercontent.com'
+          : null,
+    );
     final googleUser = await googleSignIn.signIn();
     if (googleUser == null) throw _cancelledError();
     final auth = await googleUser.authentication;
     final idToken = auth.idToken;
     if (idToken == null) throw _cancelledError();
 
-    // TODO: uncomment when backend delivers POST /api/auth/social
-    // final response = await _dio.post('/api/auth/social', data: {
-    //   'provider': 'google',
-    //   'token': idToken,
-    // });
-    // final authResponse = AuthResponse.fromJson(response.data);
-    // await _tokenStorage.saveToken(authResponse.token);
-    // return authResponse;
-
-    // STUB — remove when backend is ready
-    throw DioException(
-      requestOptions: RequestOptions(path: '/api/auth/social'),
-      response: Response(
-        requestOptions: RequestOptions(path: '/api/auth/social'),
-        statusCode: 501,
-        data: {'message': 'Google Sign-In bientôt disponible.'},
-      ),
-      type: DioExceptionType.badResponse,
-    );
+    final response = await _dio.post('/api/auth/social', data: {
+      'provider': 'google',
+      'token': idToken,
+    });
+    final authResponse = AuthResponse.fromJson(response.data);
+    await _tokenStorage.saveToken(authResponse.token);
+    return authResponse;
   }
 
-  /// Sign in with Apple.
-  /// Step 1 (client-side) works now: gets the Apple identity token.
-  /// Step 2 (backend) is stubbed until POST /api/auth/social is delivered.
   Future<AuthResponse> loginWithApple() async {
     final credential = await SignInWithApple.getAppleIDCredential(
       scopes: [
@@ -159,25 +146,13 @@ class AuthRepository {
     final identityToken = credential.identityToken;
     if (identityToken == null) throw _cancelledError();
 
-    // TODO: uncomment when backend delivers POST /api/auth/social
-    // final response = await _dio.post('/api/auth/social', data: {
-    //   'provider': 'apple',
-    //   'token': identityToken,
-    // });
-    // final authResponse = AuthResponse.fromJson(response.data);
-    // await _tokenStorage.saveToken(authResponse.token);
-    // return authResponse;
-
-    // STUB — remove when backend is ready
-    throw DioException(
-      requestOptions: RequestOptions(path: '/api/auth/social'),
-      response: Response(
-        requestOptions: RequestOptions(path: '/api/auth/social'),
-        statusCode: 501,
-        data: {'message': 'Apple Sign-In bientôt disponible.'},
-      ),
-      type: DioExceptionType.badResponse,
-    );
+    final response = await _dio.post('/api/auth/social', data: {
+      'provider': 'apple',
+      'token': identityToken,
+    });
+    final authResponse = AuthResponse.fromJson(response.data);
+    await _tokenStorage.saveToken(authResponse.token);
+    return authResponse;
   }
 
   DioException _cancelledError() => DioException(
@@ -434,6 +409,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
       state = AuthState(status: AuthStatus.authenticated, user: authResponse.user);
       _registerDeviceToken();
+      await refreshUser();
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
         // User cancelled — restore previous state silently
@@ -458,6 +434,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
       state = AuthState(status: AuthStatus.authenticated, user: authResponse.user);
       _registerDeviceToken();
+      await refreshUser();
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
         state = const AuthState(status: AuthStatus.unauthenticated);
