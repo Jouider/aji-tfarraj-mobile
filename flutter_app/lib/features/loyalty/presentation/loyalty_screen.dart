@@ -51,7 +51,7 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
 
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(myPointsProvider),
-      color: AppColors.primary,
+      color: AppColors.secondary,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -69,7 +69,7 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
                 ? TextButton(
                     onPressed: () => setState(() => _showFullHistory = true),
                     child: Text(
-                      'Voir tout',
+                      strings.seeAll,
                       style: AppTypography.labelMedium
                           .copyWith(color: AppColors.primary),
                     ),
@@ -90,7 +90,7 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
               entries: summary.history,
               isPreview: !_showFullHistory,
               labelForType: (type) => _labelForType(type, locale),
-              seeAllLabel: 'Voir tout',
+              seeAllLabel: strings.seeAll,
               onSeeAll: () => setState(() => _showFullHistory = true),
             ),
           const SizedBox(height: AppSpacing.xl),

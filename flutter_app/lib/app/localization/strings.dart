@@ -297,6 +297,22 @@ class AppStrings {
   String get seeAll =>
       locale == AppLocale.fr ? CopyFr.common.seeAll : CopyAr.common.seeAll;
 
+  String get backToHome => locale == AppLocale.fr
+      ? CopyFr.common.backToHome
+      : CopyAr.common.backToHome;
+
+  String get browseShows => locale == AppLocale.fr
+      ? CopyFr.common.browseShows
+      : CopyAr.common.browseShows;
+
+  String get reservationSuccessBody => locale == AppLocale.fr
+      ? CopyFr.common.reservationSuccessBody
+      : CopyAr.common.reservationSuccessBody;
+
+  String get errorTitle => locale == AppLocale.fr
+      ? CopyFr.errors.errorTitle
+      : CopyAr.errors.errorTitle;
+
   String get unknownUser => locale == AppLocale.fr
       ? CopyFr.common.unknownUser
       : CopyAr.common.unknownUser;
@@ -406,6 +422,26 @@ class AppStrings {
   String get profileSavedSuccess => locale == AppLocale.fr
       ? CopyFr.profile.savedSuccess
       : CopyAr.profile.savedSuccess;
+
+  String get genericError => locale == AppLocale.fr
+      ? CopyFr.errors.unknownError
+      : CopyAr.errors.unknownError;
+
+  String get avatarDeletedSuccess => locale == AppLocale.fr
+      ? CopyFr.profile.avatarDeletedSuccess
+      : CopyAr.profile.avatarDeletedSuccess;
+
+  String get addPhotoHint => locale == AppLocale.fr
+      ? CopyFr.profile.addPhotoHint
+      : CopyAr.profile.addPhotoHint;
+
+  String get skipForNow => locale == AppLocale.fr
+      ? CopyFr.profile.skipForNow
+      : CopyAr.profile.skipForNow;
+
+  String get cameraAccessDenied => locale == AppLocale.fr
+      ? CopyFr.profile.cameraAccessDenied
+      : CopyAr.profile.cameraAccessDenied;
 
   String get uploadPhoto => locale == AppLocale.fr
       ? CopyFr.profile.uploadPhoto

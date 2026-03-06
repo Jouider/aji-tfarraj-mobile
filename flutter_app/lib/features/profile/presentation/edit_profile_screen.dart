@@ -2,13 +2,16 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
+import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/profile/data/profile_repository.dart';
 import 'package:aji_tfarraj/features/profile/domain/city.dart';
@@ -75,12 +78,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _errorMessage = null;
     });
     try {
-      await ref.read(profileRepositoryProvider).updateProfile(
+      // Update immediately from PATCH response so the router redirect
+      // sees profileComplete=true even if the follow-up GET /me fails.
+      final updatedUser = await ref.read(profileRepositoryProvider).updateProfile(
             firstName: _firstNameController.text.trim(),
             lastName: _lastNameController.text.trim(),
             cityName: _selectedCity,
             district: _selectedDistrict,
           );
+      ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
       // Re-fetch from GET /api/auth/me so profile_complete reflects the true
       // server state (the PATCH response may return stale computed values).
       await ref.read(loginAuthStateProvider.notifier).refreshUser();
@@ -92,10 +98,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             backgroundColor: AppColors.success,
           ),
         );
-        Navigator.of(context).pop();
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(Routes.home);
+        }
       }
     } on ApiException catch (e) {
       setState(() => _errorMessage = e.message);
+    } catch (e) {
+      setState(() => _errorMessage = ref.read(stringsProvider).genericError);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -104,8 +116,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<void> _pickAvatar() async {
     Navigator.of(context).pop(); // close bottom sheet
     final picker = ImagePicker();
-    final picked =
-        await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    final XFile? picked;
+    try {
+      picked = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    } on PlatformException catch (e) {
+      if (mounted) {
+        final msg = e.code == 'camera_access_denied'
+            ? ref.read(stringsProvider).cameraAccessDenied
+            : ref.read(stringsProvider).genericError;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+        );
+      }
+      return;
+    } catch (_) {
+      return; // user cancelled or camera unavailable
+    }
     if (picked == null) return;
 
     setState(() => _isAvatarLoading = true);
@@ -117,8 +143,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message), backgroundColor: AppColors.error),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.message),
+            content: Text(ref.read(stringsProvider).genericError),
             backgroundColor: AppColors.error,
           ),
         );
@@ -135,11 +167,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       final updatedUser =
           await ref.read(profileRepositoryProvider).deleteAvatar();
       ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
-    } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.message),
+            content: Text(ref.read(stringsProvider).avatarDeletedSuccess),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message), backgroundColor: AppColors.error),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(ref.read(stringsProvider).genericError),
             backgroundColor: AppColors.error,
           ),
         );
@@ -217,9 +263,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final user = authState.user;
     final citiesAsync = ref.watch(citiesProvider);
 
+    final canGoBack = context.canPop();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(s.editProfileTitle, style: AppTypography.h3),
+        actions: [
+          if (!canGoBack)
+            TextButton(
+              onPressed: () => context.go(Routes.home),
+              child: Text(
+                s.skipForNow,
+                style: AppTypography.labelMedium
+                    .copyWith(color: AppColors.textMuted),
+              ),
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -239,7 +298,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         backgroundColor: AppColors.backgroundGrey,
                         child: _isAvatarLoading
                             ? const CircularProgressIndicator(
-                                color: AppColors.primary)
+                                color: AppColors.secondary)
                             : (user?.avatarUrl != null
                                 ? ClipOval(
                                     child: CachedNetworkImage(
@@ -277,6 +336,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ),
                 ),
               ),
+              if (user?.avatarUrl == null && !_isAvatarLoading) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  s.addPhotoHint,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodySmall
+                      .copyWith(color: AppColors.textMuted),
+                ),
+              ],
               const SizedBox(height: AppSpacing.xl),
 
               // ── Error banner ──
@@ -336,7 +404,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               citiesAsync.when(
                 loading: () => const Padding(
                   padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  child: LinearProgressIndicator(),
+                  child: LinearProgressIndicator(color: AppColors.secondary),
                 ),
                 error: (_, __) => _CitiesRetryWidget(
                   onRetry: () => ref.refresh(citiesProvider),
@@ -455,15 +523,18 @@ class _CitiesRetryWidget extends StatelessWidget {
         children: [
           const Icon(Icons.wifi_off_outlined, color: AppColors.error, size: 20),
           const SizedBox(width: AppSpacing.sm),
-          const Expanded(
+          Expanded(
             child: Text(
               'Impossible de charger les villes.',
-              style: TextStyle(color: AppColors.error, fontSize: 13),
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           ),
           TextButton(
             onPressed: onRetry,
-            child: const Text('Réessayer'),
+            child: Text(
+              'Réessayer',
+              style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
+            ),
           ),
         ],
       ),

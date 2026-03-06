@@ -47,9 +47,17 @@ dev_dependencies:
   flutter_lints: ^3.0.1
   riverpod_generator: ^2.3.9
   build_runner: ^2.4.8
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/web-app-manifest-512x512.png"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true
 
   assets:
     - assets/images/
+    - assets/images/ajitfarraj_logo/

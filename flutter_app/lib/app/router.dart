@@ -109,8 +109,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       // (except when already on the edit profile screen to avoid redirect loops)
       if (isAuthenticated && currentPath != Routes.editProfile) {
         final user = ref.read(loginAuthStateProvider).user;
+        // Exclude all photo-related fields — avatar is optional until reservation
+        const photoFields = {'avatar', 'avatar_url', 'live_photo_captured_at'};
         final missingRequired = user?.missingProfileFields
-                .where((f) => f != 'avatar' && f != 'avatar_url')
+                .where((f) => !photoFields.contains(f))
                 .isNotEmpty ??
             false;
         if (user != null && !user.profileComplete && missingRequired) {
@@ -166,79 +168,105 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ============================================
-      // Shell Route (bottom nav stays visible)
+      // Shell Route — StatefulShellRoute preserves each tab's navigation
+      // stack and scroll position when switching between tabs.
       // ============================================
-      ShellRoute(
-        builder: (context, state, child) => AppShell(child: child),
-        routes: [
-          // --- Tab Roots ---
-          GoRoute(
-            path: Routes.home,
-            name: 'home',
-            builder: (context, state) => const HomeScreen(),
-          ),
-          GoRoute(
-            path: Routes.browse,
-            name: 'browse',
-            builder: (context, state) => const ShowsBrowseScreen(),
-          ),
-          GoRoute(
-            path: Routes.myReservations,
-            name: 'myReservations',
-            builder: (context, state) => const MyReservationsScreen(),
-          ),
-          GoRoute(
-            path: Routes.ticket,
-            name: 'ticket',
-            builder: (context, state) => const TicketScreen(),
-          ),
-          GoRoute(
-            path: Routes.profile,
-            name: 'profile',
-            builder: (context, state) => const ProfileScreen(),
-          ),
-          GoRoute(
-            path: Routes.editProfile,
-            name: 'editProfile',
-            builder: (context, state) => const EditProfileScreen(),
-          ),
-
-          // --- Show Routes (independent of tabs, nav stays) ---
-          GoRoute(
-            path: '/show/:showId',
-            name: 'showDetail',
-            builder: (context, state) {
-              final showId = state.pathParameters['showId']!;
-              return ShowDetailScreen(showId: showId);
-            },
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
+        branches: [
+          // ── Branch 0: Home + Show detail flows ──
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: 'reserve',
-                name: 'reserveSeats',
+                path: Routes.home,
+                name: 'home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+              GoRoute(
+                path: '/show/:showId',
+                name: 'showDetail',
                 builder: (context, state) {
                   final showId = state.pathParameters['showId']!;
-                  return ReserveSeatsScreen(showId: showId);
+                  return ShowDetailScreen(showId: showId);
+                },
+                routes: [
+                  GoRoute(
+                    path: 'reserve',
+                    name: 'reserveSeats',
+                    builder: (context, state) {
+                      final showId = state.pathParameters['showId']!;
+                      return ReserveSeatsScreen(showId: showId);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'sold-out',
+                    name: 'soldOut',
+                    builder: (context, state) {
+                      final showId = state.pathParameters['showId']!;
+                      return SoldOutScreen(showId: showId);
+                    },
+                  ),
+                ],
+              ),
+              GoRoute(
+                path: '/reservation/:reservationId',
+                name: 'reservationDetail',
+                builder: (context, state) {
+                  final reservationId = state.pathParameters['reservationId']!;
+                  return ReservationDetailScreen(reservationId: reservationId);
                 },
               ),
               GoRoute(
-                path: 'sold-out',
-                name: 'soldOut',
-                builder: (context, state) {
-                  final showId = state.pathParameters['showId']!;
-                  return SoldOutScreen(showId: showId);
-                },
+                path: Routes.editProfile,
+                name: 'editProfile',
+                builder: (context, state) => const EditProfileScreen(),
               ),
             ],
           ),
 
-          // --- Reservation Detail (independent of tabs, nav stays) ---
-          GoRoute(
-            path: '/reservation/:reservationId',
-            name: 'reservationDetail',
-            builder: (context, state) {
-              final reservationId = state.pathParameters['reservationId']!;
-              return ReservationDetailScreen(reservationId: reservationId);
-            },
+          // ── Branch 1: Browse ──
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.browse,
+                name: 'browse',
+                builder: (context, state) => const ShowsBrowseScreen(),
+              ),
+            ],
+          ),
+
+          // ── Branch 2: My Reservations ──
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.myReservations,
+                name: 'myReservations',
+                builder: (context, state) => const MyReservationsScreen(),
+              ),
+            ],
+          ),
+
+          // ── Branch 3: Ticket ──
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.ticket,
+                name: 'ticket',
+                builder: (context, state) => const TicketScreen(),
+              ),
+            ],
+          ),
+
+          // ── Branch 4: Profile ──
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.profile,
+                name: 'profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
           ),
         ],
       ),
@@ -272,7 +300,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.error,
         name: 'error',
-        builder: (context, state) => const ErrorScreen(),
+        builder: (context, state) {
+          final message = state.extra is String ? state.extra as String : null;
+          return ErrorScreen(message: message);
+        },
       ),
     ],
   );

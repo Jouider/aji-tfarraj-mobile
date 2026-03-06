@@ -83,11 +83,14 @@ class ApiClient {
   Future<void> _handleUnauthorized() async {
     // Clear token from secure storage
     await _tokenStorage.clearToken();
-    
+
     // Update auth state to logged out (triggers router refresh)
     final authNotifier = _ref.read(authStateProvider.notifier);
     await authNotifier.clearToken();
-    
+
+    // Signal that the session expired (shown as banner on the landing screen)
+    _ref.read(sessionExpiredProvider.notifier).state = true;
+
     if (kDebugMode) {
       print('┌─────────────────────────────────────────');
       print('│ 🔐 401 Unauthorized - Session cleared');
@@ -210,7 +213,7 @@ class ApiException implements Exception {
         if (data is Map<String, dynamic>) {
           message = data['message'] ?? message;
           code = data['code'] as String?;
-          errors = data['errors'] as Map<String, dynamic>?;
+          errors = (data['errors'] as Map?)?.cast<String, dynamic>();
         }
         break;
       default:

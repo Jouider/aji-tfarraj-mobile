@@ -81,3 +81,7 @@ class AuthStateNotifier extends AsyncNotifier<String?> {
 final authStateProvider = AsyncNotifierProvider<AuthStateNotifier, String?>(() {
   return AuthStateNotifier();
 });
+
+/// Signals that the user's session was terminated by a 401 response.
+/// Set to true by ApiClient on 401; reset to false after the user sees the message.
+final sessionExpiredProvider = StateProvider<bool>((ref) => false);

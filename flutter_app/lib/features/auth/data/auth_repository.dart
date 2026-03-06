@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -115,12 +114,9 @@ class AuthRepository {
   }
 
   Future<AuthResponse> loginWithGoogle() async {
-    final googleSignIn = GoogleSignIn(
-      scopes: ['email'],
-      clientId: Platform.isIOS
-          ? '600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d.apps.googleusercontent.com'
-          : null,
-    );
+    // clientId is intentionally omitted — the google_sign_in plugin reads it
+    // automatically from GoogleService-Info.plist (iOS) and google-services.json (Android).
+    final googleSignIn = GoogleSignIn(scopes: ['email']);
     final googleUser = await googleSignIn.signIn();
     if (googleUser == null) throw _cancelledError();
     final auth = await googleUser.authentication;

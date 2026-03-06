@@ -9,6 +9,7 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
+import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
@@ -248,19 +249,20 @@ class _HeroSection extends StatelessWidget {
           Positioned(
             top: MediaQuery.of(context).padding.top + AppSpacing.sm,
             left: AppSpacing.md,
-            child: GestureDetector(
-              onTap: onBack,
-              child: Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.45),
-                  shape: BoxShape.circle,
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            child: Material(
+              color: Colors.black.withValues(alpha: 0.45),
+              shape: const CircleBorder(
+                side: BorderSide(color: Colors.white10),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onBack,
+                child: const SizedBox(
+                  width: 38,
+                  height: 38,
+                  child: Icon(Icons.arrow_back_ios_new,
+                      color: Colors.white, size: 16),
                 ),
-                child: const Icon(Icons.arrow_back_ios_new,
-                    color: Colors.white, size: 16),
               ),
             ),
           ),
@@ -994,41 +996,21 @@ class _ShowDetailSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(height: 380, color: AppColors.backgroundGrey),
+          SkeletonLoader.card(height: 380, width: double.infinity),
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundGrey,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusLg),
-                  ),
-                ),
+                SkeletonLoader.card(height: 80),
                 const SizedBox(height: AppSpacing.lg),
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundGrey,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusLg),
-                  ),
-                ),
+                SkeletonLoader.card(height: 200),
                 const SizedBox(height: AppSpacing.lg),
-                Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundGrey,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusLg),
-                  ),
-                ),
+                SkeletonLoader.card(height: 60),
               ],
             ),
           ),

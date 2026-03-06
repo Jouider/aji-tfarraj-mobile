@@ -1,15 +1,23 @@
 /// App configuration constants
+///
+/// Switch environments at build time:
+///   flutter run --dart-define=ENV=local
+///   flutter run --dart-define=ENV=prod  (default)
 class AppConfig {
   AppConfig._();
 
   /// API Base URL - Production
-  static const String apiBaseUrl = 'https://aji-tfarraj-backend-production.up.railway.app';
+  static const String apiBaseUrl =
+      'https://aji-tfarraj-backend-production.up.railway.app';
 
   /// API Base URL - Local development
   static const String apiBaseUrlLocal = 'http://localhost:8000';
 
-  /// Current environment base URL
-  static const String currentBaseUrl = apiBaseUrl;
+  static const _env = String.fromEnvironment('ENV', defaultValue: 'prod');
+
+  /// Current environment base URL — set via --dart-define=ENV=local|prod
+  static String get currentBaseUrl =>
+      _env == 'local' ? apiBaseUrlLocal : apiBaseUrl;
 
   /// Safely compose API endpoint URL
   static String apiUrl(String path) {

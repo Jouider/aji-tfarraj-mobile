@@ -8,8 +8,10 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
+import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
+import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
@@ -50,16 +52,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final showsState = ref.watch(showsListProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
     final s = ref.watch(stringsProvider);
+    final locale = ref.watch(localeProvider);
+    final logo = locale == AppLocale.ar
+        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
+        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(unreadCount, s),
+      appBar: _buildAppBar(unreadCount, s, logo),
       body: _buildBody(showsState, s),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(int unreadCount, AppStrings s) {
+  PreferredSizeWidget _buildAppBar(int unreadCount, AppStrings s, String logo) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -77,8 +83,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
       title: Image.asset(
-        'assets/images/logo.png',
-        height: 98,
+        logo,
+        height: 130,
         fit: BoxFit.contain,
         alignment: Alignment.centerLeft,
       ),
@@ -784,29 +790,19 @@ class _HomeLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Hero skeleton
-          Container(
-            height: 420,
-            width: double.infinity,
-            color: AppColors.backgroundGrey,
-          ),
+          SkeletonLoader.card(height: 420, width: double.infinity),
 
           const SizedBox(height: AppSpacing.xl),
 
           // Section label
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Container(
-              height: 20,
-              width: 180,
-              decoration: BoxDecoration(
-                color: AppColors.backgroundGrey,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-              ),
-            ),
+            child: SkeletonLoader.text(width: 180, height: 20),
           ),
 
           const SizedBox(height: AppSpacing.md),
@@ -816,17 +812,37 @@ class _HomeLoadingSkeleton extends StatelessWidget {
             height: 240,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               itemCount: 5,
               itemBuilder: (_, __) => Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.md),
-                child: Container(
-                  width: 150,
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundGrey,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  ),
-                ),
+                child: SkeletonLoader.card(width: 150, height: 170),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.xl),
+
+          // Second section label
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: SkeletonLoader.text(width: 140, height: 20),
+          ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // Second horizontal cards skeleton
+          SizedBox(
+            height: 240,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              itemCount: 4,
+              itemBuilder: (_, __) => Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.md),
+                child: SkeletonLoader.card(width: 150, height: 170),
               ),
             ),
           ),

@@ -145,6 +145,7 @@ class ErrorsCopyAr {
       'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
   String get emailAlreadyExists => 'يوجد حساب مسجل بهذا البريد الإلكتروني.';
   String get validationError => 'يرجى التحقق من المعلومات المدخلة.';
+  String get errorTitle => 'حدث خطأ';
 }
 
 /// Rules page content in Arabic
@@ -260,6 +261,10 @@ class CommonCopyAr {
   String get unknownUser => 'مستخدم';
   String get place => 'مقعد';
   String get places => 'مقاعد';
+  String get backToHome => 'العودة إلى الرئيسية';
+  String get browseShows => 'استعراض البرامج الأخرى';
+  String get reservationSuccessBody =>
+      'طلبك قيد المعالجة. سيتم الاتصال بك لتأكيد مشاركتك.';
 }
 
 /// Profile screen copy in Arabic
@@ -297,6 +302,11 @@ class ProfileCopyAr {
   String get takePhoto => 'التقاط صورة';
   String get chooseFromGallery => 'اختيار من المعرض';
   String get removePhoto => 'حذف الصورة';
+  String get avatarDeletedSuccess => 'تم حذف صورة الملف الشخصي';
+  String get addPhotoHint => 'اضغط لإضافة صورة (اختياري)';
+  String get skipForNow => 'تخطى الآن';
+  String get cameraAccessDenied =>
+      'تم رفض الوصول إلى الكاميرا. يرجى السماح بالوصول في الإعدادات.';
 }
 
 /// My Reservations screen copy in Arabic

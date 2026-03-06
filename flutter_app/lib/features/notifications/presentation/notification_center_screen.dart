@@ -120,7 +120,7 @@ class NotificationCenterScreen extends ConsumerWidget {
     // Notifications list
     return RefreshIndicator(
       onRefresh: () => ref.read(notificationsProvider.notifier).refresh(),
-      color: AppColors.primary,
+      color: AppColors.secondary,
       child: ListView.builder(
         padding: const EdgeInsets.all(AppSpacing.lg),
         itemCount: state.notifications.length,

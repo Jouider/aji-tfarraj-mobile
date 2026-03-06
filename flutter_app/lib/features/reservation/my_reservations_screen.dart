@@ -593,18 +593,10 @@ class _ShowThumbnail extends StatelessWidget {
             ? CachedNetworkImage(
                 imageUrl: imageUrl!,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: AppColors.backgroundGrey,
-                  child: const Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                  ),
+                placeholder: (context, url) => const SkeletonLoader(
+                  width: 64,
+                  height: 64,
+                  borderRadius: AppSpacing.radiusMd,
                 ),
                 errorWidget: (context, url, error) => _placeholder(),
               )

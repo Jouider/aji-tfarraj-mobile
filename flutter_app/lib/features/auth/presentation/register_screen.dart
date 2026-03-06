@@ -5,6 +5,7 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
@@ -38,11 +39,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(loginAuthStateProvider);
     final s = ref.watch(stringsProvider);
+    final locale = ref.watch(localeProvider);
+    final logo = locale == AppLocale.ar
+        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
+        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
 
-    ref.listen<AuthState>(loginAuthStateProvider, (previous, next) {
-      if (next.isAuthenticated) {
-        context.go(Routes.home);
-      }
+    ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
+      if (next.isAuthenticated) context.go(Routes.home);
     });
 
     return Scaffold(
@@ -61,9 +64,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo
-                Center(
-                  child: Image.asset('assets/images/logo.png', width: 140),
-                ),
+                Center(child: Image.asset(logo, width: 120)),
                 const SizedBox(height: AppSpacing.xl),
 
                 // Title
@@ -71,37 +72,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   s.registerSubtitle,
-                  style: AppTypography.bodyMedium
-                      .copyWith(color: AppColors.textMuted),
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textMuted,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
 
-                // Error message
+                // Error banner
                 if (authState.errorMessage != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: AppColors.errorLight,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      border: Border.all(
-                          color: AppColors.error.withValues(alpha: 0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.error_outline,
-                            color: AppColors.error, size: 20),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Text(
-                            authState.errorMessage!,
-                            style: AppTypography.bodySmall
-                                .copyWith(color: AppColors.error),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _ErrorBanner(message: authState.errorMessage!),
                   const SizedBox(height: AppSpacing.lg),
                 ],
 
@@ -114,27 +93,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     labelText: s.nameLabel,
                     hintText: s.nameHint,
                     prefixIcon: const Icon(Icons.person_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide:
-                          const BorderSide(color: AppColors.primary, width: 2),
-                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return s.nameRequired;
-                    }
-                    if (value.length < 2) return s.nameMin;
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return s.nameRequired;
+                    if (v.length < 2) return s.nameMin;
                     return null;
                   },
                 ),
@@ -149,27 +111,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     labelText: s.emailLabel,
                     hintText: s.emailHint,
                     prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide:
-                          const BorderSide(color: AppColors.primary, width: 2),
-                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return s.emailRequired;
-                    }
-                    if (!value.contains('@') || !value.contains('.')) {
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return s.emailRequired;
+                    if (!v.contains('@') || !v.contains('.')) {
                       return s.emailInvalid;
                     }
                     return null;
@@ -185,37 +130,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   decoration: InputDecoration(
                     labelText: s.passwordLabel,
                     prefixIcon: const Icon(Icons.lock_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide:
-                          const BorderSide(color: AppColors.primary, width: 2),
-                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: AppColors.textMuted,
+                        size: AppSpacing.iconMd,
                       ),
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return s.passwordRequired;
-                    }
-                    if (value.length < 8) return s.passwordMin;
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return s.passwordRequired;
+                    if (v.length < 8) return s.passwordMin;
                     return null;
                   },
                 ),
@@ -229,39 +158,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   decoration: InputDecoration(
                     labelText: s.confirmPasswordLabel,
                     prefixIcon: const Icon(Icons.lock_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide:
-                          const BorderSide(color: AppColors.primary, width: 2),
-                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureConfirmPassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: AppColors.textMuted,
+                        size: AppSpacing.iconMd,
                       ),
-                      onPressed: () => setState(() =>
-                          _obscureConfirmPassword = !_obscureConfirmPassword),
+                      onPressed: () => setState(
+                          () => _obscureConfirmPassword = !_obscureConfirmPassword),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return s.confirmPasswordRequired;
-                    }
-                    if (value != _passwordController.text) {
-                      return s.passwordMismatch;
-                    }
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return s.confirmPasswordRequired;
+                    if (v != _passwordController.text) return s.passwordMismatch;
                     return null;
                   },
                   onFieldSubmitted: (_) => _submit(),
@@ -283,11 +194,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
-                            width: 22,
-                            height: 22,
+                            width: 20,
+                            height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.backgroundWhite,
+                              color: Colors.white,
                             ),
                           )
                         : Text(
@@ -306,13 +217,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   children: [
                     Text(
                       s.alreadyAccount,
-                      style: AppTypography.bodyMedium
-                          .copyWith(color: AppColors.textMuted),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textMuted,
+                      ),
                     ),
                     TextButton(
                       onPressed: () => context.go(Routes.authLanding),
                       style: TextButton.styleFrom(
-                          foregroundColor: AppColors.secondary),
+                        foregroundColor: AppColors.secondary,
+                        padding: const EdgeInsets.only(left: AppSpacing.xs),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                       child: Text(
                         s.loginLink,
                         style: AppTypography.bodyMedium.copyWith(
@@ -323,6 +238,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: AppSpacing.xl),
               ],
             ),
           ),
@@ -342,5 +258,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             passwordConfirmation: _confirmPasswordController.text,
           );
     } catch (_) {}
+  }
+}
+
+class _ErrorBanner extends StatelessWidget {
+  final String message;
+  const _ErrorBanner({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.errorLight,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline,
+              color: AppColors.error, size: AppSpacing.iconMd),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

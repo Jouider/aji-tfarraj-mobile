@@ -63,20 +63,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF8E1),
+                color: AppColors.warningLight,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                border: Border.all(color: const Color(0xFFFFD54F)),
+                border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.4)),
               ),
               child: Row(
                 children: [
                   const Icon(Icons.warning_amber_rounded,
-                      color: Color(0xFFF57F17), size: 20),
+                      color: AppColors.warning, size: 20),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       s.profileIncompleteWarning,
                       style: AppTypography.bodySmall
-                          .copyWith(color: const Color(0xFFF57F17)),
+                          .copyWith(color: AppColors.warning),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -91,7 +92,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: Text(
                       s.completeProfileButton,
                       style: AppTypography.labelSmall.copyWith(
-                        color: const Color(0xFFF57F17),
+                        color: AppColors.warning,
                         fontWeight: AppTypography.semiBold,
                       ),
                     ),
@@ -225,7 +226,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: Text(
                         unreadCount > 9 ? '9+' : unreadCount.toString(),
                         style: const TextStyle(
-                          color: AppColors.backgroundWhite,
+                          color: Colors.white,
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
                         ),

@@ -8,7 +8,9 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
 /// Auth Landing Screen — entry point for unauthenticated users.
@@ -27,15 +29,22 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
+    final locale = ref.watch(localeProvider);
+    final logo = locale == AppLocale.ar
+        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
+        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
 
     // Navigate to home once authenticated
     ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
       if (next.isAuthenticated) {
+        // Clear session-expired flag on successful login
+        ref.read(sessionExpiredProvider.notifier).state = false;
         context.go(Routes.home);
       }
     });
 
     final authState = ref.watch(loginAuthStateProvider);
+    final sessionExpired = ref.watch(sessionExpiredProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -44,11 +53,11 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 56),
+              const SizedBox(height: AppSpacing.xxxl),
 
               // ── Logo ──
               Center(
-                child: Image.asset('assets/images/logo.png', width: 160),
+                child: Image.asset(logo, width: 160),
               ),
               const SizedBox(height: AppSpacing.lg),
 
@@ -66,6 +75,12 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
                     .copyWith(color: AppColors.textMuted),
               ),
               const SizedBox(height: AppSpacing.xxxl),
+
+              // ── Session expired banner ──
+              if (sessionExpired) ...[
+                _ErrorBanner(message: s.unauthorized),
+                const SizedBox(height: AppSpacing.lg),
+              ],
 
               // ── Error banner ──
               if (authState.errorMessage != null) ...[
@@ -110,7 +125,8 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
                       : () => context.push(Routes.login),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.secondary,
-                    foregroundColor: AppColors.backgroundWhite,
+                    foregroundColor: AppColors.backgroundWhite, // #0C0C0C — dark text on gold, intentional
+
                     shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),

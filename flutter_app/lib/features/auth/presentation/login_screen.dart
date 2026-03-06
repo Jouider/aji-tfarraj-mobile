@@ -5,6 +5,7 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
@@ -33,11 +34,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(loginAuthStateProvider);
     final s = ref.watch(stringsProvider);
+    final locale = ref.watch(localeProvider);
+    final logo = locale == AppLocale.ar
+        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
+        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
 
-    ref.listen<AuthState>(loginAuthStateProvider, (previous, next) {
-      if (next.isAuthenticated) {
-        context.go(Routes.home);
-      }
+    ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
+      if (next.isAuthenticated) context.go(Routes.home);
     });
 
     return Scaffold(
@@ -49,10 +52,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: AppSpacing.xxxl),
+
                 // Logo
-                Image.asset('assets/images/logo.png', width: 180),
+                Center(child: Image.asset(logo, width: 160)),
                 const SizedBox(height: AppSpacing.lg),
+
                 Text(
                   s.loginSubtitle,
                   textAlign: TextAlign.center,
@@ -62,32 +67,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
 
-                // Error message
+                // Error banner
                 if (authState.errorMessage != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: AppColors.errorLight,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      border: Border.all(
-                          color: AppColors.error.withValues(alpha: 0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.error_outline,
-                            color: AppColors.error, size: 20),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Text(
-                            authState.errorMessage!,
-                            style: AppTypography.bodySmall
-                                .copyWith(color: AppColors.error),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _ErrorBanner(message: authState.errorMessage!),
                   const SizedBox(height: AppSpacing.lg),
                 ],
 
@@ -101,25 +83,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     labelText: s.emailLabel,
                     hintText: s.emailHint,
                     prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide:
-                          const BorderSide(color: AppColors.primary, width: 2),
-                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return s.emailRequired;
-                    if (!value.contains('@')) return s.emailInvalid;
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return s.emailRequired;
+                    if (!v.contains('@')) return s.emailInvalid;
                     return null;
                   },
                 ),
@@ -134,41 +101,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: InputDecoration(
                     labelText: s.passwordLabel,
                     prefixIcon: const Icon(Icons.lock_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
-                      borderSide:
-                          const BorderSide(color: AppColors.primary, width: 2),
-                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: AppColors.textMuted,
+                        size: AppSpacing.iconMd,
                       ),
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return s.passwordRequired;
-                    }
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return s.passwordRequired;
                     return null;
                   },
                   onFieldSubmitted: (_) => _submit(),
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.sm),
 
                 // Forgot password
                 Align(
@@ -178,14 +129,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? null
                         : () => context.push(Routes.forgotPassword),
                     style: TextButton.styleFrom(
-                        foregroundColor: AppColors.secondary,
-                        padding: EdgeInsets.zero),
-                    child: Text(s.forgotPassword,
-                        style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.secondary)),
+                      foregroundColor: AppColors.secondary,
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      s.forgotPassword,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.secondary,
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Login button
                 SizedBox(
@@ -202,11 +158,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
-                            width: 22,
-                            height: 22,
+                            width: 20,
+                            height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.backgroundWhite,
+                              color: Colors.white,
                             ),
                           )
                         : Text(
@@ -225,20 +181,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     Text(
                       s.noAccount,
-                      style: AppTypography.bodyMedium
-                          .copyWith(color: AppColors.textMuted),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textMuted,
+                      ),
                     ),
                     TextButton(
                       onPressed: authState.isLoading
                           ? null
                           : () => context.go(Routes.authLanding),
                       style: TextButton.styleFrom(
-                          foregroundColor: AppColors.secondary),
-                      child: Text(s.registerLink,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.secondary,
-                            fontWeight: FontWeight.w600,
-                          )),
+                        foregroundColor: AppColors.secondary,
+                        padding: const EdgeInsets.only(left: AppSpacing.xs),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        s.registerLink,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.secondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -259,5 +221,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: _passwordController.text,
           );
     } catch (_) {}
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared error banner (reused in login & register)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ErrorBanner extends StatelessWidget {
+  final String message;
+  const _ErrorBanner({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.errorLight,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.error, size: AppSpacing.iconMd),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

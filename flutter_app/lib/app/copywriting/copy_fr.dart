@@ -146,6 +146,7 @@ class ErrorsCopyFr {
   String get invalidCredentials => 'Email ou mot de passe incorrect.';
   String get emailAlreadyExists => 'Un compte avec cet email existe déjà.';
   String get validationError => 'Veuillez vérifier les informations saisies.';
+  String get errorTitle => 'Une erreur est survenue';
 }
 
 /// Rules page content in French
@@ -279,6 +280,10 @@ class CommonCopyFr {
   String get unknownUser => 'Utilisateur';
   String get place => 'place';
   String get places => 'places';
+  String get backToHome => 'Retour à l\'accueil';
+  String get browseShows => 'Voir d\'autres émissions';
+  String get reservationSuccessBody =>
+      'Votre demande est en cours de traitement. Vous serez contacté pour confirmer votre participation.';
 }
 
 /// Profile screen copy in French
@@ -316,6 +321,11 @@ class ProfileCopyFr {
   String get takePhoto => 'Prendre une photo';
   String get chooseFromGallery => 'Choisir depuis la galerie';
   String get removePhoto => 'Supprimer la photo';
+  String get avatarDeletedSuccess => 'Photo de profil supprimée';
+  String get addPhotoHint => 'Appuyez pour ajouter une photo (optionnel)';
+  String get skipForNow => "Ignorer pour l'instant";
+  String get cameraAccessDenied =>
+      "Accès à la caméra refusé. Autorisez l'accès dans les réglages.";
 }
 
 /// Home screen copy in French
@@ -488,7 +498,7 @@ class NavTabsCopyFr {
 
   String get emissions => 'Émissions';
   String get explorer => 'Explorer';
-  String get reservations => 'Réservations';
+  String get reservations => 'Réservation';
   String get ticket => 'Billet';
   String get profile => 'Profil';
 }

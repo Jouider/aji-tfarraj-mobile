@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/tickets/domain/ticket.dart';
@@ -27,6 +27,11 @@ class TicketsFetchResult {
     this.isOffline = false,
   });
 }
+
+const _storage = FlutterSecureStorage(
+  aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+);
 
 /// Repository for Ticket-related API calls
 class TicketRepository {
@@ -282,13 +287,12 @@ class TicketRepository {
         e.type == DioExceptionType.unknown;
   }
 
-  /// Cache tickets list to shared preferences
+  /// Cache tickets list to secure storage
   Future<void> _cacheTickets(List<Ticket> tickets) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       final jsonList = tickets.map((t) => t.toJson()).toList();
       final jsonString = jsonEncode(jsonList);
-      await prefs.setString(_cachedTicketsKey, jsonString);
+      await _storage.write(key: _cachedTicketsKey, value: jsonString);
     } catch (_) {
       // Silently fail on cache write errors
     }
@@ -297,8 +301,7 @@ class TicketRepository {
   /// Load tickets from cache
   Future<List<Ticket>> _loadCachedTickets() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jsonString = prefs.getString(_cachedTicketsKey);
+      final jsonString = await _storage.read(key: _cachedTicketsKey);
       if (jsonString == null) {
         return [];
       }
@@ -314,8 +317,7 @@ class TicketRepository {
   /// Clear cached tickets (useful on logout)
   Future<void> clearCache() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_cachedTicketsKey);
+      await _storage.delete(key: _cachedTicketsKey);
     } catch (_) {
       // Silently fail
     }

@@ -129,11 +129,11 @@ class _TicketLoadingView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: AppColors.primary),
+          const CircularProgressIndicator(color: AppColors.secondary),
           const SizedBox(height: AppSpacing.lg),
           Text(
             s.ticketLoading,
-            style: const TextStyle(color: AppColors.textMuted),
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
           ),
         ],
       ),
@@ -157,7 +157,7 @@ class _TicketLockedView extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
-      color: AppColors.primary,
+      color: AppColors.secondary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
@@ -253,7 +253,7 @@ class _TicketsContentView extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
-      color: AppColors.primary,
+      color: AppColors.secondary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
@@ -743,35 +743,36 @@ class _TicketCodeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _copyToClipboard(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundGrey,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              ticketCode,
-              style: AppTypography.labelLarge.copyWith(
-                letterSpacing: 2,
-                color: isUsed ? AppColors.textMuted : AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
+    return Material(
+      color: AppColors.backgroundGrey,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _copyToClipboard(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                ticketCode,
+                style: AppTypography.labelLarge.copyWith(
+                  letterSpacing: 2,
+                  color: isUsed ? AppColors.textMuted : AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            const Icon(
-              Icons.copy,
-              size: 16,
-              color: AppColors.textMuted,
-            ),
-          ],
+              const SizedBox(width: AppSpacing.sm),
+              const Icon(
+                Icons.copy,
+                size: 16,
+                color: AppColors.textMuted,
+              ),
+            ],
+          ),
         ),
       ),
     );

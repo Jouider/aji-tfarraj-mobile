@@ -1,51 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/spacing.dart';
+import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
-/// Sold Out Screen
-/// TODO: Display sold out message for the show
-/// TODO: Add option to get notified if seats become available
-/// TODO: Add button to browse other shows
-class SoldOutScreen extends StatelessWidget {
+class SoldOutScreen extends ConsumerWidget {
   final String showId;
 
   const SoldOutScreen({super.key, required this.showId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Complet'),
+        title: Text(s.homeSoldOutBadge),
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // TODO: Add sold out illustration
               const Icon(
                 Icons.event_busy,
                 size: 80,
-                color: Colors.red,
+                color: AppColors.error,
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Complet !',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Text(
-                'Désolé, toutes les places pour le show $showId sont réservées.',
+                s.soldOut,
+                style: AppTypography.bodyLarge,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
-              // TODO: Add notification signup
-              ElevatedButton(
-                onPressed: () {
-                  context.go(Routes.home);
-                },
-                child: const Text('Voir d\'autres émissions'),
+              const SizedBox(height: AppSpacing.xl),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => context.go(Routes.home),
+                  child: Text(s.browseShows),
+                ),
               ),
             ],
           ),

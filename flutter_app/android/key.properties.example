@@ -1,0 +1,11 @@
+# Copy this file to key.properties (same directory) and fill in your values.
+# key.properties must NOT be committed to git — add it to .gitignore.
+#
+# To generate a keystore:
+#   keytool -genkey -v -keystore release.keystore \
+#     -alias ajitfarraj -keyalg RSA -keysize 2048 -validity 10000
+#
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=ajitfarraj
+storeFile=../release.keystore

@@ -6,6 +6,7 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
 import 'package:aji_tfarraj/features/reservations/domain/reservation.dart';
 import 'package:aji_tfarraj/features/reservations/presentation/reservation_status.dart';
@@ -37,9 +38,7 @@ class ReservationDetailScreen extends ConsumerWidget {
         ),
       ),
       body: reservationAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.secondary),
-        ),
+        loading: () => const _DetailSkeleton(),
         error: (error, stack) => _ErrorView(
           message: error.toString(),
           onRetry: () => ref.refresh(reservationDetailProvider(int.parse(reservationId))),
@@ -696,6 +695,32 @@ class _ErrorView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DetailSkeleton extends StatelessWidget {
+  const _DetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SkeletonLoader.card(height: 160),
+          const SizedBox(height: AppSpacing.xl),
+          SkeletonLoader.text(width: 100, height: 14),
+          const SizedBox(height: AppSpacing.sm),
+          SkeletonLoader.card(height: 120),
+          const SizedBox(height: AppSpacing.xl),
+          SkeletonLoader.text(width: 200, height: 14),
+          const SizedBox(height: AppSpacing.sm),
+          SkeletonLoader.card(height: 160),
+        ],
       ),
     );
   }
