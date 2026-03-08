@@ -43,4 +43,7 @@ class Routes {
   static String reservationResult(String reservationId) =>
       '/reservation-result/$reservationId';
   static const error = '/error';
+
+  // Phone OTP verification (full screen, outside shell)
+  static const phoneVerification = '/phone-verify';
 }

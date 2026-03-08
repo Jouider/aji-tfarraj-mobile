@@ -53,6 +53,8 @@
 	<string>Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil.</string>
+	<key>GIDClientID</key>
+	<string>600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Secure token storage service using flutter_secure_storage
 class TokenStorage {
   static const _tokenKey = 'auth_token';
+  static const _expiresAtKey = 'auth_token_expires_at';
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
@@ -23,9 +24,36 @@ class TokenStorage {
     await _storage.write(key: _tokenKey, value: token);
   }
 
-  /// Clear the stored auth token
+  /// Save token expiry timestamp (ISO 8601 string)
+  Future<void> saveExpiresAt(String expiresAt) async {
+    await _storage.write(key: _expiresAtKey, value: expiresAt);
+  }
+
+  /// Read stored expiry as a UTC DateTime (null if not set or parse fails)
+  Future<DateTime?> readExpiresAt() async {
+    try {
+      final raw = await _storage.read(key: _expiresAtKey);
+      if (raw == null) return null;
+      return DateTime.parse(raw).toUtc();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Returns true if the token expires within [threshold] from now.
+  /// Returns false if no expiry is stored (safe default — don't force refresh).
+  Future<bool> isExpiringSoon({
+    Duration threshold = const Duration(days: 1),
+  }) async {
+    final expiresAt = await readExpiresAt();
+    if (expiresAt == null) return false;
+    return DateTime.now().toUtc().add(threshold).isAfter(expiresAt);
+  }
+
+  /// Clear the stored auth token and its expiry
   Future<void> clearToken() async {
     await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: _expiresAtKey);
   }
 
   /// Check if token exists

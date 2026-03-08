@@ -10,6 +10,9 @@ class User {
   final String? avatarUrl;
   final bool profileComplete;
   final List<String> missingProfileFields;
+  final String? phoneCountryCode;
+  final String? phoneNumber;
+  final DateTime? phoneVerifiedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -24,11 +27,21 @@ class User {
     this.avatarUrl,
     this.profileComplete = true,
     this.missingProfileFields = const [],
+    this.phoneCountryCode,
+    this.phoneNumber,
+    this.phoneVerifiedAt,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    DateTime? phoneVerifiedAt;
+    final rawPhoneVerified = json['phone_verified_at'] as String?;
+    if (rawPhoneVerified != null) {
+      try {
+        phoneVerifiedAt = DateTime.parse(rawPhoneVerified).toUtc();
+      } catch (_) {}
+    }
     return User(
       id: json['id'] as int,
       name: json['name'] as String,
@@ -43,6 +56,9 @@ class User {
               ?.map((e) => e as String)
               .toList() ??
           [],
+      phoneCountryCode: json['phone_country_code'] as String?,
+      phoneNumber: json['phone_number'] as String?,
+      phoneVerifiedAt: phoneVerifiedAt,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -60,6 +76,9 @@ class User {
       'avatar_url': avatarUrl,
       'profile_complete': profileComplete,
       'missing_profile_fields': missingProfileFields,
+      'phone_country_code': phoneCountryCode,
+      'phone_number': phoneNumber,
+      'phone_verified_at': phoneVerifiedAt?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -76,9 +95,13 @@ class User {
     String? avatarUrl,
     bool? profileComplete,
     List<String>? missingProfileFields,
+    String? phoneCountryCode,
+    String? phoneNumber,
+    DateTime? phoneVerifiedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool clearAvatar = false,
+    bool clearPhoneVerification = false,
   }) {
     return User(
       id: id ?? this.id,
@@ -91,10 +114,16 @@ class User {
       avatarUrl: clearAvatar ? null : (avatarUrl ?? this.avatarUrl),
       profileComplete: profileComplete ?? this.profileComplete,
       missingProfileFields: missingProfileFields ?? this.missingProfileFields,
+      phoneCountryCode: phoneCountryCode ?? this.phoneCountryCode,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      phoneVerifiedAt: clearPhoneVerification ? null : (phoneVerifiedAt ?? this.phoneVerifiedAt),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  /// Whether the phone number has been verified
+  bool get isPhoneVerified => phoneVerifiedAt != null;
 
   /// Display name: first + last if available, otherwise full name
   String get displayName {
@@ -105,20 +134,31 @@ class User {
   }
 }
 
-/// Authentication response containing token and user
+/// Authentication response containing token, expiry, and user
 class AuthResponse {
   final String token;
   final User user;
+  /// UTC expiry from the server's `expires_at` field (null if backend omits it)
+  final DateTime? expiresAt;
 
   AuthResponse({
     required this.token,
     required this.user,
+    this.expiresAt,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    DateTime? expiresAt;
+    final raw = json['expires_at'] as String?;
+    if (raw != null) {
+      try {
+        expiresAt = DateTime.parse(raw).toUtc();
+      } catch (_) {}
+    }
     return AuthResponse(
       token: json['token'] as String,
       user: User.fromJson(json['user'] as Map<String, dynamic>),
+      expiresAt: expiresAt,
     );
   }
 }

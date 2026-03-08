@@ -26,6 +26,7 @@ import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart'
 import 'package:aji_tfarraj/features/notifications/presentation/notification_center_screen.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
+import 'package:aji_tfarraj/features/profile/presentation/phone_otp_verification_screen.dart';
 
 /// Routes that require authentication
 const _protectedRoutes = [
@@ -109,8 +110,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       // (except when already on the edit profile screen to avoid redirect loops)
       if (isAuthenticated && currentPath != Routes.editProfile) {
         final user = ref.read(loginAuthStateProvider).user;
-        // Exclude all photo-related fields — avatar is optional until reservation
-        const photoFields = {'avatar', 'avatar_url', 'live_photo_captured_at'};
+        // Exclude photo and phone fields — these are optional until reservation
+        // (phone verification enforcement happens server-side via 409 PROFILE_INCOMPLETE)
+        const photoFields = {
+          'avatar', 'avatar_url', 'live_photo_captured_at',
+          'phone_country_code', 'phone_number', 'phone_verified_at',
+        };
         final missingRequired = user?.missingProfileFields
                 .where((f) => !photoFields.contains(f))
                 .isNotEmpty ??
@@ -303,6 +308,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final message = state.extra is String ? state.extra as String : null;
           return ErrorScreen(message: message);
+        },
+      ),
+      GoRoute(
+        path: Routes.phoneVerification,
+        name: 'phoneVerification',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, String>;
+          return PhoneOtpVerificationScreen(
+            countryCode: extra['countryCode']!,
+            phoneNumber: extra['phoneNumber']!,
+          );
         },
       ),
     ],

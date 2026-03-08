@@ -286,7 +286,7 @@ class ProfileCopyAr {
   String get editTitle => 'تعديل الملف الشخصي';
   String get incompleteWarning => 'أكمل ملفك الشخصي لتتمكن من الحجز';
   String get incompleteMessage =>
-      'يرجى إدخال اسمك الأول والأخير والمدينة والحي قبل الحجز.';
+      'يرجى إدخال اسمك الأول والأخير والمدينة والحي، والتحقق من رقم هاتفك قبل الحجز.';
   String get completeProfileButton => 'إكمال الملف الشخصي';
   String get firstNameLabel => 'الاسم الأول';
   String get lastNameLabel => 'الاسم الأخير';
@@ -307,6 +307,29 @@ class ProfileCopyAr {
   String get skipForNow => 'تخطى الآن';
   String get cameraAccessDenied =>
       'تم رفض الوصول إلى الكاميرا. يرجى السماح بالوصول في الإعدادات.';
+
+  // Phone section
+  String get phoneLabel => 'رقم الهاتف';
+  String get phoneNumberHint => '6XXXXXXXX';
+  String get phoneVerified => 'رقم موثّق';
+  String get phoneNotVerified => 'رقم غير موثّق';
+  String get phoneNumberInvalid => 'يرجى إدخال رقم صالح.';
+  String get verifyPhoneButton => 'توثيق الرقم';
+
+  // OTP screen
+  String get otpScreenTitle => 'التحقق من الرقم';
+  String otpScreenSubtitle(String maskedPhone) =>
+      'أرسلنا رمزاً إلى $maskedPhone';
+  String get otpCodeHint => 'رمز مكون من 6 أرقام';
+  String get otpCodeRequired => 'يرجى إدخال الرمز المكون من 6 أرقام.';
+  String get otpVerifyButton => 'تحقق';
+  String get otpResendButton => 'إعادة إرسال الرمز';
+  String otpResendCountdown(int s) => 'إعادة الإرسال خلال $s ث';
+  String get otpSentSuccess => 'تم إرسال الرمز عبر الرسائل القصيرة.';
+  String get otpVerifiedSuccess => 'تم توثيق الرقم بنجاح.';
+  String get otpInvalidCode => 'الرمز غير صالح أو منتهي الصلاحية.';
+  String get otpSendFailed => 'تعذر إرسال الرمز في الوقت الحالي.';
+  String get otpVerifyFailed => 'تعذر التحقق من الرمز في الوقت الحالي.';
 }
 
 /// My Reservations screen copy in Arabic

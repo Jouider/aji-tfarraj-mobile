@@ -305,7 +305,7 @@ class ProfileCopyFr {
   String get editTitle => 'Modifier le profil';
   String get incompleteWarning => 'Complétez votre profil pour pouvoir réserver';
   String get incompleteMessage =>
-      'Veuillez renseigner votre prénom, nom, ville et quartier avant de réserver.';
+      'Veuillez renseigner votre prénom, nom, ville, quartier et vérifier votre numéro de téléphone avant de réserver.';
   String get completeProfileButton => 'Compléter mon profil';
   String get firstNameLabel => 'Prénom';
   String get lastNameLabel => 'Nom';
@@ -326,6 +326,29 @@ class ProfileCopyFr {
   String get skipForNow => "Ignorer pour l'instant";
   String get cameraAccessDenied =>
       "Accès à la caméra refusé. Autorisez l'accès dans les réglages.";
+
+  // Phone section
+  String get phoneLabel => 'Téléphone';
+  String get phoneNumberHint => '6XXXXXXXX';
+  String get phoneVerified => 'Numéro vérifié';
+  String get phoneNotVerified => 'Numéro non vérifié';
+  String get phoneNumberInvalid => 'Veuillez entrer un numéro valide.';
+  String get verifyPhoneButton => 'Vérifier mon numéro';
+
+  // OTP screen
+  String get otpScreenTitle => 'Vérification du numéro';
+  String otpScreenSubtitle(String maskedPhone) =>
+      'Nous avons envoyé un code à $maskedPhone';
+  String get otpCodeHint => 'Code à 6 chiffres';
+  String get otpCodeRequired => 'Veuillez entrer le code à 6 chiffres.';
+  String get otpVerifyButton => 'Vérifier';
+  String get otpResendButton => 'Renvoyer le code';
+  String otpResendCountdown(int s) => 'Renvoyer dans ${s}s';
+  String get otpSentSuccess => 'Code envoyé par SMS.';
+  String get otpVerifiedSuccess => 'Numéro vérifié avec succès.';
+  String get otpInvalidCode => 'Code invalide ou expiré.';
+  String get otpSendFailed => "Impossible d'envoyer le code pour le moment.";
+  String get otpVerifyFailed => 'Impossible de vérifier le code pour le moment.';
 }
 
 /// Home screen copy in French

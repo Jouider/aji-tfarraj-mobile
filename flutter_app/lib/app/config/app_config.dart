@@ -33,6 +33,7 @@ class AppConfig {
   static const String authLogin = '/api/auth/login';
   static const String authLogout = '/api/auth/logout';
   static const String authMe = '/api/auth/me';
+  static const String authRefresh = '/api/auth/refresh';
   static const String shows = '/api/shows';
   static String showDetail(int id) => '/api/shows/$id';
   static const String reservations = '/api/reservations';

@@ -33,9 +33,9 @@ class AuthRepository {
         'password_confirmation': passwordConfirmation,
       },
     );
-    
+
     final authResponse = AuthResponse.fromJson(response.data);
-    await _tokenStorage.saveToken(authResponse.token);
+    await _saveAuthResponse(authResponse);
     return authResponse;
   }
 
@@ -51,10 +51,41 @@ class AuthRepository {
         'password': password,
       },
     );
-    
+
     final authResponse = AuthResponse.fromJson(response.data);
-    await _tokenStorage.saveToken(authResponse.token);
+    await _saveAuthResponse(authResponse);
     return authResponse;
+  }
+
+  /// Refresh the current token via POST /api/auth/refresh.
+  /// Saves new token + expires_at on success.
+  /// Throws on failure (caller handles 401 → full logout).
+  Future<AuthResponse> refreshToken() async {
+    final token = await _tokenStorage.readToken();
+    if (token == null || token.isEmpty) {
+      throw DioException(
+        requestOptions: RequestOptions(path: AppConfig.authRefresh),
+        type: DioExceptionType.unknown,
+        error: 'No token to refresh',
+      );
+    }
+    final response = await _dio.post(
+      AppConfig.authRefresh,
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    final authResponse = AuthResponse.fromJson(response.data);
+    await _saveAuthResponse(authResponse);
+    return authResponse;
+  }
+
+  /// Persist token + optional expires_at from an auth response
+  Future<void> _saveAuthResponse(AuthResponse authResponse) async {
+    await _tokenStorage.saveToken(authResponse.token);
+    if (authResponse.expiresAt != null) {
+      await _tokenStorage.saveExpiresAt(
+        authResponse.expiresAt!.toIso8601String(),
+      );
+    }
   }
 
   /// Get current authenticated user (GET /api/auth/me)
@@ -128,7 +159,7 @@ class AuthRepository {
       'token': idToken,
     });
     final authResponse = AuthResponse.fromJson(response.data);
-    await _tokenStorage.saveToken(authResponse.token);
+    await _saveAuthResponse(authResponse);
     return authResponse;
   }
 
@@ -147,7 +178,7 @@ class AuthRepository {
       'token': identityToken,
     });
     final authResponse = AuthResponse.fromJson(response.data);
-    await _tokenStorage.saveToken(authResponse.token);
+    await _saveAuthResponse(authResponse);
     return authResponse;
   }
 
@@ -217,37 +248,50 @@ class AuthNotifier extends StateNotifier<AuthState> {
     _checkAuthStatus();
   }
 
-  /// Check if user is already logged in on app start
-  /// Validates token by calling GET /api/auth/me
+  /// Check if user is already logged in on app start.
+  /// Proactively refreshes the token if it expires within 1 day.
   Future<void> _checkAuthStatus() async {
     state = state.copyWith(status: AuthStatus.loading);
-    
+
     try {
       final token = await _tokenStorage.readToken();
-      if (token != null && token.isNotEmpty) {
-        // Validate token by fetching current user
-        final user = await _repository.me();
-        
-        // Sync with router's auth state provider
-        await _ref.read(authStateProvider.notifier).setToken(token);
-        
-        state = AuthState(status: AuthStatus.authenticated, user: user);
-        
-        // Register device for push notifications (user already authenticated)
-        _registerDeviceToken();
-      } else {
+      if (token == null || token.isEmpty) {
         state = const AuthState(status: AuthStatus.unauthenticated);
+        return;
       }
+
+      // Proactively refresh if token is expiring soon (within 1 day)
+      if (await _tokenStorage.isExpiringSoon()) {
+        try {
+          final refreshed = await _repository.refreshToken();
+          await _ref.read(authStateProvider.notifier).setToken(refreshed.token);
+          state = AuthState(status: AuthStatus.authenticated, user: refreshed.user);
+          _registerDeviceToken();
+          return;
+        } on DioException catch (e) {
+          if (e.response?.statusCode == 401) {
+            // Refresh rejected → session is truly expired
+            await _tokenStorage.clearToken();
+            await _ref.read(authStateProvider.notifier).clearToken();
+            state = const AuthState(status: AuthStatus.unauthenticated);
+            return;
+          }
+          // Network error during refresh — fall through to validate with /me
+        }
+      }
+
+      // Validate token by fetching current user
+      final user = await _repository.me();
+      await _ref.read(authStateProvider.notifier).setToken(token);
+      state = AuthState(status: AuthStatus.authenticated, user: user);
+      _registerDeviceToken();
     } on DioException catch (e) {
-      // Token invalid, expired, or network error
       if (e.response?.statusCode == 401) {
-        // Token is invalid - clear it
         await _tokenStorage.clearToken();
         await _ref.read(authStateProvider.notifier).clearToken();
       }
       state = const AuthState(status: AuthStatus.unauthenticated);
     } catch (_) {
-      // Any other error - treat as unauthenticated
       await _tokenStorage.clearToken();
       await _ref.read(authStateProvider.notifier).clearToken();
       state = const AuthState(status: AuthStatus.unauthenticated);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,10 @@ class ApiClient {
   final Dio _dio;
   final TokenStorage _tokenStorage;
   final Ref _ref;
+
+  /// Guards against multiple concurrent refresh calls
+  bool _isRefreshing = false;
+  Completer<bool>? _refreshCompleter;
 
   ApiClient({required TokenStorage tokenStorage, required Ref ref})
       : _tokenStorage = tokenStorage,
@@ -68,9 +74,23 @@ class ApiClient {
           print('└─────────────────────────────────────────');
         }
 
-        // Handle 401 Unauthorized - auto logout
-        if (error.response?.statusCode == 401) {
-          await _handleUnauthorized();
+        // Retry transient errors (timeouts, connection drops, 5xx) with backoff
+        if (_isRetryable(error)) {
+          final retried = await _retryWithBackoff(error);
+          if (retried != null) {
+            handler.resolve(retried);
+            return;
+          }
+        }
+
+        // Handle 401 Unauthorized — try refresh first, then clear session
+        if (error.response?.statusCode == 401 &&
+            error.requestOptions.extra['skipRefresh'] != true) {
+          final retried = await _tryRefreshAndRetry(error);
+          if (retried != null) {
+            handler.resolve(retried);
+            return;
+          }
         }
 
         handler.next(error);
@@ -78,23 +98,151 @@ class ApiClient {
     ));
   }
 
-  /// Handle 401 response by clearing token and updating auth state
-  /// Navigation will be triggered through router refresh listener
-  Future<void> _handleUnauthorized() async {
-    // Clear token from secure storage
+  // ─── Retry logic ───────────────────────────────────────────────────────────
+
+  static const _maxRetries = 3;
+  static const _retryDelays = [
+    Duration(milliseconds: 500),
+    Duration(milliseconds: 1000),
+    Duration(milliseconds: 2000),
+  ];
+
+  /// Returns true for transient errors that are safe to retry:
+  /// network timeouts, connection drops, and 5xx server errors.
+  /// Never retries on 4xx (client errors) or refresh/retry-flagged requests.
+  bool _isRetryable(DioException error) {
+    if (error.requestOptions.extra['retryCount'] != null) {
+      final count = error.requestOptions.extra['retryCount'] as int;
+      if (count >= _maxRetries) return false;
+    }
+    if (error.requestOptions.extra['skipRefresh'] == true) return false;
+
+    switch (error.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.connectionError:
+        return true;
+      case DioExceptionType.badResponse:
+        final status = error.response?.statusCode ?? 0;
+        return status == 502 || status == 503 || status == 504;
+      default:
+        return false;
+    }
+  }
+
+  /// Waits with exponential backoff then re-fires the request.
+  /// Increments `retryCount` in `extra` to prevent infinite loops.
+  Future<Response?> _retryWithBackoff(DioException error) async {
+    final opts = error.requestOptions;
+    final attempt = (opts.extra['retryCount'] as int? ?? 0);
+    final delay = _retryDelays[attempt];
+
+    if (kDebugMode) {
+      print('┌─────────────────────────────────────────');
+      print('│ 🔁 Retry ${attempt + 1}/$_maxRetries after ${delay.inMilliseconds}ms');
+      print('│ 🔗 ${opts.uri}');
+      print('└─────────────────────────────────────────');
+    }
+
+    await Future<void>.delayed(delay);
+
+    try {
+      opts.extra['retryCount'] = attempt + 1;
+      return await _dio.fetch(opts);
+    } on DioException {
+      return null;
+    }
+  }
+
+  // ─── Token refresh logic ────────────────────────────────────────────────────
+
+  /// Attempt a token refresh, then retry the original request.
+  /// Returns the retried [Response] on success, null if refresh/retry failed.
+  /// Uses a lock to prevent multiple concurrent refresh calls.
+  Future<Response?> _tryRefreshAndRetry(DioException error) async {
+    // If a refresh is already in flight, wait for it
+    if (_isRefreshing) {
+      final success = await _refreshCompleter!.future;
+      if (!success) return null;
+      return _retryRequest(error.requestOptions);
+    }
+
+    _isRefreshing = true;
+    _refreshCompleter = Completer<bool>();
+
+    try {
+      final token = await _tokenStorage.readToken();
+      if (token == null || token.isEmpty) {
+        _refreshCompleter!.complete(false);
+        await _clearSession();
+        return null;
+      }
+
+      final refreshResponse = await _dio.post<Map<String, dynamic>>(
+        AppConfig.authRefresh,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+          extra: {'skipRefresh': true},
+        ),
+      );
+
+      final data = refreshResponse.data;
+      final newToken = data?['token'] as String?;
+      if (newToken == null) {
+        _refreshCompleter!.complete(false);
+        await _clearSession();
+        return null;
+      }
+
+      await _tokenStorage.saveToken(newToken);
+      final expiresAt = data?['expires_at'] as String?;
+      if (expiresAt != null) await _tokenStorage.saveExpiresAt(expiresAt);
+      await _ref.read(authStateProvider.notifier).setToken(newToken);
+
+      _refreshCompleter!.complete(true);
+
+      if (kDebugMode) {
+        print('┌─────────────────────────────────────────');
+        print('│ 🔄 Token refreshed — retrying request');
+        print('└─────────────────────────────────────────');
+      }
+
+      return await _retryRequest(error.requestOptions);
+    } on DioException catch (e) {
+      _refreshCompleter!.complete(false);
+      if (e.response?.statusCode == 401) {
+        // Refresh token itself is invalid — full logout
+        await _clearSession();
+      }
+      return null;
+    } finally {
+      _isRefreshing = false;
+      _refreshCompleter = null;
+    }
+  }
+
+  /// Re-execute [opts] with the current stored token injected.
+  Future<Response?> _retryRequest(RequestOptions opts) async {
+    try {
+      final token = await _tokenStorage.readToken();
+      opts.headers['Authorization'] = 'Bearer $token';
+      opts.extra['skipRefresh'] = true;
+      return await _dio.fetch(opts);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Clear token + auth state + show session-expired banner
+  Future<void> _clearSession() async {
     await _tokenStorage.clearToken();
-
-    // Update auth state to logged out (triggers router refresh)
-    final authNotifier = _ref.read(authStateProvider.notifier);
-    await authNotifier.clearToken();
-
-    // Signal that the session expired (shown as banner on the landing screen)
+    await _ref.read(authStateProvider.notifier).clearToken();
     _ref.read(sessionExpiredProvider.notifier).state = true;
 
     if (kDebugMode) {
       print('┌─────────────────────────────────────────');
-      print('│ 🔐 401 Unauthorized - Session cleared');
-      print('│ 🔄 Router will redirect to login');
+      print('│ 🔐 Session cleared — redirect to login');
       print('└─────────────────────────────────────────');
     }
   }

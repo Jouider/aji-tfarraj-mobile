@@ -10,6 +10,7 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/push/push_service.dart';
 import 'package:aji_tfarraj/app/push/push_token_provider.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/monitoring/provider_observer.dart';
 import 'package:aji_tfarraj/features/notifications/data/notification_repository.dart';
 
 void main() async {
@@ -38,8 +39,8 @@ void main() async {
   
   runApp(
     ProviderScope(
+      observers: const [AppProviderObserver()],
       overrides: [
-        // Override SharedPreferences provider with actual instance
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
       child: const AjiTfarrajApp(),

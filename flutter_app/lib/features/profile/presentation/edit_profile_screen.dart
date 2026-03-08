@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show PlatformException;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
@@ -27,12 +27,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   String? _selectedCity;
   String? _selectedDistrict;
   bool _isLoading = false;
   bool _isAvatarLoading = false;
+  bool _isVerifyingPhone = false;
   String? _errorMessage;
+  // Fixed country code for now — Morocco (+212)
+  final String _countryCode = '+212';
 
   @override
   void initState() {
@@ -43,6 +47,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _lastNameController.text = user.lastName ?? '';
       _selectedCity = user.cityName;
       _selectedDistrict = user.district;
+      _phoneController.text = user.phoneNumber ?? '';
     }
   }
 
@@ -50,6 +55,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -78,6 +84,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _errorMessage = null;
     });
     try {
+      final phone = _phoneController.text.trim();
       // Update immediately from PATCH response so the router redirect
       // sees profileComplete=true even if the follow-up GET /me fails.
       final updatedUser = await ref.read(profileRepositoryProvider).updateProfile(
@@ -85,6 +92,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             lastName: _lastNameController.text.trim(),
             cityName: _selectedCity,
             district: _selectedDistrict,
+            phoneCountryCode: phone.isNotEmpty ? _countryCode : null,
+            phoneNumber: phone.isNotEmpty ? phone : null,
           );
       ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
       // Re-fetch from GET /api/auth/me so profile_complete reflects the true
@@ -193,6 +202,60 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } finally {
       if (mounted) setState(() => _isAvatarLoading = false);
     }
+  }
+
+  Future<void> _requestOtpAndNavigate() async {
+    final user = ref.read(loginAuthStateProvider).user;
+    final phone = user?.phoneNumber ?? '';
+    final cc = user?.phoneCountryCode ?? _countryCode;
+    if (phone.isEmpty) return;
+
+    setState(() {
+      _isVerifyingPhone = true;
+      _errorMessage = null;
+    });
+    try {
+      await ref.read(profileRepositoryProvider).requestPhoneOtp(
+            countryCode: cc,
+            phoneNumber: phone,
+          );
+      if (!mounted) return;
+      final result = await context.push<bool>(
+        Routes.phoneVerification,
+        extra: {'countryCode': cc, 'phoneNumber': phone},
+      );
+      if (result == true && mounted) {
+        final messenger = ScaffoldMessenger.of(context);
+        await ref.read(loginAuthStateProvider.notifier).refreshUser();
+        final s = ref.read(stringsProvider);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(s.otpVerifiedSuccess),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        // If profile is now complete and we were forced here (no back stack),
+        // send the user home — they've finished the onboarding requirement.
+        if (mounted) {
+          final currentUser = ref.read(loginAuthStateProvider).user;
+          if (currentUser?.profileComplete == true && !context.canPop()) {
+            context.go(Routes.home);
+          }
+        }
+      }
+    } on ApiException catch (e) {
+      setState(() => _errorMessage = _mapOtpError(e));
+    } finally {
+      if (mounted) setState(() => _isVerifyingPhone = false);
+    }
+  }
+
+  String _mapOtpError(ApiException e) {
+    if (e.code == 'OTP_SEND_FAILED') {
+      return ref.read(stringsProvider).otpSendFailed;
+    }
+    if (e.isUnauthenticated) return ref.read(stringsProvider).unauthorized;
+    return e.message;
   }
 
   void _showAvatarSheet() {
@@ -471,6 +534,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.xl),
+
+              // ── Phone ──
+              _PhoneSection(
+                phoneController: _phoneController,
+                countryCode: _countryCode,
+                user: user,
+                isLoading: _isLoading,
+                isVerifyingPhone: _isVerifyingPhone,
+                onVerifyTap: _requestOtpAndNavigate,
+                fieldDecoration: _fieldDecoration,
+              ),
+
               const SizedBox(height: AppSpacing.xxl),
 
               // ── Save button ──
@@ -501,6 +577,125 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ── Phone section ──────────────────────────────────────────────────────────
+
+class _PhoneSection extends ConsumerWidget {
+  const _PhoneSection({
+    required this.phoneController,
+    required this.countryCode,
+    required this.user,
+    required this.isLoading,
+    required this.isVerifyingPhone,
+    required this.onVerifyTap,
+    required this.fieldDecoration,
+  });
+
+  final TextEditingController phoneController;
+  final String countryCode;
+  final dynamic user; // User?
+  final bool isLoading;
+  final bool isVerifyingPhone;
+  final VoidCallback onVerifyTap;
+  final InputDecoration Function(String, IconData) fieldDecoration;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    final isVerified = user?.isPhoneVerified == true;
+    final hasPhone = user?.phoneNumber != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(s.phoneLabel, style: AppTypography.labelMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Country code display (fixed +212 for now)
+            Container(
+              height: AppSpacing.inputHeight,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.border),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+              alignment: Alignment.center,
+              child: Text(countryCode, style: AppTypography.bodyMedium),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: TextFormField(
+                controller: phoneController,
+                enabled: !isLoading,
+                keyboardType: TextInputType.phone,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: fieldDecoration(s.phoneNumberHint, Icons.phone_outlined),
+              ),
+            ),
+          ],
+        ),
+        if (hasPhone) ...[
+          const SizedBox(height: AppSpacing.sm),
+          if (isVerified)
+            // ── Verified badge ──
+            Row(
+              children: [
+                const Icon(Icons.check_circle,
+                    color: AppColors.success, size: 16),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  s.phoneVerified,
+                  style: AppTypography.bodySmall
+                      .copyWith(color: AppColors.success),
+                ),
+              ],
+            )
+          else ...[
+            // ── Not verified warning ──
+            Row(
+              children: [
+                const Icon(Icons.warning_amber_rounded,
+                    color: AppColors.warning, size: 16),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  s.phoneNotVerified,
+                  style: AppTypography.bodySmall
+                      .copyWith(color: AppColors.warning),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: isVerifyingPhone ? null : onVerifyTap,
+                icon: isVerifyingPhone
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: AppColors.primary),
+                      )
+                    : const Icon(Icons.verified_outlined, size: 18),
+                label: Text(s.verifyPhoneButton),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ],
     );
   }
 }

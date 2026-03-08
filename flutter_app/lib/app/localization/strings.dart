@@ -459,6 +459,80 @@ class AppStrings {
       ? CopyFr.profile.removePhoto
       : CopyAr.profile.removePhoto;
 
+  // Phone section
+  String get phoneLabel => locale == AppLocale.fr
+      ? CopyFr.profile.phoneLabel
+      : CopyAr.profile.phoneLabel;
+
+  String get phoneNumberHint => locale == AppLocale.fr
+      ? CopyFr.profile.phoneNumberHint
+      : CopyAr.profile.phoneNumberHint;
+
+  String get phoneVerified => locale == AppLocale.fr
+      ? CopyFr.profile.phoneVerified
+      : CopyAr.profile.phoneVerified;
+
+  String get phoneNotVerified => locale == AppLocale.fr
+      ? CopyFr.profile.phoneNotVerified
+      : CopyAr.profile.phoneNotVerified;
+
+  String get phoneNumberInvalid => locale == AppLocale.fr
+      ? CopyFr.profile.phoneNumberInvalid
+      : CopyAr.profile.phoneNumberInvalid;
+
+  String get verifyPhoneButton => locale == AppLocale.fr
+      ? CopyFr.profile.verifyPhoneButton
+      : CopyAr.profile.verifyPhoneButton;
+
+  // OTP screen
+  String get otpScreenTitle => locale == AppLocale.fr
+      ? CopyFr.profile.otpScreenTitle
+      : CopyAr.profile.otpScreenTitle;
+
+  String otpScreenSubtitle(String maskedPhone) => locale == AppLocale.fr
+      ? CopyFr.profile.otpScreenSubtitle(maskedPhone)
+      : CopyAr.profile.otpScreenSubtitle(maskedPhone);
+
+  String get otpCodeHint => locale == AppLocale.fr
+      ? CopyFr.profile.otpCodeHint
+      : CopyAr.profile.otpCodeHint;
+
+  String get otpCodeRequired => locale == AppLocale.fr
+      ? CopyFr.profile.otpCodeRequired
+      : CopyAr.profile.otpCodeRequired;
+
+  String get otpVerifyButton => locale == AppLocale.fr
+      ? CopyFr.profile.otpVerifyButton
+      : CopyAr.profile.otpVerifyButton;
+
+  String get otpResendButton => locale == AppLocale.fr
+      ? CopyFr.profile.otpResendButton
+      : CopyAr.profile.otpResendButton;
+
+  String otpResendCountdown(int s) => locale == AppLocale.fr
+      ? CopyFr.profile.otpResendCountdown(s)
+      : CopyAr.profile.otpResendCountdown(s);
+
+  String get otpSentSuccess => locale == AppLocale.fr
+      ? CopyFr.profile.otpSentSuccess
+      : CopyAr.profile.otpSentSuccess;
+
+  String get otpVerifiedSuccess => locale == AppLocale.fr
+      ? CopyFr.profile.otpVerifiedSuccess
+      : CopyAr.profile.otpVerifiedSuccess;
+
+  String get otpInvalidCode => locale == AppLocale.fr
+      ? CopyFr.profile.otpInvalidCode
+      : CopyAr.profile.otpInvalidCode;
+
+  String get otpSendFailed => locale == AppLocale.fr
+      ? CopyFr.profile.otpSendFailed
+      : CopyAr.profile.otpSendFailed;
+
+  String get otpVerifyFailed => locale == AppLocale.fr
+      ? CopyFr.profile.otpVerifyFailed
+      : CopyAr.profile.otpVerifyFailed;
+
   // ============================================
   // My Reservations
   // ============================================
