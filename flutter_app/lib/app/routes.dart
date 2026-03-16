@@ -46,4 +46,10 @@ class Routes {
 
   // Phone OTP verification (full screen, outside shell)
   static const phoneVerification = '/phone-verify';
+
+  // Staff check-in (full screen, outside shell — staff/admin only)
+  static const staffCheckIn = '/staff/check-in';
+
+  // Legal / participation conditions (full screen, outside shell — public)
+  static const rules = '/rules';
 }

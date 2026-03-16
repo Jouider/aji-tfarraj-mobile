@@ -357,6 +357,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         } else {
           message = 'Veuillez vérifier vos informations.';
         }
+      } else if (e.response?.statusCode == 429) {
+        final retryAfter = e.response?.headers.value('retry-after');
+        final seconds = retryAfter != null ? int.tryParse(retryAfter) : null;
+        message = seconds != null
+            ? 'Trop de tentatives. Réessayez dans $seconds secondes.'
+            : 'Trop de tentatives. Veuillez réessayer plus tard.';
       } else if (e.response?.statusCode != null && e.response!.statusCode! >= 500) {
         message = 'Erreur serveur. Veuillez réessayer plus tard.';
       } else if (e.response?.data is Map && e.response?.data['message'] != null) {
@@ -364,7 +370,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       } else {
         message = 'Erreur de connexion. Veuillez réessayer.';
       }
-      
+
       state = AuthState(
         status: AuthStatus.unauthenticated,
         errorMessage: message,

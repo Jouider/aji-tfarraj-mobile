@@ -82,6 +82,16 @@ class CopyFr {
   // Bottom Nav Tabs
   // ============================================
   static const navTabs = NavTabsCopyFr();
+
+  // ============================================
+  // Staff Check-in
+  // ============================================
+  static const staff = StaffCopyFr();
+
+  // ============================================
+  // Conditions de participation
+  // ============================================
+  static const conditions = ConditionsCopyFr();
 }
 
 /// Button labels in French
@@ -241,6 +251,7 @@ class AuthCopyFr {
   String get emailInvalid => 'Veuillez entrer un email valide';
   String get passwordRequired => 'Veuillez entrer votre mot de passe';
   String get passwordMin => 'Le mot de passe doit contenir au moins 8 caractères';
+  String get passwordWeak => 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule et 1 chiffre.';
   String get nameRequired => 'Veuillez entrer votre nom';
   String get nameMin => 'Le nom doit contenir au moins 2 caractères';
   String get confirmPasswordRequired => 'Veuillez confirmer votre mot de passe';
@@ -524,4 +535,134 @@ class NavTabsCopyFr {
   String get reservations => 'Réservation';
   String get ticket => 'Billet';
   String get profile => 'Profil';
+}
+
+/// A single numbered section in the participation conditions document
+class ConditionSection {
+  final String title;
+  final String body;
+  const ConditionSection({required this.title, required this.body});
+}
+
+/// Conditions de participation du public — French
+class ConditionsCopyFr {
+  const ConditionsCopyFr();
+
+  String get title => 'Conditions de participation';
+  String get subtitle => 'Autorisation de droit à l\'image et règlement';
+  String get profileTileLabel => 'Règlement';
+  String get validationTitle => 'Validation et signature électronique';
+
+  List<String> get checkboxItems => const [
+        'Je confirme avoir plus de 18 ans et accepter les conditions de participation.',
+        'J\'autorise l\'utilisation de mon image, ma voix et ma présence dans les émissions et contenus audiovisuels.',
+        'Je m\'engage à respecter la confidentialité du tournage (NDA).',
+        'Je reconnais que ma validation électronique vaut signature et acceptation légale des présentes conditions.',
+      ];
+
+  List<ConditionSection> get sections => const [
+        ConditionSection(
+          title: 'Âge minimum',
+          body:
+              'La participation aux émissions et tournages est réservée aux personnes âgées de 18 ans minimum et 65 ans maximum.\nToute personne inscrite confirme être majeure (18 ans minimum).',
+        ),
+        ConditionSection(
+          title: 'Pièce d\'identité obligatoire',
+          body:
+              'L\'accès au studio ou au lieu de tournage est soumis à la présentation d\'une pièce d\'identité valide (CIN ou passeport).\nL\'organisateur se réserve le droit de refuser l\'accès en cas d\'absence de pièce d\'identité.',
+        ),
+        ConditionSection(
+          title: 'Autorisation de droit à l\'image',
+          body:
+              'En participant à un tournage ou événement, le participant autorise expressément et gratuitement l\'organisateur, les producteurs, les chaînes de télévision et leurs partenaires à :\n• filmer, photographier et enregistrer son image, sa voix et sa silhouette,\n• utiliser ces images dans le cadre des émissions, programmes audiovisuels ou contenus promotionnels.\n\nCes images pourront être diffusées sur tous supports : télévision, internet, plateformes numériques, réseaux sociaux et supports promotionnels.\nCette autorisation est accordée pour le monde entier et sans limitation de durée, sans compensation financière.',
+        ),
+        ConditionSection(
+          title: 'Confidentialité (NDA)',
+          body:
+              'Le participant s\'engage à ne pas divulguer :\n• le contenu de l\'émission\n• les images du tournage\n• les invités ou résultats\n• les informations liées à la production\n\navant la diffusion officielle.\n\nIl est strictement interdit de publier des photos ou vidéos du tournage sur les réseaux sociaux.',
+        ),
+        ConditionSection(
+          title: 'Téléphones et enregistrements',
+          body:
+              'Pendant le tournage :\n• les téléphones doivent être éteints ou en mode silencieux\n• il est interdit de filmer, photographier ou enregistrer.',
+        ),
+        ConditionSection(
+          title: 'Comportement et respect',
+          body:
+              'Les participants doivent :\n• respecter l\'équipe de production\n• suivre les instructions des assistants de plateau\n• respecter les autres membres du public.\n\nTout comportement violent ou perturbant peut entraîner l\'exclusion immédiate du studio.',
+        ),
+        ConditionSection(
+          title: 'Bagarres et conflits',
+          body:
+              'L\'organisateur n\'est pas responsable des bagarres ou conflits entre participants, que ce soit dans le studio ou à l\'extérieur des locaux.',
+        ),
+        ConditionSection(
+          title: 'Objets personnels',
+          body:
+              'Les participants restent responsables de leurs objets personnels.\nL\'organisateur décline toute responsabilité en cas de :\n• perte\n• vol\n• détérioration.',
+        ),
+        ConditionSection(
+          title: 'Horaires et durée du tournage',
+          body:
+              'Les horaires communiqués sont indicatifs.\nLes tournages peuvent durer plus longtemps que prévu.\nL\'organisateur ne pourra être tenu responsable des retards de fin de tournage.',
+        ),
+        ConditionSection(
+          title: 'Accès et sécurité',
+          body:
+              'L\'accès au studio peut être soumis à un contrôle de sécurité.\nL\'organisateur se réserve le droit de refuser l\'accès ou d\'exclure toute personne ne respectant pas les règles.',
+        ),
+        ConditionSection(
+          title: 'Tenue vestimentaire',
+          body:
+              'Certaines émissions peuvent exiger une tenue vestimentaire spécifique.\nLes vêtements avec logos ou messages inappropriés peuvent être refusés.',
+        ),
+        ConditionSection(
+          title: 'Protection des données',
+          body:
+              'Les informations collectées dans l\'application sont utilisées uniquement pour :\n• la gestion des inscriptions du public\n• l\'organisation des tournages\n• la communication liée aux événements.',
+        ),
+        ConditionSection(
+          title: 'Droit d\'annulation',
+          body:
+              'L\'organisateur se réserve le droit de modifier ou annuler la participation d\'un utilisateur pour des raisons organisationnelles ou de sécurité.',
+        ),
+        ConditionSection(
+          title: 'Acceptation des conditions',
+          body:
+              'Toute inscription via l\'application implique l\'acceptation complète du présent règlement.',
+        ),
+      ];
+}
+
+/// Staff check-in strings in French
+class StaffCopyFr {
+  const StaffCopyFr();
+
+  String get checkInTitle => 'Check-in billets';
+  String get tabScanQr => 'Scanner QR';
+  String get tabManualCode => 'Code manuel';
+  String get scanInstruction => 'Pointez la caméra sur le QR code du billet';
+  String get manualPlaceholder => 'AT-2026-000008';
+  String get validateButton => 'Valider le billet';
+  String get successTitle => 'Billet validé';
+  String get alreadyUsed => 'Billet déjà utilisé';
+  String get notFound => 'Billet introuvable';
+  String get accessDenied => 'Accès staff requis';
+  String get accessDeniedSubtitle =>
+      'Vous n\'avez pas les droits pour accéder à cette section.';
+  String get sessionExpired => 'Session expirée. Reconnectez-vous.';
+  String get networkError =>
+      'Impossible de vérifier le billet pour le moment.';
+  String get scanAnother => 'Scanner un autre billet';
+  String get cameraPermissionDenied => 'Accès caméra refusé';
+  String get cameraPermissionSubtitle =>
+      'Autorisez l\'accès à la caméra pour scanner les QR codes.';
+  String get openSettings => 'Ouvrir les paramètres';
+  String get checkedInAt => 'Scanné le';
+  String get profileStaffTile => 'Check-in billets';
+  String get retry => 'Réessayer';
+  String get back => 'Retour';
+  String get attendeeName => 'Spectateur';
+  String get showLabel => 'Émission';
+  String get ticketCodeLabel => 'Code billet';
 }

@@ -15,6 +15,8 @@ class User {
   final DateTime? phoneVerifiedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
+  /// User role: 'client' | 'staff' | 'admin' (null treated as 'client')
+  final String? role;
 
   User({
     required this.id,
@@ -32,6 +34,7 @@ class User {
     this.phoneVerifiedAt,
     required this.createdAt,
     required this.updatedAt,
+    this.role,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -61,6 +64,7 @@ class User {
       phoneVerifiedAt: phoneVerifiedAt,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      role: json['role'] as String?,
     );
   }
 
@@ -81,6 +85,7 @@ class User {
       'phone_verified_at': phoneVerifiedAt?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'role': role,
     };
   }
 
@@ -100,6 +105,7 @@ class User {
     DateTime? phoneVerifiedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? role,
     bool clearAvatar = false,
     bool clearPhoneVerification = false,
   }) {
@@ -119,11 +125,16 @@ class User {
       phoneVerifiedAt: clearPhoneVerification ? null : (phoneVerifiedAt ?? this.phoneVerifiedAt),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      role: role ?? this.role,
     );
   }
 
   /// Whether the phone number has been verified
   bool get isPhoneVerified => phoneVerifiedAt != null;
+
+  bool get isStaff => role == 'staff';
+  bool get isAdmin => role == 'admin';
+  bool get isStaffOrAdmin => role == 'staff' || role == 'admin';
 
   /// Display name: first + last if available, otherwise full name
   String get displayName {

@@ -212,6 +212,9 @@ class AppStrings {
   String get passwordMin =>
       locale == AppLocale.fr ? CopyFr.auth.passwordMin : CopyAr.auth.passwordMin;
 
+  String get passwordWeak =>
+      locale == AppLocale.fr ? CopyFr.auth.passwordWeak : CopyAr.auth.passwordWeak;
+
   String get nameRequired => locale == AppLocale.fr
       ? CopyFr.auth.nameRequired
       : CopyAr.auth.nameRequired;
@@ -973,6 +976,105 @@ class AppStrings {
       : CopyAr.navTabs.profile;
 
   // ============================================
+  // Staff Check-in
+  // ============================================
+  String get staffCheckInTitle => locale == AppLocale.fr
+      ? CopyFr.staff.checkInTitle
+      : CopyAr.staff.checkInTitle;
+
+  String get staffTabScanQr => locale == AppLocale.fr
+      ? CopyFr.staff.tabScanQr
+      : CopyAr.staff.tabScanQr;
+
+  String get staffTabManualCode => locale == AppLocale.fr
+      ? CopyFr.staff.tabManualCode
+      : CopyAr.staff.tabManualCode;
+
+  String get staffScanInstruction => locale == AppLocale.fr
+      ? CopyFr.staff.scanInstruction
+      : CopyAr.staff.scanInstruction;
+
+  String get staffManualPlaceholder => locale == AppLocale.fr
+      ? CopyFr.staff.manualPlaceholder
+      : CopyAr.staff.manualPlaceholder;
+
+  String get staffValidateButton => locale == AppLocale.fr
+      ? CopyFr.staff.validateButton
+      : CopyAr.staff.validateButton;
+
+  String get staffSuccessTitle => locale == AppLocale.fr
+      ? CopyFr.staff.successTitle
+      : CopyAr.staff.successTitle;
+
+  String get staffAlreadyUsed => locale == AppLocale.fr
+      ? CopyFr.staff.alreadyUsed
+      : CopyAr.staff.alreadyUsed;
+
+  String get staffNotFound => locale == AppLocale.fr
+      ? CopyFr.staff.notFound
+      : CopyAr.staff.notFound;
+
+  String get staffAccessDenied => locale == AppLocale.fr
+      ? CopyFr.staff.accessDenied
+      : CopyAr.staff.accessDenied;
+
+  String get staffAccessDeniedSubtitle => locale == AppLocale.fr
+      ? CopyFr.staff.accessDeniedSubtitle
+      : CopyAr.staff.accessDeniedSubtitle;
+
+  String get staffSessionExpired => locale == AppLocale.fr
+      ? CopyFr.staff.sessionExpired
+      : CopyAr.staff.sessionExpired;
+
+  String get staffNetworkError => locale == AppLocale.fr
+      ? CopyFr.staff.networkError
+      : CopyAr.staff.networkError;
+
+  String get staffScanAnother => locale == AppLocale.fr
+      ? CopyFr.staff.scanAnother
+      : CopyAr.staff.scanAnother;
+
+  String get staffCameraPermissionDenied => locale == AppLocale.fr
+      ? CopyFr.staff.cameraPermissionDenied
+      : CopyAr.staff.cameraPermissionDenied;
+
+  String get staffCameraPermissionSubtitle => locale == AppLocale.fr
+      ? CopyFr.staff.cameraPermissionSubtitle
+      : CopyAr.staff.cameraPermissionSubtitle;
+
+  String get staffOpenSettings => locale == AppLocale.fr
+      ? CopyFr.staff.openSettings
+      : CopyAr.staff.openSettings;
+
+  String get staffCheckedInAt => locale == AppLocale.fr
+      ? CopyFr.staff.checkedInAt
+      : CopyAr.staff.checkedInAt;
+
+  String get staffCheckInLabel => locale == AppLocale.fr
+      ? CopyFr.staff.profileStaffTile
+      : CopyAr.staff.profileStaffTile;
+
+  String get staffRetry => locale == AppLocale.fr
+      ? CopyFr.staff.retry
+      : CopyAr.staff.retry;
+
+  String get staffBack => locale == AppLocale.fr
+      ? CopyFr.staff.back
+      : CopyAr.staff.back;
+
+  String get staffAttendeeName => locale == AppLocale.fr
+      ? CopyFr.staff.attendeeName
+      : CopyAr.staff.attendeeName;
+
+  String get staffShowLabel => locale == AppLocale.fr
+      ? CopyFr.staff.showLabel
+      : CopyAr.staff.showLabel;
+
+  String get staffTicketCodeLabel => locale == AppLocale.fr
+      ? CopyFr.staff.ticketCodeLabel
+      : CopyAr.staff.ticketCodeLabel;
+
+  // ============================================
   // Rules (locale-aware items list)
   // ============================================
   List<({String title, String description})> get rulesItems =>
@@ -983,4 +1085,31 @@ class AppStrings {
           : CopyAr.rules.items
               .map((e) => (title: e.title, description: e.description))
               .toList();
+
+  // ============================================
+  // Conditions de participation
+  // ============================================
+  String get conditionsTitle => locale == AppLocale.fr
+      ? CopyFr.conditions.title
+      : CopyAr.conditions.title;
+
+  String get conditionsSubtitle => locale == AppLocale.fr
+      ? CopyFr.conditions.subtitle
+      : CopyAr.conditions.subtitle;
+
+  String get conditionsProfileTileLabel => locale == AppLocale.fr
+      ? CopyFr.conditions.profileTileLabel
+      : CopyAr.conditions.profileTileLabel;
+
+  String get conditionsValidationTitle => locale == AppLocale.fr
+      ? CopyFr.conditions.validationTitle
+      : CopyAr.conditions.validationTitle;
+
+  List<String> get conditionsCheckboxItems => locale == AppLocale.fr
+      ? CopyFr.conditions.checkboxItems
+      : CopyAr.conditions.checkboxItems;
+
+  List<ConditionSection> get conditionsSections => locale == AppLocale.fr
+      ? CopyFr.conditions.sections
+      : CopyAr.conditions.sections;
 }

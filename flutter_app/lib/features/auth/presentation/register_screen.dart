@@ -145,6 +145,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   validator: (v) {
                     if (v == null || v.isEmpty) return s.passwordRequired;
                     if (v.length < 8) return s.passwordMin;
+                    if (!v.contains(RegExp(r'[A-Z]')) ||
+                        !v.contains(RegExp(r'[a-z]')) ||
+                        !v.contains(RegExp(r'[0-9]'))) {
+                      return s.passwordWeak;
+                    }
                     return null;
                   },
                 ),

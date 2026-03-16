@@ -251,25 +251,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const Divider(color: AppColors.border),
 
-          // Help tile
-          ListTile(
-            leading: const Icon(Icons.help_outline,
-                color: AppColors.textSecondary),
-            title: Text(s.profileHelpLabel, style: AppTypography.bodyMedium),
-            trailing:
-                const Icon(Icons.chevron_right, color: AppColors.textMuted),
-            onTap: () {},
-          ),
-          const Divider(color: AppColors.border),
+          // Staff check-in tile (only visible to staff/admin)
+          if (user != null && user.isStaffOrAdmin) ...[
+            ListTile(
+              leading: const Icon(Icons.qr_code_scanner,
+                  color: AppColors.textSecondary),
+              title: Text(s.staffCheckInLabel,
+                  style: AppTypography.bodyMedium),
+              trailing:
+                  const Icon(Icons.chevron_right, color: AppColors.textMuted),
+              onTap: () => context.push(Routes.staffCheckIn),
+            ),
+            const Divider(color: AppColors.border),
+          ],
 
-          // About tile
+          // Règlement tile
           ListTile(
-            leading: const Icon(Icons.info_outline,
+            leading: const Icon(Icons.gavel_outlined,
                 color: AppColors.textSecondary),
-            title: Text(s.profileAboutLabel, style: AppTypography.bodyMedium),
+            title: Text(s.conditionsProfileTileLabel,
+                style: AppTypography.bodyMedium),
             trailing:
                 const Icon(Icons.chevron_right, color: AppColors.textMuted),
-            onTap: () {},
+            onTap: () => context.push(Routes.rules),
           ),
           const Divider(color: AppColors.border),
           const SizedBox(height: AppSpacing.xl),

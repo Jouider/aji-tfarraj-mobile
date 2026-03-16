@@ -27,6 +27,8 @@ import 'package:aji_tfarraj/features/notifications/presentation/notification_cen
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
 import 'package:aji_tfarraj/features/profile/presentation/phone_otp_verification_screen.dart';
+import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.dart';
+import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
 
 /// Routes that require authentication
 const _protectedRoutes = [
@@ -37,6 +39,7 @@ const _protectedRoutes = [
   Routes.profile,
   Routes.notifications,
   Routes.loyalty,
+  Routes.staffCheckIn,
 ];
 
 /// Routes that should redirect to home if already authenticated
@@ -320,6 +323,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             phoneNumber: extra['phoneNumber']!,
           );
         },
+      ),
+      GoRoute(
+        path: Routes.staffCheckIn,
+        name: 'staffCheckIn',
+        builder: (context, state) => const StaffCheckInScreen(),
+      ),
+      GoRoute(
+        path: Routes.rules,
+        name: 'rules',
+        builder: (context, state) => const RulesScreen(),
       ),
     ],
   );

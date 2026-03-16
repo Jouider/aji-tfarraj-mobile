@@ -357,6 +357,14 @@ class ApiException implements Exception {
         message = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
         break;
       case DioExceptionType.badResponse:
+        if (error.response?.statusCode == 429) {
+          final retryAfter = error.response?.headers.value('retry-after');
+          final seconds = retryAfter != null ? int.tryParse(retryAfter) : null;
+          message = seconds != null
+              ? 'Trop de tentatives. Réessayez dans $seconds secondes.'
+              : 'Trop de tentatives. Veuillez réessayer plus tard.';
+          break;
+        }
         final data = error.response?.data;
         if (data is Map<String, dynamic>) {
           message = data['message'] ?? message;
@@ -380,6 +388,7 @@ class ApiException implements Exception {
   bool get isForbidden => statusCode == 403;
   bool get isNotFound => statusCode == 404;
   bool get isValidationError => statusCode == 422;
+  bool get isRateLimited => statusCode == 429;
   bool get isServerError => statusCode != null && statusCode! >= 500;
 
   @override

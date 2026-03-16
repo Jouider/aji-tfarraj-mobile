@@ -1,3 +1,5 @@
+import 'package:aji_tfarraj/app/copywriting/copy_fr.dart' show ConditionSection;
+
 /// Arabic copywriting for Aji Tfarraj app
 /// Starter pack - not final marketing copy
 class CopyAr {
@@ -82,6 +84,16 @@ class CopyAr {
   // Bottom Nav Tabs
   // ============================================
   static const navTabs = NavTabsCopyAr();
+
+  // ============================================
+  // Staff Check-in
+  // ============================================
+  static const staff = StaffCopyAr();
+
+  // ============================================
+  // Conditions de participation
+  // ============================================
+  static const conditions = ConditionsCopyAr();
 }
 
 /// Button labels in Arabic
@@ -223,6 +235,7 @@ class AuthCopyAr {
   String get emailInvalid => 'يرجى إدخال بريد إلكتروني صالح';
   String get passwordRequired => 'يرجى إدخال كلمة المرور';
   String get passwordMin => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل';
+  String get passwordWeak => 'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم على الأقل.';
   String get nameRequired => 'يرجى إدخال اسمك';
   String get nameMin => 'الاسم يجب أن يحتوي على حرفين على الأقل';
   String get confirmPasswordRequired => 'يرجى تأكيد كلمة المرور';
@@ -517,4 +530,126 @@ class NavTabsCopyAr {
   String get reservations => 'حجوزاتي';
   String get ticket => 'بطاقتي';
   String get profile => 'حسابي';
+}
+
+/// Staff check-in strings in Arabic
+class StaffCopyAr {
+  const StaffCopyAr();
+
+  String get checkInTitle => 'تسجيل الدخول - البطاقات';
+  String get tabScanQr => 'مسح QR';
+  String get tabManualCode => 'الرمز اليدوي';
+  String get scanInstruction => 'وجّه الكاميرا نحو رمز QR الخاص بالبطاقة';
+  String get manualPlaceholder => 'AT-2026-000008';
+  String get validateButton => 'التحقق من البطاقة';
+  String get successTitle => 'تم التحقق من البطاقة';
+  String get alreadyUsed => 'البطاقة مستخدمة بالفعل';
+  String get notFound => 'البطاقة غير موجودة';
+  String get accessDenied => 'مطلوب صلاحيات الموظف';
+  String get accessDeniedSubtitle =>
+      'ليس لديك الصلاحيات للوصول إلى هذا القسم.';
+  String get sessionExpired => 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.';
+  String get networkError => 'تعذّر التحقق من البطاقة في الوقت الحالي.';
+  String get scanAnother => 'مسح بطاقة أخرى';
+  String get cameraPermissionDenied => 'تم رفض الوصول إلى الكاميرا';
+  String get cameraPermissionSubtitle =>
+      'السماح بالوصول إلى الكاميرا لمسح رموز QR.';
+  String get openSettings => 'فتح الإعدادات';
+  String get checkedInAt => 'وقت الدخول';
+  String get profileStaffTile => 'تسجيل الدخول - البطاقات';
+  String get retry => 'إعادة المحاولة';
+  String get back => 'رجوع';
+  String get attendeeName => 'المشاهد';
+  String get showLabel => 'البرنامج';
+  String get ticketCodeLabel => 'رمز البطاقة';
+}
+
+/// شروط المشاركة — Arabic
+class ConditionsCopyAr {
+  const ConditionsCopyAr();
+
+  String get title => 'شروط المشاركة';
+  String get subtitle => 'تفويض حق الصورة والنظام الداخلي';
+  String get profileTileLabel => 'النظام الداخلي';
+  String get validationTitle => 'التوقيع والتصديق الإلكتروني';
+
+  List<String> get checkboxItems => const [
+        'أؤكد أن عمري يزيد عن 18 سنة وأوافق على شروط المشاركة.',
+        'أفوّض استخدام صورتي وصوتي وحضوري في البرامج والمحتويات السمعية البصرية.',
+        'أتعهد باحترام سرية التصوير (اتفاقية عدم الإفصاح).',
+        'أقر بأن تصديقي الإلكتروني يُعدّ توقيعاً وقبولاً قانونياً للشروط الواردة.',
+      ];
+
+  List<ConditionSection> get sections => const [
+        ConditionSection(
+          title: 'الحد الأدنى للسن',
+          body:
+              'تُخصص المشاركة في البرامج والتصوير للأشخاص الذين تتراوح أعمارهم بين 18 و65 سنة.\nيؤكد كل شخص مسجل أنه بالغ (18 سنة على الأقل).',
+        ),
+        ConditionSection(
+          title: 'بطاقة الهوية إلزامية',
+          body:
+              'يخضع الدخول إلى الاستوديو أو موقع التصوير لتقديم وثيقة هوية سارية المفعول (بطاقة وطنية أو جواز سفر).\nيحق للمنظم رفض الدخول في غياب وثيقة الهوية.',
+        ),
+        ConditionSection(
+          title: 'تفويض حق الصورة',
+          body:
+              'بمشاركته في التصوير أو الحدث، يفوّض المشارك صراحةً وبدون مقابل للمنظم والمنتجين وقنوات التلفزيون وشركائهم:\n• تصويره والتقاط صوره وتسجيل صورته وصوته وملامحه،\n• استخدام هذه الصور في إطار البرامج والمحتويات السمعية البصرية أو الترويجية.\n\nيمكن بث هذه الصور على جميع الوسائط: التلفزيون، الإنترنت، المنصات الرقمية، الشبكات الاجتماعية والوسائط الترويجية.\nيُمنح هذا التفويض على المستوى العالمي وبدون حد زمني وبدون تعويض مالي.',
+        ),
+        ConditionSection(
+          title: 'السرية (اتفاقية عدم الإفصاح)',
+          body:
+              'يلتزم المشارك بعدم الكشف عن:\n• مضمون البرنامج\n• مقاطع التصوير\n• الضيوف أو النتائج\n• المعلومات المتعلقة بالإنتاج\n\nقبل البث الرسمي.\n\nيُمنع منعاً باتاً نشر صور أو مقاطع فيديو من التصوير على الشبكات الاجتماعية.',
+        ),
+        ConditionSection(
+          title: 'الهواتف والتسجيلات',
+          body:
+              'خلال التصوير:\n• يجب إيقاف تشغيل الهواتف أو ضبطها على الوضع الصامت\n• يُمنع التصوير الفوتوغرافي أو بالفيديو أو التسجيل الصوتي.',
+        ),
+        ConditionSection(
+          title: 'السلوك والاحترام',
+          body:
+              'يجب على المشاركين:\n• احترام فريق الإنتاج\n• اتباع تعليمات مساعدي الاستوديو\n• احترام سائر أفراد الجمهور.\n\nأي سلوك عنيف أو مزعزع للنظام قد يُفضي إلى الطرد الفوري من الاستوديو.',
+        ),
+        ConditionSection(
+          title: 'الشجارات والنزاعات',
+          body:
+              'لا يتحمل المنظم أي مسؤولية عن الشجارات أو النزاعات بين المشاركين، سواء داخل الاستوديو أو خارج المقر.',
+        ),
+        ConditionSection(
+          title: 'المقتنيات الشخصية',
+          body:
+              'يتحمل المشاركون مسؤولية مقتنياتهم الشخصية.\nيتبرأ المنظم من كل مسؤولية في حال:\n• الضياع\n• السرقة\n• التلف.',
+        ),
+        ConditionSection(
+          title: 'مواعيد وأوقات التصوير',
+          body:
+              'المواعيد المُعلنة إرشادية.\nقد تستمر التصوير لوقت أطول مما هو مقرر.\nلا يمكن تحميل المنظم المسؤولية عن تأخر نهاية التصوير.',
+        ),
+        ConditionSection(
+          title: 'الدخول والأمن',
+          body:
+              'قد يخضع الدخول إلى الاستوديو لفحص أمني.\nيحق للمنظم رفض الدخول أو طرد أي شخص لا يحترم القواعد.',
+        ),
+        ConditionSection(
+          title: 'اللباس',
+          body:
+              'قد تشترط بعض البرامج نوعاً معيناً من اللباس.\nقد يُرفض الدخول للملابس التي تحمل شعارات أو رسائل غير لائقة.',
+        ),
+        ConditionSection(
+          title: 'حماية البيانات',
+          body:
+              'تُستخدم المعلومات المجمّعة في التطبيق حصراً من أجل:\n• إدارة تسجيلات الجمهور\n• تنظيم التصوير\n• التواصل المتعلق بالفعاليات.',
+        ),
+        ConditionSection(
+          title: 'حق الإلغاء',
+          body:
+              'يحق للمنظم تعديل أو إلغاء مشاركة مستخدم لأسباب تنظيمية أو أمنية.',
+        ),
+        ConditionSection(
+          title: 'قبول الشروط',
+          body:
+              'يستلزم أي تسجيل عبر التطبيق القبول الكامل للنظام الداخلي الحالي.',
+        ),
+      ];
 }
