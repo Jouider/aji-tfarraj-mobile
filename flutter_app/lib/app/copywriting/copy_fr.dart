@@ -92,6 +92,34 @@ class CopyFr {
   // Conditions de participation
   // ============================================
   static const conditions = ConditionsCopyFr();
+
+  // ============================================
+  // Rewards
+  // ============================================
+  static const rewards = RewardsCopyFr();
+}
+
+/// Rewards screen copy in French
+class RewardsCopyFr {
+  const RewardsCopyFr();
+
+  String get rewardsTitle => 'Récompenses';
+  String get myRewardsTitle => 'Mes demandes';
+  String get collectReward => 'Obtenir';
+  String get rewardRequestSent =>
+      'Demande envoyée. En attente d\'approbation.';
+  String get pendingLabel => 'En attente';
+  String get approvedLabel => 'Approuvé';
+  String get rejectedLabel => 'Refusé';
+  String get insufficientPoints => 'Vous n\'avez pas assez de points.';
+  String get duplicatePending =>
+      'Vous avez déjà demandé cette récompense.';
+  String get rewardInactive => 'Cette récompense n\'est plus disponible.';
+  String get noRewardsYet => 'Aucune récompense disponible.';
+  String get noMyRewardsYet => 'Aucune demande pour le moment.';
+  String get pointsRequired => 'pts requis';
+  String get seeAllRewards => 'Voir toutes les récompenses';
+  String get requestedAt => 'Demandée le';
 }
 
 /// Button labels in French

@@ -11,7 +11,10 @@ import 'package:aji_tfarraj/features/loyalty/data/loyalty_repository.dart';
 import 'package:aji_tfarraj/features/loyalty/domain/points_summary.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/widgets/points_total_card.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/widgets/points_history_list.dart';
-import 'package:aji_tfarraj/features/loyalty/presentation/widgets/reward_card.dart';
+import 'package:go_router/go_router.dart';
+import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
+import 'package:aji_tfarraj/features/rewards/presentation/widgets/reward_api_card.dart';
 
 /// Main loyalty / fidelity screen
 class LoyaltyScreen extends ConsumerStatefulWidget {
@@ -41,12 +44,12 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
         error: (error, _) => ErrorState.generic(
           onRetry: () => ref.invalidate(myPointsProvider),
         ),
-        data: (summary) => _buildContent(summary, strings),
+        data: (summary) => _buildContent(context, summary, strings),
       ),
     );
   }
 
-  Widget _buildContent(PointsSummary summary, dynamic strings) {
+  Widget _buildContent(BuildContext context, PointsSummary summary, dynamic strings) {
     final locale = ref.watch(localeProvider);
 
     return RefreshIndicator(
@@ -96,31 +99,19 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
           const SizedBox(height: AppSpacing.xl),
 
           // ── Rewards section ──
-          _SectionHeader(title: strings.rewards),
+          _SectionHeader(
+            title: strings.rewards,
+            trailing: TextButton(
+              onPressed: () => context.push(Routes.rewards),
+              child: Text(
+                strings.seeAllRewards,
+                style: AppTypography.labelMedium
+                    .copyWith(color: AppColors.primary),
+              ),
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
-          RewardCard(
-            title: 'Café offert',
-            requiredPoints: 100,
-            currentBalance: summary.balance,
-            icon: Icons.coffee,
-            comingSoonLabel: strings.comingSoon,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          RewardCard(
-            title: 'Réduction 20%',
-            requiredPoints: 250,
-            currentBalance: summary.balance,
-            icon: Icons.discount,
-            comingSoonLabel: strings.comingSoon,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          RewardCard(
-            title: 'Invitation VIP',
-            requiredPoints: 500,
-            currentBalance: summary.balance,
-            icon: Icons.workspace_premium,
-            comingSoonLabel: strings.comingSoon,
-          ),
+          _RewardsPreview(),
           const SizedBox(height: AppSpacing.xxl),
         ],
       ),
@@ -170,6 +161,40 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Shows first 3 rewards from the API in preview mode (no collect button)
+class _RewardsPreview extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rewardsAsync = ref.watch(rewardsListProvider);
+
+    return rewardsAsync.when(
+      loading: () => Column(
+        children: List.generate(
+          2,
+          (_) => const Padding(
+            padding: EdgeInsets.only(bottom: AppSpacing.md),
+            child: SkeletonLoader(width: double.infinity, height: 100),
+          ),
+        ),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (rewards) {
+        if (rewards.isEmpty) return const SizedBox.shrink();
+        final preview = rewards.take(3).toList();
+        return Column(
+          children: [
+            for (int i = 0; i < preview.length; i++) ...[
+              RewardApiCard(reward: preview[i], previewMode: true),
+              if (i < preview.length - 1)
+                const SizedBox(height: AppSpacing.md),
+            ],
+          ],
+        );
+      },
     );
   }
 }

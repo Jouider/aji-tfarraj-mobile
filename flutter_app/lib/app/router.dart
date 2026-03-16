@@ -21,7 +21,6 @@ import 'package:aji_tfarraj/features/profile/profile_screen.dart';
 import 'package:aji_tfarraj/features/profile/presentation/edit_profile_screen.dart';
 import 'package:aji_tfarraj/features/error/error_screen.dart';
 import 'package:aji_tfarraj/features/show/sold_out_screen.dart';
-import 'package:aji_tfarraj/app/design_system/demo_screen.dart';
 import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/notification_center_screen.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
@@ -29,6 +28,8 @@ import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart
 import 'package:aji_tfarraj/features/profile/presentation/phone_otp_verification_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.dart';
 import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
+import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
+import 'package:aji_tfarraj/features/rewards/presentation/my_rewards_screen.dart';
 
 /// Routes that require authentication
 const _protectedRoutes = [
@@ -39,6 +40,8 @@ const _protectedRoutes = [
   Routes.profile,
   Routes.notifications,
   Routes.loyalty,
+  Routes.rewards,
+  Routes.myRewards,
   Routes.staffCheckIn,
 ];
 
@@ -104,6 +107,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         return Routes.authLanding;
       }
 
+      // If authenticated but not staff, block staff check-in route
+      if (isAuthenticated && currentPath == Routes.staffCheckIn) {
+        final user = ref.read(loginAuthStateProvider).user;
+        if (user != null && !user.isStaffOrAdmin) {
+          return Routes.home;
+        }
+      }
+
       // If authenticated and trying to access login/register -> redirect to home
       if (isAuthenticated && isAuthRoute) {
         return Routes.home;
@@ -132,15 +143,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      // ============================================
-      // Design System Demo (for development)
-      // ============================================
-      GoRoute(
-        path: '/design-system',
-        name: 'designSystem',
-        builder: (context, state) => const DesignSystemDemoScreen(),
-      ),
-
       // ============================================
       // Auth Flow (outside shell - no bottom nav)
       // ============================================
@@ -333,6 +335,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.rules,
         name: 'rules',
         builder: (context, state) => const RulesScreen(),
+      ),
+      GoRoute(
+        path: Routes.rewards,
+        name: 'rewards',
+        builder: (context, state) => const RewardsScreen(),
+      ),
+      GoRoute(
+        path: Routes.myRewards,
+        name: 'myRewards',
+        builder: (context, state) => const MyRewardsScreen(),
       ),
     ],
   );

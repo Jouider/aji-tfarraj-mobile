@@ -94,6 +94,32 @@ class CopyAr {
   // Conditions de participation
   // ============================================
   static const conditions = ConditionsCopyAr();
+
+  // ============================================
+  // Rewards
+  // ============================================
+  static const rewards = RewardsCopyAr();
+}
+
+/// Rewards screen copy in Arabic
+class RewardsCopyAr {
+  const RewardsCopyAr();
+
+  String get rewardsTitle => 'المكافآت';
+  String get myRewardsTitle => 'طلباتي';
+  String get collectReward => 'احصل عليها';
+  String get rewardRequestSent => 'تم إرسال الطلب. في انتظار الموافقة.';
+  String get pendingLabel => 'قيد الانتظار';
+  String get approvedLabel => 'مقبول';
+  String get rejectedLabel => 'مرفوض';
+  String get insufficientPoints => 'ليس لديك نقاط كافية.';
+  String get duplicatePending => 'لقد طلبت هذه المكافأة بالفعل.';
+  String get rewardInactive => 'هذه المكافأة غير متاحة حاليًا.';
+  String get noRewardsYet => 'لا توجد مكافآت متاحة.';
+  String get noMyRewardsYet => 'لا توجد طلبات حتى الآن.';
+  String get pointsRequired => 'نقطة مطلوبة';
+  String get seeAllRewards => 'عرض كل المكافآت';
+  String get requestedAt => 'تم الطلب في';
 }
 
 /// Button labels in Arabic

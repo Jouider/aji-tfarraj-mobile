@@ -27,6 +27,16 @@ class PointsEntry {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'type': type,
+      'points': points,
+      'meta': meta,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+
   /// Whether the entry represents earned (positive) points
   bool get isPositive => points > 0;
 
@@ -85,6 +95,13 @@ class PointsSummary {
       balance: _parseInt(data['balance']),
       history: history,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'balance': balance,
+      'history': history.map((e) => e.toJson()).toList(),
+    };
   }
 
   static int _parseInt(dynamic value) {

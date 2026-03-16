@@ -1,0 +1,19 @@
+flutter_native_splash:
+  # Dark background matching the app's main scaffold color
+  color: "#0C0C0C"
+  color_dark: "#0C0C0C"
+
+  # White logo on dark background
+  image: assets/images/ajitfarraj_logo/white_fr_logo.png
+  image_dark: assets/images/ajitfarraj_logo/white_fr_logo.png
+
+  # Keep the native splash visible until Flutter is ready
+  fullscreen: false
+
+  android_12:
+    color: "#0C0C0C"
+    color_dark: "#0C0C0C"
+    image: assets/images/ajitfarraj_logo/white_fr_logo.png
+    image_dark: assets/images/ajitfarraj_logo/white_fr_logo.png
+    icon_background_color: "#0C0C0C"
+    icon_background_color_dark: "#0C0C0C"

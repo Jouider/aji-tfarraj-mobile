@@ -149,6 +149,57 @@ class AppStrings {
       : CopyAr.loyalty.attendanceLabel;
 
   // ============================================
+  // Rewards
+  // ============================================
+  String get rewardsTitle => locale == AppLocale.fr
+      ? CopyFr.rewards.rewardsTitle
+      : CopyAr.rewards.rewardsTitle;
+
+  String get myRewardsTitle => locale == AppLocale.fr
+      ? CopyFr.rewards.myRewardsTitle
+      : CopyAr.rewards.myRewardsTitle;
+
+  String get collectReward => locale == AppLocale.fr
+      ? CopyFr.rewards.collectReward
+      : CopyAr.rewards.collectReward;
+
+  String get rewardRequestSent => locale == AppLocale.fr
+      ? CopyFr.rewards.rewardRequestSent
+      : CopyAr.rewards.rewardRequestSent;
+
+  String get rewardPendingLabel => locale == AppLocale.fr
+      ? CopyFr.rewards.pendingLabel
+      : CopyAr.rewards.pendingLabel;
+
+  String get rewardApprovedLabel => locale == AppLocale.fr
+      ? CopyFr.rewards.approvedLabel
+      : CopyAr.rewards.approvedLabel;
+
+  String get rewardRejectedLabel => locale == AppLocale.fr
+      ? CopyFr.rewards.rejectedLabel
+      : CopyAr.rewards.rejectedLabel;
+
+  String get noRewardsYet => locale == AppLocale.fr
+      ? CopyFr.rewards.noRewardsYet
+      : CopyAr.rewards.noRewardsYet;
+
+  String get noMyRewardsYet => locale == AppLocale.fr
+      ? CopyFr.rewards.noMyRewardsYet
+      : CopyAr.rewards.noMyRewardsYet;
+
+  String get pointsRequired => locale == AppLocale.fr
+      ? CopyFr.rewards.pointsRequired
+      : CopyAr.rewards.pointsRequired;
+
+  String get seeAllRewards => locale == AppLocale.fr
+      ? CopyFr.rewards.seeAllRewards
+      : CopyAr.rewards.seeAllRewards;
+
+  String get requestedAt => locale == AppLocale.fr
+      ? CopyFr.rewards.requestedAt
+      : CopyAr.rewards.requestedAt;
+
+  // ============================================
   // Auth
   // ============================================
   String get loginSubtitle => locale == AppLocale.fr

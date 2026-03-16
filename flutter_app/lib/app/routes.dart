@@ -27,6 +27,10 @@ class Routes {
   // Loyalty
   static const loyalty = '/loyalty';
 
+  // Rewards
+  static const rewards = '/rewards';
+  static const myRewards = '/my-rewards';
+
   // Show routes (inside shell, independent of tabs)
   static const show = '/show';
   static String showDetail(String showId) => '/show/$showId';
