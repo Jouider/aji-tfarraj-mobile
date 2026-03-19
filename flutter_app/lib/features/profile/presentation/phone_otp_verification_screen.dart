@@ -8,14 +8,6 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/profile/presentation/phone_otp_controller.dart';
 
-/// Masks all but the last 2 digits of the local number part.
-/// e.g. "+212" + "615069686" → "+212 6XXXXXX86"
-String _maskPhone(String countryCode, String phoneNumber) {
-  if (phoneNumber.length <= 2) return '$countryCode $phoneNumber';
-  final visible = phoneNumber.substring(phoneNumber.length - 2);
-  final masked = 'X' * (phoneNumber.length - 2);
-  return '$countryCode $masked$visible';
-}
 
 class PhoneOtpVerificationScreen extends ConsumerStatefulWidget {
   const PhoneOtpVerificationScreen({
@@ -88,7 +80,7 @@ class _PhoneOtpVerificationScreenState
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
     final state = ref.watch(phoneOtpControllerProvider(_providerKey));
-    final maskedPhone = _maskPhone(widget.countryCode, widget.phoneNumber);
+    final maskedPhone = '${widget.countryCode} ${widget.phoneNumber}';
 
     return Scaffold(
       appBar: AppBar(

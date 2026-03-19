@@ -27,6 +27,15 @@ class Reward {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'image_url': imageUrl,
+        'points_required': pointsRequired,
+        'can_collect': canCollect,
+      };
+
   static int _parseInt(dynamic value) {
     if (value is int) return value;
     if (value is double) return value.toInt();

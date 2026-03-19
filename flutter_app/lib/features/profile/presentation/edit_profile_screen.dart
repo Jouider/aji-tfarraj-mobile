@@ -107,6 +107,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             backgroundColor: AppColors.success,
           ),
         );
+
+        // If a phone was just saved and is not yet verified, start OTP flow immediately
+        final savedUser = ref.read(loginAuthStateProvider).user;
+        final phone = _phoneController.text.trim();
+        if (phone.isNotEmpty && savedUser?.isPhoneVerified != true) {
+          setState(() => _isLoading = false);
+          await _requestOtpAndNavigate();
+          return;
+        }
+
         if (context.canPop()) {
           context.pop();
         } else {

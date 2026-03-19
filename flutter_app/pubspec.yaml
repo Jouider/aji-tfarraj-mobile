@@ -41,7 +41,7 @@ dependencies:
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.2
   # QR code scanning (staff check-in)
-  mobile_scanner: ^6.0.0
+  mobile_scanner: ^7.0.0
 
   flutter_native_splash:
     ^2.4.0

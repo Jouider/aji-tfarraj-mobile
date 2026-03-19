@@ -1,20 +1,51 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/rewards/domain/reward.dart';
+
+const _kRewardsCacheKey = 'rewards_list_cache';
 
 class RewardsRepository {
   final ApiClient _apiClient;
 
+  /// In-memory cache of the last successful rewards list
+  List<Reward>? _cachedRewards;
+
   RewardsRepository(this._apiClient);
 
   /// Fetch all available rewards — GET /api/rewards
+  /// Falls back to in-memory then disk cache on network failure.
   Future<List<Reward>> fetchRewards() async {
-    final response = await _apiClient.get<dynamic>('/api/rewards');
-    final raw = response.data;
-    if (raw is List) {
-      return raw.whereType<Map<String, dynamic>>().map(Reward.fromJson).toList();
+    try {
+      final response = await _apiClient.get<dynamic>('/api/rewards');
+      final raw = response.data;
+      final rewards = raw is List
+          ? raw.whereType<Map<String, dynamic>>().map(Reward.fromJson).toList()
+          : <Reward>[];
+      _cachedRewards = rewards;
+      _persistCache(rewards);
+      return rewards;
+    } on DioException catch (e) {
+      if (_cachedRewards != null) {
+        if (kDebugMode) {
+          debugPrint('[RewardsRepository] Network error – returning in-memory cache');
+        }
+        return _cachedRewards!;
+      }
+      final disk = await _loadCachedRewards();
+      if (disk != null) {
+        if (kDebugMode) {
+          debugPrint('[RewardsRepository] Network error – returning disk cache');
+        }
+        _cachedRewards = disk;
+        return disk;
+      }
+      throw ApiException.fromDioError(e);
     }
-    return [];
   }
 
   /// Collect a reward — POST /api/rewards/{id}/collect
@@ -60,14 +91,39 @@ class RewardsRepository {
     }
     return [];
   }
+
+  Future<void> _persistCache(List<Reward> rewards) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _kRewardsCacheKey,
+        jsonEncode(rewards.map((r) => r.toJson()).toList()),
+      );
+    } catch (_) {
+      // Cache write failure is non-fatal
+    }
+  }
+
+  Future<List<Reward>?> _loadCachedRewards() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_kRewardsCacheKey);
+      if (raw == null) return null;
+      final list = jsonDecode(raw) as List<dynamic>;
+      return list.whereType<Map<String, dynamic>>().map(Reward.fromJson).toList();
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 final rewardsRepositoryProvider = Provider<RewardsRepository>((ref) {
   return RewardsRepository(ref.watch(apiClientProvider));
 });
 
-/// All available rewards
-final rewardsListProvider = FutureProvider<List<Reward>>((ref) {
+/// All available rewards — kept alive so it survives navigation
+final rewardsListProvider = FutureProvider.autoDispose<List<Reward>>((ref) {
+  ref.keepAlive();
   return ref.watch(rewardsRepositoryProvider).fetchRewards();
 });
 

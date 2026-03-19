@@ -174,8 +174,8 @@ class ApiClient {
     try {
       final token = await _tokenStorage.readToken();
       if (token == null || token.isEmpty) {
+        // No token means the user was never authenticated — don't show "session expired"
         _refreshCompleter!.complete(false);
-        await _clearSession();
         return null;
       }
 
