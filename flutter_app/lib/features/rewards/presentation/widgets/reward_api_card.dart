@@ -78,125 +78,183 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
         border: Border.all(color: AppColors.border),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Image ──
-          if (reward.imageUrl != null)
-            CachedNetworkImage(
-              imageUrl: reward.imageUrl!,
-              height: 140,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              placeholder: (_, __) => Container(
-                height: 140,
-                color: AppColors.backgroundGrey,
-                child: const Center(
-                  child: Icon(Icons.card_giftcard,
-                      color: AppColors.textMuted, size: 40),
-                ),
-              ),
-              errorWidget: (_, __, ___) => Container(
-                height: 140,
-                color: AppColors.backgroundGrey,
-                child: const Center(
-                  child: Icon(Icons.card_giftcard,
-                      color: AppColors.textMuted, size: 40),
-                ),
-              ),
-            )
-          else
-            Container(
-              height: 100,
-              width: double.infinity,
-              color: AppColors.backgroundGrey,
-              child: const Center(
-                child: Icon(Icons.card_giftcard,
-                    color: AppColors.textMuted, size: 40),
-              ),
-            ),
+      child: widget.previewMode
+          ? _buildHorizontal(reward, strings)
+          : _buildVertical(reward, strings),
+    );
+  }
 
-          // ── Content ──
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+  /// Horizontal layout: image left, text right — used in loyalty screen preview
+  Widget _buildHorizontal(Reward reward, dynamic strings) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // ── Image (left, square) ──
+        SizedBox(
+          width: 90,
+          height: 90,
+          child: reward.imageUrl != null
+              ? CachedNetworkImage(
+                  imageUrl: reward.imageUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => _imagePlaceholder(),
+                  errorWidget: (_, __, ___) => _imagePlaceholder(),
+                )
+              : _imagePlaceholder(),
+        ),
+
+        // ── Text (right) ──
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(reward.title, style: AppTypography.labelLarge),
+                Text(
+                  reward.title,
+                  style: AppTypography.labelMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   reward.description,
-                  style: AppTypography.bodySmall
+                  style: AppTypography.caption
                       .copyWith(color: AppColors.textSecondary),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.xs),
+                _buildPointsBadge(reward, strings),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Horizontal layout with collect button — used in rewards screen
+  Widget _buildVertical(Reward reward, dynamic strings) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // ── Image (left, square) ──
+        SizedBox(
+          width: 90,
+          height: 90,
+          child: reward.imageUrl != null
+              ? CachedNetworkImage(
+                  imageUrl: reward.imageUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => _imagePlaceholder(),
+                  errorWidget: (_, __, ___) => _imagePlaceholder(),
+                )
+              : _imagePlaceholder(),
+        ),
+
+        // ── Text + actions (right) ──
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  reward.title,
+                  style: AppTypography.labelMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  reward.description,
+                  style: AppTypography.caption
+                      .copyWith(color: AppColors.textSecondary),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.xs),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Points badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: AppSpacing.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: reward.canCollect
-                            ? AppColors.secondaryLight.withValues(alpha: 0.3)
-                            : AppColors.backgroundGrey,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusFull),
-                      ),
-                      child: Text(
-                        '${reward.pointsRequired} ${strings.pointsRequired}',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: reward.canCollect
-                              ? AppColors.secondaryDark
-                              : AppColors.textMuted,
-                          fontWeight: AppTypography.semiBold,
+                    _buildPointsBadge(reward, strings),
+                    SizedBox(
+                      height: 30,
+                      child: ElevatedButton(
+                        onPressed:
+                            reward.canCollect && !_loading ? _collect : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.textPrimary,
+                          disabledBackgroundColor: AppColors.disabled,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusFull),
+                          ),
+                          elevation: 0,
                         ),
+                        child: _loading
+                            ? const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.textPrimary,
+                                ),
+                              )
+                            : Text(strings.collectReward,
+                                style: AppTypography.labelSmall),
                       ),
                     ),
-
-                    // Collect button (hidden in preview mode)
-                    if (!widget.previewMode)
-                      SizedBox(
-                        height: 34,
-                        child: ElevatedButton(
-                          onPressed:
-                              reward.canCollect && !_loading ? _collect : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.textPrimary,
-                            disabledBackgroundColor: AppColors.disabled,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.md),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusFull),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: _loading
-                              ? const SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                )
-                              : Text(strings.collectReward,
-                                  style: AppTypography.labelSmall),
-                        ),
-                      ),
                   ],
                 ),
               ],
             ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _imagePlaceholder() => Container(
+        color: AppColors.backgroundGrey,
+        child: const Center(
+          child:
+              Icon(Icons.card_giftcard, color: AppColors.textMuted, size: 32),
+        ),
+      );
+
+  Widget _buildPointsBadge(Reward reward, dynamic strings) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: reward.canCollect
+            ? AppColors.secondaryLight.withValues(alpha: 0.3)
+            : AppColors.backgroundGrey,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      ),
+      child: Text(
+        '${reward.pointsRequired} ${strings.pointsRequired}',
+        style: AppTypography.labelSmall.copyWith(
+          color: reward.canCollect
+              ? AppColors.secondaryDark
+              : AppColors.textMuted,
+          fontWeight: AppTypography.semiBold,
+        ),
       ),
     );
   }

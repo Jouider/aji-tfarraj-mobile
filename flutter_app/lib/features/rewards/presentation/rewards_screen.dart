@@ -76,7 +76,7 @@ class RewardsScreen extends ConsumerWidget {
           3,
           (_) => const Padding(
             padding: EdgeInsets.only(bottom: AppSpacing.md),
-            child: SkeletonLoader(width: double.infinity, height: 220),
+            child: SkeletonLoader(width: double.infinity, height: 90),
           ),
         ),
       ),
