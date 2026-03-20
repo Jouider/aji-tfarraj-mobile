@@ -29,6 +29,7 @@ class ReserveSeatsScreen extends ConsumerStatefulWidget {
 
 class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
   bool _isLoading = false;
+  bool _agreedToTerms = false;
   String? _errorMessage;
 
   @override
@@ -87,7 +88,17 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
               ],
 
               _InfoCard(s: s),
-              const SizedBox(height: 120),
+              const SizedBox(height: AppSpacing.lg),
+
+              // ── Agreement checkbox ──
+              if (!isSoldOut)
+                _AgreementSection(
+                  agreed: _agreedToTerms,
+                  onChanged: (v) => setState(() => _agreedToTerms = v),
+                  s: s,
+                ),
+
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -100,6 +111,7 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
           child: _StickyConfirmCTA(
             isLoading: _isLoading,
             isSoldOut: isSoldOut,
+            agreedToTerms: _agreedToTerms,
             onConfirm: () => _submitReservation(context),
             s: s,
           ),
@@ -469,18 +481,99 @@ class _InfoCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Agreement Section (in scrollable content)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AgreementSection extends StatelessWidget {
+  final bool agreed;
+  final ValueChanged<bool> onChanged;
+  final AppStrings s;
+
+  const _AgreementSection({
+    required this.agreed,
+    required this.onChanged,
+    required this.s,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onChanged(!agreed),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: agreed
+              ? AppColors.successLight
+              : AppColors.backgroundGrey,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(
+            color: agreed
+                ? AppColors.success.withValues(alpha: 0.4)
+                : AppColors.border,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 22,
+              height: 22,
+              child: Checkbox(
+                value: agreed,
+                onChanged: (v) => onChanged(v ?? false),
+                activeColor: AppColors.success,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    s.agreementCheckboxLabel,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: () => context.push(Routes.rules),
+                    child: Text(
+                      s.agreementReadRules,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.primary,
+                        decoration: TextDecoration.underline,
+                        decorationColor: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Sticky Confirm CTA
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _StickyConfirmCTA extends StatelessWidget {
   final bool isLoading;
   final bool isSoldOut;
+  final bool agreedToTerms;
   final VoidCallback onConfirm;
   final AppStrings s;
 
   const _StickyConfirmCTA({
     required this.isLoading,
     required this.isSoldOut,
+    required this.agreedToTerms,
     required this.onConfirm,
     required this.s,
   });
@@ -550,7 +643,7 @@ class _StickyConfirmCTA extends StatelessWidget {
                       ),
                     )
                   : FilledButton(
-                      onPressed: isLoading ? null : onConfirm,
+                      onPressed: (isLoading || !agreedToTerms) ? null : onConfirm,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.secondary,
                         foregroundColor: AppColors.backgroundWhite,

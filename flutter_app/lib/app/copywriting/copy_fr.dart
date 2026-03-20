@@ -373,6 +373,14 @@ class ProfileCopyFr {
   String get phoneNotVerified => 'Numéro non vérifié';
   String get phoneNumberInvalid => 'Veuillez entrer un numéro valide.';
   String get verifyPhoneButton => 'Vérifier mon numéro';
+  String get phoneAlreadyUsed => 'Ce numéro est déjà utilisé par un autre compte.';
+
+  // Date of birth
+  String get dateOfBirthLabel => 'Date de naissance';
+  String get dateOfBirthRequired => 'Veuillez saisir votre date de naissance';
+
+  // Avatar
+  String get avatarRequiredHint => 'Photo requise pour compléter le profil';
 
   // OTP screen
   String get otpScreenTitle => 'Vérification du numéro';
@@ -445,6 +453,9 @@ class ReserveSeatsCopyFr {
   String get soldOutCta => 'Complet';
   String get errSoldOut => 'Places complètes. Pas assez de places disponibles.';
   String get errNotEnough => 'Pas assez de places disponibles.';
+  String get agreementCheckboxLabel =>
+      "J'ai lu et j'accepte les conditions de participation.";
+  String get agreementReadRules => 'Lire le règlement';
 }
 
 /// Ticket screen copy in French

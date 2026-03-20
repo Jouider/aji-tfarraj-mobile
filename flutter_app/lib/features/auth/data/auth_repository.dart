@@ -176,6 +176,8 @@ class AuthRepository {
     final response = await _dio.post('/api/auth/social', data: {
       'provider': 'apple',
       'token': identityToken,
+      if (credential.givenName != null) 'first_name': credential.givenName,
+      if (credential.familyName != null) 'last_name': credential.familyName,
     });
     final authResponse = AuthResponse.fromJson(response.data);
     await _saveAuthResponse(authResponse);

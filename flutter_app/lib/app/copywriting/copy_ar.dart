@@ -354,6 +354,14 @@ class ProfileCopyAr {
   String get phoneNotVerified => 'رقم غير موثّق';
   String get phoneNumberInvalid => 'يرجى إدخال رقم صالح.';
   String get verifyPhoneButton => 'توثيق الرقم';
+  String get phoneAlreadyUsed => 'هذا الرقم مستخدم بالفعل من قبل حساب آخر.';
+
+  // Date of birth
+  String get dateOfBirthLabel => 'تاريخ الميلاد';
+  String get dateOfBirthRequired => 'يرجى إدخال تاريخ ميلادك';
+
+  // Avatar
+  String get avatarRequiredHint => 'الصورة مطلوبة لإكمال الملف الشخصي';
 
   // OTP screen
   String get otpScreenTitle => 'التحقق من الرقم';
@@ -466,6 +474,9 @@ class ReserveSeatsCopyAr {
   String get soldOutCta => 'مكتمل';
   String get errSoldOut => 'المقاعد ممتلئة. لا توجد مقاعد كافية.';
   String get errNotEnough => 'لا توجد مقاعد كافية.';
+  String get agreementCheckboxLabel =>
+      'لقد قرأت وأوافق على شروط المشاركة.';
+  String get agreementReadRules => 'قراءة النظام الداخلي';
 }
 
 /// Ticket screen copy in Arabic

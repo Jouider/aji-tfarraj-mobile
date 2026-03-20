@@ -3,7 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart' as dio_pkg;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -186,14 +191,121 @@ class _ShowDetailContent extends ConsumerWidget {
 // Hero Section
 // ─────────────────────────────────────────────────────
 
-class _HeroSection extends StatelessWidget {
+class _HeroSection extends StatefulWidget {
   final Show show;
   final VoidCallback onBack;
 
   const _HeroSection({required this.show, required this.onBack});
 
   @override
+  State<_HeroSection> createState() => _HeroSectionState();
+}
+
+class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver {
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
+  bool _isPlaying = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Pause when app goes to background
+    if (state != AppLifecycleState.resumed && _isPlaying) {
+      _videoController?.pause();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Pause when widget goes offstage (tab switch in IndexedStack)
+    if (!TickerMode.of(context) && _isPlaying) {
+      _videoController?.pause();
+    }
+  }
+
+  @override
+  void deactivate() {
+    _videoController?.pause();
+    super.deactivate();
+  }
+
+  Future<void> _startVideo() async {
+    final url = widget.show.videoUrl!;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Download to temp file to avoid iOS byte-range issues with the server
+      final tmpDir = await getTemporaryDirectory();
+      final fileName = url.split('/').last;
+      final filePath = '${tmpDir.path}/$fileName';
+      final file = File(filePath);
+
+      if (!file.existsSync()) {
+        debugPrint('[Video] Downloading: $url');
+        await dio_pkg.Dio().download(url, filePath);
+        debugPrint('[Video] Downloaded to: $filePath');
+      }
+
+      if (!mounted) return;
+
+      final vpc = VideoPlayerController.file(file);
+      await vpc.initialize();
+
+      final chewie = ChewieController(
+        videoPlayerController: vpc,
+        autoPlay: true,
+        aspectRatio: vpc.value.aspectRatio,
+        allowFullScreen: true,
+        showControls: true,
+      );
+
+      if (!mounted) {
+        vpc.dispose();
+        chewie.dispose();
+        return;
+      }
+
+      setState(() {
+        _videoController = vpc;
+        _chewieController = chewie;
+        _isPlaying = true;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('[Video] Error: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _stopVideo() {
+    _chewieController?.dispose();
+    _videoController?.dispose();
+    setState(() {
+      _chewieController = null;
+      _videoController = null;
+      _isPlaying = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _chewieController?.dispose();
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final show = widget.show;
     final dateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
 
     return SizedBox(
@@ -202,50 +314,87 @@ class _HeroSection extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Background image
-          show.imageUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: show.imageUrl!,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) =>
-                      Container(color: AppColors.backgroundGrey),
-                  errorWidget: (_, __, ___) => Container(
+          // Background — video player or image
+          if (_isPlaying && _chewieController != null)
+            Chewie(controller: _chewieController!)
+          else ...[
+            // Background image
+            show.imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: show.imageUrl!,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) =>
+                        Container(color: AppColors.backgroundGrey),
+                    errorWidget: (_, __, ___) => Container(
+                      color: AppColors.backgroundGrey,
+                      child: const Center(
+                        child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
+                      ),
+                    ),
+                  )
+                : Container(
                     color: AppColors.backgroundGrey,
                     child: const Center(
                       child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
                     ),
                   ),
-                )
-              : Container(
-                  color: AppColors.backgroundGrey,
-                  child: const Center(
-                    child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
+
+            // Top gradient
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment(0, 0.35),
+                  colors: [Color(0xCC000000), Colors.transparent],
+                ),
+              ),
+            ),
+
+            // Bottom gradient
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment(0, 0.15),
+                  colors: [Color(0xFF000000), Colors.transparent],
+                ),
+              ),
+            ),
+
+            // Play button — center (only when video available)
+            if (show.videoUrl != null)
+              Positioned.fill(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: _isLoading ? null : _startVideo,
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 28,
+                              height: 28,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                    ),
                   ),
                 ),
-
-          // Top gradient
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment(0, 0.35),
-                colors: [Color(0xCC000000), Colors.transparent],
               ),
-            ),
-          ),
+          ],
 
-          // Bottom gradient
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment(0, 0.15),
-                colors: [Color(0xFF000000), Colors.transparent],
-              ),
-            ),
-          ),
-
-          // Back button — top left
+          // Back button — top left (always visible)
           Positioned(
             top: MediaQuery.of(context).padding.top + AppSpacing.sm,
             left: AppSpacing.md,
@@ -256,19 +405,28 @@ class _HeroSection extends StatelessWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
-                onTap: onBack,
-                child: const SizedBox(
+                onTap: () {
+                  if (_isPlaying) {
+                    _stopVideo();
+                  } else {
+                    widget.onBack();
+                  }
+                },
+                child: SizedBox(
                   width: 38,
                   height: 38,
-                  child: Icon(Icons.arrow_back_ios_new,
-                      color: Colors.white, size: 16),
+                  child: Icon(
+                    _isPlaying ? Icons.close : Icons.arrow_back_ios_new,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
               ),
             ),
           ),
 
-          // Channel badge — top right
-          if (show.channel != null)
+          // Channel badge — top right (only when not playing)
+          if (show.channel != null && !_isPlaying)
             Positioned(
               top: MediaQuery.of(context).padding.top + AppSpacing.sm,
               right: AppSpacing.md,

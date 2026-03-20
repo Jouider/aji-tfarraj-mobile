@@ -25,7 +25,6 @@ import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart'
 import 'package:aji_tfarraj/features/notifications/presentation/notification_center_screen.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
-import 'package:aji_tfarraj/features/profile/presentation/phone_otp_verification_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.dart';
 import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
@@ -126,12 +125,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         final user = ref.read(loginAuthStateProvider).user;
         // Exclude photo and phone fields — these are optional until reservation
         // (phone verification enforcement happens server-side via 409 PROFILE_INCOMPLETE)
-        const photoFields = {
+        const optionalFields = {
           'avatar', 'avatar_url', 'live_photo_captured_at',
-          'phone_country_code', 'phone_number', 'phone_verified_at',
+          'phone_verified_at',
         };
         final missingRequired = user?.missingProfileFields
-                .where((f) => !photoFields.contains(f))
+                .where((f) => !optionalFields.contains(f))
                 .isNotEmpty ??
             false;
         if (user != null && !user.profileComplete && missingRequired) {
@@ -313,17 +312,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final message = state.extra is String ? state.extra as String : null;
           return ErrorScreen(message: message);
-        },
-      ),
-      GoRoute(
-        path: Routes.phoneVerification,
-        name: 'phoneVerification',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, String>;
-          return PhoneOtpVerificationScreen(
-            countryCode: extra['countryCode']!,
-            phoneNumber: extra['phoneNumber']!,
-          );
         },
       ),
       GoRoute(

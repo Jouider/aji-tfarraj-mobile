@@ -538,6 +538,22 @@ class AppStrings {
       ? CopyFr.profile.verifyPhoneButton
       : CopyAr.profile.verifyPhoneButton;
 
+  String get phoneAlreadyUsed => locale == AppLocale.fr
+      ? CopyFr.profile.phoneAlreadyUsed
+      : CopyAr.profile.phoneAlreadyUsed;
+
+  String get dateOfBirthLabel => locale == AppLocale.fr
+      ? CopyFr.profile.dateOfBirthLabel
+      : CopyAr.profile.dateOfBirthLabel;
+
+  String get dateOfBirthRequired => locale == AppLocale.fr
+      ? CopyFr.profile.dateOfBirthRequired
+      : CopyAr.profile.dateOfBirthRequired;
+
+  String get avatarRequiredHint => locale == AppLocale.fr
+      ? CopyFr.profile.avatarRequiredHint
+      : CopyAr.profile.avatarRequiredHint;
+
   // OTP screen
   String get otpScreenTitle => locale == AppLocale.fr
       ? CopyFr.profile.otpScreenTitle
@@ -824,6 +840,14 @@ class AppStrings {
   String get reserveSeatsErrNotEnough => locale == AppLocale.fr
       ? CopyFr.reserveSeats.errNotEnough
       : CopyAr.reserveSeats.errNotEnough;
+
+  String get agreementCheckboxLabel => locale == AppLocale.fr
+      ? CopyFr.reserveSeats.agreementCheckboxLabel
+      : CopyAr.reserveSeats.agreementCheckboxLabel;
+
+  String get agreementReadRules => locale == AppLocale.fr
+      ? CopyFr.reserveSeats.agreementReadRules
+      : CopyAr.reserveSeats.agreementReadRules;
 
   // ============================================
   // Ticket

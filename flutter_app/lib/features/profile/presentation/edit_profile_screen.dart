@@ -33,8 +33,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   String? _selectedDistrict;
   bool _isLoading = false;
   bool _isAvatarLoading = false;
-  bool _isVerifyingPhone = false;
   String? _errorMessage;
+  DateTime? _dateOfBirth;
   // Fixed country code for now — Morocco (+212)
   final String _countryCode = '+212';
 
@@ -48,6 +48,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _selectedCity = user.cityName;
       _selectedDistrict = user.district;
       _phoneController.text = user.phoneNumber ?? '';
+      _dateOfBirth = user.dateOfBirth;
     }
   }
 
@@ -94,11 +95,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             district: _selectedDistrict,
             phoneCountryCode: phone.isNotEmpty ? _countryCode : null,
             phoneNumber: phone.isNotEmpty ? phone : null,
+            dateOfBirth: _dateOfBirth,
           );
+      debugPrint('[EditProfile] PATCH user: profileComplete=${updatedUser.profileComplete}, missing=${updatedUser.missingProfileFields}');
       ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
       // Re-fetch from GET /api/auth/me so profile_complete reflects the true
       // server state (the PATCH response may return stale computed values).
       await ref.read(loginAuthStateProvider.notifier).refreshUser();
+      final refreshedUser = ref.read(loginAuthStateProvider).user;
+      debugPrint('[EditProfile] Refreshed user: profileComplete=${refreshedUser?.profileComplete}, missing=${refreshedUser?.missingProfileFields}');
       if (mounted) {
         final s = ref.read(stringsProvider);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,15 +113,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
         );
 
-        // If a phone was just saved and is not yet verified, start OTP flow immediately
-        final savedUser = ref.read(loginAuthStateProvider).user;
-        final phone = _phoneController.text.trim();
-        if (phone.isNotEmpty && savedUser?.isPhoneVerified != true) {
-          setState(() => _isLoading = false);
-          await _requestOtpAndNavigate();
-          return;
-        }
-
         if (context.canPop()) {
           context.pop();
         } else {
@@ -124,7 +120,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         }
       }
     } on ApiException catch (e) {
-      setState(() => _errorMessage = e.message);
+      final s = ref.read(stringsProvider);
+      if (e.code == 'PHONE_ALREADY_USED' ||
+          (e.isValidationError && e.errors?['phone_number'] != null)) {
+        setState(() => _errorMessage = s.phoneAlreadyUsed);
+      } else {
+        setState(() => _errorMessage = e.message);
+      }
     } catch (e) {
       setState(() => _errorMessage = ref.read(stringsProvider).genericError);
     } finally {
@@ -212,60 +214,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } finally {
       if (mounted) setState(() => _isAvatarLoading = false);
     }
-  }
-
-  Future<void> _requestOtpAndNavigate() async {
-    final user = ref.read(loginAuthStateProvider).user;
-    final phone = user?.phoneNumber ?? '';
-    final cc = user?.phoneCountryCode ?? _countryCode;
-    if (phone.isEmpty) return;
-
-    setState(() {
-      _isVerifyingPhone = true;
-      _errorMessage = null;
-    });
-    try {
-      await ref.read(profileRepositoryProvider).requestPhoneOtp(
-            countryCode: cc,
-            phoneNumber: phone,
-          );
-      if (!mounted) return;
-      final result = await context.push<bool>(
-        Routes.phoneVerification,
-        extra: {'countryCode': cc, 'phoneNumber': phone},
-      );
-      if (result == true && mounted) {
-        final messenger = ScaffoldMessenger.of(context);
-        await ref.read(loginAuthStateProvider.notifier).refreshUser();
-        final s = ref.read(stringsProvider);
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(s.otpVerifiedSuccess),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        // If profile is now complete and we were forced here (no back stack),
-        // send the user home — they've finished the onboarding requirement.
-        if (mounted) {
-          final currentUser = ref.read(loginAuthStateProvider).user;
-          if (currentUser?.profileComplete == true && !context.canPop()) {
-            context.go(Routes.home);
-          }
-        }
-      }
-    } on ApiException catch (e) {
-      setState(() => _errorMessage = _mapOtpError(e));
-    } finally {
-      if (mounted) setState(() => _isVerifyingPhone = false);
-    }
-  }
-
-  String _mapOtpError(ApiException e) {
-    if (e.code == 'OTP_SEND_FAILED') {
-      return ref.read(stringsProvider).otpSendFailed;
-    }
-    if (e.isUnauthenticated) return ref.read(stringsProvider).unauthorized;
-    return e.message;
   }
 
   void _showAvatarSheet() {
@@ -411,11 +359,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               if (user?.avatarUrl == null && !_isAvatarLoading) ...[
                 const SizedBox(height: AppSpacing.sm),
-                Text(
-                  s.addPhotoHint,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodySmall
-                      .copyWith(color: AppColors.textMuted),
+                Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.info_outline,
+                          size: 14, color: AppColors.warning),
+                      const SizedBox(width: 4),
+                      Text(
+                        s.avatarRequiredHint,
+                        style: AppTypography.bodySmall
+                            .copyWith(color: AppColors.warning),
+                      ),
+                    ],
+                  ),
                 ),
               ],
               const SizedBox(height: AppSpacing.xl),
@@ -470,6 +427,37 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 validator: (v) => (v == null || v.trim().isEmpty)
                     ? s.lastNameRequired
                     : null,
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // ── Date of birth ──
+              GestureDetector(
+                onTap: _isLoading
+                    ? null
+                    : () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _dateOfBirth ?? DateTime(2000, 1, 1),
+                          firstDate: DateTime(1940),
+                          lastDate: DateTime(2008, 12, 31),
+                        );
+                        if (picked != null) {
+                          setState(() => _dateOfBirth = picked);
+                        }
+                      },
+                child: AbsorbPointer(
+                  child: TextFormField(
+                    controller: TextEditingController(
+                      text: _dateOfBirth != null
+                          ? '${_dateOfBirth!.day.toString().padLeft(2, '0')}/${_dateOfBirth!.month.toString().padLeft(2, '0')}/${_dateOfBirth!.year}'
+                          : '',
+                    ),
+                    decoration: _fieldDecoration(
+                        s.dateOfBirthLabel, Icons.cake_outlined),
+                    validator: (_) =>
+                        _dateOfBirth == null ? s.dateOfBirthRequired : null,
+                  ),
+                ),
               ),
               const SizedBox(height: AppSpacing.md),
 
@@ -550,10 +538,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               _PhoneSection(
                 phoneController: _phoneController,
                 countryCode: _countryCode,
-                user: user,
                 isLoading: _isLoading,
-                isVerifyingPhone: _isVerifyingPhone,
-                onVerifyTap: _requestOtpAndNavigate,
                 fieldDecoration: _fieldDecoration,
               ),
 
@@ -597,26 +582,18 @@ class _PhoneSection extends ConsumerWidget {
   const _PhoneSection({
     required this.phoneController,
     required this.countryCode,
-    required this.user,
     required this.isLoading,
-    required this.isVerifyingPhone,
-    required this.onVerifyTap,
     required this.fieldDecoration,
   });
 
   final TextEditingController phoneController;
   final String countryCode;
-  final dynamic user; // User?
   final bool isLoading;
-  final bool isVerifyingPhone;
-  final VoidCallback onVerifyTap;
   final InputDecoration Function(String, IconData) fieldDecoration;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
-    final isVerified = user?.isPhoneVerified == true;
-    final hasPhone = user?.phoneNumber != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -626,7 +603,6 @@ class _PhoneSection extends ConsumerWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Country code display (fixed +212 for now)
             Container(
               height: AppSpacing.inputHeight,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -645,66 +621,13 @@ class _PhoneSection extends ConsumerWidget {
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: fieldDecoration(s.phoneNumberHint, Icons.phone_outlined),
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? s.phoneNumberInvalid
+                    : null,
               ),
             ),
           ],
         ),
-        if (hasPhone) ...[
-          const SizedBox(height: AppSpacing.sm),
-          if (isVerified)
-            // ── Verified badge ──
-            Row(
-              children: [
-                const Icon(Icons.check_circle,
-                    color: AppColors.success, size: 16),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  s.phoneVerified,
-                  style: AppTypography.bodySmall
-                      .copyWith(color: AppColors.success),
-                ),
-              ],
-            )
-          else ...[
-            // ── Not verified warning ──
-            Row(
-              children: [
-                const Icon(Icons.warning_amber_rounded,
-                    color: AppColors.warning, size: 16),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  s.phoneNotVerified,
-                  style: AppTypography.bodySmall
-                      .copyWith(color: AppColors.warning),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: isVerifyingPhone ? null : onVerifyTap,
-                icon: isVerifyingPhone
-                    ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: AppColors.primary),
-                      )
-                    : const Icon(Icons.verified_outlined, size: 18),
-                label: Text(s.verifyPhoneButton),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusMd),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ],
       ],
     );
   }

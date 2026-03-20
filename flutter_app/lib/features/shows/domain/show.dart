@@ -11,6 +11,7 @@ class Show {
   final int reservedSeats;
   final bool isActive;
   final String? imageUrl;
+  final String? videoUrl;
   final int? rewardPoints;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -27,6 +28,7 @@ class Show {
     required this.reservedSeats,
     required this.isActive,
     this.imageUrl,
+    this.videoUrl,
     this.rewardPoints,
     this.createdAt,
     this.updatedAt,
@@ -55,6 +57,7 @@ class Show {
       reservedSeats: json['reserved_seats'] as int,
       isActive: json['is_active'] as bool,
       imageUrl: json['image_url'] as String?,
+      videoUrl: json['video_url'] as String?,
       rewardPoints: json['reward_points'] as int?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
@@ -79,6 +82,7 @@ class Show {
       'reserved_seats': reservedSeats,
       'is_active': isActive,
       'image_url': imageUrl,
+      'video_url': videoUrl,
       'reward_points': rewardPoints,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
