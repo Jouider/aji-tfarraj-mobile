@@ -183,8 +183,8 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
       await ref.read(loginAuthStateProvider.notifier).loginWithGoogle();
     } on DioException catch (_) {
       // Error message already set in authState.errorMessage by the notifier
-    } catch (_) {
-      // Silently ignore (e.g. user cancelled the popup)
+    } catch (e) {
+      debugPrint('[Google] error: $e');
     } finally {
       if (mounted) setState(() => _loadingProvider = null);
     }

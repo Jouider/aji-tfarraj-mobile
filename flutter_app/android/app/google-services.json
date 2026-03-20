@@ -18,8 +18,12 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.ajitfarraj.aji_tfarraj",
-            "certificate_hash": "0bfbc1ea9b3be439c3a24aa4253119057fb624e07"
+            "certificate_hash": "0bfbc1ea9b3be439c3a24aa425311957fb624e07"
           }
+        },
+        {
+          "client_id": "600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -29,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ajitfarraj.app"
+              }
+            }
+          ]
         }
       }
     }
