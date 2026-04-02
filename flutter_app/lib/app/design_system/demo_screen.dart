@@ -226,7 +226,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                  Icon(Icons.chevron_right, color: AppColors.textMuted),
                 ],
               ),
             ),

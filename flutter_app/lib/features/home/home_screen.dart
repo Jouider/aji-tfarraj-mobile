@@ -52,16 +52,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final showsState = ref.watch(showsListProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
     final s = ref.watch(stringsProvider);
+    final isAr = ref.watch(isRtlProvider);
     final locale = ref.watch(localeProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final logo = locale == AppLocale.ar
-        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
-        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
+        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
+        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(unreadCount, s, logo),
-      body: _buildBody(showsState, s),
+      body: _buildBody(showsState, s, isAr),
     );
   }
 
@@ -95,7 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildBody(ShowsListState showsState, AppStrings s) {
+  Widget _buildBody(ShowsListState showsState, AppStrings s, bool isAr) {
     if (showsState.isLoading) {
       return const _HomeLoadingSkeleton();
     }
@@ -119,32 +121,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final now = DateTime.now();
     final upcoming60Days = now.add(const Duration(days: 60));
 
-    // Hero show: first upcoming active show
+    // Effective date helper: prefer next episode date, fall back to top-level
+    DateTime? effectiveDate(Show show) =>
+        show.nextEpisode?.startsAt ?? show.startsAt;
+
+    // Hero show: first upcoming active show (prefer shows with upcoming episodes)
     final Show? heroShow = allShows
-        .where((show) => show.startsAt.isAfter(now) && show.isActive)
+        .where((show) {
+          final date = effectiveDate(show);
+          return date != null &&
+              date.isAfter(now) &&
+              show.isActive &&
+              show.hasUpcomingEpisodes;
+        })
         .fold<Show?>(null, (prev, show) {
-      if (prev == null) return show;
-      return show.startsAt.isBefore(prev.startsAt) ? show : prev;
-    });
+          if (prev == null) return show;
+          return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
+              ? show
+              : prev;
+        }) ??
+        // Fallback: any active upcoming show (backward compat)
+        allShows
+            .where((show) {
+              final date = effectiveDate(show);
+              return date != null && date.isAfter(now) && show.isActive;
+            })
+            .fold<Show?>(null, (prev, show) {
+          if (prev == null) return show;
+          return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
+              ? show
+              : prev;
+        });
 
     // Upcoming within 60 days, excluding hero
     final prochains = allShows
         .where(
-          (show) =>
-              show.startsAt.isAfter(now) &&
-              show.startsAt.isBefore(upcoming60Days) &&
-              show.isActive &&
-              show.id != heroShow?.id,
+          (show) {
+            final date = effectiveDate(show);
+            return date != null &&
+                date.isAfter(now) &&
+                date.isBefore(upcoming60Days) &&
+                show.isActive &&
+                show.id != heroShow?.id;
+          },
         )
         .toList()
-      ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+      ..sort((a, b) =>
+          (effectiveDate(a) ?? now).compareTo(effectiveDate(b) ?? now));
 
     // Beyond 60 days or inactive
     final bientot = allShows
-        .where(
-            (show) => !show.isActive || (show.startsAt.isAfter(upcoming60Days)))
+        .where((show) {
+          final date = effectiveDate(show);
+          return !show.isActive ||
+              date == null ||
+              date.isAfter(upcoming60Days);
+        })
         .toList()
-      ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+      ..sort((a, b) =>
+          (effectiveDate(a) ?? now).compareTo(effectiveDate(b) ?? now));
 
     // Sorted by reserved seats descending
     final populaires = List<Show>.from(allShows)
@@ -159,7 +194,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         slivers: [
           // Hero show
           if (heroShow != null)
-            SliverToBoxAdapter(child: _HeroShowCard(show: heroShow, s: s)),
+            SliverToBoxAdapter(child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
 
           // Upcoming section
           if (prochains.isNotEmpty) ...[
@@ -171,7 +206,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             SliverToBoxAdapter(
-              child: _ShowsHorizontalSection(shows: prochains, s: s),
+              child: _ShowsHorizontalSection(shows: prochains, s: s, isAr: isAr),
             ),
           ],
 
@@ -189,6 +224,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 shows: bientot,
                 isComingSoon: true,
                 s: s,
+                isAr: isAr,
               ),
             ),
           ],
@@ -206,6 +242,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: _ShowsHorizontalSection(
                 shows: populaires.take(10).toList(),
                 s: s,
+                isAr: isAr,
               ),
             ),
           ],
@@ -225,8 +262,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class _HeroShowCard extends StatelessWidget {
   final Show show;
   final AppStrings s;
+  final bool isAr;
 
-  const _HeroShowCard({required this.show, required this.s});
+  const _HeroShowCard({required this.show, required this.s, required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +345,7 @@ class _HeroShowCard extends StatelessWidget {
 
                   // Title
                   Text(
-                    show.title,
+                    show.localizedTitle(isAr),
                     style: AppTypography.h1.copyWith(
                       color: Colors.white,
                       height: 1.1,
@@ -321,20 +359,22 @@ class _HeroShowCard extends StatelessWidget {
                   // Date + City row
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.calendar_today_outlined,
                         size: 13,
                         color: AppColors.textMuted,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        dateFormat.format(show.startsAt.toLocal()),
+                        show.startsAt != null
+                            ? dateFormat.format(show.startsAt!.toLocal())
+                            : '—',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textMuted,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
-                      const Icon(
+                      Icon(
                         Icons.location_on_outlined,
                         size: 13,
                         color: AppColors.textMuted,
@@ -437,7 +477,7 @@ class _HeroPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.backgroundGrey,
-      child: const Center(
+      child: Center(
         child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
       ),
     );
@@ -512,10 +552,12 @@ class _ShowsHorizontalSection extends StatelessWidget {
   final List<Show> shows;
   final bool isComingSoon;
   final AppStrings s;
+  final bool isAr;
 
   const _ShowsHorizontalSection({
     required this.shows,
     required this.s,
+    required this.isAr,
     this.isComingSoon = false,
   });
 
@@ -537,6 +579,7 @@ class _ShowsHorizontalSection extends StatelessWidget {
               show: shows[index],
               isComingSoon: isComingSoon,
               s: s,
+              isAr: isAr,
             ),
           );
         },
@@ -553,10 +596,12 @@ class _ShowHorizontalCard extends StatelessWidget {
   final Show show;
   final bool isComingSoon;
   final AppStrings s;
+  final bool isAr;
 
   const _ShowHorizontalCard({
     required this.show,
     required this.s,
+    required this.isAr,
     this.isComingSoon = false,
   });
 
@@ -589,7 +634,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                                 Container(color: AppColors.backgroundGrey),
                             errorWidget: (_, __, ___) => Container(
                               color: AppColors.backgroundGrey,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.tv,
                                 size: 32,
                                 color: AppColors.textLight,
@@ -598,7 +643,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                           )
                         : Container(
                             color: AppColors.backgroundGrey,
-                            child: const Icon(
+                            child: Icon(
                               Icons.tv,
                               size: 32,
                               color: AppColors.textLight,
@@ -694,7 +739,7 @@ class _ShowHorizontalCard extends StatelessWidget {
 
             // Title
             Text(
-              show.title,
+              show.localizedTitle(isAr),
               style: AppTypography.labelMedium.copyWith(
                 color: AppColors.textPrimary,
               ),
@@ -707,20 +752,36 @@ class _ShowHorizontalCard extends StatelessWidget {
             // Date or "Bientôt"
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.calendar_today_outlined,
                   size: 11,
                   color: AppColors.textLight,
                 ),
                 const SizedBox(width: 3),
-                Text(
-                  isComingSoon && !show.isActive
-                      ? s.homeDateTbc
-                      : dateFormat.format(show.startsAt.toLocal()),
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textLight,
+                Expanded(
+                  child: Text(
+                    isComingSoon && !show.isActive
+                        ? s.homeDateTbc
+                        : show.startsAt != null
+                            ? dateFormat.format(show.startsAt!.toLocal())
+                            : '—',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textLight,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                // Episode count badge
+                if (show.totalEpisodes > 1) ...[
+                  const SizedBox(width: 4),
+                  Text(
+                    s.episodeCount(show.upcomingEpisodesCount),
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.secondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],
@@ -746,7 +807,7 @@ class _NotificationBellButton extends StatelessWidget {
       icon: Stack(
         clipBehavior: Clip.none,
         children: [
-          const Icon(
+          Icon(
             Icons.notifications_outlined,
             color: AppColors.textPrimary,
           ),

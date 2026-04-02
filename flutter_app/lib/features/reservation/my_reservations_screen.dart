@@ -282,7 +282,9 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                               const SizedBox(width: AppSpacing.xs),
                               Expanded(
                                 child: Text(
-                                  dateFormat.format(reservation.show!.startsAt.toLocal()),
+                                  reservation.show!.startsAt != null
+                                      ? dateFormat.format(reservation.show!.startsAt!.toLocal())
+                                      : '—',
                                   style: AppTypography.bodySmall.copyWith(
                                     color: AppColors.textMuted,
                                   ),
@@ -316,7 +318,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
             ),
 
             // Divider
-            const Divider(height: 1, color: AppColors.border),
+            Divider(height: 1, color: AppColors.border),
 
             // Footer with seats, status, and actions
             Padding(

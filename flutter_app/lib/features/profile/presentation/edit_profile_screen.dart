@@ -268,7 +268,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -327,17 +327,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                       width: 104,
                                       height: 104,
                                       fit: BoxFit.cover,
-                                      placeholder: (_, __) => const Icon(
+                                      placeholder: (_, __) => Icon(
                                           Icons.person,
                                           size: 52,
                                           color: AppColors.textMuted),
-                                      errorWidget: (_, __, ___) => const Icon(
+                                      errorWidget: (_, __, ___) => Icon(
                                           Icons.person,
                                           size: 52,
                                           color: AppColors.textMuted),
                                     ),
                                   )
-                                : const Icon(Icons.person,
+                                : Icon(Icons.person,
                                     size: 52, color: AppColors.textMuted)),
                       ),
                       Positioned(

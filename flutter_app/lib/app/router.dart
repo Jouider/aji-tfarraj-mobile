@@ -29,6 +29,9 @@ import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.da
 import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/my_rewards_screen.dart';
+import 'package:aji_tfarraj/features/referral/presentation/referral_landing_screen.dart';
+import 'package:aji_tfarraj/features/referral/presentation/referral_stats_screen.dart';
+import 'package:aji_tfarraj/features/referral/presentation/my_referral_links_screen.dart';
 
 /// Routes that require authentication
 const _protectedRoutes = [
@@ -42,6 +45,8 @@ const _protectedRoutes = [
   Routes.rewards,
   Routes.myRewards,
   Routes.staffCheckIn,
+  Routes.referralStats,
+  Routes.referralLinks,
 ];
 
 /// Routes that should redirect to home if already authenticated
@@ -80,7 +85,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Also protect show detail and reservation routes
       final isShowRoute = currentPath.startsWith('/show/');
       final isReservationRoute = currentPath.startsWith('/reservation/');
-      final needsAuth = isProtectedRoute || isShowRoute || isReservationRoute;
+      // /r/{token} is public — no auth required for referral landing
+      final isReferralLanding = currentPath.startsWith('/r/');
+      final needsAuth =
+          (isProtectedRoute || isShowRoute || isReservationRoute) &&
+              !isReferralLanding;
 
       // Check if trying to access auth routes (login/register) while authenticated
       final isAuthRoute = _authRoutes.contains(currentPath);
@@ -209,6 +218,18 @@ final routerProvider = Provider<GoRouter>((ref) {
                     },
                   ),
                   GoRoute(
+                    path: 'episode/:episodeId/reserve',
+                    name: 'reserveEpisode',
+                    builder: (context, state) {
+                      final showId = state.pathParameters['showId']!;
+                      final episodeId = state.pathParameters['episodeId']!;
+                      return ReserveSeatsScreen(
+                        showId: showId,
+                        episodeId: episodeId,
+                      );
+                    },
+                  ),
+                  GoRoute(
                     path: 'sold-out',
                     name: 'soldOut',
                     builder: (context, state) {
@@ -333,6 +354,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.myRewards,
         name: 'myRewards',
         builder: (context, state) => const MyRewardsScreen(),
+      ),
+
+      // ============================================
+      // Referral Routes
+      // ============================================
+      GoRoute(
+        path: '/r/:token',
+        name: 'referralLanding',
+        builder: (context, state) {
+          final token = state.pathParameters['token']!;
+          return ReferralLandingScreen(token: token);
+        },
+      ),
+      GoRoute(
+        path: Routes.referralStats,
+        name: 'referralStats',
+        builder: (context, state) => const ReferralStatsScreen(),
+      ),
+      GoRoute(
+        path: Routes.referralLinks,
+        name: 'referralLinks',
+        builder: (context, state) => const MyReferralLinksScreen(),
       ),
     ],
   );

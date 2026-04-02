@@ -18,8 +18,11 @@ import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
+import 'package:aji_tfarraj/features/shows/domain/episode.dart';
+import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
 
 /// Show Detail Screen — premium cinematic layout
 class ShowDetailScreen extends ConsumerStatefulWidget {
@@ -118,12 +121,13 @@ class _ShowDetailContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isAr = ref.watch(isRtlProvider);
     return Stack(
       children: [
         CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: _HeroSection(show: show, onBack: () => _goBack(context)),
+              child: _HeroSection(show: show, onBack: () => _goBack(context), isAr: isAr),
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -132,12 +136,21 @@ class _ShowDetailContent extends ConsumerWidget {
                 child: _SeatsCard(show: show),
               ),
             ),
-            if (show.description != null && show.description!.isNotEmpty)
+            // Episodes section
+            if (show.episodes.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
-                  child: _DescriptionCard(description: show.description!),
+                  child: _EpisodesSection(show: show, showId: showId),
+                ),
+              ),
+            if (show.localizedDescription(isAr) != null && show.localizedDescription(isAr)!.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+                  child: _DescriptionCard(description: show.localizedDescription(isAr)!),
                 ),
               ),
             SliverToBoxAdapter(
@@ -176,6 +189,9 @@ class _ShowDetailContent extends ConsumerWidget {
                   false;
               if (user != null && !user.profileComplete && missingRequired) {
                 _showProfileIncompleteDialog(context, ref);
+              } else if (show.nextEpisode != null) {
+                context.go(Routes.episodeReserve(
+                    showId, show.nextEpisode!.id.toString()));
               } else {
                 context.go(Routes.showReserve(showId));
               }
@@ -194,8 +210,9 @@ class _ShowDetailContent extends ConsumerWidget {
 class _HeroSection extends StatefulWidget {
   final Show show;
   final VoidCallback onBack;
+  final bool isAr;
 
-  const _HeroSection({required this.show, required this.onBack});
+  const _HeroSection({required this.show, required this.onBack, required this.isAr});
 
   @override
   State<_HeroSection> createState() => _HeroSectionState();
@@ -327,14 +344,14 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
                         Container(color: AppColors.backgroundGrey),
                     errorWidget: (_, __, ___) => Container(
                       color: AppColors.backgroundGrey,
-                      child: const Center(
+                      child: Center(
                         child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
                       ),
                     ),
                   )
                 : Container(
                     color: AppColors.backgroundGrey,
-                    child: const Center(
+                    child: Center(
                       child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
                     ),
                   ),
@@ -463,7 +480,7 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  show.title,
+                  show.localizedTitle(widget.isAr),
                   style: AppTypography.h1.copyWith(
                     color: Colors.white,
                     height: 1.1,
@@ -474,16 +491,18 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
                 const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today_outlined,
+                    Icon(Icons.calendar_today_outlined,
                         size: 13, color: AppColors.textMuted),
                     const SizedBox(width: 5),
                     Text(
-                      dateFormat.format(show.startsAt.toLocal()),
+                      show.startsAt != null
+                          ? dateFormat.format(show.startsAt!.toLocal())
+                          : '—',
                       style: AppTypography.bodySmall
                           .copyWith(color: AppColors.textMuted),
                     ),
                     const SizedBox(width: AppSpacing.lg),
-                    const Icon(Icons.location_on_outlined,
+                    Icon(Icons.location_on_outlined,
                         size: 13, color: AppColors.textMuted),
                     const SizedBox(width: 5),
                     Flexible(
@@ -719,14 +738,18 @@ class _DetailsCard extends ConsumerWidget {
           _DetailRow(
             icon: Icons.calendar_today_outlined,
             label: s.showDetailDateLabel,
-            value: dateFormat.format(show.startsAt.toLocal()),
+            value: show.startsAt != null
+                ? dateFormat.format(show.startsAt!.toLocal())
+                : '—',
             isFirst: true,
           ),
           _RowDivider(),
           _DetailRow(
             icon: Icons.access_time_rounded,
             label: s.showDetailTimeLabel,
-            value: timeFormat.format(show.startsAt.toLocal()),
+            value: show.startsAt != null
+                ? timeFormat.format(show.startsAt!.toLocal())
+                : '—',
           ),
           _RowDivider(),
           _DetailRow(
@@ -747,7 +770,7 @@ class _DetailsCard extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.map_outlined,
+                    Icon(Icons.map_outlined,
                         size: 12, color: AppColors.textMuted),
                     const SizedBox(width: 4),
                     Text(
@@ -859,7 +882,7 @@ class _DetailRow extends StatelessWidget {
 class _RowDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Divider(
+    return Divider(
       height: 1,
       thickness: 0.5,
       color: AppColors.border,
@@ -927,7 +950,7 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0,
                     duration: const Duration(milliseconds: 200),
-                    child: const Icon(Icons.keyboard_arrow_down_rounded,
+                    child: Icon(Icons.keyboard_arrow_down_rounded,
                         color: AppColors.textLight, size: 22),
                   ),
                 ],
@@ -941,7 +964,7 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
             secondChild: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Divider(height: 1, color: AppColors.border),
+                Divider(height: 1, color: AppColors.border),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.lg,
                       AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
@@ -1032,16 +1055,46 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
 // Sticky Reserve CTA
 // ─────────────────────────────────────────────────────
 
-class _StickyReserveCTA extends ConsumerWidget {
+class _StickyReserveCTA extends ConsumerStatefulWidget {
   final Show show;
   final VoidCallback onReserve;
 
   const _StickyReserveCTA({required this.show, required this.onReserve});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_StickyReserveCTA> createState() => _StickyReserveCTAState();
+}
+
+class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
+  bool _isSharing = false;
+
+  Future<void> _shareShow() async {
+    setState(() => _isSharing = true);
+    try {
+      final s = ref.read(stringsProvider);
+      final repo = ref.read(referralRepositoryProvider);
+      final link = await repo.generateLink(showId: widget.show.id);
+      if (!mounted) return;
+      await Share.share(
+        s.referralShareMessage(widget.show.localizedTitle(ref.read(isRtlProvider)), link.referralLink),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      final s = ref.read(stringsProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(s.networkError)),
+      );
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
-    final isSoldOut = show.isSoldOut;
+    final show = widget.show;
+    final episode = show.nextEpisode;
+    final isSoldOut = episode?.isSoldOut ?? show.isSoldOut;
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -1050,7 +1103,7 @@ class _StickyReserveCTA extends ConsumerWidget {
         AppSpacing.lg,
         MediaQuery.of(context).padding.bottom + AppSpacing.md,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.backgroundWhite,
         border:
             Border(top: BorderSide(color: AppColors.border, width: 0.5)),
@@ -1060,7 +1113,7 @@ class _StickyReserveCTA extends ConsumerWidget {
         child: Row(
           children: [
             // Reward points badge
-            if (!isSoldOut && show.rewardPoints != null) ...[
+            if (!isSoldOut && (episode?.rewardPoints ?? show.rewardPoints) != null) ...[
               Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md, vertical: AppSpacing.sm),
@@ -1078,7 +1131,7 @@ class _StickyReserveCTA extends ConsumerWidget {
                         color: AppColors.secondary, size: 18),
                     const SizedBox(height: 2),
                     Text(
-                      '+${show.effectiveRewardPoints}',
+                      '+${episode?.effectiveRewardPoints ?? show.effectiveRewardPoints}',
                       style: AppTypography.caption.copyWith(
                         color: AppColors.secondary,
                         fontWeight: FontWeight.w700,
@@ -1098,14 +1151,14 @@ class _StickyReserveCTA extends ConsumerWidget {
                     ? OutlinedButton.icon(
                         onPressed: null,
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
+                          side: BorderSide(
                               color: AppColors.border, width: 1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusMd),
                           ),
                         ),
-                        icon: const Icon(Icons.event_busy_outlined,
+                        icon: Icon(Icons.event_busy_outlined,
                             size: 18, color: AppColors.textLight),
                         label: Text(
                           s.showDetailSoldOutCta,
@@ -1114,7 +1167,7 @@ class _StickyReserveCTA extends ConsumerWidget {
                         ),
                       )
                     : FilledButton.icon(
-                        onPressed: onReserve,
+                        onPressed: widget.onReserve,
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.secondary,
                           foregroundColor: Colors.black,
@@ -1137,8 +1190,291 @@ class _StickyReserveCTA extends ConsumerWidget {
                       ),
               ),
             ),
+
+            // Share / Invite button
+            const SizedBox(width: AppSpacing.sm),
+            SizedBox(
+              width: 52,
+              height: 52,
+              child: OutlinedButton(
+                onPressed: _isSharing ? null : _shareShow,
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  side: BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                ),
+                child: _isSharing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.secondary,
+                        ),
+                      )
+                    : const Icon(Icons.share_outlined,
+                        size: 20, color: AppColors.secondary),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────
+// Episodes Section
+// ─────────────────────────────────────────────────────
+
+class _EpisodesSection extends ConsumerWidget {
+  final Show show;
+  final String showId;
+
+  const _EpisodesSection({required this.show, required this.showId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    final now = DateTime.now();
+
+    // Split into upcoming and past
+    final upcoming = show.episodes
+        .where((e) => e.startsAt.isAfter(now) && e.isActive)
+        .toList()
+      ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+    final past = show.episodes
+        .where((e) => !e.startsAt.isAfter(now) || !e.isActive)
+        .toList()
+      ..sort((a, b) => b.startsAt.compareTo(a.startsAt));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section header
+        Row(
+          children: [
+            const Icon(Icons.video_library_outlined,
+                size: 18, color: AppColors.secondary),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              '${s.episodeSectionTitle} (${show.episodes.length})',
+              style: AppTypography.h4.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+
+        // Upcoming episodes
+        ...upcoming.map((episode) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: _EpisodeCard(
+                episode: episode,
+                showId: showId,
+                isPast: false,
+              ),
+            )),
+
+        // Past episodes
+        ...past.map((episode) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: _EpisodeCard(
+                episode: episode,
+                showId: showId,
+                isPast: true,
+              ),
+            )),
+      ],
+    );
+  }
+}
+
+class _EpisodeCard extends ConsumerWidget {
+  final Episode episode;
+  final String showId;
+  final bool isPast;
+
+  const _EpisodeCard({
+    required this.episode,
+    required this.showId,
+    required this.isPast,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    final dateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+    final isSoldOut = episode.isSoldOut;
+
+    final Color statusColor;
+    if (isPast) {
+      statusColor = AppColors.textLight;
+    } else if (isSoldOut) {
+      statusColor = AppColors.error;
+    } else if (episode.availableSeats <= 5) {
+      statusColor = AppColors.warning;
+    } else {
+      statusColor = AppColors.success;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isPast
+            ? AppColors.backgroundGrey.withValues(alpha: 0.5)
+            : AppColors.backgroundGrey,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: isPast ? AppColors.border.withValues(alpha: 0.5) : AppColors.border,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Episode info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  episode.label,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: isPast ? AppColors.textLight : AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 12,
+                      color: isPast ? AppColors.textLight : AppColors.textMuted,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        dateFormat.format(episode.startsAt.toLocal()),
+                        style: AppTypography.caption.copyWith(
+                          color:
+                              isPast ? AppColors.textLight : AppColors.textMuted,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 12,
+                      color: isPast ? AppColors.textLight : AppColors.textMuted,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        episode.studio != null
+                            ? '${episode.studio}, ${episode.city}'
+                            : episode.city,
+                        style: AppTypography.caption.copyWith(
+                          color:
+                              isPast ? AppColors.textLight : AppColors.textMuted,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: AppSpacing.sm),
+
+          // Status + action
+          if (isPast)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.border.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+              child: Text(
+                s.pastEpisodeLabel,
+                style: AppTypography.caption
+                    .copyWith(color: AppColors.textLight),
+              ),
+            )
+          else if (isSoldOut)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.errorLight,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+              child: Text(
+                s.episodeSoldOut,
+                style: AppTypography.caption
+                    .copyWith(color: AppColors.error, fontWeight: FontWeight.w600),
+              ),
+            )
+          else
+            Flexible(
+              flex: 0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Seats badge
+                  Text(
+                    s.episodeAvailableSeats(episode.availableSeats),
+                    style: AppTypography.caption.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                  const SizedBox(height: 4),
+                  // Reserve button
+                  SizedBox(
+                    height: 32,
+                    child: FilledButton(
+                      onPressed: () => context.go(Routes.episodeReserve(
+                          showId, episode.id.toString())),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm),
+                        minimumSize: Size.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusSm),
+                        ),
+                      ),
+                      child: Text(
+                        s.reserveEpisode,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1213,7 +1549,7 @@ class _ErrorView extends ConsumerWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: const Icon(Icons.arrow_back_ios_new,
+                  child: Icon(Icons.arrow_back_ios_new,
                       color: AppColors.textPrimary, size: 16),
                 ),
               ),

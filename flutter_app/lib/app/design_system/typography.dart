@@ -18,17 +18,17 @@ class AppTypography {
   // ============================================
   // Font Families
   // ============================================
-  
+
   /// French / Latin font - Inter
   static String get fontFamilyFr => GoogleFonts.inter().fontFamily!;
-  
+
   /// Arabic font - Cairo
   static String get fontFamilyAr => GoogleFonts.cairo().fontFamily!;
 
   // ============================================
   // Headings (FR - Inter)
   // ============================================
-  
+
   /// H1 - Page titles
   static TextStyle get h1 => GoogleFonts.inter(
         fontSize: 28,
@@ -64,7 +64,7 @@ class AppTypography {
   // ============================================
   // Body Text (FR - Inter)
   // ============================================
-  
+
   /// Body Large - Main content
   static TextStyle get bodyLarge => GoogleFonts.inter(
         fontSize: 16,
@@ -92,7 +92,7 @@ class AppTypography {
   // ============================================
   // Labels (FR - Inter)
   // ============================================
-  
+
   /// Label Large - Form labels
   static TextStyle get labelLarge => GoogleFonts.inter(
         fontSize: 14,
@@ -128,12 +128,12 @@ class AppTypography {
   // ============================================
   // Button Text
   // ============================================
-  
+
   /// Button Large - Primary buttons
   static TextStyle get buttonLarge => GoogleFonts.inter(
         fontSize: 16,
         fontWeight: semiBold,
-        color: AppColors.backgroundWhite,
+        color: AppColors.buttonText,
         height: 1.2,
       );
 
@@ -141,14 +141,14 @@ class AppTypography {
   static TextStyle get buttonMedium => GoogleFonts.inter(
         fontSize: 14,
         fontWeight: semiBold,
-        color: AppColors.backgroundWhite,
+        color: AppColors.buttonText,
         height: 1.2,
       );
 
   // ============================================
   // Arabic Typography (Cairo)
   // ============================================
-  
+
   /// Arabic H1
   static TextStyle get h1Ar => GoogleFonts.cairo(
         fontSize: 28,
@@ -209,14 +209,14 @@ class AppTypography {
   static TextStyle get buttonAr => GoogleFonts.cairo(
         fontSize: 16,
         fontWeight: semiBold,
-        color: AppColors.backgroundWhite,
+        color: AppColors.buttonText,
         height: 1.3,
       );
 
   // ============================================
   // Helper Methods
   // ============================================
-  
+
   /// Get text style based on locale
   static TextStyle getLocalizedStyle(TextStyle frStyle, TextStyle arStyle, Locale locale) {
     return locale.languageCode == 'ar' ? arStyle : frStyle;

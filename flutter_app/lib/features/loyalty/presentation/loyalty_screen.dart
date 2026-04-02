@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/widgets/reward_api_card.dart';
+import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
 
 /// Main loyalty / fidelity screen
 class LoyaltyScreen extends ConsumerStatefulWidget {
@@ -96,6 +97,10 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
               seeAllLabel: strings.seeAll,
               onSeeAll: () => setState(() => _showFullHistory = true),
             ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // ── Referral section ──
+          _ReferralSummaryCard(ref: ref, s: strings),
           const SizedBox(height: AppSpacing.xl),
 
           // ── Rewards section ──
@@ -195,6 +200,71 @@ class _RewardsPreview extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Referral summary card shown in the Loyalty screen
+class _ReferralSummaryCard extends StatelessWidget {
+  final WidgetRef ref;
+  final dynamic s;
+
+  const _ReferralSummaryCard({required this.ref, required this.s});
+
+  @override
+  Widget build(BuildContext context) {
+    final statsAsync = ref.watch(myReferralStatsProvider);
+
+    return statsAsync.when(
+      loading: () => const SkeletonLoader(width: double.infinity, height: 100),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (stats) => GestureDetector(
+        onTap: () => context.push(Routes.referralStats),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primary.withValues(alpha: 0.08),
+                AppColors.secondary.withValues(alpha: 0.08),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            border:
+                Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.people_outline,
+                    color: AppColors.secondary, size: 22),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(s.referralTitle, style: AppTypography.h4),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${stats.totalInvited} ${s.referralTotalInvited} · ${stats.totalPoints} pts',
+                      style: AppTypography.bodySmall
+                          .copyWith(color: AppColors.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: AppColors.textMuted),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

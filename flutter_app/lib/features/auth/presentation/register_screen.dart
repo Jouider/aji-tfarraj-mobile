@@ -40,9 +40,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.watch(loginAuthStateProvider);
     final s = ref.watch(stringsProvider);
     final locale = ref.watch(localeProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final logo = locale == AppLocale.ar
-        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
-        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
+        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
+        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
       if (next.isAuthenticated) context.go(Routes.home);

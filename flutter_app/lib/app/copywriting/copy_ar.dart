@@ -99,6 +99,16 @@ class CopyAr {
   // Rewards
   // ============================================
   static const rewards = RewardsCopyAr();
+
+  // ============================================
+  // Referral / الإحالة
+  // ============================================
+  static const referral = ReferralCopyAr();
+
+  // ============================================
+  // Episodes / الحلقات
+  // ============================================
+  static const episode = EpisodeCopyAr();
 }
 
 /// Rewards screen copy in Arabic
@@ -314,6 +324,10 @@ class ProfileCopyAr {
   String get languageLabel => 'اللغة';
   String get languageValueFr => 'Français';
   String get languageValueAr => 'العربية';
+  String get themeLabel => 'المظهر';
+  String get themeSystem => 'النظام';
+  String get themeLight => 'فاتح';
+  String get themeDark => 'داكن';
   String get loyaltyLabel => 'الولاء';
   String get notificationsLabel => 'الإشعارات';
   String unreadCount(int n) => '$n غير مقروء${n > 1 ? 'ة' : ''}';
@@ -689,4 +703,60 @@ class ConditionsCopyAr {
               'يستلزم أي تسجيل عبر التطبيق القبول الكامل للنظام الداخلي الحالي.',
         ),
       ];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Referral / الإحالة
+// ─────────────────────────────────────────────────────────────────────────────
+class ReferralCopyAr {
+  const ReferralCopyAr();
+
+  String get title => 'الإحالة';
+  String get myReferralCode => 'رمز الإحالة الخاص بي';
+  String get copyCode => 'نسخ الرمز';
+  String get codeCopied => 'تم نسخ الرمز!';
+  String get inviteFriend => 'دعوة صديق';
+  String get generateLink => 'إنشاء رابط';
+  String get shareLink => 'مشاركة الرابط';
+  String invitesYou(String name) => '$name يدعوك لحضور هذه الحلقة';
+  String get reserveNow => 'احجز الآن';
+  String get referralCodeLabel => 'رمز الإحالة (اختياري)';
+  String get referralCodeHint => 'أدخل رمز صديقك';
+  String get totalInvited => 'المدعوون';
+  String get totalAttended => 'الحاضرون';
+  String get pending => 'قيد الانتظار';
+  String get pointsEarned => 'النقاط المكتسبة';
+  String get myLinks => 'روابط الإحالة الخاصة بي';
+  String get clicks => 'نقرات';
+  String get conversions => 'حجوزات';
+  String get expired => 'منتهي الصلاحية';
+  String get linkExpired => 'انتهت صلاحية هذا الرابط';
+  String get linkInvalid => 'رابط غير صالح';
+  String get showUnavailable => 'هذه الحلقة لم تعد متاحة';
+  String shareMessage(String showTitle, String link) =>
+      'انضم إلي لحضور $showTitle! احجز مكانك هنا: $link';
+  String get noLinksYet => 'لا توجد روابط مشتركة';
+  String get noReferralsYet => 'لا توجد إحالات حتى الآن';
+  String get inviteFriendsEarnPoints => 'ادعُ أصدقاءك واكسب نقاطًا!';
+  String get profileTileLabel => 'الإحالة';
+  String get statsTitle => 'إحالاتي';
+  String get linksTitle => 'روابطي';
+}
+
+// ──────────────────────────────���───────────────────────────���──────────────────
+// Episodes / الحلقات
+// ────────────────���────────────────────────────��───────────────────────────────
+class EpisodeCopyAr {
+  const EpisodeCopyAr();
+
+  String get sectionTitle => 'الحلقات';
+  String episodeCount(int n) => '$n ${n == 1 ? 'حلقة' : 'حلقات'}';
+  String get reserveEpisode => 'احجز هذه الحلقة';
+  String get noUpcomingEpisodes => 'لا توجد تسجيلات قادمة';
+  String get nextEpisode => 'الحلقة القادمة';
+  String get pastEpisode => 'حلقة سابقة';
+  String get allEpisodes => 'جميع الحلق��ت';
+  String get upcomingEpisodes => 'الحلقات القادمة';
+  String get soldOut => 'مك��مل';
+  String availableSeats(int n) => '$n ${n == 1 ? 'مقعد متاح' : 'مقاعد متاحة'}';
 }

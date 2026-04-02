@@ -1,26 +1,48 @@
 // filepath: /Users/mouadsmac/aji-tfarraj-mobile/flutter_app/lib/app/localization/locale_provider.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
+import 'package:aji_tfarraj/features/notifications/data/notification_repository.dart'
+    show sharedPreferencesProvider;
+
+const _kLocaleKey = 'app_locale';
 
 /// Notifier for managing the current app locale
 class LocaleNotifier extends Notifier<AppLocale> {
   @override
   AppLocale build() {
-    // Default to French
+    // Restore persisted locale (if any)
+    final prefs = ref.read(sharedPreferencesProvider);
+    final saved = prefs.getString(_kLocaleKey);
+    if (saved == 'ar') return AppLocale.ar;
     return AppLocale.fr;
   }
 
-  /// Change the current locale
+  /// Change the current locale and persist the choice
   void setLocale(AppLocale locale) {
     state = locale;
+    _persist(locale);
   }
 
   /// Toggle between FR and AR
   void toggleLocale() {
-    state = state == AppLocale.fr ? AppLocale.ar : AppLocale.fr;
+    final next = state == AppLocale.fr ? AppLocale.ar : AppLocale.fr;
+    state = next;
+    _persist(next);
   }
+
+  void _persist(AppLocale locale) {
+    ref
+        .read(sharedPreferencesProvider)
+        .setString(_kLocaleKey, locale.languageCode);
+  }
+}
+
+/// Whether the user has explicitly chosen a language at least once
+bool hasChosenLocale(SharedPreferences prefs) {
+  return prefs.containsKey(_kLocaleKey);
 }
 
 /// Provider for the current app locale (default: fr)

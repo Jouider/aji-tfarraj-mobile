@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
@@ -8,6 +9,7 @@ import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/theme/theme_mode_provider.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:aji_tfarraj/features/loyalty/data/loyalty_repository.dart';
@@ -115,13 +117,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => const Icon(Icons.person,
+                        placeholder: (_, __) => Icon(Icons.person,
                             size: 50, color: AppColors.textMuted),
-                        errorWidget: (_, __, ___) => const Icon(Icons.person,
+                        errorWidget: (_, __, ___) => Icon(Icons.person,
                             size: 50, color: AppColors.textMuted),
                       ),
                     )
-                  : const Icon(Icons.person,
+                  : Icon(Icons.person,
                       size: 50, color: AppColors.textMuted),
             ),
           ),
@@ -146,7 +148,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           // Language tile — shows current language, toggles on tap
           ListTile(
-            leading: const Icon(Icons.language, color: AppColors.textSecondary),
+            leading: Icon(Icons.language, color: AppColors.textSecondary),
             title: Text(s.profileLanguageLabel, style: AppTypography.bodyMedium),
             subtitle: Text(
               currentLocale == AppLocale.fr
@@ -154,16 +156,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   : s.profileLanguageValueAr,
               style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
             ),
-            trailing: const Icon(Icons.swap_horiz, color: AppColors.textMuted),
+            trailing: Icon(Icons.swap_horiz, color: AppColors.textMuted),
             onTap: () =>
                 ref.read(localeProvider.notifier).toggleLocale(),
           ),
-          const Divider(color: AppColors.border),
+          Divider(color: AppColors.border),
+
+          // Theme tile — cycles system → light → dark
+          Builder(builder: (context) {
+            final themeMode = ref.watch(themeModeProvider);
+            final themeLabel = switch (themeMode) {
+              ThemeMode.system => s.themeSystem,
+              ThemeMode.light => s.themeLight,
+              ThemeMode.dark => s.themeDark,
+            };
+            final themeIcon = switch (themeMode) {
+              ThemeMode.system => Icons.brightness_auto,
+              ThemeMode.light => Icons.light_mode,
+              ThemeMode.dark => Icons.dark_mode,
+            };
+            return ListTile(
+              leading: Icon(themeIcon, color: AppColors.textSecondary),
+              title: Text(s.profileThemeLabel, style: AppTypography.bodyMedium),
+              subtitle: Text(
+                themeLabel,
+                style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+              ),
+              trailing: Icon(Icons.swap_horiz, color: AppColors.textMuted),
+              onTap: () =>
+                  ref.read(themeModeProvider.notifier).toggleTheme(),
+            );
+          }),
+          Divider(color: AppColors.border),
 
           // Loyalty tile
           ListTile(
             leading:
-                const Icon(Icons.star_outline, color: AppColors.textSecondary),
+                Icon(Icons.star_outline, color: AppColors.textSecondary),
             title: Text(s.profileLoyaltyLabel,
                 style: AppTypography.bodyMedium),
             trailing: Row(
@@ -197,19 +226,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   error: (_, __) => const SizedBox.shrink(),
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                Icon(Icons.chevron_right, color: AppColors.textMuted),
               ],
             ),
             onTap: () => context.push(Routes.loyalty),
           ),
-          const Divider(color: AppColors.border),
+          Divider(color: AppColors.border),
+
+          // Referral / Parrainage tile
+          ListTile(
+            leading: Icon(Icons.people_outline,
+                color: AppColors.textSecondary),
+            title:
+                Text(s.referralProfileTileLabel, style: AppTypography.bodyMedium),
+            subtitle: user?.referralCode != null
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        user!.referralCode!,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.secondary,
+                          letterSpacing: 2,
+                          fontWeight: AppTypography.medium,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      GestureDetector(
+                        onTap: () {
+                          Clipboard.setData(
+                              ClipboardData(text: user.referralCode!));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(s.referralCodeCopied),
+                              duration: const Duration(seconds: 2),
+                              backgroundColor: AppColors.success,
+                            ),
+                          );
+                        },
+                        child: Icon(Icons.copy,
+                            size: 14, color: AppColors.textMuted),
+                      ),
+                    ],
+                  )
+                : null,
+            trailing:
+                Icon(Icons.chevron_right, color: AppColors.textMuted),
+            onTap: () => context.push(Routes.referralStats),
+          ),
+          Divider(color: AppColors.border),
 
           // Notifications tile
           ListTile(
             leading: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Icon(Icons.notifications_outlined,
+                Icon(Icons.notifications_outlined,
                     color: AppColors.textSecondary),
                 if (unreadCount > 0)
                   Positioned(
@@ -246,36 +318,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   )
                 : null,
             trailing:
-                const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                Icon(Icons.chevron_right, color: AppColors.textMuted),
             onTap: () => context.push(Routes.notifications),
           ),
-          const Divider(color: AppColors.border),
+          Divider(color: AppColors.border),
 
           // Staff check-in tile (only visible to staff/admin)
           if (user != null && user.isStaffOrAdmin) ...[
             ListTile(
-              leading: const Icon(Icons.qr_code_scanner,
+              leading: Icon(Icons.qr_code_scanner,
                   color: AppColors.textSecondary),
               title: Text(s.staffCheckInLabel,
                   style: AppTypography.bodyMedium),
               trailing:
-                  const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                  Icon(Icons.chevron_right, color: AppColors.textMuted),
               onTap: () => context.push(Routes.staffCheckIn),
             ),
-            const Divider(color: AppColors.border),
+            Divider(color: AppColors.border),
           ],
 
           // Règlement tile
           ListTile(
-            leading: const Icon(Icons.gavel_outlined,
+            leading: Icon(Icons.gavel_outlined,
                 color: AppColors.textSecondary),
             title: Text(s.conditionsProfileTileLabel,
                 style: AppTypography.bodyMedium),
             trailing:
-                const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                Icon(Icons.chevron_right, color: AppColors.textMuted),
             onTap: () => context.push(Routes.rules),
           ),
-          const Divider(color: AppColors.border),
+          Divider(color: AppColors.border),
           const SizedBox(height: AppSpacing.xl),
 
           // Logout button

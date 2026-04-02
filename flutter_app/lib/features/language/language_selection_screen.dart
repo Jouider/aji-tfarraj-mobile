@@ -64,7 +64,9 @@ class _LanguageSelectionScreenState extends ConsumerState<LanguageSelectionScree
                   // Logo — use white variant on dark background
                   Center(
                     child: Image.asset(
-                      'assets/images/ajitfarraj_logo/white_fr_logo.png',
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 'assets/images/ajitfarraj_logo/white_fr_logo.png'
+                          : 'assets/images/ajitfarraj_logo/black_fr_logo.png',
                       width: 180,
                     ),
                   ),

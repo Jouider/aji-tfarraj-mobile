@@ -117,49 +117,49 @@ class _StatusConfig {
 _StatusConfig _getStatusConfig(StatusType status) {
   switch (status) {
     case StatusType.pendingReview:
-      return const _StatusConfig(
+      return _StatusConfig(
         defaultText: 'En attente',
         backgroundColor: AppColors.warningLight,
         textColor: AppColors.warningDark,
         icon: Icons.schedule,
       );
     case StatusType.contacting:
-      return const _StatusConfig(
+      return _StatusConfig(
         defaultText: 'En cours de contact',
         backgroundColor: AppColors.warningLight,
         textColor: AppColors.warningDark,
         icon: Icons.phone_outlined,
       );
     case StatusType.approved:
-      return const _StatusConfig(
+      return _StatusConfig(
         defaultText: 'Confirmée',
         backgroundColor: AppColors.successLight,
         textColor: AppColors.successDark,
         icon: Icons.check_circle_outline,
       );
     case StatusType.rejected:
-      return const _StatusConfig(
+      return _StatusConfig(
         defaultText: 'Refusée',
         backgroundColor: AppColors.errorLight,
         textColor: AppColors.errorDark,
         icon: Icons.cancel_outlined,
       );
     case StatusType.cancelled:
-      return const _StatusConfig(
+      return _StatusConfig(
         defaultText: 'Annulée',
         backgroundColor: AppColors.infoLight,
         textColor: AppColors.infoDark,
         icon: Icons.block,
       );
     case StatusType.expired:
-      return const _StatusConfig(
+      return _StatusConfig(
         defaultText: 'Expirée',
         backgroundColor: AppColors.errorLight,
         textColor: AppColors.errorDark,
         icon: Icons.timer_off_outlined,
       );
     case StatusType.checkedIn:
-      return const _StatusConfig(
+      return _StatusConfig(
         defaultText: 'Entrée validée',
         backgroundColor: AppColors.successLight,
         textColor: AppColors.successDark,

@@ -17,6 +17,7 @@ class MyRewardsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(stringsProvider);
+    final isAr = ref.watch(isRtlProvider);
     final requestsAsync = ref.watch(myRewardsProvider);
 
     return Scaffold(
@@ -59,8 +60,8 @@ class MyRewardsScreen extends ConsumerWidget {
               itemCount: requests.length,
               separatorBuilder: (_, __) =>
                   const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (_, i) =>
-                  _RewardRequestTile(request: requests[i], strings: strings),
+              itemBuilder: (_, i) => _RewardRequestTile(
+                  request: requests[i], strings: strings, isAr: isAr),
             ),
           );
         },
@@ -72,8 +73,10 @@ class MyRewardsScreen extends ConsumerWidget {
 class _RewardRequestTile extends StatelessWidget {
   final RewardRequest request;
   final dynamic strings;
+  final bool isAr;
 
-  const _RewardRequestTile({required this.request, required this.strings});
+  const _RewardRequestTile(
+      {required this.request, required this.strings, required this.isAr});
 
   AppBadge _buildBadge() {
     switch (request.status) {
@@ -100,14 +103,14 @@ class _RewardRequestTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.card_giftcard,
+          Icon(Icons.card_giftcard,
               color: AppColors.textMuted, size: AppSpacing.iconMd),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(request.rewardTitle, style: AppTypography.labelMedium),
+                Text(request.localizedTitle(isAr), style: AppTypography.labelMedium),
                 const SizedBox(height: 2),
                 Text(
                   '${strings.requestedAt} $date',

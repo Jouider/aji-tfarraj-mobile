@@ -6,6 +6,7 @@ class Reservation {
   final int id;
   final int userId;
   final int showId;
+  final int? episodeId;
   final int seats;
   final String status;
   final String? rejectionReason;
@@ -19,6 +20,7 @@ class Reservation {
     required this.id,
     required this.userId,
     required this.showId,
+    this.episodeId,
     required this.seats,
     required this.status,
     this.rejectionReason,
@@ -55,7 +57,8 @@ class Reservation {
       id: json['id'] as int,
       userId: json['user_id'] as int,
       showId: json['show_id'] as int,
-      seats: json['seats'] as int,
+      episodeId: json['episode_id'] as int?,
+      seats: json['seats'] as int? ?? 1,
       status: json['status'] as String,
       rejectionReason: json['rejection_reason'] as String?,
       expiresAt: json['expires_at'] != null
@@ -76,6 +79,7 @@ class Reservation {
       'id': id,
       'user_id': userId,
       'show_id': showId,
+      'episode_id': episodeId,
       'seats': seats,
       'status': status,
       'rejection_reason': rejectionReason,

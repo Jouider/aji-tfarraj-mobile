@@ -295,7 +295,7 @@ class _ManualCodeTab extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: AppSpacing.xl),
-          const Icon(Icons.confirmation_number_outlined,
+          Icon(Icons.confirmation_number_outlined,
               size: 64, color: AppColors.textMuted),
           const SizedBox(height: AppSpacing.xl),
           TextField(
@@ -385,7 +385,7 @@ class _CheckInResultCard extends ConsumerWidget {
             width: 80,
             height: 80,
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.successLight,
               shape: BoxShape.circle,
             ),
@@ -420,20 +420,20 @@ class _CheckInResultCard extends ConsumerWidget {
                   value: result.ticketCode,
                   valueBold: true,
                 ),
-                const Divider(color: AppColors.border, height: AppSpacing.xl),
+                Divider(color: AppColors.border, height: AppSpacing.xl),
                 _ResultRow(
                   icon: Icons.access_time_rounded,
                   label: s.staffCheckedInAt,
                   value: dateFormat.format(result.checkedInAt),
                 ),
-                const Divider(color: AppColors.border, height: AppSpacing.xl),
+                Divider(color: AppColors.border, height: AppSpacing.xl),
                 _ResultRow(
                   icon: Icons.person_outline,
                   label: s.staffAttendeeName,
                   value: result.userName,
                   subtitle: result.userEmail,
                 ),
-                const Divider(color: AppColors.border, height: AppSpacing.xl),
+                Divider(color: AppColors.border, height: AppSpacing.xl),
                 _ResultRow(
                   icon: Icons.tv_outlined,
                   label: s.staffShowLabel,
@@ -469,7 +469,7 @@ class _CheckInResultCard extends ConsumerWidget {
               onPressed: () => Navigator.of(context).pop(),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
-                side: const BorderSide(color: AppColors.border),
+                side: BorderSide(color: AppColors.border),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
@@ -513,7 +513,7 @@ class _ErrorCard extends ConsumerWidget {
             width: 80,
             height: 80,
             margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.errorLight,
               shape: BoxShape.circle,
             ),
@@ -561,7 +561,7 @@ class _ErrorCard extends ConsumerWidget {
               onPressed: () => Navigator.of(context).pop(),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
-                side: const BorderSide(color: AppColors.border),
+                side: BorderSide(color: AppColors.border),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),

@@ -39,17 +39,18 @@ class ReservationsRepository {
     }
   }
 
-  /// Create a new reservation
+  /// Create a new reservation for an episode
   Future<Reservation> createReservation({
-    required int showId,
-    required int seats,
+    required int episodeId,
+    String? referralCode,
   }) async {
     try {
       final response = await _apiClient.post(
         AppConfig.reservations,
         data: {
-          'show_id': showId,
-          'seats': seats,
+          'episode_id': episodeId,
+          if (referralCode != null && referralCode.isNotEmpty)
+            'referral_code': referralCode,
         },
       );
       final data = response.data;
@@ -118,13 +119,13 @@ class MyReservationsNotifier extends AsyncNotifier<List<Reservation>> {
 
   /// Create a new reservation and refresh the list
   Future<Reservation> createReservation({
-    required int showId,
-    required int seats,
+    required int episodeId,
+    String? referralCode,
   }) async {
     final repository = ref.read(reservationsRepositoryProvider);
     final reservation = await repository.createReservation(
-      showId: showId,
-      seats: seats,
+      episodeId: episodeId,
+      referralCode: referralCode,
     );
     // Refresh the list after creating
     await refresh();

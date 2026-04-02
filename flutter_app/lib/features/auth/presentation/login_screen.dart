@@ -39,9 +39,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(loginAuthStateProvider);
     final s = ref.watch(stringsProvider);
     final locale = ref.watch(localeProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final logo = locale == AppLocale.ar
-        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
-        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
+        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
+        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     final isAnyLoading = authState.isLoading || _loadingProvider != null;
 
@@ -387,7 +388,7 @@ class _OrDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(child: Divider(color: AppColors.border)),
+        Expanded(child: Divider(color: AppColors.border)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Text(
@@ -395,7 +396,7 @@ class _OrDivider extends StatelessWidget {
             style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
           ),
         ),
-        const Expanded(child: Divider(color: AppColors.border)),
+        Expanded(child: Divider(color: AppColors.border)),
       ],
     );
   }

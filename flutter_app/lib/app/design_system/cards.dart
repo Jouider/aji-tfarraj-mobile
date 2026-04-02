@@ -78,7 +78,7 @@ class ShowCard extends StatelessWidget {
                   Row(
                     children: [
                       if (date != null) ...[
-                        const Icon(
+                        Icon(
                           Icons.calendar_today_outlined,
                           size: AppSpacing.iconSm,
                           color: AppColors.textMuted,
@@ -89,7 +89,7 @@ class ShowCard extends StatelessWidget {
                       if (date != null && location != null)
                         const SizedBox(width: AppSpacing.md),
                       if (location != null) ...[
-                        const Icon(
+                        Icon(
                           Icons.location_on_outlined,
                           size: AppSpacing.iconSm,
                           color: AppColors.textMuted,
@@ -121,7 +121,7 @@ class _ImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Icon(
         Icons.image_outlined,
         size: AppSpacing.iconXxl,

@@ -356,15 +356,15 @@ class _ButtonContent extends StatelessWidget {
   final TextStyle textStyle;
   final Color loadingColor;
 
-  const _ButtonContent({
+  _ButtonContent({
     required this.label,
     required this.isLoading,
     required this.size,
     required this.textStyle,
     this.leadingIcon,
     this.trailingIcon,
-    this.loadingColor = AppColors.backgroundWhite,
-  });
+    Color? loadingColor,
+  }) : loadingColor = loadingColor ?? AppColors.backgroundWhite;
 
   @override
   Widget build(BuildContext context) {

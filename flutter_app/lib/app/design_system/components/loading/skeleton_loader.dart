@@ -84,7 +84,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
             gradient: LinearGradient(
               begin: Alignment(_animation.value, 0),
               end: Alignment(_animation.value + 1, 0),
-              colors: const [
+              colors: [
                 AppColors.backgroundGrey,
                 AppColors.backgroundLight,
                 AppColors.backgroundGrey,

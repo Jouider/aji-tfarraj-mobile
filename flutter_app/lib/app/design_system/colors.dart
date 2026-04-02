@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
 
 /// Aji Tfarraj Color Palette
-/// Dark premium theme inspired by cinematic app design
+/// Supports both dark and light themes via dynamic brightness resolution
 class AppColors {
   AppColors._();
 
   // ============================================
-  // Primary Colors
+  // Brightness State
+  // ============================================
+
+  static Brightness _brightness = Brightness.dark;
+
+  /// Update the current brightness (called from the root widget)
+  static void updateBrightness(Brightness brightness) {
+    _brightness = brightness;
+  }
+
+  static bool get _isDark => _brightness == Brightness.dark;
+
+  // ============================================
+  // Primary Colors (same in both modes)
   // ============================================
 
   /// Primary / Bordeaux - Main CTA, buttons, approved badges
@@ -15,7 +28,7 @@ class AppColors {
   static const Color primaryDark = Color(0xFF5E0A24);
 
   // ============================================
-  // Secondary Colors
+  // Secondary Colors (same in both modes)
   // ============================================
 
   /// Secondary / Gold - Accents, icons, highlights, selected states
@@ -24,57 +37,103 @@ class AppColors {
   static const Color secondaryDark = Color(0xFFC77B00);
 
   // ============================================
-  // Neutral / Dark Theme Surfaces
+  // Text Colors
   // ============================================
 
-  /// Text colors (on dark backgrounds)
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFFD1D5DB);
-  static const Color textMuted = Color(0xFF9CA3AF);
-  static const Color textLight = Color(0xFF6B7280);
+  static Color get textPrimary =>
+      _isDark ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A);
 
-  /// Background / Surface colors — dark theme
-  static const Color backgroundWhite = Color(0xFF0C0C0C);   // Main scaffold background
-  static const Color backgroundGrey = Color(0xFF1C1C1E);    // Card / chip backgrounds
-  static const Color backgroundLight = Color(0xFF111111);   // Slightly elevated surfaces
+  static Color get textSecondary =>
+      _isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563);
+
+  static Color get textMuted =>
+      _isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+
+  static Color get textLight =>
+      _isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF);
+
+  // ============================================
+  // Background / Surface Colors
+  // ============================================
+
+  /// Main scaffold background
+  static Color get backgroundWhite =>
+      _isDark ? const Color(0xFF0C0C0C) : const Color(0xFFFAFAFA);
+
+  /// Card / chip backgrounds
+  static Color get backgroundGrey =>
+      _isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF3F4F6);
+
+  /// Slightly elevated surfaces
+  static Color get backgroundLight =>
+      _isDark ? const Color(0xFF111111) : const Color(0xFFFFFFFF);
 
   /// Elevated card surface (hero card, modals)
-  static const Color cardDarkElevated = Color(0xFF252528);
+  static Color get cardDarkElevated =>
+      _isDark ? const Color(0xFF252528) : const Color(0xFFFFFFFF);
 
   /// Surface overlay (bottom sheets, dialogs)
-  static const Color surfaceOverlay = Color(0xFF1A1A1C);
-
-  /// Border colors
-  static const Color border = Color(0xFF2C2C2E);
-  static const Color borderLight = Color(0xFF3A3A3C);
-  static const Color divider = Color(0xFF2C2C2E);
-
-  /// Disabled state
-  static const Color disabled = Color(0xFF3A3A3C);
+  static Color get surfaceOverlay =>
+      _isDark ? const Color(0xFF1A1A1C) : const Color(0xFFFFFFFF);
 
   // ============================================
-  // Status Colors
+  // Border Colors
+  // ============================================
+
+  static Color get border =>
+      _isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E7EB);
+
+  static Color get borderLight =>
+      _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D5DB);
+
+  static Color get divider =>
+      _isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E7EB);
+
+  /// Disabled state
+  static Color get disabled =>
+      _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D5DB);
+
+  // ============================================
+  // Status Colors (foreground — same in both modes)
   // ============================================
 
   /// Success (approved / checked_in)
   static const Color success = Color(0xFF4ADE80);
-  static const Color successLight = Color(0xFF0D3320);
   static const Color successDark = Color(0xFF16A34A);
 
   /// Warning (pending / contacting)
   static const Color warning = Color(0xFFFBBF24);
-  static const Color warningLight = Color(0xFF3D2400);
   static const Color warningDark = Color(0xFFD97706);
 
   /// Error (rejected / expired)
   static const Color error = Color(0xFFF87171);
-  static const Color errorLight = Color(0xFF3D0A0A);
   static const Color errorDark = Color(0xFFDC2626);
 
   /// Info (cancelled / neutral)
   static const Color info = Color(0xFF9CA3AF);
-  static const Color infoLight = Color(0xFF252528);
   static const Color infoDark = Color(0xFF6B7280);
+
+  // ============================================
+  // Status Background Colors (theme-aware)
+  // ============================================
+
+  static Color get successLight =>
+      _isDark ? const Color(0xFF0D3320) : const Color(0xFFDCFCE7);
+
+  static Color get warningLight =>
+      _isDark ? const Color(0xFF3D2400) : const Color(0xFFFEF3C7);
+
+  static Color get errorLight =>
+      _isDark ? const Color(0xFF3D0A0A) : const Color(0xFFFEE2E2);
+
+  static Color get infoLight =>
+      _isDark ? const Color(0xFF252528) : const Color(0xFFF3F4F6);
+
+  // ============================================
+  // Button Text (always white, for primary-colored buttons)
+  // ============================================
+
+  static const Color buttonText = Colors.white;
 
   // ============================================
   // Semantic Helpers

@@ -168,7 +168,9 @@ class _ResultContent extends StatelessWidget {
                   _InfoRow(
                     icon: Icons.calendar_today_outlined,
                     label: 'Date du spectacle',
-                    value: dateFormat.format(reservation.show!.startsAt.toLocal()),
+                    value: reservation.show!.startsAt != null
+                        ? dateFormat.format(reservation.show!.startsAt!.toLocal())
+                        : '—',
                   ),
                 ],
                 if (reservation.expiresAt != null) ...[

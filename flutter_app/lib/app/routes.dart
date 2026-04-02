@@ -35,6 +35,8 @@ class Routes {
   static const show = '/show';
   static String showDetail(String showId) => '/show/$showId';
   static String showReserve(String showId) => '/show/$showId/reserve';
+  static String episodeReserve(String showId, String episodeId) =>
+      '/show/$showId/episode/$episodeId/reserve';
   static String showSoldOut(String showId) => '/show/$showId/sold-out';
 
   // Reservation routes (inside shell, independent of tabs)
@@ -56,4 +58,9 @@ class Routes {
 
   // Legal / participation conditions (full screen, outside shell — public)
   static const rules = '/rules';
+
+  // Referral / Parrainage
+  static const referralStats = '/referral-stats';
+  static const referralLinks = '/referral-links';
+  static String referralLanding(String token) => '/r/$token';
 }

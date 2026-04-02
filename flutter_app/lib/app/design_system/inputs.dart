@@ -78,11 +78,11 @@ class AppInput extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -98,7 +98,7 @@ class AppInput extends StatelessWidget {
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              borderSide: const BorderSide(color: AppColors.borderLight),
+              borderSide: BorderSide(color: AppColors.borderLight),
             ),
           ),
         ),
@@ -128,14 +128,14 @@ class AppSearchInput extends StatelessWidget {
       hint: hint ?? 'Rechercher...',
       controller: controller,
       onChanged: onChanged,
-      prefixIcon: const Icon(
+      prefixIcon: Icon(
         Icons.search,
         color: AppColors.textMuted,
         size: AppSpacing.iconMd,
       ),
       suffixIcon: controller?.text.isNotEmpty == true
           ? IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.close,
                 color: AppColors.textMuted,
                 size: AppSpacing.iconMd,

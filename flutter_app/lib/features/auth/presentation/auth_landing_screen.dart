@@ -30,9 +30,10 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
     final locale = ref.watch(localeProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final logo = locale == AppLocale.ar
-        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
-        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
+        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
+        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     // Navigate to home once authenticated
     ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
@@ -148,7 +149,7 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
                       : () => context.push(Routes.register),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.textPrimary,
-                    side: const BorderSide(color: AppColors.border),
+                    side: BorderSide(color: AppColors.border),
                     shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),
@@ -306,7 +307,7 @@ class _OrDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(child: Divider(color: AppColors.border)),
+        Expanded(child: Divider(color: AppColors.border)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Text(
@@ -314,7 +315,7 @@ class _OrDivider extends StatelessWidget {
             style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
           ),
         ),
-        const Expanded(child: Divider(color: AppColors.border)),
+        Expanded(child: Divider(color: AppColors.border)),
       ],
     );
   }

@@ -33,7 +33,7 @@ class NotificationCard extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.lg),
         color: AppColors.error,
-        child: const Icon(
+        child: Icon(
           Icons.delete_outline,
           color: AppColors.backgroundWhite,
         ),

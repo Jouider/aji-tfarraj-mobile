@@ -18,6 +18,8 @@ class User {
   final DateTime updatedAt;
   /// User role: 'client' | 'staff' | 'admin' (null treated as 'client')
   final String? role;
+  /// Unique 8-char referral code for this user
+  final String? referralCode;
 
   User({
     required this.id,
@@ -37,6 +39,7 @@ class User {
     required this.createdAt,
     required this.updatedAt,
     this.role,
+    this.referralCode,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -70,6 +73,7 @@ class User {
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       role: json['role'] as String?,
+      referralCode: json['referral_code'] as String?,
     );
   }
 
@@ -92,6 +96,7 @@ class User {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'role': role,
+      'referral_code': referralCode,
     };
   }
 
@@ -113,6 +118,7 @@ class User {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? role,
+    String? referralCode,
     bool clearAvatar = false,
     bool clearPhoneVerification = false,
   }) {
@@ -134,6 +140,7 @@ class User {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       role: role ?? this.role,
+      referralCode: referralCode ?? this.referralCode,
     );
   }
 

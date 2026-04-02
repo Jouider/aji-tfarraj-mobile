@@ -41,4 +41,10 @@ class AppConfig {
   static String reservationDetail(int id) => '/api/reservations/$id';
   static String cancelReservation(int id) => '/api/reservations/$id/cancel';
   static const String myTicket = '/api/me/ticket';
+
+  // Referral / Parrainage
+  static const String myReferralLinks = '/api/me/referral-links';
+  static String resolveReferralLink(String token) =>
+      '/api/referral-links/$token';
+  static const String myReferrals = '/api/me/referrals';
 }

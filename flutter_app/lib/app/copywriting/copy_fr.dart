@@ -97,6 +97,16 @@ class CopyFr {
   // Rewards
   // ============================================
   static const rewards = RewardsCopyFr();
+
+  // ============================================
+  // Referral / Parrainage
+  // ============================================
+  static const referral = ReferralCopyFr();
+
+  // ============================================
+  // Episodes
+  // ============================================
+  static const episode = EpisodeCopyFr();
 }
 
 /// Rewards screen copy in French
@@ -333,6 +343,10 @@ class ProfileCopyFr {
   String get languageLabel => 'Langue';
   String get languageValueFr => 'Français';
   String get languageValueAr => 'العربية';
+  String get themeLabel => 'Apparence';
+  String get themeSystem => 'Système';
+  String get themeLight => 'Clair';
+  String get themeDark => 'Sombre';
   String get loyaltyLabel => 'Fidélité';
   String get notificationsLabel => 'Notifications';
   String unreadCount(int n) => '$n non lue${n > 1 ? 's' : ''}';
@@ -704,4 +718,62 @@ class StaffCopyFr {
   String get attendeeName => 'Spectateur';
   String get showLabel => 'Émission';
   String get ticketCodeLabel => 'Code billet';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Referral / Parrainage
+// ─────────────────────────────────────────────────────────────────────────────
+class ReferralCopyFr {
+  const ReferralCopyFr();
+
+  String get title => 'Parrainage';
+  String get myReferralCode => 'Mon code de parrainage';
+  String get copyCode => 'Copier le code';
+  String get codeCopied => 'Code copié !';
+  String get inviteFriend => 'Inviter un ami';
+  String get generateLink => 'Générer un lien';
+  String get shareLink => 'Partager le lien';
+  String invitesYou(String name) => '$name t\'invite à cette émission';
+  String get reserveNow => 'Réserver maintenant';
+  String get referralCodeLabel => 'Code de parrainage (optionnel)';
+  String get referralCodeHint => 'Entrez le code d\'un ami';
+  String get totalInvited => 'Invités';
+  String get totalAttended => 'Présents';
+  String get pending => 'En attente';
+  String get pointsEarned => 'Points gagnés';
+  String get myLinks => 'Mes liens de parrainage';
+  String get clicks => 'clics';
+  String get conversions => 'réservations';
+  String get expired => 'Expiré';
+  String get linkExpired => 'Ce lien a expiré';
+  String get linkInvalid => 'Lien invalide';
+  String get showUnavailable => 'Cette émission n\'est plus disponible';
+  String shareMessage(String showTitle, String link) =>
+      'Rejoins-moi pour assister à $showTitle ! Réserve ta place ici : $link';
+  String get noLinksYet => 'Aucun lien partagé';
+  String get noReferralsYet => 'Aucun parrainage pour le moment';
+  String get inviteFriendsEarnPoints =>
+      'Invite tes amis et gagne des points !';
+  String get profileTileLabel => 'Parrainage';
+  String get statsTitle => 'Mes parrainages';
+  String get linksTitle => 'Mes liens';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Episodes
+// ─────────────────────────────────────────────────────────────────────────────
+class EpisodeCopyFr {
+  const EpisodeCopyFr();
+
+  String get sectionTitle => 'Épisodes';
+  String episodeCount(int n) => '$n épisode${n > 1 ? 's' : ''}';
+  String get reserveEpisode => 'Réserver cet épisode';
+  String get noUpcomingEpisodes => 'Aucun tournage à venir';
+  String get nextEpisode => 'Prochain épisode';
+  String get pastEpisode => 'Épisode passé';
+  String get allEpisodes => 'Tous les épisodes';
+  String get upcomingEpisodes => 'Épisodes à venir';
+  String get soldOut => 'Complet';
+  String availableSeats(int n) =>
+      '$n ${n == 1 ? 'place disponible' : 'places disponibles'}';
 }

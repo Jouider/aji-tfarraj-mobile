@@ -15,13 +15,16 @@ import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
+import 'package:aji_tfarraj/features/shows/domain/episode.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
+import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
 
 /// Reserve Seats Screen — dark premium redesign
 class ReserveSeatsScreen extends ConsumerStatefulWidget {
   final String showId;
+  final String? episodeId;
 
-  const ReserveSeatsScreen({super.key, required this.showId});
+  const ReserveSeatsScreen({super.key, required this.showId, this.episodeId});
 
   @override
   ConsumerState<ReserveSeatsScreen> createState() => _ReserveSeatsScreenState();
@@ -31,6 +34,25 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
   bool _isLoading = false;
   bool _agreedToTerms = false;
   String? _errorMessage;
+  final _referralCodeController = TextEditingController();
+  bool _showReferralField = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill referral code from deep link if available
+    final pending = ref.read(pendingReferralCodeProvider);
+    if (pending != null && pending.isNotEmpty) {
+      _referralCodeController.text = pending;
+      _showReferralField = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _referralCodeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +67,7 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => context.go(Routes.showDetail(widget.showId)),
         ),
         bottom: PreferredSize(
@@ -65,8 +87,21 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
     );
   }
 
+  /// Resolve the episode to reserve from the show's data
+  Episode? _resolveEpisode(Show show) {
+    if (widget.episodeId != null) {
+      final targetId = int.parse(widget.episodeId!);
+      final match = show.episodes.where((e) => e.id == targetId);
+      if (match.isNotEmpty) return match.first;
+    }
+    return show.nextEpisode;
+  }
+
   Widget _buildContent(BuildContext context, Show show, AppStrings s) {
-    final seatsLeft = show.availableSeats > 0 ? show.availableSeats : 0;
+    final episode = _resolveEpisode(show);
+    final seatsLeft = episode != null
+        ? (episode.availableSeats > 0 ? episode.availableSeats : 0)
+        : (show.availableSeats > 0 ? show.availableSeats : 0);
     final isSoldOut = seatsLeft == 0;
     final dateFormat = DateFormat('dd MMM yyyy · HH:mm', 'fr_FR');
 
@@ -77,7 +112,8 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _ShowSummaryCard(show: show, dateFormat: dateFormat),
+              _ShowSummaryCard(
+                  show: show, episode: episode, dateFormat: dateFormat),
               const SizedBox(height: AppSpacing.lg),
               _SeatsLeftBadge(seatsLeft: seatsLeft, s: s),
               const SizedBox(height: AppSpacing.xl),
@@ -89,6 +125,18 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
 
               _InfoCard(s: s),
               const SizedBox(height: AppSpacing.lg),
+
+              // ── Referral code (optional) ──
+              if (!isSoldOut) ...[
+                _ReferralCodeSection(
+                  controller: _referralCodeController,
+                  isExpanded: _showReferralField,
+                  onToggle: () =>
+                      setState(() => _showReferralField = !_showReferralField),
+                  s: s,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
 
               // ── Agreement checkbox ──
               if (!isSoldOut)
@@ -130,13 +178,31 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
       _errorMessage = null;
     });
 
+    // Resolve the episode ID to submit
+    final showAsync = ref.read(showDetailProvider(showId));
+    final show = showAsync.valueOrNull;
+    final episode = show != null ? _resolveEpisode(show) : null;
+    final episodeId = episode?.id;
+
+    if (episodeId == null) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = ref.read(stringsProvider).unknownError;
+      });
+      return;
+    }
+
     analytics.logReserveAttempt(showId: showId, seats: 1);
 
     try {
+      final referralCode = _referralCodeController.text.trim();
       final reservation = await ref.read(myReservationsProvider.notifier).createReservation(
-            showId: showId,
-            seats: 1,
+            episodeId: episodeId,
+            referralCode: referralCode.isNotEmpty ? referralCode : null,
           );
+
+      // Clear pending referral code after successful reservation
+      ref.read(pendingReferralCodeProvider.notifier).state = null;
 
       if (!mounted) return;
 
@@ -221,14 +287,26 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
 // Show Summary Card
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ShowSummaryCard extends StatelessWidget {
+class _ShowSummaryCard extends ConsumerWidget {
   final Show show;
+  final Episode? episode;
   final DateFormat dateFormat;
 
-  const _ShowSummaryCard({required this.show, required this.dateFormat});
+  const _ShowSummaryCard({
+    required this.show,
+    this.episode,
+    required this.dateFormat,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isAr = ref.watch(isRtlProvider);
+    // Prefer episode data when available
+    final displayDate = episode?.startsAt ?? show.startsAt;
+    final displayLocation = episode != null
+        ? (episode!.studio ?? episode!.city)
+        : (show.studio ?? show.city);
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -276,20 +354,34 @@ class _ShowSummaryCard extends StatelessWidget {
                 ],
 
                 Text(
-                  show.title,
+                  show.localizedTitle(isAr),
                   style: AppTypography.h4,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+                // Episode subtitle
+                if (episode != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    episode!.label,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.secondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xs),
 
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.textMuted),
+                    Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.textMuted),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        dateFormat.format(show.startsAt.toLocal()),
+                        displayDate != null
+                            ? dateFormat.format(displayDate.toLocal())
+                            : '—',
                         style: AppTypography.bodySmall,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -299,10 +391,10 @@ class _ShowSummaryCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    const Icon(Icons.location_on_outlined, size: 13, color: AppColors.textMuted),
+                    Icon(Icons.location_on_outlined, size: 13, color: AppColors.textMuted),
                     const SizedBox(width: 4),
                     Text(
-                      show.studio ?? show.city,
+                      displayLocation,
                       style: AppTypography.bodySmall,
                     ),
                   ],
@@ -323,7 +415,7 @@ class _ThumbPlaceholder extends StatelessWidget {
       width: 80,
       height: 80,
       color: AppColors.backgroundLight,
-      child: const Icon(Icons.tv_outlined, color: AppColors.textLight, size: 32),
+      child: Icon(Icons.tv_outlined, color: AppColors.textLight, size: 32),
     );
   }
 }
@@ -589,7 +681,7 @@ class _StickyConfirmCTA extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.backgroundLight,
-        border: const Border(top: BorderSide(color: AppColors.border, width: 0.5)),
+        border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.4),
@@ -632,7 +724,7 @@ class _StickyConfirmCTA extends StatelessWidget {
                       onPressed: null,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textLight,
-                        side: const BorderSide(color: AppColors.border),
+                        side: BorderSide(color: AppColors.border),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                         ),
@@ -653,7 +745,7 @@ class _StickyConfirmCTA extends StatelessWidget {
                         ),
                       ),
                       child: isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
@@ -667,6 +759,106 @@ class _StickyConfirmCTA extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Referral Code Section (optional, expandable)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ReferralCodeSection extends StatelessWidget {
+  final TextEditingController controller;
+  final bool isExpanded;
+  final VoidCallback onToggle;
+  final AppStrings s;
+
+  const _ReferralCodeSection({
+    required this.controller,
+    required this.isExpanded,
+    required this.onToggle,
+    required this.s,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: onToggle,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundGrey,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.people_outline,
+                    size: 20, color: AppColors.textMuted),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    s.referralCodeLabel,
+                    style: AppTypography.bodySmall
+                        .copyWith(color: AppColors.textSecondary),
+                  ),
+                ),
+                Icon(
+                  isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: AppColors.textMuted,
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isExpanded) ...[
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: controller,
+            textCapitalization: TextCapitalization.characters,
+            maxLength: 8,
+            decoration: InputDecoration(
+              hintText: s.referralCodeHint,
+              hintStyle:
+                  AppTypography.bodySmall.copyWith(color: AppColors.textLight),
+              counterText: '',
+              filled: true,
+              fillColor: AppColors.backgroundLight,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: const BorderSide(color: AppColors.secondary),
+              ),
+              prefixIcon: Icon(Icons.confirmation_number_outlined,
+                  size: 18, color: AppColors.textMuted),
+            ),
+            style: AppTypography.bodyMedium.copyWith(
+              letterSpacing: 2,
+              fontWeight: AppTypography.medium,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

@@ -175,6 +175,9 @@ class PushRouter {
       '/reservation/',
       '/reservation-result/',
       '/notifications',
+      '/r/',
+      '/referral-stats',
+      '/referral-links',
     ];
 
     // Check if route matches any valid prefix

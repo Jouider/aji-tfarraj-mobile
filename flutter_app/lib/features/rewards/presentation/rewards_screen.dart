@@ -28,7 +28,7 @@ class RewardsScreen extends ConsumerWidget {
         actions: [
           TextButton.icon(
             onPressed: () => context.push(Routes.myRewards),
-            icon: const Icon(Icons.history, size: 18,
+            icon: Icon(Icons.history, size: 18,
                 color: AppColors.textSecondary),
             label: Text(
               strings.myRewardsTitle,

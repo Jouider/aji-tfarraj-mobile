@@ -5,6 +5,8 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/features/notifications/data/notification_repository.dart'
+    show sharedPreferencesProvider;
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -29,7 +31,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _controller.forward();
 
     Future.delayed(const Duration(milliseconds: 2200), () {
-      if (mounted) context.go(Routes.language);
+      if (!mounted) return;
+      final prefs = ref.read(sharedPreferencesProvider);
+      if (hasChosenLocale(prefs)) {
+        // Already chose a language before — skip to auth
+        context.go(Routes.authLanding);
+      } else {
+        // First launch — show language picker
+        context.go(Routes.language);
+      }
     });
   }
 
@@ -42,9 +52,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final logo = locale == AppLocale.ar
-        ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
-        : 'assets/images/ajitfarraj_logo/white_fr_logo.png';
+        ? (isDark
+            ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
+            : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
+        : (isDark
+            ? 'assets/images/ajitfarraj_logo/white_fr_logo.png'
+            : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,

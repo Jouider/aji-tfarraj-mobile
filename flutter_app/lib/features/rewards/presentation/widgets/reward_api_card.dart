@@ -70,6 +70,7 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
   Widget build(BuildContext context) {
     final reward = widget.reward;
     final strings = ref.watch(stringsProvider);
+    final isAr = ref.watch(isRtlProvider);
 
     return Container(
       decoration: BoxDecoration(
@@ -79,13 +80,13 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
       ),
       clipBehavior: Clip.antiAlias,
       child: widget.previewMode
-          ? _buildHorizontal(reward, strings)
-          : _buildVertical(reward, strings),
+          ? _buildHorizontal(reward, strings, isAr)
+          : _buildVertical(reward, strings, isAr),
     );
   }
 
   /// Horizontal layout: image left, text right — used in loyalty screen preview
-  Widget _buildHorizontal(Reward reward, dynamic strings) {
+  Widget _buildHorizontal(Reward reward, dynamic strings, bool isAr) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -115,14 +116,14 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  reward.title,
+                  reward.localizedTitle(isAr),
                   style: AppTypography.labelMedium,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  reward.description,
+                  reward.localizedDescription(isAr),
                   style: AppTypography.caption
                       .copyWith(color: AppColors.textSecondary),
                   maxLines: 2,
@@ -139,7 +140,7 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
   }
 
   /// Horizontal layout with collect button — used in rewards screen
-  Widget _buildVertical(Reward reward, dynamic strings) {
+  Widget _buildVertical(Reward reward, dynamic strings, bool isAr) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -169,14 +170,14 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  reward.title,
+                  reward.localizedTitle(isAr),
                   style: AppTypography.labelMedium,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  reward.description,
+                  reward.localizedDescription(isAr),
                   style: AppTypography.caption
                       .copyWith(color: AppColors.textSecondary),
                   maxLines: 2,
@@ -205,7 +206,7 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
                           elevation: 0,
                         ),
                         child: _loading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 12,
                                 height: 12,
                                 child: CircularProgressIndicator(
@@ -229,7 +230,7 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
 
   Widget _imagePlaceholder() => Container(
         color: AppColors.backgroundGrey,
-        child: const Center(
+        child: Center(
           child:
               Icon(Icons.card_giftcard, color: AppColors.textMuted, size: 32),
         ),

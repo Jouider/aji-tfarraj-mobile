@@ -88,7 +88,7 @@ class RulesScreen extends ConsumerWidget {
           }),
 
           const SizedBox(height: AppSpacing.xl),
-          const Divider(color: AppColors.border),
+          Divider(color: AppColors.border),
           const SizedBox(height: AppSpacing.lg),
 
           // Validation section header

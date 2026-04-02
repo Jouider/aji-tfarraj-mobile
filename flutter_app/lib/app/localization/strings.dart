@@ -396,6 +396,22 @@ class AppStrings {
       ? CopyFr.profile.languageValueAr
       : CopyAr.profile.languageValueAr;
 
+  String get profileThemeLabel => locale == AppLocale.fr
+      ? CopyFr.profile.themeLabel
+      : CopyAr.profile.themeLabel;
+
+  String get themeSystem => locale == AppLocale.fr
+      ? CopyFr.profile.themeSystem
+      : CopyAr.profile.themeSystem;
+
+  String get themeLight => locale == AppLocale.fr
+      ? CopyFr.profile.themeLight
+      : CopyAr.profile.themeLight;
+
+  String get themeDark => locale == AppLocale.fr
+      ? CopyFr.profile.themeDark
+      : CopyAr.profile.themeDark;
+
   String get profileLoyaltyLabel => locale == AppLocale.fr
       ? CopyFr.profile.loyaltyLabel
       : CopyAr.profile.loyaltyLabel;
@@ -1187,4 +1203,166 @@ class AppStrings {
   List<ConditionSection> get conditionsSections => locale == AppLocale.fr
       ? CopyFr.conditions.sections
       : CopyAr.conditions.sections;
+
+  // ============================================
+  // Referral / Parrainage
+  // ============================================
+  String get referralTitle => locale == AppLocale.fr
+      ? CopyFr.referral.title
+      : CopyAr.referral.title;
+
+  String get referralMyCode => locale == AppLocale.fr
+      ? CopyFr.referral.myReferralCode
+      : CopyAr.referral.myReferralCode;
+
+  String get referralCopyCode => locale == AppLocale.fr
+      ? CopyFr.referral.copyCode
+      : CopyAr.referral.copyCode;
+
+  String get referralCodeCopied => locale == AppLocale.fr
+      ? CopyFr.referral.codeCopied
+      : CopyAr.referral.codeCopied;
+
+  String get referralInviteFriend => locale == AppLocale.fr
+      ? CopyFr.referral.inviteFriend
+      : CopyAr.referral.inviteFriend;
+
+  String get referralGenerateLink => locale == AppLocale.fr
+      ? CopyFr.referral.generateLink
+      : CopyAr.referral.generateLink;
+
+  String get referralShareLink => locale == AppLocale.fr
+      ? CopyFr.referral.shareLink
+      : CopyAr.referral.shareLink;
+
+  String referralInvitesYou(String name) => locale == AppLocale.fr
+      ? CopyFr.referral.invitesYou(name)
+      : CopyAr.referral.invitesYou(name);
+
+  String get referralReserveNow => locale == AppLocale.fr
+      ? CopyFr.referral.reserveNow
+      : CopyAr.referral.reserveNow;
+
+  String get referralCodeLabel => locale == AppLocale.fr
+      ? CopyFr.referral.referralCodeLabel
+      : CopyAr.referral.referralCodeLabel;
+
+  String get referralCodeHint => locale == AppLocale.fr
+      ? CopyFr.referral.referralCodeHint
+      : CopyAr.referral.referralCodeHint;
+
+  String get referralTotalInvited => locale == AppLocale.fr
+      ? CopyFr.referral.totalInvited
+      : CopyAr.referral.totalInvited;
+
+  String get referralTotalAttended => locale == AppLocale.fr
+      ? CopyFr.referral.totalAttended
+      : CopyAr.referral.totalAttended;
+
+  String get referralPending => locale == AppLocale.fr
+      ? CopyFr.referral.pending
+      : CopyAr.referral.pending;
+
+  String get referralPointsEarned => locale == AppLocale.fr
+      ? CopyFr.referral.pointsEarned
+      : CopyAr.referral.pointsEarned;
+
+  String get referralMyLinks => locale == AppLocale.fr
+      ? CopyFr.referral.myLinks
+      : CopyAr.referral.myLinks;
+
+  String get referralClicks => locale == AppLocale.fr
+      ? CopyFr.referral.clicks
+      : CopyAr.referral.clicks;
+
+  String get referralConversions => locale == AppLocale.fr
+      ? CopyFr.referral.conversions
+      : CopyAr.referral.conversions;
+
+  String get referralExpired => locale == AppLocale.fr
+      ? CopyFr.referral.expired
+      : CopyAr.referral.expired;
+
+  String get referralLinkExpired => locale == AppLocale.fr
+      ? CopyFr.referral.linkExpired
+      : CopyAr.referral.linkExpired;
+
+  String get referralLinkInvalid => locale == AppLocale.fr
+      ? CopyFr.referral.linkInvalid
+      : CopyAr.referral.linkInvalid;
+
+  String get referralShowUnavailable => locale == AppLocale.fr
+      ? CopyFr.referral.showUnavailable
+      : CopyAr.referral.showUnavailable;
+
+  String referralShareMessage(String showTitle, String link) =>
+      locale == AppLocale.fr
+          ? CopyFr.referral.shareMessage(showTitle, link)
+          : CopyAr.referral.shareMessage(showTitle, link);
+
+  String get referralNoLinksYet => locale == AppLocale.fr
+      ? CopyFr.referral.noLinksYet
+      : CopyAr.referral.noLinksYet;
+
+  String get referralNoReferralsYet => locale == AppLocale.fr
+      ? CopyFr.referral.noReferralsYet
+      : CopyAr.referral.noReferralsYet;
+
+  String get referralInviteFriendsEarnPoints => locale == AppLocale.fr
+      ? CopyFr.referral.inviteFriendsEarnPoints
+      : CopyAr.referral.inviteFriendsEarnPoints;
+
+  String get referralProfileTileLabel => locale == AppLocale.fr
+      ? CopyFr.referral.profileTileLabel
+      : CopyAr.referral.profileTileLabel;
+
+  String get referralStatsTitle => locale == AppLocale.fr
+      ? CopyFr.referral.statsTitle
+      : CopyAr.referral.statsTitle;
+
+  String get referralLinksTitle => locale == AppLocale.fr
+      ? CopyFr.referral.linksTitle
+      : CopyAr.referral.linksTitle;
+
+  // ── Episodes ──────────────────────────────────────────────────────────────
+
+  String get episodeSectionTitle => locale == AppLocale.fr
+      ? CopyFr.episode.sectionTitle
+      : CopyAr.episode.sectionTitle;
+
+  String episodeCount(int n) => locale == AppLocale.fr
+      ? CopyFr.episode.episodeCount(n)
+      : CopyAr.episode.episodeCount(n);
+
+  String get reserveEpisode => locale == AppLocale.fr
+      ? CopyFr.episode.reserveEpisode
+      : CopyAr.episode.reserveEpisode;
+
+  String get noUpcomingEpisodes => locale == AppLocale.fr
+      ? CopyFr.episode.noUpcomingEpisodes
+      : CopyAr.episode.noUpcomingEpisodes;
+
+  String get nextEpisodeLabel => locale == AppLocale.fr
+      ? CopyFr.episode.nextEpisode
+      : CopyAr.episode.nextEpisode;
+
+  String get pastEpisodeLabel => locale == AppLocale.fr
+      ? CopyFr.episode.pastEpisode
+      : CopyAr.episode.pastEpisode;
+
+  String get allEpisodesLabel => locale == AppLocale.fr
+      ? CopyFr.episode.allEpisodes
+      : CopyAr.episode.allEpisodes;
+
+  String get upcomingEpisodesLabel => locale == AppLocale.fr
+      ? CopyFr.episode.upcomingEpisodes
+      : CopyAr.episode.upcomingEpisodes;
+
+  String get episodeSoldOut => locale == AppLocale.fr
+      ? CopyFr.episode.soldOut
+      : CopyAr.episode.soldOut;
+
+  String episodeAvailableSeats(int n) => locale == AppLocale.fr
+      ? CopyFr.episode.availableSeats(n)
+      : CopyAr.episode.availableSeats(n);
 }

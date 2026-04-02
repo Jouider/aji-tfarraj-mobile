@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -29,7 +30,7 @@ class ReservationDetailScreen extends ConsumerWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => context.canPop() ? context.pop() : context.go(Routes.myReservations),
         ),
         bottom: PreferredSize(
@@ -93,7 +94,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                 ],
                 if (statusHelper.isExpired) ...[
                   const SizedBox(height: AppSpacing.lg),
-                  const _AlertInfoBox(
+                  _AlertInfoBox(
                     icon: Icons.timer_off_outlined,
                     title: 'Réservation expirée',
                     message:
@@ -104,7 +105,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                 ],
                 if (statusHelper.isCheckedIn) ...[
                   const SizedBox(height: AppSpacing.lg),
-                  const _AlertInfoBox(
+                  _AlertInfoBox(
                     icon: Icons.verified_outlined,
                     title: 'Entrée validée',
                     message:
@@ -163,7 +164,7 @@ class ReservationDetailScreen extends ConsumerWidget {
               Container(
                 width: 52,
                 height: 52,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.errorLight,
                   shape: BoxShape.circle,
                 ),
@@ -185,7 +186,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textSecondary,
-                        side: const BorderSide(color: AppColors.border),
+                        side: BorderSide(color: AppColors.border),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -323,7 +324,7 @@ class _SectionLabel extends StatelessWidget {
 // Show Info Card
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ShowInfoCard extends StatelessWidget {
+class _ShowInfoCard extends ConsumerWidget {
   final Reservation reservation;
   final DateFormat dateFormat;
   final DateFormat timeFormat;
@@ -335,7 +336,8 @@ class _ShowInfoCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isAr = ref.watch(isRtlProvider);
     final show = reservation.show!;
 
     return Container(
@@ -348,16 +350,20 @@ class _ShowInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(show.title, style: AppTypography.h4),
+          Text(show.localizedTitle(isAr), style: AppTypography.h4),
           const SizedBox(height: AppSpacing.md),
           _InfoRow(
             icon: Icons.calendar_today_outlined,
-            label: dateFormat.format(show.startsAt.toLocal()),
+            label: show.startsAt != null
+                ? dateFormat.format(show.startsAt!.toLocal())
+                : '—',
           ),
           const SizedBox(height: AppSpacing.sm),
           _InfoRow(
             icon: Icons.access_time_outlined,
-            label: timeFormat.format(show.startsAt.toLocal()),
+            label: show.startsAt != null
+                ? timeFormat.format(show.startsAt!.toLocal())
+                : '—',
           ),
           const SizedBox(height: AppSpacing.sm),
           _InfoRow(
@@ -403,18 +409,18 @@ class _ReservationDetailsCard extends StatelessWidget {
             value: '#${reservation.id}',
             valueStyle: AppTypography.labelLarge.copyWith(color: AppColors.secondary),
           ),
-          const Divider(height: AppSpacing.xl, color: AppColors.border),
+          Divider(height: AppSpacing.xl, color: AppColors.border),
           _DetailRow(
             label: 'Nombre de places',
             value: '${reservation.seats} place${reservation.seats > 1 ? 's' : ''}',
           ),
-          const Divider(height: AppSpacing.xl, color: AppColors.border),
+          Divider(height: AppSpacing.xl, color: AppColors.border),
           _DetailRow(
             label: 'Date de réservation',
             value: DateFormat('dd/MM/yyyy').format(reservation.createdAt.toLocal()),
           ),
           if (reservation.expiresAt != null) ...[
-            const Divider(height: AppSpacing.xl, color: AppColors.border),
+            Divider(height: AppSpacing.xl, color: AppColors.border),
             _DetailRow(
               label: statusHelper.isExpired ? 'Expirée le' : 'Expire le',
               value: DateFormat('dd/MM/yyyy à HH:mm').format(reservation.expiresAt!.toLocal()),

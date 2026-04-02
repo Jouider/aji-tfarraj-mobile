@@ -500,14 +500,15 @@ class _RefreshButton extends StatelessWidget {
 }
 
 /// Main ticket card with QR code
-class _TicketCard extends StatelessWidget {
+class _TicketCard extends ConsumerWidget {
   final AppStrings s;
   final Ticket ticket;
 
   const _TicketCard({required this.s, required this.ticket});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isAr = ref.watch(isRtlProvider);
     final dateFormat = DateFormat('EEEE dd MMMM yyyy', 'fr_FR');
     final timeFormat = DateFormat('HH:mm');
     final show = ticket.show;
@@ -571,7 +572,7 @@ class _TicketCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    show.title,
+                    show.localizedTitle(isAr),
                     style: AppTypography.h4,
                     textAlign: TextAlign.center,
                     maxLines: 2,
@@ -580,12 +581,16 @@ class _TicketCard extends StatelessWidget {
                   const SizedBox(height: AppSpacing.md),
                   _TicketInfoRow(
                     icon: Icons.calendar_today,
-                    label: dateFormat.format(show.startsAt.toLocal()),
+                    label: show.startsAt != null
+                        ? dateFormat.format(show.startsAt!.toLocal())
+                        : '—',
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   _TicketInfoRow(
                     icon: Icons.access_time,
-                    label: timeFormat.format(show.startsAt.toLocal()),
+                    label: show.startsAt != null
+                        ? timeFormat.format(show.startsAt!.toLocal())
+                        : '—',
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   _TicketInfoRow(
@@ -766,7 +771,7 @@ class _TicketCodeRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              const Icon(
+              Icon(
                 Icons.copy,
                 size: 16,
                 color: AppColors.textMuted,

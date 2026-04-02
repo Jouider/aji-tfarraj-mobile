@@ -84,6 +84,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
     final showsState = ref.watch(showsListProvider);
     final filteredShows = ref.watch(filteredShowsProvider);
     final s = ref.watch(stringsProvider);
+    final isAr = ref.watch(isRtlProvider);
 
     // Build city list from all loaded shows
     final cities = showsState.uniqueCities;
@@ -152,7 +153,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
 
           // Content
           Expanded(
-            child: _buildContent(showsState, grouped, s),
+            child: _buildContent(showsState, grouped, s, isAr),
           ),
         ],
       ),
@@ -163,6 +164,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
     ShowsListState showsState,
     Map<String, List<Show>> grouped,
     AppStrings s,
+    bool isAr,
   ) {
     if (showsState.isLoading) {
       return const _BrowseLoadingSkeleton();
@@ -207,6 +209,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
             s: s,
             studioName: studioName,
             shows: studioShows,
+            isAr: isAr,
           );
         },
       ),
@@ -263,13 +266,13 @@ class _SearchBar extends StatelessWidget {
         decoration: InputDecoration(
           hintText: s.browseSearchHint,
           hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textLight),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textLight, size: 22),
+          prefixIcon: Icon(Icons.search, color: AppColors.textLight, size: 22),
           suffixIcon: ListenableBuilder(
             listenable: controller,
             builder: (_, __) => controller.text.isEmpty
                 ? const SizedBox.shrink()
                 : IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.textLight, size: 20),
+                    icon: Icon(Icons.close, color: AppColors.textLight, size: 20),
                     onPressed: onClear,
                   ),
           ),
@@ -395,8 +398,9 @@ class _StudioSection extends StatelessWidget {
   final AppStrings s;
   final String studioName;
   final List<Show> shows;
+  final bool isAr;
 
-  const _StudioSection({required this.s, required this.studioName, required this.shows});
+  const _StudioSection({required this.s, required this.studioName, required this.shows, required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -441,7 +445,7 @@ class _StudioSection extends StatelessWidget {
         ),
 
         // Show cards
-        ...shows.map((show) => _BrowseShowCard(s: s, show: show)),
+        ...shows.map((show) => _BrowseShowCard(s: s, show: show, isAr: isAr)),
       ],
     );
   }
@@ -454,8 +458,9 @@ class _StudioSection extends StatelessWidget {
 class _BrowseShowCard extends StatelessWidget {
   final AppStrings s;
   final Show show;
+  final bool isAr;
 
-  const _BrowseShowCard({required this.s, required this.show});
+  const _BrowseShowCard({required this.s, required this.show, required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -494,13 +499,13 @@ class _BrowseShowCard extends StatelessWidget {
                             Container(color: AppColors.backgroundWhite),
                         errorWidget: (_, __, ___) => Container(
                           color: AppColors.backgroundWhite,
-                          child: const Icon(Icons.tv,
+                          child: Icon(Icons.tv,
                               size: 28, color: AppColors.textLight),
                         ),
                       )
                     : Container(
                         color: AppColors.backgroundWhite,
-                        child: const Icon(Icons.tv,
+                        child: Icon(Icons.tv,
                             size: 28, color: AppColors.textLight),
                       ),
               ),
@@ -521,7 +526,7 @@ class _BrowseShowCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            show.title,
+                            show.localizedTitle(isAr),
                             style: AppTypography.labelLarge.copyWith(
                               color: AppColors.textPrimary,
                             ),
@@ -561,11 +566,13 @@ class _BrowseShowCard extends StatelessWidget {
                     // Date
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today_outlined,
+                        Icon(Icons.calendar_today_outlined,
                             size: 12, color: AppColors.textLight),
                         const SizedBox(width: 4),
                         Text(
-                          dateFormat.format(show.startsAt.toLocal()),
+                          show.startsAt != null
+                              ? dateFormat.format(show.startsAt!.toLocal())
+                              : '—',
                           style: AppTypography.caption.copyWith(
                             color: AppColors.textMuted,
                           ),
@@ -578,7 +585,7 @@ class _BrowseShowCard extends StatelessWidget {
                     // City + seats
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined,
+                        Icon(Icons.location_on_outlined,
                             size: 12, color: AppColors.textLight),
                         const SizedBox(width: 4),
                         Text(
@@ -649,7 +656,7 @@ class _BrowseShowCard extends StatelessWidget {
             ),
 
             // Chevron
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(right: AppSpacing.sm),
               child: Icon(Icons.chevron_right, color: AppColors.textLight, size: 20),
             ),
@@ -762,7 +769,7 @@ class _FilterSheet extends StatelessWidget {
                 onPressed: onClear,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.textSecondary,
-                  side: const BorderSide(color: AppColors.border),
+                  side: BorderSide(color: AppColors.border),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
