@@ -109,6 +109,21 @@ class CopyAr {
   // Episodes / الحلقات
   // ============================================
   static const episode = EpisodeCopyAr();
+
+  // ============================================
+  // Reservation Result / تأكيد الحجز
+  // ============================================
+  static const reservationResult = ReservationResultCopyAr();
+
+  // ============================================
+  // Reservation Detail / تفاصيل الحجز
+  // ============================================
+  static const reservationDetail = ReservationDetailCopyAr();
+
+  // ============================================
+  // Support Tickets / تذاكر الدعم
+  // ============================================
+  static const support = SupportCopyAr();
 }
 
 /// Rewards screen copy in Arabic
@@ -271,7 +286,8 @@ class AuthCopyAr {
   String get emailInvalid => 'يرجى إدخال بريد إلكتروني صالح';
   String get passwordRequired => 'يرجى إدخال كلمة المرور';
   String get passwordMin => 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل';
-  String get passwordWeak => 'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم على الأقل.';
+  String get passwordWeak =>
+      'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم على الأقل.';
   String get nameRequired => 'يرجى إدخال اسمك';
   String get nameMin => 'الاسم يجب أن يحتوي على حرفين على الأقل';
   String get confirmPasswordRequired => 'يرجى تأكيد كلمة المرور';
@@ -279,8 +295,7 @@ class AuthCopyAr {
 
   // Auth landing
   String get authLandingTitle => 'مرحباً';
-  String get authLandingSubtitle =>
-      'احجز مقاعدك للبرامج التلفزيونية المغربية';
+  String get authLandingSubtitle => 'احجز مقاعدك للبرامج التلفزيونية المغربية';
   String get continueWithGoogle => 'المتابعة مع Google';
   String get continueWithApple => 'المتابعة مع Apple';
   String get continueWithEmail => 'تسجيل الدخول بالبريد الإلكتروني';
@@ -328,15 +343,21 @@ class ProfileCopyAr {
   String get themeSystem => 'النظام';
   String get themeLight => 'فاتح';
   String get themeDark => 'داكن';
-  String get loyaltyLabel => 'الولاء';
+  String get loyaltyLabel => 'الوفاء';
   String get notificationsLabel => 'الإشعارات';
   String unreadCount(int n) => '$n غير مقروء${n > 1 ? 'ة' : ''}';
+  String get groupPreferences => 'التفضيلات';
+  String get groupAccount => 'الحساب';
+  String get groupSettings => 'الإعدادات';
   String get helpLabel => 'المساعدة';
   String get aboutLabel => 'حول التطبيق';
   String get logoutLabel => 'تسجيل الخروج';
 
   // Edit profile
   String get editTitle => 'تعديل الملف الشخصي';
+  String get editSectionPersonal => 'المعلومات الشخصية';
+  String get editSectionLocation => 'الموقع';
+  String get editSectionContact => 'التواصل';
   String get incompleteWarning => 'أكمل ملفك الشخصي لتتمكن من الحجز';
   String get incompleteMessage =>
       'يرجى إدخال اسمك الأول والأخير والمدينة والحي، والتحقق من رقم هاتفك قبل الحجز.';
@@ -453,8 +474,7 @@ class ShowDetailCopyAr {
   const ShowDetailCopyAr();
 
   String get soldOut => 'مكتمل';
-  String availableSeats(int n) =>
-      '$n ${n == 1 ? 'مقعد متاح' : 'مقاعد متاحة'}';
+  String availableSeats(int n) => '$n ${n == 1 ? 'مقعد متاح' : 'مقاعد متاحة'}';
   String reservations(int reserved, int cap) => '$reserved حجز من أصل $cap';
   String get about => 'حول البرنامج';
   String get seeLess => 'عرض أقل';
@@ -476,8 +496,7 @@ class ReserveSeatsCopyAr {
 
   String get title => 'حجز مقاعد';
   String get soldOutBadge => 'مكتمل — لا مقاعد متاحة';
-  String availableSeats(int n) =>
-      '$n ${n == 1 ? 'مقعد متاح' : 'مقاعد متاحة'}';
+  String availableSeats(int n) => '$n ${n == 1 ? 'مقعد متاح' : 'مقاعد متاحة'}';
   String get seatsCountLabel => 'عدد المقاعد';
   String maxHint(int n) => 'بحد أقصى 4 مقاعد · $n متاح';
   String get infoTitle => 'معلومة مهمة';
@@ -488,8 +507,7 @@ class ReserveSeatsCopyAr {
   String get soldOutCta => 'مكتمل';
   String get errSoldOut => 'المقاعد ممتلئة. لا توجد مقاعد كافية.';
   String get errNotEnough => 'لا توجد مقاعد كافية.';
-  String get agreementCheckboxLabel =>
-      'لقد قرأت وأوافق على شروط المشاركة.';
+  String get agreementCheckboxLabel => 'لقد قرأت وأوافق على شروط المشاركة.';
   String get agreementReadRules => 'قراءة النظام الداخلي';
 }
 
@@ -597,8 +615,7 @@ class StaffCopyAr {
   String get alreadyUsed => 'البطاقة مستخدمة بالفعل';
   String get notFound => 'البطاقة غير موجودة';
   String get accessDenied => 'مطلوب صلاحيات الموظف';
-  String get accessDeniedSubtitle =>
-      'ليس لديك الصلاحيات للوصول إلى هذا القسم.';
+  String get accessDeniedSubtitle => 'ليس لديك الصلاحيات للوصول إلى هذا القسم.';
   String get sessionExpired => 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.';
   String get networkError => 'تعذّر التحقق من البطاقة في الوقت الحالي.';
   String get scanAnother => 'مسح بطاقة أخرى';
@@ -759,4 +776,170 @@ class EpisodeCopyAr {
   String get upcomingEpisodes => 'الحلقات القادمة';
   String get soldOut => 'مك��مل';
   String availableSeats(int n) => '$n ${n == 1 ? 'مقعد متاح' : 'مقاعد متاحة'}';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reservation Result / تأكيد الحجز
+// ─────────────────────────────────────────────────────────────────────────────
+class ReservationResultCopyAr {
+  const ReservationResultCopyAr();
+
+  String get title => 'تم إرسال الحجز';
+  String get statusBadge => 'في انتظار المراجعة';
+  String get summaryShowLabel => 'البرنامج';
+  String get summaryNumberLabel => 'رقم الحجز';
+  String get summarySeatsLabel => 'المقاعد المحجوزة';
+  String get summaryDateLabel => 'تاريخ العرض';
+  String get summaryExpiresLabel => 'تنتهي في';
+  String seats(int n) => '$n ${n == 1 ? 'مقعد' : 'مقاعد'}';
+  String get nextStepsTitle => 'الخطوات التالية';
+  String get step1 => 'طلبك قيد المعالجة.';
+  String get step2 => 'سيتصل بك فريقنا لتأكيد حجزك.';
+  String get step3 => 'بعد الموافقة، ستتلقى تذكرتك الإلكترونية.';
+  String get ctaMyReservations => 'عرض حجوزاتي';
+  String get ctaHome => 'العودة إلى الرئيسية';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reservation Detail screen / تفاصيل الحجز
+// ─────────────────────────────────────────────────────────────────────────────
+class ReservationDetailCopyAr {
+  const ReservationDetailCopyAr();
+
+  String get appBarTitle => 'حجزي';
+
+  // Status messages
+  String get msgPending =>
+      'طلبك قيد المعالجة. سيتم إخطارك فور الموافقة عليه.';
+  String get msgApproved =>
+      'تم تأكيد حجزك! يمكنك الاطلاع على تذكرتك أدناه.';
+  String get msgRejected =>
+      'تم رفض طلبك. يمكنك تقديم طلب جديد.';
+  String get msgCheckedIn => 'لقد حضرت هذا البرنامج. شكراً!';
+  String get msgCancelled => 'لقد ألغيت هذا الحجز.';
+  String get msgExpired =>
+      'انتهت صلاحية هذا الحجز. يمكنك حجز برنامج آخر.';
+
+  // Section labels
+  String get sectionShow => 'البرنامج';
+  String get sectionDetails => 'تفاصيل الحجز';
+
+  // Detail row labels
+  String get labelNumber => 'رقم الحجز';
+  String get labelSeats => 'عدد المقاعد';
+  String get labelCreatedAt => 'تاريخ الحجز';
+  String get labelExpiresAt => 'تنتهي في';
+  String get labelExpiredAt => 'انتهت في';
+  String seats(int n) => '$n ${n == 1 ? 'مقعد' : 'مقاعد'}';
+
+  // Alert boxes
+  String get alertRejectionTitle => 'سبب الرفض';
+  String get alertExpiredTitle => 'انتهت صلاحية الحجز';
+  String get alertExpiredBody =>
+      'انتهت صلاحية هذا الحجز لأنه لم يتم تأكيده في الوقت المحدد. يمكنك تقديم حجز جديد.';
+  String get alertCheckedInTitle => 'تم تسجيل الدخول';
+  String get alertCheckedInBody =>
+      'تم استخدام تذكرتك للوصول إلى البرنامج. شكراً لمشاركتك!';
+
+  // Action buttons
+  String get btnViewTicket => 'عرض تذكرتي';
+  String get btnViewUsedTicket => 'عرض التذكرة المستخدمة';
+  String get btnDiscoverShows => 'اكتشف البرامج';
+  String get btnCancelReservation => 'إلغاء الحجز';
+
+  // Cancel dialog
+  String get cancelDialogTitle => 'إلغاء الحجز؟';
+  String get cancelDialogBody =>
+      'هذا الإجراء لا يمكن التراجع عنه. سيتم تحرير مقعدك.';
+  String get cancelDialogBack => 'رجوع';
+  String get cancelDialogConfirm => 'تأكيد';
+
+  // Snackbar
+  String get cancelSuccess => 'تم إلغاء الحجز';
+  String get copiedLabel => 'تم النسخ!';
+
+  // Error view
+  String get retry => 'إعادة المحاولة';
+}
+
+/// Support Tickets copy in Arabic
+class SupportCopyAr {
+  const SupportCopyAr();
+
+  // App bar titles
+  String get listTitle => 'الدعم / المساعدة';
+  String get createTitle => 'تذكرة جديدة';
+  String get newButton => 'جديدة';
+
+  // Status badges
+  String get statusOpen => 'قيد الانتظار';
+  String get statusInProgress => 'قيد المعالجة';
+  String get statusClosed => 'تم الحل';
+
+  // Status banner titles & messages
+  String get bannerOpenTitle => 'قيد الانتظار';
+  String get bannerOpenMsg =>
+      'طلبك في قائمة الانتظار.\nسيتواصل معك فريقنا قريباً.';
+  String get bannerInProgressTitle => 'قيد المعالجة';
+  String get bannerInProgressMsg =>
+      'أحد الوكلاء يتولى طلبك.\nسيتم التواصل معك هاتفياً.';
+  String get bannerClosedTitle => 'تم الحل';
+  String get bannerClosedMsg =>
+      'تمت معالجة هذه التذكرة وإغلاقها.\nشكراً على تواصلك معنا.';
+
+  // Card
+  String get cardSubtitle => 'سيتواصل معك فريقنا عبر الهاتف.';
+
+  // Empty state
+  String get emptyTitle => 'لا توجد تذاكر';
+  String get emptySubtitle => 'لم تتواصل مع الدعم بعد.';
+  String get emptyButton => 'إنشاء تذكرة';
+
+  // Error state
+  String get errorMsg => 'تعذر تحميل تذاكرك.';
+  String get retryButton => 'إعادة المحاولة';
+
+  // Create screen
+  String get infoBannerTitle => 'معلومة مفيدة';
+  String get infoBannerBody =>
+      'سيتصل بك فريقنا على الرقم المرتبط بحسابك. '
+      'صف مشكلتك بالتفصيل لتسريع المعالجة.';
+  String get subjectLabel => 'الموضوع *';
+  String get subjectHint => 'مثال: مشكلة في حجزي...';
+  String get subjectRequired => 'الموضوع مطلوب';
+  String get messageLabel => 'الوصف *';
+  String get messageHint =>
+      'صف مشكلتك بالتفصيل...\nاذكر رقم الحجز إن وجد.';
+  String get submitButton => 'إرسال طلبي';
+
+  // Confirmation screen
+  String get confirmationTitle => 'تم إرسال الطلب!';
+  String get confirmationBadge => 'في انتظار المعالجة';
+  String get summarySubject => 'الموضوع';
+  String get summaryTicket => 'التذكرة';
+  String get summarySubmitted => 'أُرسلت في';
+  String get stepsTitle => 'الخطوات التالية';
+  String get step1 => 'تم استلام طلبك بنجاح.';
+  String get step2 => 'سيتصل بك أحد الوكلاء خلال 24–48 ساعة.';
+  String get step3 => 'ستُغلق التذكرة بعد الحل.';
+  String get btnViewTickets => 'عرض تذاكري';
+  String get btnBackHome => 'العودة للرئيسية';
+
+  // Detail screen
+  String get detailSubjectSection => 'الموضوع';
+  String get detailMessageSection => 'رسالتك';
+  String get detailMetaSection => 'التفاصيل';
+  String get metaTicketNumber => 'رقم التذكرة';
+  String get metaSubmittedAt => 'تاريخ الإرسال';
+  String get metaUpdatedAt => 'آخر تحديث';
+  String get infoCallPending =>
+      'ستتلقى اتصالاً من فريقنا.\nتأكد من أن رقمك محدّث.';
+  String get infoClosed => 'هذه التذكرة مغلقة.';
+  String get detailError => 'خطأ في التحميل';
+  String get detailForbidden => 'غير مصرح بالوصول';
+  String get detailRetry => 'إعادة المحاولة';
+
+  // Profile entry point
+  String get profileTitle => 'الدعم / المساعدة';
+  String get profileSubtitle => 'تواصل مع فريقنا';
 }

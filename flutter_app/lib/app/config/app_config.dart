@@ -47,4 +47,9 @@ class AppConfig {
   static String resolveReferralLink(String token) =>
       '/api/referral-links/$token';
   static const String myReferrals = '/api/me/referrals';
+
+  // Support Tickets
+  static const String supportTickets = '/api/support/tickets';
+  static const String mySupportTickets = '/api/me/support-tickets';
+  static String supportTicketDetail(int id) => '/api/me/support-tickets/$id';
 }

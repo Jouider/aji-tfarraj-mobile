@@ -64,11 +64,19 @@ class ReservationStatusHelper {
     }
   }
 
-  /// Get badge color for status
+  /// Get badge color for status (bright, for dark-mode or decorative use)
   Color get color => AppColors.getStatusColor(status);
 
   /// Get background color (lighter) for badge
   Color get backgroundColor => AppColors.getStatusBackgroundColor(status);
+
+  /// Get readable foreground color for badge text/icon (theme-aware)
+  // FIX: Theme-aware foreground — dark variants in light mode for readability
+  Color get foregroundColor => AppColors.getStatusForegroundColor(status);
+
+  /// Get border color for badge (status-tinted)
+  // FIX: Status-tinted borders
+  Color get borderColor => AppColors.getStatusBorderColor(status);
 
   /// Get icon for status
   IconData get icon {
@@ -121,6 +129,7 @@ class ReservationStatusHelper {
 }
 
 /// Widget for displaying reservation status badge
+// FIX: Status badge — brand tokens, no truncation, radius 20, theme-aware foreground
 class ReservationStatusBadge extends ConsumerWidget {
   final String status;
   final bool showIcon;
@@ -134,32 +143,34 @@ class ReservationStatusBadge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final helper = ReservationStatusHelper(status);
-    final s = ref.watch(stringsProvider);
+    final isAr = ref.watch(isRtlProvider);
+    // FIX: Use theme-aware foreground — readable in both light and dark
+    final fg = helper.foregroundColor;
+    // FIX: Use short badge label (helper.label) — NOT statusByKey which returns "En attente de validation"
+    final label = isAr ? helper.labelAr : helper.label;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: helper.backgroundColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: helper.color.withValues(alpha: 0.3)),
+        // FIX: Radius 20 pill shape
+        borderRadius: BorderRadius.circular(20),
+        // FIX: Status-tinted border at correct opacity
+        border: Border.all(color: helper.borderColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (showIcon) ...[
-            Icon(helper.icon, size: 14, color: helper.color),
+            Icon(helper.icon, size: 14, color: fg),
             const SizedBox(width: 6),
           ],
-          Flexible(
-            child: Text(
-              s.statusByKey(status),
-              style: TextStyle(
-                color: helper.color,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+          Text(
+            label,
+            style: TextStyle(
+              color: fg,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

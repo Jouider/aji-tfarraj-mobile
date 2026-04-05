@@ -107,6 +107,21 @@ class CopyFr {
   // Episodes
   // ============================================
   static const episode = EpisodeCopyFr();
+
+  // ============================================
+  // Reservation Result / Confirmation screen
+  // ============================================
+  static const reservationResult = ReservationResultCopyFr();
+
+  // ============================================
+  // Reservation Detail screen
+  // ============================================
+  static const reservationDetail = ReservationDetailCopyFr();
+
+  // ============================================
+  // Support Tickets
+  // ============================================
+  static const support = SupportCopyFr();
 }
 
 /// Rewards screen copy in French
@@ -350,12 +365,18 @@ class ProfileCopyFr {
   String get loyaltyLabel => 'Fidélité';
   String get notificationsLabel => 'Notifications';
   String unreadCount(int n) => '$n non lue${n > 1 ? 's' : ''}';
+  String get groupPreferences => 'Préférences';
+  String get groupAccount => 'Compte';
+  String get groupSettings => 'Paramètres';
   String get helpLabel => 'Aide';
   String get aboutLabel => 'À propos';
   String get logoutLabel => 'Se déconnecter';
 
   // Edit profile
   String get editTitle => 'Modifier le profil';
+  String get editSectionPersonal => 'Informations personnelles';
+  String get editSectionLocation => 'Localisation';
+  String get editSectionContact => 'Contact';
   String get incompleteWarning => 'Complétez votre profil pour pouvoir réserver';
   String get incompleteMessage =>
       'Veuillez renseigner votre prénom, nom, ville, quartier et vérifier votre numéro de téléphone avant de réserver.';
@@ -776,4 +797,173 @@ class EpisodeCopyFr {
   String get soldOut => 'Complet';
   String availableSeats(int n) =>
       '$n ${n == 1 ? 'place disponible' : 'places disponibles'}';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reservation Result / Confirmation screen
+// ─────────────────────────────────────────────────────────────────────────────
+class ReservationResultCopyFr {
+  const ReservationResultCopyFr();
+
+  String get title => 'Réservation envoyée';
+  String get statusBadge => 'En attente de validation';
+  String get summaryShowLabel => 'Spectacle';
+  String get summaryNumberLabel => 'Numéro de réservation';
+  String get summarySeatsLabel => 'Places réservées';
+  String get summaryDateLabel => 'Date du spectacle';
+  String get summaryExpiresLabel => 'Expire le';
+  String seats(int n) => '$n ${n == 1 ? 'place' : 'places'}';
+  String get nextStepsTitle => 'Prochaines étapes';
+  String get step1 => 'Votre demande est en cours de traitement.';
+  String get step2 =>
+      'Notre équipe vous contactera pour confirmer votre réservation.';
+  String get step3 =>
+      'Une fois approuvée, vous recevrez votre billet électronique.';
+  String get ctaMyReservations => 'Voir mes réservations';
+  String get ctaHome => "Retour à l'accueil";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reservation Detail screen
+// ─────────────────────────────────────────────────────────────────────────────
+class ReservationDetailCopyFr {
+  const ReservationDetailCopyFr();
+
+  String get appBarTitle => 'Ma réservation';
+
+  // Status messages
+  String get msgPending =>
+      'Votre demande est en cours de traitement. Vous serez notifié une fois approuvée.';
+  String get msgApproved =>
+      'Votre réservation est confirmée ! Consultez votre billet ci-dessous.';
+  String get msgRejected =>
+      'Votre demande a été refusée. Vous pouvez en faire une nouvelle.';
+  String get msgCheckedIn => 'Vous avez assisté à cette émission. Merci !';
+  String get msgCancelled => 'Vous avez annulé cette réservation.';
+  String get msgExpired =>
+      'Cette réservation a expiré. Vous pouvez réserver une autre émission.';
+
+  // Section labels
+  String get sectionShow => 'Émission';
+  String get sectionDetails => 'Détails de la réservation';
+
+  // Detail row labels
+  String get labelNumber => 'Numéro de réservation';
+  String get labelSeats => 'Nombre de places';
+  String get labelCreatedAt => 'Date de réservation';
+  String get labelExpiresAt => 'Expire le';
+  String get labelExpiredAt => 'Expirée le';
+  String seats(int n) => '$n place${n > 1 ? 's' : ''}';
+
+  // Alert boxes
+  String get alertRejectionTitle => 'Raison du refus';
+  String get alertExpiredTitle => 'Réservation expirée';
+  String get alertExpiredBody =>
+      "Cette réservation a expiré car elle n'a pas été confirmée à temps. Vous pouvez faire une nouvelle réservation.";
+  String get alertCheckedInTitle => 'Entrée validée';
+  String get alertCheckedInBody =>
+      "Votre billet a été utilisé pour accéder à l'émission. Merci de votre participation !";
+
+  // Action buttons
+  String get btnViewTicket => 'Voir mon billet';
+  String get btnViewUsedTicket => 'Voir le billet utilisé';
+  String get btnDiscoverShows => 'Découvrir les émissions';
+  String get btnCancelReservation => 'Annuler la réservation';
+
+  // Cancel dialog
+  String get cancelDialogTitle => 'Annuler la réservation ?';
+  String get cancelDialogBody =>
+      'Cette action est irréversible. Votre place sera libérée.';
+  String get cancelDialogBack => 'Retour';
+  String get cancelDialogConfirm => 'Confirmer';
+
+  // Snackbar
+  String get cancelSuccess => 'Réservation annulée';
+  String get copiedLabel => 'Copié !';
+
+  // Error view
+  String get retry => 'Réessayer';
+}
+
+/// Support Tickets copy in French
+class SupportCopyFr {
+  const SupportCopyFr();
+
+  // App bar titles
+  String get listTitle => 'Support / Aide';
+  String get createTitle => 'Nouveau ticket';
+  String get newButton => 'Nouveau';
+
+  // Status badges
+  String get statusOpen => 'En attente';
+  String get statusInProgress => 'En cours';
+  String get statusClosed => 'Résolu';
+
+  // Status banner titles & messages
+  String get bannerOpenTitle => 'En attente';
+  String get bannerOpenMsg =>
+      'Votre demande est en file d\'attente.\nNotre équipe vous contactera bientôt.';
+  String get bannerInProgressTitle => 'En cours de traitement';
+  String get bannerInProgressMsg =>
+      'Un agent s\'occupe de votre demande.\nVous serez contacté par téléphone.';
+  String get bannerClosedTitle => 'Résolu';
+  String get bannerClosedMsg =>
+      'Ce ticket a été traité et clôturé.\nMerci de nous avoir contactés.';
+
+  // Card
+  String get cardSubtitle => 'Notre équipe vous contactera par téléphone.';
+
+  // Empty state
+  String get emptyTitle => 'Aucun ticket';
+  String get emptySubtitle =>
+      'Vous n\'avez pas encore contacté\nnotre support.';
+  String get emptyButton => 'Créer un ticket';
+
+  // Error state
+  String get errorMsg => 'Impossible de charger vos tickets.';
+  String get retryButton => 'Réessayer';
+
+  // Create screen
+  String get infoBannerTitle => 'Bon à savoir';
+  String get infoBannerBody =>
+      'Notre équipe vous rappellera au numéro associé à votre compte. '
+      'Décrivez votre problème en détail pour accélérer le traitement.';
+  String get subjectLabel => 'Sujet *';
+  String get subjectHint => 'Ex: Problème avec ma réservation...';
+  String get subjectRequired => 'Le sujet est requis';
+  String get messageLabel => 'Description *';
+  String get messageHint =>
+      'Décrivez votre problème en détail...\nMentionnez le numéro de réservation si applicable.';
+  String get submitButton => 'Envoyer ma demande';
+
+  // Confirmation screen
+  String get confirmationTitle => 'Demande envoyée !';
+  String get confirmationBadge => 'En attente de traitement';
+  String get summarySubject => 'Sujet';
+  String get summaryTicket => 'Ticket';
+  String get summarySubmitted => 'Soumis le';
+  String get stepsTitle => 'Prochaines étapes';
+  String get step1 => 'Votre demande a bien été reçue.';
+  String get step2 => 'Un agent vous rappellera sous 24–48h.';
+  String get step3 => 'Le ticket sera clôturé une fois résolu.';
+  String get btnViewTickets => 'Voir mes tickets';
+  String get btnBackHome => 'Retour à l\'accueil';
+
+  // Detail screen
+  String get detailSubjectSection => 'Sujet';
+  String get detailMessageSection => 'Votre message';
+  String get detailMetaSection => 'Détails';
+  String get metaTicketNumber => 'Numéro de ticket';
+  String get metaSubmittedAt => 'Date de soumission';
+  String get metaUpdatedAt => 'Dernière mise à jour';
+  String get infoCallPending =>
+      'Vous recevrez un appel de notre équipe.\nAssurez-vous que votre numéro est à jour.';
+  String get infoClosed => 'Ce ticket est clôturé.';
+  String get detailError => 'Erreur de chargement';
+  String get detailForbidden => 'Accès non autorisé';
+  String get detailRetry => 'Réessayer';
+
+  // Profile entry point
+  String get profileTitle => 'Support / Aide';
+  String get profileSubtitle => 'Contactez notre équipe';
 }

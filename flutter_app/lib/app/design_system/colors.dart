@@ -174,4 +174,43 @@ class AppColors {
         return infoLight;
     }
   }
+
+  /// Get theme-aware foreground (text/icon) color for status badges
+  /// Darkened variants in light mode for readability, bright in dark mode
+  // FIX: Status badge foreground colors — readable on both themes
+  static Color getStatusForegroundColor(String status) {
+    switch (status) {
+      case 'approved':
+      case 'checked_in':
+        return _isDark ? success : successDark; // #4ADE80 / #16A34A
+      case 'pending_review':
+      case 'contacting':
+        return _isDark ? secondaryLight : secondaryDark; // #FFC04D / #C77B00
+      case 'rejected':
+      case 'expired':
+        return _isDark ? error : errorDark; // #F87171 / #DC2626
+      case 'cancelled':
+      default:
+        return textMuted;
+    }
+  }
+
+  /// Get border color for status badges (status-tinted, alpha-reduced)
+  // FIX: Status badge border colors — tinted by status family
+  static Color getStatusBorderColor(String status) {
+    switch (status) {
+      case 'pending_review':
+      case 'contacting':
+        return secondary.withValues(alpha: 0.40);
+      case 'approved':
+      case 'checked_in':
+        return (_isDark ? success : successDark).withValues(alpha: 0.30);
+      case 'rejected':
+      case 'expired':
+        return (_isDark ? error : errorDark).withValues(alpha: 0.30);
+      case 'cancelled':
+      default:
+        return textMuted.withValues(alpha: 0.25);
+    }
+  }
 }

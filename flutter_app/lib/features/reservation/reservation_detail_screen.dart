@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -20,18 +22,32 @@ class ReservationDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
     final reservationAsync = ref.watch(reservationDetailProvider(int.parse(reservationId)));
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
+      // FIX: App bar — backgroundWhite, centered title w700 18px, primary back arrow
       appBar: AppBar(
-        title: Text('Ma réservation', style: AppTypography.h3),
-        backgroundColor: AppColors.backgroundLight,
+        title: Text(
+          s.resDetailAppBarTitle,
+          style: AppTypography.h4.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
+        scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.canPop() ? context.pop() : context.go(Routes.myReservations),
+          icon: Icon(Icons.arrow_back_ios_new,
+              size: 20, color: AppColors.textPrimary),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(Routes.myReservations),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
@@ -42,11 +58,14 @@ class ReservationDetailScreen extends ConsumerWidget {
         loading: () => const _DetailSkeleton(),
         error: (error, stack) => _ErrorView(
           message: error.toString(),
+          retryLabel: s.resDetailRetry,
           onRetry: () => ref.refresh(reservationDetailProvider(int.parse(reservationId))),
         ),
         data: (reservation) {
+          final isAr = ref.watch(isRtlProvider);
           final statusHelper = ReservationStatusHelper(reservation.status);
-          final dateFormat = DateFormat('EEEE dd MMMM yyyy', 'fr_FR');
+          final localeName = isAr ? 'ar' : 'fr_FR';
+          final dateFormat = DateFormat('EEEE dd MMMM yyyy', localeName);
           final timeFormat = DateFormat('HH:mm');
 
           return SingleChildScrollView(
@@ -57,13 +76,16 @@ class ReservationDetailScreen extends ConsumerWidget {
                 // Status hero
                 _StatusCard(
                   statusHelper: statusHelper,
-                  message: _getStatusMessage(statusHelper),
+                  message: _getStatusMessage(statusHelper, s),
+                  rejectionReason: statusHelper.isRejected
+                      ? reservation.rejectionReason
+                      : null,
                 ),
                 const SizedBox(height: AppSpacing.xl),
 
                 // Show info
                 if (reservation.show != null) ...[
-                  const _SectionLabel('Émission'),
+                  _SectionLabel(s.resDetailSectionShow),
                   const SizedBox(height: AppSpacing.sm),
                   _ShowInfoCard(
                     reservation: reservation,
@@ -74,7 +96,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                 ],
 
                 // Reservation details
-                const _SectionLabel('Détails de la réservation'),
+                _SectionLabel(s.resDetailSectionDetails),
                 const SizedBox(height: AppSpacing.sm),
                 _ReservationDetailsCard(
                   reservation: reservation,
@@ -86,7 +108,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.lg),
                   _AlertInfoBox(
                     icon: Icons.info_outline,
-                    title: 'Raison du refus',
+                    title: s.resDetailAlertRejectionTitle,
                     message: reservation.rejectionReason!,
                     color: AppColors.error,
                     bgColor: AppColors.errorLight,
@@ -96,9 +118,8 @@ class ReservationDetailScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.lg),
                   _AlertInfoBox(
                     icon: Icons.timer_off_outlined,
-                    title: 'Réservation expirée',
-                    message:
-                        'Cette réservation a expiré car elle n\'a pas été confirmée à temps. Vous pouvez faire une nouvelle réservation.',
+                    title: s.resDetailAlertExpiredTitle,
+                    message: s.resDetailAlertExpiredBody,
                     color: AppColors.warning,
                     bgColor: AppColors.warningLight,
                   ),
@@ -107,9 +128,8 @@ class ReservationDetailScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.lg),
                   _AlertInfoBox(
                     icon: Icons.verified_outlined,
-                    title: 'Entrée validée',
-                    message:
-                        'Votre billet a été utilisé pour accéder à l\'émission. Merci de votre participation !',
+                    title: s.resDetailAlertCheckedInTitle,
+                    message: s.resDetailAlertCheckedInBody,
                     color: AppColors.success,
                     bgColor: AppColors.successLight,
                   ),
@@ -120,7 +140,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                 // Action buttons
                 _ActionButtons(
                   statusHelper: statusHelper,
-                  onCancel: () => _showCancelDialog(context, ref),
+                  onCancel: () => _showCancelDialog(context, ref, s),
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],
@@ -131,24 +151,17 @@ class ReservationDetailScreen extends ConsumerWidget {
     );
   }
 
-  String _getStatusMessage(ReservationStatusHelper helper) {
-    if (helper.isPending) {
-      return 'Votre demande est en cours de traitement. Vous serez notifié une fois approuvée.';
-    } else if (helper.isApproved) {
-      return 'Votre réservation est confirmée ! Consultez votre billet ci-dessous.';
-    } else if (helper.isRejected) {
-      return 'Votre demande a été refusée. Vous pouvez en faire une nouvelle.';
-    } else if (helper.isCheckedIn) {
-      return 'Vous avez assisté à cette émission. Merci !';
-    } else if (helper.isCancelled) {
-      return 'Vous avez annulé cette réservation.';
-    } else if (helper.isExpired) {
-      return 'Cette réservation a expiré. Vous pouvez réserver une autre émission.';
-    }
+  String _getStatusMessage(ReservationStatusHelper helper, AppStrings s) {
+    if (helper.isPending) return s.resDetailMsgPending;
+    if (helper.isApproved) return s.resDetailMsgApproved;
+    if (helper.isRejected) return s.resDetailMsgRejected;
+    if (helper.isCheckedIn) return s.resDetailMsgCheckedIn;
+    if (helper.isCancelled) return s.resDetailMsgCancelled;
+    if (helper.isExpired) return s.resDetailMsgExpired;
     return '';
   }
 
-  void _showCancelDialog(BuildContext context, WidgetRef ref) {
+  void _showCancelDialog(BuildContext context, WidgetRef ref, AppStrings s) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -171,10 +184,10 @@ class ReservationDetailScreen extends ConsumerWidget {
                 child: const Icon(Icons.cancel_outlined, color: AppColors.error, size: 28),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Annuler la réservation', style: AppTypography.h4),
+              Text(s.resDetailCancelDialogTitle, style: AppTypography.h4),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.',
+                s.resDetailCancelDialogBody,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
               ),
@@ -186,13 +199,14 @@ class ReservationDetailScreen extends ConsumerWidget {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textSecondary,
+                        backgroundColor: AppColors.backgroundGrey,
                         side: BorderSide(color: AppColors.border),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                         ),
                       ),
-                      child: const Text('Garder'),
+                      child: Text(s.resDetailCancelDialogBack),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
@@ -209,7 +223,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Réservation annulée',
+                                  s.resDetailCancelSuccess,
                                   style: AppTypography.bodyMedium,
                                 ),
                                 backgroundColor: AppColors.backgroundGrey,
@@ -220,7 +234,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Erreur: $e', style: AppTypography.bodyMedium),
+                                content: Text('$e', style: AppTypography.bodyMedium),
                                 backgroundColor: AppColors.errorLight,
                               ),
                             );
@@ -235,7 +249,7 @@ class ReservationDetailScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                         ),
                       ),
-                      child: const Text('Annuler'),
+                      child: Text(s.resDetailCancelDialogConfirm),
                     ),
                   ),
                 ],
@@ -252,47 +266,77 @@ class ReservationDetailScreen extends ConsumerWidget {
 // Status Hero Card
 // ─────────────────────────────────────────────────────────────────────────────
 
+// FIX: Status banner — radius 20, theme-aware foreground, status-tinted border 25%, icon circle 20%
 class _StatusCard extends StatelessWidget {
   final ReservationStatusHelper statusHelper;
   final String message;
+  final String? rejectionReason;
 
-  const _StatusCard({required this.statusHelper, required this.message});
+  const _StatusCard({
+    required this.statusHelper,
+    required this.message,
+    this.rejectionReason,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = AppColors.getStatusColor(statusHelper.status);
+    // FIX: Use theme-aware foreground for text/icon — readable in both modes
+    final fg = AppColors.getStatusForegroundColor(statusHelper.status);
+    final rawColor = AppColors.getStatusColor(statusHelper.status);
     final statusBg = AppColors.getStatusBackgroundColor(statusHelper.status);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
         color: statusBg,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: rawColor.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
+          // FIX: Icon circle — 20% opacity background
           Container(
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.15),
+              color: rawColor.withValues(alpha: 0.20),
               shape: BoxShape.circle,
             ),
-            child: Icon(statusHelper.icon, size: 32, color: statusColor),
+            child: Icon(statusHelper.icon, size: 28, color: fg),
           ),
           const SizedBox(height: AppSpacing.md),
+          // FIX: Title — 20px w700 foreground color
           Text(
             statusHelper.label,
-            style: AppTypography.h3.copyWith(color: statusColor),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: fg,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodyMedium.copyWith(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
           ),
+          // FIX: Rejection reason in italic below message
+          if (rejectionReason != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              rejectionReason!,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodySmall.copyWith(
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+                color: fg,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -303,6 +347,7 @@ class _StatusCard extends StatelessWidget {
 // Section Label
 // ─────────────────────────────────────────────────────────────────────────────
 
+// FIX: Section label — secondary 2px left accent, textMuted 11px w600 ls1.2
 class _SectionLabel extends StatelessWidget {
   final String text;
 
@@ -310,12 +355,27 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text.toUpperCase(),
-      style: AppTypography.labelSmall.copyWith(
-        color: AppColors.textLight,
-        letterSpacing: 1.2,
-      ),
+    return Row(
+      children: [
+        Container(
+          width: 2,
+          height: 14,
+          decoration: BoxDecoration(
+            color: AppColors.secondary,
+            borderRadius: BorderRadius.circular(1),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text.toUpperCase(),
+          style: AppTypography.labelSmall.copyWith(
+            color: AppColors.textMuted,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -340,40 +400,71 @@ class _ShowInfoCard extends ConsumerWidget {
     final isAr = ref.watch(isRtlProvider);
     final show = reservation.show!;
 
+    // Build rows list to properly insert dividers between (not after last)
+    final rows = <_InfoRow>[
+      _InfoRow(
+        icon: Icons.calendar_today_outlined,
+        iconColor: AppColors.secondary,
+        label: show.startsAt != null
+            ? dateFormat.format(show.startsAt!.toLocal())
+            : '—',
+      ),
+      _InfoRow(
+        icon: Icons.access_time_outlined,
+        iconColor: AppColors.secondary,
+        label: show.startsAt != null
+            ? timeFormat.format(show.startsAt!.toLocal())
+            : '—',
+      ),
+      _InfoRow(
+        icon: Icons.location_on_outlined,
+        iconColor: AppColors.secondary,
+        label: show.studio ?? show.city,
+      ),
+      if (show.channel != null)
+        // FIX: Channel icon — primary to differentiate from location
+        _InfoRow(
+          icon: Icons.tv_outlined,
+          iconColor: AppColors.primary,
+          label: show.channel!,
+        ),
+    ];
+
+    // FIX: Card — cardDarkElevated, radius 16, shadow 5%
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.backgroundGrey,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1A1A1A).withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(show.localizedTitle(isAr), style: AppTypography.h4),
-          const SizedBox(height: AppSpacing.md),
-          _InfoRow(
-            icon: Icons.calendar_today_outlined,
-            label: show.startsAt != null
-                ? dateFormat.format(show.startsAt!.toLocal())
-                : '—',
+          // FIX: Show title — textPrimary w700 18px
+          Text(
+            show.localizedTitle(isAr),
+            style: AppTypography.h4.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          _InfoRow(
-            icon: Icons.access_time_outlined,
-            label: show.startsAt != null
-                ? timeFormat.format(show.startsAt!.toLocal())
-                : '—',
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _InfoRow(
-            icon: Icons.location_on_outlined,
-            label: show.studio ?? show.city,
-          ),
-          if (show.channel != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            _InfoRow(icon: Icons.tv_outlined, label: show.channel!),
-          ],
+          const SizedBox(height: 12),
+          // FIX: Info rows with dividers between (not after last)
+          ...List.generate(rows.length * 2 - 1, (i) {
+            if (i.isOdd) {
+              return Divider(height: 1, color: AppColors.border);
+            }
+            return rows[i ~/ 2];
+          }),
         ],
       ),
     );
@@ -384,7 +475,7 @@ class _ShowInfoCard extends ConsumerWidget {
 // Reservation Details Card
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ReservationDetailsCard extends StatelessWidget {
+class _ReservationDetailsCard extends ConsumerWidget {
   final Reservation reservation;
   final ReservationStatusHelper statusHelper;
 
@@ -394,38 +485,75 @@ class _ReservationDetailsCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    // FIX: Details card — cardDarkElevated, radius 16, shadow 5%
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.backgroundGrey,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1A1A1A).withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
+          // FIX: Reservation number — secondary w700 15px + copy icon
           _DetailRow(
-            label: 'Numéro de réservation',
+            label: s.resDetailLabelNumber,
             value: '#${reservation.id}',
-            valueStyle: AppTypography.labelLarge.copyWith(color: AppColors.secondary),
+            valueStyle: const TextStyle(
+              color: AppColors.secondary,
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+            ),
+            onCopy: () {
+              Clipboard.setData(ClipboardData(text: '#${reservation.id}'));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(s.resDetailCopied),
+                  backgroundColor: AppColors.primary,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
           ),
-          Divider(height: AppSpacing.xl, color: AppColors.border),
+          Divider(height: 1, color: AppColors.border),
           _DetailRow(
-            label: 'Nombre de places',
-            value: '${reservation.seats} place${reservation.seats > 1 ? 's' : ''}',
+            label: s.resDetailLabelSeats,
+            value: s.resDetailSeats(reservation.seats),
           ),
-          Divider(height: AppSpacing.xl, color: AppColors.border),
+          Divider(height: 1, color: AppColors.border),
           _DetailRow(
-            label: 'Date de réservation',
+            label: s.resDetailLabelCreatedAt,
             value: DateFormat('dd/MM/yyyy').format(reservation.createdAt.toLocal()),
+            valueStyle: AppTypography.bodyMedium.copyWith(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
           ),
           if (reservation.expiresAt != null) ...[
-            Divider(height: AppSpacing.xl, color: AppColors.border),
+            Divider(height: 1, color: AppColors.border),
             _DetailRow(
-              label: statusHelper.isExpired ? 'Expirée le' : 'Expire le',
-              value: DateFormat('dd/MM/yyyy à HH:mm').format(reservation.expiresAt!.toLocal()),
-              valueStyle: AppTypography.labelLarge.copyWith(
-                color: statusHelper.isExpired ? AppColors.error : AppColors.warning,
+              label: statusHelper.isExpired ? s.resDetailLabelExpiredAt : s.resDetailLabelExpiresAt,
+              value: DateFormat('dd/MM/yyyy à HH:mm')
+                  .format(reservation.expiresAt!.toLocal()),
+              valueStyle: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: statusHelper.isExpired
+                    ? AppColors.errorDark
+                    : AppColors.warningDark,
               ),
             ),
           ],
@@ -489,20 +617,21 @@ class _AlertInfoBox extends StatelessWidget {
 // Action Buttons
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ActionButtons extends StatelessWidget {
+class _ActionButtons extends ConsumerWidget {
   final ReservationStatusHelper statusHelper;
   final VoidCallback onCancel;
 
   const _ActionButtons({required this.statusHelper, required this.onCancel});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
     return Column(
       children: [
         // Approved → view ticket (gold CTA)
         if (statusHelper.isApproved) ...[
           _ActionButton(
-            label: 'Voir mon billet',
+            label: s.resDetailBtnViewTicket,
             icon: Icons.confirmation_number_outlined,
             onPressed: () => context.go(Routes.ticket),
             filled: true,
@@ -513,7 +642,7 @@ class _ActionButtons extends StatelessWidget {
         // Checked-in → view used ticket
         if (statusHelper.isCheckedIn) ...[
           _ActionButton(
-            label: 'Voir le billet utilisé',
+            label: s.resDetailBtnViewUsedTicket,
             icon: Icons.confirmation_number_outlined,
             onPressed: () => context.go(Routes.ticket),
             filled: false,
@@ -525,7 +654,7 @@ class _ActionButtons extends StatelessWidget {
         // Expired / rejected → discover shows (gold CTA)
         if (statusHelper.isExpired || statusHelper.isRejected) ...[
           _ActionButton(
-            label: 'Découvrir les émissions',
+            label: s.resDetailBtnDiscoverShows,
             icon: Icons.explore_outlined,
             onPressed: () => context.go(Routes.home),
             filled: true,
@@ -533,15 +662,8 @@ class _ActionButtons extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
         ],
 
-        // Can cancel → red outlined
-        if (statusHelper.canCancel)
-          _ActionButton(
-            label: 'Annuler la réservation',
-            icon: Icons.cancel_outlined,
-            onPressed: onCancel,
-            filled: false,
-            color: AppColors.error,
-          ),
+        // FIX: Cancel button — errorLight bg, error border 1.5px, errorDark text, radius 14, h52, shadow
+        if (statusHelper.canCancel) _CancelButton(label: s.resDetailBtnCancel, onCancel: onCancel),
       ],
     );
   }
@@ -604,59 +726,153 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Info Row & Detail Row
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
+// FIX: Cancel button — errorLight bg, error 1.5px border, errorDark text, radius 14, h52, shadow
+class _CancelButton extends StatelessWidget {
   final String label;
+  final VoidCallback onCancel;
 
-  const _InfoRow({required this.icon, required this.label});
+  const _CancelButton({required this.label, required this.onCancel});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: AppColors.backgroundLight,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+    return Container(
+      width: double.infinity,
+      height: 52,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.error.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
-          child: Icon(icon, size: 16, color: AppColors.textMuted),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Text(
-            label,
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+        ],
+      ),
+      child: OutlinedButton.icon(
+        onPressed: onCancel,
+        icon: Icon(Icons.cancel_outlined,
+            size: 18, color: AppColors.errorDark),
+        label: Text(
+          label,
+          style: AppTypography.buttonLarge.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColors.errorDark,
           ),
         ),
-      ],
+        style: OutlinedButton.styleFrom(
+          backgroundColor: AppColors.errorLight,
+          foregroundColor: AppColors.errorDark,
+          side: const BorderSide(color: AppColors.error, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      ),
     );
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Info Row & Detail Row
+// ─────────────────────────────────────────────────────────────────────────────
+
+// FIX: Info row — secondary 12% bg container 34×34 radius 8, secondary icon 18px, textSecondary 14px
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color iconColor;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    this.iconColor = AppColors.secondary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 18, color: iconColor),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: AppTypography.bodyMedium.copyWith(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// FIX: Detail row — label textMuted 14px w400, value textPrimary w600, optional copy icon
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
   final TextStyle? valueStyle;
+  final VoidCallback? onCopy;
 
-  const _DetailRow({required this.label, required this.value, this.valueStyle});
+  const _DetailRow({
+    required this.label,
+    required this.value,
+    this.valueStyle,
+    this.onCopy,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted)),
-        Text(
-          value,
-          style: valueStyle ?? AppTypography.labelLarge,
-        ),
-      ],
+    final resolvedStyle = valueStyle ??
+        AppTypography.labelLarge.copyWith(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 11),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: AppTypography.bodyMedium.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textMuted,
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(value, style: resolvedStyle),
+              // FIX: Copy icon — secondary color, size 16, tappable
+              if (onCopy != null) ...[
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: onCopy,
+                  child: const Icon(Icons.copy,
+                      size: 16, color: AppColors.secondary),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -667,9 +883,14 @@ class _DetailRow extends StatelessWidget {
 
 class _ErrorView extends StatelessWidget {
   final String message;
+  final String retryLabel;
   final VoidCallback onRetry;
 
-  const _ErrorView({required this.message, required this.onRetry});
+  const _ErrorView({
+    required this.message,
+    required this.retryLabel,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -690,7 +911,7 @@ class _ErrorView extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh, size: 18),
-              label: Text('Réessayer', style: AppTypography.buttonLarge),
+              label: Text(retryLabel, style: AppTypography.buttonLarge),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.secondary,
                 foregroundColor: AppColors.backgroundWhite,

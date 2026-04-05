@@ -8,7 +8,6 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
-import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
 import 'package:aji_tfarraj/app/design_system/components/loading/skeleton_loader.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
@@ -48,10 +47,21 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
+      // FIX: App bar — backgroundWhite, centered title, w700 18px, no back arrow
       appBar: AppBar(
-        title: Text(s.myReservationsTitle, style: AppTypography.h3),
+        title: Text(
+          s.myReservationsTitle,
+          style: AppTypography.h4.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: reservationsAsync.when(
@@ -76,18 +86,27 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
     );
   }
 
+  // FIX: Tab bar — UnderlineTabIndicator primary 3px, active w700 primary, inactive w400 textMuted, bottom border
   Widget _buildTabBar(int pending, int approved, int past) {
     final s = ref.read(stringsProvider);
     return Container(
-      color: AppColors.backgroundWhite,
+      decoration: BoxDecoration(
+        color: AppColors.backgroundWhite,
+        border: Border(
+          bottom: BorderSide(color: AppColors.border, width: 1),
+        ),
+      ),
       child: TabBar(
         controller: _tabController,
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textMuted,
-        indicatorColor: AppColors.primary,
-        indicatorWeight: 3,
-        labelStyle: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w600),
-        unselectedLabelStyle: AppTypography.labelMedium,
+        labelStyle: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700),
+        unselectedLabelStyle: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w400),
+        dividerColor: Colors.transparent,
+        indicator: UnderlineTabIndicator(
+          borderSide: const BorderSide(color: AppColors.primary, width: 3),
+          borderRadius: BorderRadius.circular(2),
+        ),
         tabs: [
           Tab(text: '${s.myResTabPending}${pending > 0 ? ' ($pending)' : ''}'),
           Tab(text: '${s.myResTabApproved}${approved > 0 ? ' ($approved)' : ''}'),
@@ -187,6 +206,7 @@ class _ReservationsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (reservations.isEmpty) {
+      // FIX: Empty state — icon, title, subtitle, CTA to browse
       return RefreshIndicator(
         onRefresh: onRefresh,
         color: AppColors.primary,
@@ -194,10 +214,55 @@ class _ReservationsList extends ConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           child: SizedBox(
             height: MediaQuery.of(context).size.height - 250,
-            child: EmptyState(
-              icon: Icons.calendar_today_outlined,
-              title: emptyMessage,
-              description: emptySubMessage,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 56,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  emptyMessage,
+                  style: AppTypography.labelLarge.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 48),
+                  child: Text(
+                    emptySubMessage,
+                    style: AppTypography.bodyMedium.copyWith(
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                GestureDetector(
+                  onTap: () => context.go(Routes.home),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      ref.read(stringsProvider).browseShows,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -241,21 +306,34 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
     final dateFormat = DateFormat('dd MMM yyyy à HH:mm', 'fr_FR');
     final s = ref.watch(stringsProvider);
 
-    return AppCard(
-      padding: EdgeInsets.zero,
+    // FIX: Card — cardDarkElevated bg, border token, radius 16, shadow 6%
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1A1A1A).withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.go(Routes.reservationDetail(reservation.id.toString())),
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Main content
+            // ─── Top row: image + show info ───
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsets.all(14),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Show image or placeholder
+                  // FIX: Image — 70×70, radius 12
                   _ShowThumbnail(imageUrl: reservation.show?.imageUrl),
                   const SizedBox(width: AppSpacing.md),
 
@@ -264,21 +342,25 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Title
+                        // FIX: Title — 15px w600 textPrimary
                         Text(
                           reservation.show?.title ?? 'Émission #${reservation.showId}',
-                          style: AppTypography.h4,
+                          style: AppTypography.labelLarge.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: AppSpacing.xs),
 
-                        // Date
+                        // FIX: Date — secondary icon, textMuted text 12px
                         if (reservation.show != null)
                           Row(
                             children: [
                               Icon(Icons.calendar_today_outlined,
-                                  size: 14, color: AppColors.textMuted),
+                                  size: 13, color: AppColors.secondary),
                               const SizedBox(width: AppSpacing.xs),
                               Expanded(
                                 child: Text(
@@ -286,6 +368,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                                       ? dateFormat.format(reservation.show!.startsAt!.toLocal())
                                       : '—',
                                   style: AppTypography.bodySmall.copyWith(
+                                    fontSize: 12,
                                     color: AppColors.textMuted,
                                   ),
                                   overflow: TextOverflow.ellipsis,
@@ -295,16 +378,17 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                           ),
                         const SizedBox(height: AppSpacing.xs),
 
-                        // City
+                        // FIX: City — secondary icon, textMuted text 12px
                         if (reservation.show != null)
                           Row(
                             children: [
                               Icon(Icons.location_on_outlined,
-                                  size: 14, color: AppColors.textMuted),
+                                  size: 13, color: AppColors.secondary),
                               const SizedBox(width: AppSpacing.xs),
                               Text(
                                 reservation.show!.city,
                                 style: AppTypography.bodySmall.copyWith(
+                                  fontSize: 12,
                                   color: AppColors.textMuted,
                                 ),
                               ),
@@ -317,32 +401,35 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
               ),
             ),
 
-            // Divider
-            Divider(height: 1, color: AppColors.border),
+            // FIX: Separator between top and bottom rows
+            Container(height: 1, color: AppColors.border),
 
-            // Footer with seats, status, and actions
+            // ─── Bottom row: seats badge + status + action ───
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               child: Row(
                 children: [
-                  // Seats badge
+                  // FIX: Seats badge — backgroundGrey, primary icon, border token, radius 20
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xs,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.backgroundGrey,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.border),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.event_seat, size: 14, color: AppColors.textMuted),
+                        Icon(Icons.event_seat, size: 13, color: AppColors.primary),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
                           s.myResSeatCount(reservation.seats),
                           style: AppTypography.labelSmall.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -351,66 +438,80 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                   ),
                   const SizedBox(width: AppSpacing.sm),
 
-                  // Status badge
-                  Flexible(
-                    child: ReservationStatusBadge(status: reservation.status),
+                  // FIX: Expanded so badge takes remaining space, cancel button stays at end
+                  Expanded(
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: ReservationStatusBadge(status: reservation.status),
+                    ),
                   ),
+                  const SizedBox(width: AppSpacing.sm),
 
-                  const Spacer(),
-
-                  // Cancel button (only for pending statuses)
+                  // FIX: Cancel button — errorLight bg, error text, radius 8, padding 6x12
                   if (statusHelper.canCancel)
                     _isCancelling
                         ? const SizedBox(
-                            width: 24,
-                            height: 24,
+                            width: 20,
+                            height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               color: AppColors.error,
                             ),
                           )
-                        : TextButton(
-                            onPressed: () => _showCancelDialog(context),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.error,
+                        : GestureDetector(
+                            onTap: () => _showCancelDialog(context),
+                            child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.sm,
+                                horizontal: 12,
+                                vertical: 6,
                               ),
-                            ),
-                            child: Text(
-                              s.cancel,
-                              style: AppTypography.labelMedium.copyWith(
-                                color: AppColors.error,
+                              decoration: BoxDecoration(
+                                color: AppColors.errorLight,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                s.cancel,
+                                style: AppTypography.labelSmall.copyWith(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.error,
+                                ),
                               ),
                             ),
                           ),
 
-                  // Chevron
+                  // FIX: Chevron — textMuted, size 16, only when tappable
                   if (!statusHelper.canCancel)
-                    Icon(Icons.chevron_right, color: AppColors.textMuted),
+                    Icon(Icons.chevron_right,
+                        color: AppColors.textMuted, size: 16),
                 ],
               ),
             ),
 
-            // Rejection reason if rejected
+            // FIX: Rejection banner — errorLight bg, border, radius 12, italic, RTL-aware
             if (reservation.rejectionReason != null && statusHelper.isRejected)
               Container(
-                margin: const EdgeInsets.fromLTRB(
-                    AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-                padding: const EdgeInsets.all(AppSpacing.md),
+                margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.errorLight,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.20),
+                  ),
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, size: 16, color: AppColors.error),
+                    Icon(Icons.info_outline, size: 18, color: AppColors.errorDark),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         reservation.rejectionReason!,
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.error,
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                          color: AppColors.errorDark,
                         ),
                       ),
                     ),
@@ -418,26 +519,29 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                 ),
               ),
 
-            // Expired status message
+            // Expired banner
             if (statusHelper.isExpired)
               Container(
-                margin: const EdgeInsets.fromLTRB(
-                    AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-                padding: const EdgeInsets.all(AppSpacing.md),
+                margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.warningLight,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.20),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.timer_off,
-                        size: 16, color: AppColors.warning),
+                    Icon(Icons.timer_off, size: 18, color: AppColors.warningDark),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         s.myResExpiredBanner,
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.warning,
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                          color: AppColors.warningDark,
                         ),
                       ),
                     ),
@@ -445,26 +549,28 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                 ),
               ),
 
-            // Checked-in status message
+            // Checked-in banner
             if (statusHelper.isCheckedIn)
               Container(
-                margin: const EdgeInsets.fromLTRB(
-                    AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
-                padding: const EdgeInsets.all(AppSpacing.md),
+                margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.successLight,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.success.withValues(alpha: 0.20),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.verified,
-                        size: 16, color: AppColors.success),
+                    Icon(Icons.verified, size: 18, color: AppColors.successDark),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         s.myResCheckedInBanner,
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.success,
+                          fontSize: 13,
+                          color: AppColors.successDark,
                         ),
                       ),
                     ),
@@ -586,19 +692,20 @@ class _ShowThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // FIX: Image — 70×70, radius 12
     return ClipRRect(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      borderRadius: BorderRadius.circular(12),
       child: SizedBox(
-        width: 64,
-        height: 64,
+        width: 70,
+        height: 70,
         child: imageUrl != null
             ? CachedNetworkImage(
                 imageUrl: imageUrl!,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => const SkeletonLoader(
-                  width: 64,
-                  height: 64,
-                  borderRadius: AppSpacing.radiusMd,
+                  width: 70,
+                  height: 70,
+                  borderRadius: 12,
                 ),
                 errorWidget: (context, url, error) => _placeholder(),
               )

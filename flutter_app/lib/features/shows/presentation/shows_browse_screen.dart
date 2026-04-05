@@ -95,11 +95,24 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundLight,
-        title: Text(s.browseTitle, style: AppTypography.h3),
+        backgroundColor: AppColors.backgroundWhite,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text(
+          s.browseTitle,
+          style: AppTypography.h4.copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => context.pop(),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(0.5),
+          child: Container(height: 0.5, color: AppColors.border),
         ),
         actions: [
           // Filter icon with active indicator
@@ -257,42 +270,45 @@ class _SearchBar extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.md,
       ),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        onChanged: onChanged,
-        textInputAction: TextInputAction.search,
-        style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
-        decoration: InputDecoration(
-          hintText: s.browseSearchHint,
-          hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textLight),
-          prefixIcon: Icon(Icons.search, color: AppColors.textLight, size: 22),
-          suffixIcon: ListenableBuilder(
-            listenable: controller,
-            builder: (_, __) => controller.text.isEmpty
-                ? const SizedBox.shrink()
-                : IconButton(
-                    icon: Icon(Icons.close, color: AppColors.textLight, size: 20),
-                    onPressed: onClear,
-                  ),
-          ),
-          filled: true,
-          fillColor: AppColors.backgroundGrey,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+      child: SizedBox(
+        height: 48,
+        child: TextField(
+          controller: controller,
+          focusNode: focusNode,
+          onChanged: onChanged,
+          textInputAction: TextInputAction.search,
+          style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            hintText: s.browseSearchHint,
+            hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textLight),
+            prefixIcon: Icon(Icons.search, color: AppColors.textMuted, size: 22),
+            suffixIcon: ListenableBuilder(
+              listenable: controller,
+              builder: (_, __) => controller.text.isEmpty
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      icon: Icon(Icons.close, color: AppColors.textMuted, size: 20),
+                      onPressed: onClear,
+                    ),
+            ),
+            filled: true,
+            fillColor: AppColors.backgroundGrey,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 0,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+            ),
           ),
         ),
       ),
@@ -372,16 +388,25 @@ class _CityChip extends StatelessWidget {
           vertical: 6,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.secondary : AppColors.backgroundGrey,
+          color: isSelected ? AppColors.secondary : AppColors.backgroundLight,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
             color: isSelected ? AppColors.secondary : AppColors.border,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.secondary.withValues(alpha: 0.30),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           style: AppTypography.labelSmall.copyWith(
-            color: isSelected ? Colors.black : AppColors.textSecondary,
+            color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
@@ -418,8 +443,8 @@ class _StudioSection extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 3,
-                height: 18,
+                width: 4,
+                height: 20,
                 decoration: BoxDecoration(
                   color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(2),
@@ -428,7 +453,8 @@ class _StudioSection extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 studioName,
-                style: AppTypography.h4.copyWith(
+                style: AppTypography.labelLarge.copyWith(
+                  fontSize: 16,
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
@@ -436,8 +462,10 @@ class _StudioSection extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 '(${shows.length})',
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textLight,
+                style: AppTypography.bodyMedium.copyWith(
+                  fontSize: 14,
+                  color: AppColors.textMuted,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
@@ -476,17 +504,24 @@ class _BrowseShowCard extends StatelessWidget {
           AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.backgroundGrey,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          color: AppColors.cardDarkElevated,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
             // Thumbnail
             ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(AppSpacing.radiusLg),
-                bottomLeft: Radius.circular(AppSpacing.radiusLg),
+                topLeft: Radius.circular(AppSpacing.radiusXl),
+                bottomLeft: Radius.circular(AppSpacing.radiusXl),
               ),
               child: SizedBox(
                 width: 90,
@@ -527,7 +562,12 @@ class _BrowseShowCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             show.localizedTitle(isAr),
-                            style: AppTypography.labelLarge.copyWith(
+                            style: (isAr
+                                    ? AppTypography.bodyMediumAr
+                                    : AppTypography.labelLarge)
+                                .copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                             maxLines: 1,
@@ -538,22 +578,19 @@ class _BrowseShowCard extends StatelessWidget {
                           const SizedBox(width: AppSpacing.sm),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
+                              horizontal: 10,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.15),
-                              borderRadius:
-                                  BorderRadius.circular(AppSpacing.radiusSm),
-                              border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.3),
-                              ),
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               show.channel!,
                               style: AppTypography.caption.copyWith(
-                                color: AppColors.primaryLight,
+                                color: Colors.white,
                                 fontWeight: FontWeight.w600,
+                                fontSize: 10,
                               ),
                             ),
                           ),
@@ -567,7 +604,7 @@ class _BrowseShowCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.calendar_today_outlined,
-                            size: 12, color: AppColors.textLight),
+                            size: 12, color: AppColors.secondary),
                         const SizedBox(width: 4),
                         Text(
                           show.startsAt != null
@@ -586,7 +623,7 @@ class _BrowseShowCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined,
-                            size: 12, color: AppColors.textLight),
+                            size: 12, color: AppColors.secondary),
                         const SizedBox(width: 4),
                         Text(
                           show.city,
@@ -619,29 +656,29 @@ class _BrowseShowCard extends StatelessWidget {
                         else
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
+                              horizontal: 8,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.successLight,
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                              color: AppColors.secondary.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: AppColors.success.withValues(alpha: 0.3),
+                                color: AppColors.secondary.withValues(alpha: 0.30),
                               ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.event_seat_outlined,
                                   size: 11,
-                                  color: AppColors.success,
+                                  color: AppColors.secondaryDark,
                                 ),
                                 const SizedBox(width: 3),
                                 Text(
                                   s.browseAvailableSeats(show.availableSeats),
                                   style: AppTypography.caption.copyWith(
-                                    color: AppColors.success,
+                                    color: AppColors.secondaryDark,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -657,8 +694,12 @@ class _BrowseShowCard extends StatelessWidget {
 
             // Chevron
             Padding(
-              padding: EdgeInsets.only(right: AppSpacing.sm),
-              child: Icon(Icons.chevron_right, color: AppColors.textLight, size: 20),
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: Icon(
+                Icons.chevron_right,
+                color: AppColors.primary.withValues(alpha: 0.60),
+                size: 16,
+              ),
             ),
           ],
         ),
@@ -739,7 +780,7 @@ class _FilterSheet extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.secondary
-                            : AppColors.backgroundGrey,
+                            : AppColors.backgroundLight,
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusFull),
                         border: Border.all(
@@ -747,11 +788,20 @@ class _FilterSheet extends StatelessWidget {
                               ? AppColors.secondary
                               : AppColors.border,
                         ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.secondary.withValues(alpha: 0.30),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : null,
                       ),
                       child: Text(
                         ch,
                         style: AppTypography.labelSmall.copyWith(
-                          color: isSelected ? Colors.black : AppColors.textSecondary,
+                          color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                         ),
                       ),

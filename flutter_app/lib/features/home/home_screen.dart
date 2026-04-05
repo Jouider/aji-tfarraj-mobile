@@ -15,6 +15,7 @@ import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
 
 /// Home Screen — Cinematic discovery layout inspired by premium streaming apps
 class HomeScreen extends ConsumerStatefulWidget {
@@ -89,6 +90,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         height: 130,
         fit: BoxFit.contain,
         alignment: Alignment.centerLeft,
+      ),
+      leading: IconButton(
+        icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const SupportTicketsScreen()),
+        ),
       ),
       actions: [
         _NotificationBellButton(unreadCount: unreadCount, s: s),
@@ -247,8 +254,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
 
-          // Bottom padding for nav bar
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxxl)),
+          // FIX: Bottom padding — 16px before bottom nav
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
         ],
       ),
     );
@@ -300,15 +307,29 @@ class _HeroShowCard extends StatelessWidget {
               ),
             ),
 
-            // Gradient overlay — bottom (for content legibility)
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment(0, 0.1),
-                  colors: [Color(0xFF000000), Colors.transparent],
-                ),
-              ),
+            // FIX: Hero gradient — smooth 55% coverage, theme-aware bottom color
+            Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final bottomColor =
+                    isDark ? const Color(0xFF0C0C0C) : const Color(0xFFFAFAFA);
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: const Alignment(0, -0.1),
+                      colors: [
+                        bottomColor,
+                        bottomColor.withValues(alpha: 0.85),
+                        bottomColor.withValues(alpha: 0.50),
+                        bottomColor.withValues(alpha: 0.15),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.25, 0.50, 0.75, 1.0],
+                    ),
+                  ),
+                );
+              },
             ),
 
             // Content at bottom
@@ -319,50 +340,47 @@ class _HeroShowCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Channel badge
+                  // FIX: Channel tag — unified primary semi-transparent style (hero)
                   if (show.channel != null)
                     Container(
                       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: 3,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.secondary,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSm,
-                        ),
+                        color: AppColors.primary.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         show.channel!.toUpperCase(),
                         style: AppTypography.labelSmall.copyWith(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
                           letterSpacing: 0.5,
                         ),
                       ),
                     ),
 
-                  // Title
+                  // Title — Cairo for AR (proper shaping), Inter for FR
                   Text(
                     show.localizedTitle(isAr),
-                    style: AppTypography.h1.copyWith(
-                      color: Colors.white,
-                      height: 1.1,
-                    ),
+                    style: (isAr ? AppTypography.h1Ar : AppTypography.h1)
+                        .copyWith(color: Colors.white, height: 1.1),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
 
                   const SizedBox(height: AppSpacing.sm),
 
-                  // Date + City row
+                  // FIX: Date/location row — secondary icons, textSecondary text, 12px
                   Row(
                     children: [
                       Icon(
                         Icons.calendar_today_outlined,
                         size: 13,
-                        color: AppColors.textMuted,
+                        color: AppColors.secondary,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -370,20 +388,22 @@ class _HeroShowCard extends StatelessWidget {
                             ? dateFormat.format(show.startsAt!.toLocal())
                             : '—',
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textMuted,
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Icon(
                         Icons.location_on_outlined,
                         size: 13,
-                        color: AppColors.textMuted,
+                        color: AppColors.secondary,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         show.city,
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textMuted,
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -391,33 +411,46 @@ class _HeroShowCard extends StatelessWidget {
 
                   const SizedBox(height: AppSpacing.lg),
 
-                  // CTA row
+                  // FIX: CTA button — primary bg, white text, shadow, height 52, radius 14
+                  // FIX: Seats badge — secondary bg, primaryDark text, radius 12
                   Row(
                     children: [
                       Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () => context.push(
-                            Routes.showDetail(show.id.toString()),
+                        child: Container(
+                          height: 52,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(alpha: 0.30),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
-                            foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusMd,
+                          child: FilledButton.icon(
+                            onPressed: () => context.push(
+                              Routes.showDetail(show.id.toString()),
+                            ),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                          ),
-                          icon: const Icon(
-                            Icons.confirmation_number_outlined,
-                            size: 18,
-                          ),
-                          label: Text(
-                            show.isSoldOut ? s.homeSoldOut : s.reserve,
-                            style: AppTypography.buttonMedium.copyWith(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w700,
+                            icon: const Icon(
+                              Icons.confirmation_number_outlined,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                            label: Text(
+                              show.isSoldOut ? s.homeSoldOut : s.reserve,
+                              style: AppTypography.buttonMedium.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
@@ -425,21 +458,15 @@ class _HeroShowCard extends StatelessWidget {
 
                       const SizedBox(width: AppSpacing.md),
 
-                      // Seats pill
                       if (!show.isSoldOut)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: 14,
+                            horizontal: 14,
+                            vertical: 10,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.successLight,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMd,
-                            ),
-                            border: Border.all(
-                              color: AppColors.success.withValues(alpha: 0.35),
-                            ),
+                            color: AppColors.secondary,
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -447,13 +474,13 @@ class _HeroShowCard extends StatelessWidget {
                               const Icon(
                                 Icons.event_seat_outlined,
                                 size: 15,
-                                color: AppColors.success,
+                                color: AppColors.primaryDark,
                               ),
                               const SizedBox(width: 5),
                               Text(
                                 '${show.availableSeats}',
                                 style: AppTypography.labelMedium.copyWith(
-                                  color: AppColors.success,
+                                  color: AppColors.primaryDark,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -572,9 +599,10 @@ class _ShowsHorizontalSection extends StatelessWidget {
           right: AppSpacing.sm,
         ),
         itemCount: shows.length,
+        // FIX: Spacing — 14px gap between horizontal cards
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.md),
+            padding: const EdgeInsets.only(right: 14),
             child: _ShowHorizontalCard(
               show: shows[index],
               isComingSoon: isComingSoon,
@@ -616,10 +644,21 @@ class _ShowHorizontalCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-              child: SizedBox(
+            // FIX: Show cards — card elevation shadow, borderRadius 16
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF1A1A1A).withValues(alpha: 0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: SizedBox(
                 height: 170,
                 width: 150,
                 child: Stack(
@@ -705,27 +744,26 @@ class _ShowHorizontalCard extends StatelessWidget {
                         ),
                       ),
 
-                    // Channel badge — top right
+                    // FIX: Channel tag — unified primary semi-transparent style (cards)
                     if (show.channel != null)
                       Positioned(
                         top: AppSpacing.sm,
                         right: AppSpacing.sm,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 5,
-                            vertical: 2,
+                            horizontal: 8,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSm,
-                            ),
+                            color: AppColors.primary.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            show.channel!,
+                            show.channel!.toUpperCase(),
                             style: AppTypography.caption.copyWith(
-                              color: AppColors.textSecondary,
+                              color: Colors.white,
                               fontWeight: FontWeight.w600,
+                              fontSize: 10,
                             ),
                           ),
                         ),
@@ -733,15 +771,18 @@ class _ShowHorizontalCard extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
+            ), // ClipRRect
+          ), // Container shadow wrapper
 
             const SizedBox(height: AppSpacing.sm),
 
-            // Title
+            // Title — Cairo for AR (proper shaping), Inter for FR
             Text(
               show.localizedTitle(isAr),
-              style: AppTypography.labelMedium.copyWith(
+              style: (isAr ? AppTypography.bodyMediumAr : AppTypography.labelMedium)
+                  .copyWith(
                 color: AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -749,13 +790,13 @@ class _ShowHorizontalCard extends StatelessWidget {
 
             const SizedBox(height: 2),
 
-            // Date or "Bientôt"
+            // FIX: Cards date label — textMuted for consistent date styling
             Row(
               children: [
                 Icon(
                   Icons.calendar_today_outlined,
                   size: 11,
-                  color: AppColors.textLight,
+                  color: AppColors.textMuted,
                 ),
                 const SizedBox(width: 3),
                 Expanded(
@@ -766,7 +807,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                             ? dateFormat.format(show.startsAt!.toLocal())
                             : '—',
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.textLight,
+                      color: AppColors.textMuted,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -807,9 +848,9 @@ class _NotificationBellButton extends StatelessWidget {
       icon: Stack(
         clipBehavior: Clip.none,
         children: [
-          Icon(
+          const Icon(
             Icons.notifications_outlined,
-            color: AppColors.textPrimary,
+            color: Colors.white,
           ),
           if (unreadCount > 0)
             Positioned(

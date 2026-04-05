@@ -436,10 +436,34 @@ class AppStrings {
       ? CopyFr.profile.logoutLabel
       : CopyAr.profile.logoutLabel;
 
+  String get profileGroupPreferences => locale == AppLocale.fr
+      ? CopyFr.profile.groupPreferences
+      : CopyAr.profile.groupPreferences;
+
+  String get profileGroupAccount => locale == AppLocale.fr
+      ? CopyFr.profile.groupAccount
+      : CopyAr.profile.groupAccount;
+
+  String get profileGroupSettings => locale == AppLocale.fr
+      ? CopyFr.profile.groupSettings
+      : CopyAr.profile.groupSettings;
+
   // Edit profile
   String get editProfileTitle => locale == AppLocale.fr
       ? CopyFr.profile.editTitle
       : CopyAr.profile.editTitle;
+
+  String get editSectionPersonal => locale == AppLocale.fr
+      ? CopyFr.profile.editSectionPersonal
+      : CopyAr.profile.editSectionPersonal;
+
+  String get editSectionLocation => locale == AppLocale.fr
+      ? CopyFr.profile.editSectionLocation
+      : CopyAr.profile.editSectionLocation;
+
+  String get editSectionContact => locale == AppLocale.fr
+      ? CopyFr.profile.editSectionContact
+      : CopyAr.profile.editSectionContact;
 
   String get profileIncompleteWarning => locale == AppLocale.fr
       ? CopyFr.profile.incompleteWarning
@@ -1365,4 +1389,296 @@ class AppStrings {
   String episodeAvailableSeats(int n) => locale == AppLocale.fr
       ? CopyFr.episode.availableSeats(n)
       : CopyAr.episode.availableSeats(n);
+
+  // ── Reservation Result ────────────────────────────────────────────────────
+
+  String get reservationResultTitle => locale == AppLocale.fr
+      ? CopyFr.reservationResult.title
+      : CopyAr.reservationResult.title;
+
+  String get reservationResultStatusBadge => locale == AppLocale.fr
+      ? CopyFr.reservationResult.statusBadge
+      : CopyAr.reservationResult.statusBadge;
+
+  String get reservationResultNumberLabel => locale == AppLocale.fr
+      ? CopyFr.reservationResult.summaryNumberLabel
+      : CopyAr.reservationResult.summaryNumberLabel;
+
+  String get reservationResultSeatsLabel => locale == AppLocale.fr
+      ? CopyFr.reservationResult.summarySeatsLabel
+      : CopyAr.reservationResult.summarySeatsLabel;
+
+  String get reservationResultDateLabel => locale == AppLocale.fr
+      ? CopyFr.reservationResult.summaryDateLabel
+      : CopyAr.reservationResult.summaryDateLabel;
+
+  String get reservationResultExpiresLabel => locale == AppLocale.fr
+      ? CopyFr.reservationResult.summaryExpiresLabel
+      : CopyAr.reservationResult.summaryExpiresLabel;
+
+  String reservationResultSeats(int n) => locale == AppLocale.fr
+      ? CopyFr.reservationResult.seats(n)
+      : CopyAr.reservationResult.seats(n);
+
+  String get reservationResultNextStepsTitle => locale == AppLocale.fr
+      ? CopyFr.reservationResult.nextStepsTitle
+      : CopyAr.reservationResult.nextStepsTitle;
+
+  String get reservationResultStep1 => locale == AppLocale.fr
+      ? CopyFr.reservationResult.step1
+      : CopyAr.reservationResult.step1;
+
+  String get reservationResultStep2 => locale == AppLocale.fr
+      ? CopyFr.reservationResult.step2
+      : CopyAr.reservationResult.step2;
+
+  String get reservationResultStep3 => locale == AppLocale.fr
+      ? CopyFr.reservationResult.step3
+      : CopyAr.reservationResult.step3;
+
+  String get reservationResultCtaMyReservations => locale == AppLocale.fr
+      ? CopyFr.reservationResult.ctaMyReservations
+      : CopyAr.reservationResult.ctaMyReservations;
+
+  String get reservationResultCtaHome => locale == AppLocale.fr
+      ? CopyFr.reservationResult.ctaHome
+      : CopyAr.reservationResult.ctaHome;
+
+  // ── Reservation Detail ────────────────────────────────────────────────────
+
+  String get resDetailAppBarTitle => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.appBarTitle
+      : CopyAr.reservationDetail.appBarTitle;
+
+  String get resDetailMsgPending => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.msgPending
+      : CopyAr.reservationDetail.msgPending;
+
+  String get resDetailMsgApproved => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.msgApproved
+      : CopyAr.reservationDetail.msgApproved;
+
+  String get resDetailMsgRejected => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.msgRejected
+      : CopyAr.reservationDetail.msgRejected;
+
+  String get resDetailMsgCheckedIn => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.msgCheckedIn
+      : CopyAr.reservationDetail.msgCheckedIn;
+
+  String get resDetailMsgCancelled => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.msgCancelled
+      : CopyAr.reservationDetail.msgCancelled;
+
+  String get resDetailMsgExpired => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.msgExpired
+      : CopyAr.reservationDetail.msgExpired;
+
+  String get resDetailSectionShow => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.sectionShow
+      : CopyAr.reservationDetail.sectionShow;
+
+  String get resDetailSectionDetails => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.sectionDetails
+      : CopyAr.reservationDetail.sectionDetails;
+
+  String get resDetailLabelNumber => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.labelNumber
+      : CopyAr.reservationDetail.labelNumber;
+
+  String get resDetailLabelSeats => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.labelSeats
+      : CopyAr.reservationDetail.labelSeats;
+
+  String get resDetailLabelCreatedAt => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.labelCreatedAt
+      : CopyAr.reservationDetail.labelCreatedAt;
+
+  String get resDetailLabelExpiresAt => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.labelExpiresAt
+      : CopyAr.reservationDetail.labelExpiresAt;
+
+  String get resDetailLabelExpiredAt => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.labelExpiredAt
+      : CopyAr.reservationDetail.labelExpiredAt;
+
+  String resDetailSeats(int n) => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.seats(n)
+      : CopyAr.reservationDetail.seats(n);
+
+  String get resDetailAlertRejectionTitle => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.alertRejectionTitle
+      : CopyAr.reservationDetail.alertRejectionTitle;
+
+  String get resDetailAlertExpiredTitle => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.alertExpiredTitle
+      : CopyAr.reservationDetail.alertExpiredTitle;
+
+  String get resDetailAlertExpiredBody => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.alertExpiredBody
+      : CopyAr.reservationDetail.alertExpiredBody;
+
+  String get resDetailAlertCheckedInTitle => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.alertCheckedInTitle
+      : CopyAr.reservationDetail.alertCheckedInTitle;
+
+  String get resDetailAlertCheckedInBody => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.alertCheckedInBody
+      : CopyAr.reservationDetail.alertCheckedInBody;
+
+  String get resDetailBtnViewTicket => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.btnViewTicket
+      : CopyAr.reservationDetail.btnViewTicket;
+
+  String get resDetailBtnViewUsedTicket => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.btnViewUsedTicket
+      : CopyAr.reservationDetail.btnViewUsedTicket;
+
+  String get resDetailBtnDiscoverShows => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.btnDiscoverShows
+      : CopyAr.reservationDetail.btnDiscoverShows;
+
+  String get resDetailBtnCancel => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.btnCancelReservation
+      : CopyAr.reservationDetail.btnCancelReservation;
+
+  String get resDetailCancelDialogTitle => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.cancelDialogTitle
+      : CopyAr.reservationDetail.cancelDialogTitle;
+
+  String get resDetailCancelDialogBody => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.cancelDialogBody
+      : CopyAr.reservationDetail.cancelDialogBody;
+
+  String get resDetailCancelDialogBack => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.cancelDialogBack
+      : CopyAr.reservationDetail.cancelDialogBack;
+
+  String get resDetailCancelDialogConfirm => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.cancelDialogConfirm
+      : CopyAr.reservationDetail.cancelDialogConfirm;
+
+  String get resDetailCancelSuccess => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.cancelSuccess
+      : CopyAr.reservationDetail.cancelSuccess;
+
+  String get resDetailCopied => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.copiedLabel
+      : CopyAr.reservationDetail.copiedLabel;
+
+  String get resDetailRetry => locale == AppLocale.fr
+      ? CopyFr.reservationDetail.retry
+      : CopyAr.reservationDetail.retry;
+
+  // ============================================
+  // Support Tickets
+  // ============================================
+  String get supportListTitle => locale == AppLocale.fr
+      ? CopyFr.support.listTitle : CopyAr.support.listTitle;
+  String get supportCreateTitle => locale == AppLocale.fr
+      ? CopyFr.support.createTitle : CopyAr.support.createTitle;
+  String get supportNewButton => locale == AppLocale.fr
+      ? CopyFr.support.newButton : CopyAr.support.newButton;
+
+  String get supportStatusOpen => locale == AppLocale.fr
+      ? CopyFr.support.statusOpen : CopyAr.support.statusOpen;
+  String get supportStatusInProgress => locale == AppLocale.fr
+      ? CopyFr.support.statusInProgress : CopyAr.support.statusInProgress;
+  String get supportStatusClosed => locale == AppLocale.fr
+      ? CopyFr.support.statusClosed : CopyAr.support.statusClosed;
+
+  String get supportBannerOpenTitle => locale == AppLocale.fr
+      ? CopyFr.support.bannerOpenTitle : CopyAr.support.bannerOpenTitle;
+  String get supportBannerOpenMsg => locale == AppLocale.fr
+      ? CopyFr.support.bannerOpenMsg : CopyAr.support.bannerOpenMsg;
+  String get supportBannerInProgressTitle => locale == AppLocale.fr
+      ? CopyFr.support.bannerInProgressTitle : CopyAr.support.bannerInProgressTitle;
+  String get supportBannerInProgressMsg => locale == AppLocale.fr
+      ? CopyFr.support.bannerInProgressMsg : CopyAr.support.bannerInProgressMsg;
+  String get supportBannerClosedTitle => locale == AppLocale.fr
+      ? CopyFr.support.bannerClosedTitle : CopyAr.support.bannerClosedTitle;
+  String get supportBannerClosedMsg => locale == AppLocale.fr
+      ? CopyFr.support.bannerClosedMsg : CopyAr.support.bannerClosedMsg;
+
+  String get supportCardSubtitle => locale == AppLocale.fr
+      ? CopyFr.support.cardSubtitle : CopyAr.support.cardSubtitle;
+
+  String get supportEmptyTitle => locale == AppLocale.fr
+      ? CopyFr.support.emptyTitle : CopyAr.support.emptyTitle;
+  String get supportEmptySubtitle => locale == AppLocale.fr
+      ? CopyFr.support.emptySubtitle : CopyAr.support.emptySubtitle;
+  String get supportEmptyButton => locale == AppLocale.fr
+      ? CopyFr.support.emptyButton : CopyAr.support.emptyButton;
+  String get supportErrorMsg => locale == AppLocale.fr
+      ? CopyFr.support.errorMsg : CopyAr.support.errorMsg;
+  String get supportRetryButton => locale == AppLocale.fr
+      ? CopyFr.support.retryButton : CopyAr.support.retryButton;
+
+  String get supportInfoBannerTitle => locale == AppLocale.fr
+      ? CopyFr.support.infoBannerTitle : CopyAr.support.infoBannerTitle;
+  String get supportInfoBannerBody => locale == AppLocale.fr
+      ? CopyFr.support.infoBannerBody : CopyAr.support.infoBannerBody;
+  String get supportSubjectLabel => locale == AppLocale.fr
+      ? CopyFr.support.subjectLabel : CopyAr.support.subjectLabel;
+  String get supportSubjectHint => locale == AppLocale.fr
+      ? CopyFr.support.subjectHint : CopyAr.support.subjectHint;
+  String get supportSubjectRequired => locale == AppLocale.fr
+      ? CopyFr.support.subjectRequired : CopyAr.support.subjectRequired;
+  String get supportMessageLabel => locale == AppLocale.fr
+      ? CopyFr.support.messageLabel : CopyAr.support.messageLabel;
+  String get supportMessageHint => locale == AppLocale.fr
+      ? CopyFr.support.messageHint : CopyAr.support.messageHint;
+  String get supportSubmitButton => locale == AppLocale.fr
+      ? CopyFr.support.submitButton : CopyAr.support.submitButton;
+
+  String get supportConfirmationTitle => locale == AppLocale.fr
+      ? CopyFr.support.confirmationTitle : CopyAr.support.confirmationTitle;
+  String get supportConfirmationBadge => locale == AppLocale.fr
+      ? CopyFr.support.confirmationBadge : CopyAr.support.confirmationBadge;
+  String get supportSummarySubject => locale == AppLocale.fr
+      ? CopyFr.support.summarySubject : CopyAr.support.summarySubject;
+  String get supportSummaryTicket => locale == AppLocale.fr
+      ? CopyFr.support.summaryTicket : CopyAr.support.summaryTicket;
+  String get supportSummarySubmitted => locale == AppLocale.fr
+      ? CopyFr.support.summarySubmitted : CopyAr.support.summarySubmitted;
+  String get supportStepsTitle => locale == AppLocale.fr
+      ? CopyFr.support.stepsTitle : CopyAr.support.stepsTitle;
+  String get supportStep1 => locale == AppLocale.fr
+      ? CopyFr.support.step1 : CopyAr.support.step1;
+  String get supportStep2 => locale == AppLocale.fr
+      ? CopyFr.support.step2 : CopyAr.support.step2;
+  String get supportStep3 => locale == AppLocale.fr
+      ? CopyFr.support.step3 : CopyAr.support.step3;
+  String get supportBtnViewTickets => locale == AppLocale.fr
+      ? CopyFr.support.btnViewTickets : CopyAr.support.btnViewTickets;
+  String get supportBtnBackHome => locale == AppLocale.fr
+      ? CopyFr.support.btnBackHome : CopyAr.support.btnBackHome;
+
+  String get supportDetailSubjectSection => locale == AppLocale.fr
+      ? CopyFr.support.detailSubjectSection : CopyAr.support.detailSubjectSection;
+  String get supportDetailMessageSection => locale == AppLocale.fr
+      ? CopyFr.support.detailMessageSection : CopyAr.support.detailMessageSection;
+  String get supportDetailMetaSection => locale == AppLocale.fr
+      ? CopyFr.support.detailMetaSection : CopyAr.support.detailMetaSection;
+  String get supportMetaTicketNumber => locale == AppLocale.fr
+      ? CopyFr.support.metaTicketNumber : CopyAr.support.metaTicketNumber;
+  String get supportMetaSubmittedAt => locale == AppLocale.fr
+      ? CopyFr.support.metaSubmittedAt : CopyAr.support.metaSubmittedAt;
+  String get supportMetaUpdatedAt => locale == AppLocale.fr
+      ? CopyFr.support.metaUpdatedAt : CopyAr.support.metaUpdatedAt;
+  String get supportInfoCallPending => locale == AppLocale.fr
+      ? CopyFr.support.infoCallPending : CopyAr.support.infoCallPending;
+  String get supportInfoClosed => locale == AppLocale.fr
+      ? CopyFr.support.infoClosed : CopyAr.support.infoClosed;
+  String get supportDetailError => locale == AppLocale.fr
+      ? CopyFr.support.detailError : CopyAr.support.detailError;
+  String get supportDetailForbidden => locale == AppLocale.fr
+      ? CopyFr.support.detailForbidden : CopyAr.support.detailForbidden;
+  String get supportDetailRetry => locale == AppLocale.fr
+      ? CopyFr.support.detailRetry : CopyAr.support.detailRetry;
+
+  String get supportProfileTitle => locale == AppLocale.fr
+      ? CopyFr.support.profileTitle : CopyAr.support.profileTitle;
+  String get supportProfileSubtitle => locale == AppLocale.fr
+      ? CopyFr.support.profileSubtitle : CopyAr.support.profileSubtitle;
 }
