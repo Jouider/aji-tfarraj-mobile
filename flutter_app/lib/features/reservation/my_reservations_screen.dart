@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,17 +27,31 @@ class MyReservationsScreen extends ConsumerStatefulWidget {
 class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  Timer? _autoRefreshTimer;
+
+  /// Poll interval — refresh reservations every 30s while screen is visible
+  static const _pollInterval = Duration(seconds: 30);
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _startAutoRefresh();
   }
 
   @override
   void dispose() {
+    _autoRefreshTimer?.cancel();
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _startAutoRefresh() {
+    _autoRefreshTimer = Timer.periodic(_pollInterval, (_) {
+      if (mounted) {
+        ref.read(myReservationsProvider.notifier).refresh();
+      }
+    });
   }
 
   @override
@@ -303,6 +318,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
   Widget build(BuildContext context) {
     final reservation = widget.reservation;
     final statusHelper = ReservationStatusHelper(reservation.status);
+    final isAr = ref.watch(isRtlProvider);
     final dateFormat = DateFormat('dd MMM yyyy à HH:mm', 'fr_FR');
     final s = ref.watch(stringsProvider);
 
@@ -344,7 +360,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                       children: [
                         // FIX: Title — 15px w600 textPrimary
                         Text(
-                          reservation.show?.title ?? 'Émission #${reservation.showId}',
+                          reservation.show?.localizedTitle(isAr) ?? 'Émission #${reservation.showId}',
                           style: AppTypography.labelLarge.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,

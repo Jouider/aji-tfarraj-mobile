@@ -556,69 +556,73 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 error: (_, __) => _CitiesRetryWidget(
                   onRetry: () => ref.refresh(citiesProvider),
                 ),
-                data: (cities) => Column(
-                  children: [
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedCity,
-                      decoration: _fieldDecoration(
-                          s.cityLabel, Icons.location_city_outlined),
-                      dropdownColor: AppColors.surfaceOverlay,
-                      items: cities
-                          .map((c) => DropdownMenuItem(
-                                value: c.name,
-                                child: Text(c.name,
-                                    style: AppTypography.bodyMedium.copyWith(
-                                        color: AppColors.textPrimary)),
-                              ))
-                          .toList(),
-                      onChanged: _isLoading
-                          ? null
-                          : (val) {
-                              setState(() {
-                                _selectedCity = val;
-                                _selectedDistrict = null;
-                              });
-                            },
-                      validator: (_) =>
-                          _selectedCity == null ? s.cityRequired : null,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Builder(
-                      key: ValueKey(_selectedCity),
-                      builder: (_) {
-                        final City? selected = _selectedCity != null
-                            ? cities.cast<City?>().firstWhere(
-                                (c) => c?.name == _selectedCity,
-                                orElse: () => null)
-                            : null;
-                        final districts = selected?.districts ?? [];
-                        return DropdownButtonFormField<String>(
-                          initialValue: districts.contains(_selectedDistrict)
-                              ? _selectedDistrict
-                              : null,
-                          decoration: _fieldDecoration(
-                              s.districtLabel, Icons.map_outlined),
-                          dropdownColor: AppColors.surfaceOverlay,
-                          items: districts
-                              .map((d) => DropdownMenuItem(
-                                    value: d,
-                                    child: Text(d,
-                                        style: AppTypography.bodyMedium.copyWith(
-                                            color: AppColors.textPrimary)),
-                                  ))
-                              .toList(),
-                          onChanged: (_isLoading || districts.isEmpty)
-                              ? null
-                              : (val) =>
-                                  setState(() => _selectedDistrict = val),
-                          validator: (_) => _selectedDistrict == null
-                              ? s.districtRequired
-                              : null,
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                data: (cities) {
+                  final isAr = ref.watch(isRtlProvider);
+                  return Column(
+                    children: [
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedCity,
+                        decoration: _fieldDecoration(
+                            s.cityLabel, Icons.location_city_outlined),
+                        dropdownColor: AppColors.surfaceOverlay,
+                        items: cities
+                            .map((c) => DropdownMenuItem(
+                                  value: c.name,
+                                  child: Text(c.localizedName(isAr),
+                                      style: AppTypography.bodyMedium.copyWith(
+                                          color: AppColors.textPrimary)),
+                                ))
+                            .toList(),
+                        onChanged: _isLoading
+                            ? null
+                            : (val) {
+                                setState(() {
+                                  _selectedCity = val;
+                                  _selectedDistrict = null;
+                                });
+                              },
+                        validator: (_) =>
+                            _selectedCity == null ? s.cityRequired : null,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Builder(
+                        key: ValueKey(_selectedCity),
+                        builder: (_) {
+                          final City? selected = _selectedCity != null
+                              ? cities.cast<City?>().firstWhere(
+                                  (c) => c?.name == _selectedCity,
+                                  orElse: () => null)
+                              : null;
+                          final districts = selected?.districts ?? [];
+                          return DropdownButtonFormField<String>(
+                            initialValue: districts.contains(_selectedDistrict)
+                                ? _selectedDistrict
+                                : null,
+                            decoration: _fieldDecoration(
+                                s.districtLabel, Icons.map_outlined),
+                            dropdownColor: AppColors.surfaceOverlay,
+                            items: districts
+                                .map((d) => DropdownMenuItem(
+                                      value: d,
+                                      child: Text(
+                                          selected?.localizedDistrict(d, isAr) ?? d,
+                                          style: AppTypography.bodyMedium.copyWith(
+                                              color: AppColors.textPrimary)),
+                                    ))
+                                .toList(),
+                            onChanged: (_isLoading || districts.isEmpty)
+                                ? null
+                                : (val) =>
+                                    setState(() => _selectedDistrict = val),
+                            validator: (_) => _selectedDistrict == null
+                                ? s.districtRequired
+                                : null,
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.xl),
 

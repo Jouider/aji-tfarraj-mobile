@@ -12,6 +12,7 @@ import 'package:aji_tfarraj/app/push/push_router.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/features/notifications/domain/app_notification.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
 
 /// Background message handler - must be top-level function
 @pragma('vm:entry-point')
@@ -247,6 +248,11 @@ class PushService {
 
       // Store notification
       await _storeNotification(notification);
+
+      // Auto-refresh reservations when a reservation notification arrives
+      if (notification.type == NotificationType.reservation) {
+        _ref?.read(myReservationsProvider.notifier).refresh();
+      }
 
       // Show foreground UI
       _showForegroundNotification(notification);

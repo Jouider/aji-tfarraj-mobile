@@ -98,7 +98,7 @@ class ReservationSummaryCard extends ConsumerWidget {
                       children: [
                         // FIX: Show name — textPrimary w700 16px
                         Text(
-                          reservation.show!.title,
+                          reservation.show!.localizedTitle(isAr),
                           style: AppTypography.bodyMedium.copyWith(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w700,

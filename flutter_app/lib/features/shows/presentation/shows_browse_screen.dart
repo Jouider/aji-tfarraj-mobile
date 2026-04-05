@@ -492,7 +492,11 @@ class _BrowseShowCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+    final fallbackDateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+    final browseDateStr = show.localizedDate(isAr) ??
+        (show.startsAt != null
+            ? fallbackDateFormat.format(show.startsAt!.toLocal())
+            : s.homeDateTbc);
 
     return GestureDetector(
       onTap: () => context.push(Routes.showDetail(show.id.toString())),
@@ -607,9 +611,7 @@ class _BrowseShowCard extends StatelessWidget {
                             size: 12, color: AppColors.secondary),
                         const SizedBox(width: 4),
                         Text(
-                          show.startsAt != null
-                              ? dateFormat.format(show.startsAt!.toLocal())
-                              : '—',
+                          browseDateStr,
                           style: AppTypography.caption.copyWith(
                             color: AppColors.textMuted,
                           ),
@@ -626,7 +628,7 @@ class _BrowseShowCard extends StatelessWidget {
                             size: 12, color: AppColors.secondary),
                         const SizedBox(width: 4),
                         Text(
-                          show.city,
+                          show.nextEpisode?.localizedCity(isAr) ?? show.city,
                           style: AppTypography.caption.copyWith(
                             color: AppColors.textMuted,
                           ),

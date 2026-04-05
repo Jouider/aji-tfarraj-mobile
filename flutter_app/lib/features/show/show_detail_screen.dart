@@ -122,12 +122,18 @@ class _ShowDetailContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isAr = ref.watch(isRtlProvider);
+    final s = ref.watch(stringsProvider);
     return Stack(
       children: [
         CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: _HeroSection(show: show, onBack: () => _goBack(context), isAr: isAr),
+              child: _HeroSection(
+                show: show,
+                onBack: () => _goBack(context),
+                isAr: isAr,
+                dateTbc: s.homeDateTbc,
+              ),
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -211,8 +217,14 @@ class _HeroSection extends StatefulWidget {
   final Show show;
   final VoidCallback onBack;
   final bool isAr;
+  final String dateTbc;
 
-  const _HeroSection({required this.show, required this.onBack, required this.isAr});
+  const _HeroSection({
+    required this.show,
+    required this.onBack,
+    required this.isAr,
+    required this.dateTbc,
+  });
 
   @override
   State<_HeroSection> createState() => _HeroSectionState();
@@ -323,7 +335,9 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
   @override
   Widget build(BuildContext context) {
     final show = widget.show;
-    final dateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+    final isAr = widget.isAr;
+    final fallbackDateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+    final dateTbc = widget.dateTbc;
 
     return SizedBox(
       height: 380,
@@ -469,7 +483,7 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
                         size: 13, color: AppColors.secondaryLight),
                     const SizedBox(width: 4),
                     Text(
-                      show.channel!,
+                      show.localizedChannel(isAr) ?? show.channel!,
                       style: AppTypography.labelSmall.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -518,9 +532,10 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
                         size: 13, color: AppColors.secondary),
                     const SizedBox(width: 5),
                     Text(
-                      show.startsAt != null
-                          ? dateFormat.format(show.startsAt!.toLocal())
-                          : '—',
+                      show.localizedDate(isAr) ??
+                          (show.startsAt != null
+                              ? fallbackDateFormat.format(show.startsAt!.toLocal())
+                              : dateTbc),
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                         fontSize: 13,
@@ -532,7 +547,7 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
                     const SizedBox(width: 5),
                     Flexible(
                       child: Text(
-                        show.city,
+                        show.nextEpisode?.localizedCity(isAr) ?? show.city,
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 13,
@@ -765,15 +780,17 @@ class _DetailsCard extends ConsumerWidget {
 
   const _DetailsCard({required this.show});
 
-  String get _locationText {
-    if (show.studio != null && show.studio!.isNotEmpty) {
-      return '${show.studio}, ${show.city}';
+  String _locationText(bool isAr) {
+    final studio = show.nextEpisode?.localizedStudio(isAr) ?? show.studio;
+    final city = show.nextEpisode?.localizedCity(isAr) ?? show.city;
+    if (studio != null && studio.isNotEmpty) {
+      return '$studio, $city';
     }
-    return show.city;
+    return city;
   }
 
-  Future<void> _openInMaps() async {
-    final query = Uri.encodeComponent(_locationText);
+  Future<void> _openInMaps(bool isAr) async {
+    final query = Uri.encodeComponent(_locationText(isAr));
     final url = Uri.parse('https://maps.google.com/?q=$query');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -783,8 +800,20 @@ class _DetailsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
-    final dateFormat = DateFormat('EEEE dd MMMM yyyy', 'fr_FR');
+    final isAr = ref.watch(isRtlProvider);
+    final fallbackDateFormat = DateFormat('EEEE dd MMMM yyyy', 'fr_FR');
     final timeFormat = DateFormat('HH:mm', 'fr_FR');
+
+    // Use backend preformatted date_fr/date_ar; split time from date_fr for time row
+    final localizedDateStr = show.localizedDate(isAr);
+    final hasDate = localizedDateStr != null || show.startsAt != null;
+    final dateValue = localizedDateStr ??
+        (show.startsAt != null
+            ? fallbackDateFormat.format(show.startsAt!.toLocal())
+            : s.homeDateTbc);
+    final timeValue = show.startsAt != null
+        ? timeFormat.format(show.startsAt!.toLocal())
+        : (hasDate ? '—' : s.homeDateTbc);
 
     return Container(
       decoration: BoxDecoration(
@@ -797,26 +826,22 @@ class _DetailsCard extends ConsumerWidget {
           _DetailRow(
             icon: Icons.calendar_today_outlined,
             label: s.showDetailDateLabel,
-            value: show.startsAt != null
-                ? dateFormat.format(show.startsAt!.toLocal())
-                : '—',
+            value: dateValue,
             isFirst: true,
           ),
           _RowDivider(),
           _DetailRow(
             icon: Icons.access_time_rounded,
             label: s.showDetailTimeLabel,
-            value: show.startsAt != null
-                ? timeFormat.format(show.startsAt!.toLocal())
-                : '—',
+            value: timeValue,
           ),
           _RowDivider(),
           _DetailRow(
             icon: Icons.location_on_outlined,
             label: s.showDetailLocationLabel,
-            value: _locationText,
+            value: _locationText(isAr),
             trailing: GestureDetector(
-              onTap: _openInMaps,
+              onTap: () => _openInMaps(isAr),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm, vertical: 4),
@@ -1315,15 +1340,21 @@ class _EpisodesSection extends ConsumerWidget {
     final s = ref.watch(stringsProvider);
     final now = DateTime.now();
 
-    // Split into upcoming and past
+    // Split into upcoming and past.
+    // Episodes with no startsAt (unscheduled) go in upcoming — shown with "Coming Soon".
     final upcoming = show.episodes
-        .where((e) => e.startsAt.isAfter(now) && e.isActive)
+        .where((e) => e.startsAt == null || (e.startsAt!.isAfter(now) && e.isActive))
         .toList()
-      ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+      ..sort((a, b) {
+        // Unscheduled episodes sort to the end of upcoming
+        final aDate = a.startsAt ?? DateTime(9999);
+        final bDate = b.startsAt ?? DateTime(9999);
+        return aDate.compareTo(bDate);
+      });
     final past = show.episodes
-        .where((e) => !e.startsAt.isAfter(now) || !e.isActive)
+        .where((e) => e.startsAt != null && (!e.startsAt!.isAfter(now) || !e.isActive))
         .toList()
-      ..sort((a, b) => b.startsAt.compareTo(a.startsAt));
+      ..sort((a, b) => b.startsAt!.compareTo(a.startsAt!));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1398,8 +1429,12 @@ class _EpisodeCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
-    final dateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+    final isAr = ref.watch(isRtlProvider);
     final isSoldOut = episode.isSoldOut;
+    final episodeDateStr = episode.localizedDate(isAr) ??
+        (episode.startsAt != null
+            ? DateFormat('EEE d MMM • HH:mm', 'fr_FR').format(episode.startsAt!.toLocal())
+            : s.homeDateTbc);
 
     // FIX: Episode card — cardDarkElevated, radius 16, shadow, padding 14
     return Container(
@@ -1452,7 +1487,7 @@ class _EpisodeCard extends ConsumerWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        dateFormat.format(episode.startsAt.toLocal()),
+                        episodeDateStr,
                         style: AppTypography.caption.copyWith(
                           color:
                               isPast ? AppColors.textLight : AppColors.textMuted,
@@ -1474,9 +1509,9 @@ class _EpisodeCard extends ConsumerWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        episode.studio != null
-                            ? '${episode.studio}, ${episode.city}'
-                            : episode.city,
+                        episode.localizedStudio(isAr) != null
+                            ? '${episode.localizedStudio(isAr)}, ${episode.localizedCity(isAr)}'
+                            : episode.localizedCity(isAr),
                         style: AppTypography.caption.copyWith(
                           color:
                               isPast ? AppColors.textLight : AppColors.textMuted,

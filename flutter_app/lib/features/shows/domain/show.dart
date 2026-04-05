@@ -9,6 +9,9 @@ class Show {
   final String? descriptionAr;
   final String? category;
   final String? channel;
+  final String? channelAr;
+  final String? dateFr;
+  final String? dateAr;
   final String? imageUrl;
   final String? videoUrl;
   final bool isActive;
@@ -37,6 +40,9 @@ class Show {
     this.descriptionAr,
     this.category,
     this.channel,
+    this.channelAr,
+    this.dateFr,
+    this.dateAr,
     this.imageUrl,
     this.videoUrl,
     required this.isActive,
@@ -76,6 +82,17 @@ class Show {
           ? descriptionAr
           : description;
 
+  /// Localized channel name — falls back to French if AR is null
+  String? localizedChannel(bool isAr) =>
+      (isAr && channelAr != null && channelAr!.isNotEmpty)
+          ? channelAr
+          : channel;
+
+  /// Localized date string preformatted by backend.
+  /// Falls back to dateFr if Arabic is null, then null if both absent.
+  String? localizedDate(bool isAr) =>
+      (isAr && dateAr != null) ? dateAr : dateFr;
+
   /// Create Show from JSON (snake_case from API)
   factory Show.fromJson(Map<String, dynamic> json) {
     return Show(
@@ -86,6 +103,9 @@ class Show {
       descriptionAr: json['description_ar'] as String?,
       category: json['category'] as String?,
       channel: json['channel'] as String?,
+      channelAr: json['channel_ar'] as String?,
+      dateFr: json['date_fr'] as String?,
+      dateAr: json['date_ar'] as String?,
       imageUrl: json['image_url'] as String?,
       videoUrl: json['video_url'] as String?,
       isActive: json['is_active'] as bool? ?? true,
@@ -128,6 +148,9 @@ class Show {
       'description_ar': descriptionAr,
       'category': category,
       'channel': channel,
+      'channel_ar': channelAr,
+      'date_fr': dateFr,
+      'date_ar': dateAr,
       'image_url': imageUrl,
       'video_url': videoUrl,
       'is_active': isActive,

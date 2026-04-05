@@ -275,7 +275,11 @@ class _HeroShowCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+    final fallbackDateFormat = DateFormat('EEE d MMM • HH:mm', 'fr_FR');
+    final dateStr = show.localizedDate(isAr) ??
+        (show.startsAt != null
+            ? fallbackDateFormat.format(show.startsAt!.toLocal())
+            : s.homeDateTbc);
 
     return GestureDetector(
       onTap: () => context.push(Routes.showDetail(show.id.toString())),
@@ -353,7 +357,7 @@ class _HeroShowCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        show.channel!.toUpperCase(),
+                        (show.localizedChannel(isAr) ?? show.channel!).toUpperCase(),
                         style: AppTypography.labelSmall.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -384,9 +388,7 @@ class _HeroShowCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        show.startsAt != null
-                            ? dateFormat.format(show.startsAt!.toLocal())
-                            : '—',
+                        dateStr,
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 12,
@@ -400,7 +402,7 @@ class _HeroShowCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        show.city,
+                        show.nextEpisode?.localizedCity(isAr) ?? show.city,
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 12,
@@ -635,7 +637,11 @@ class _ShowHorizontalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('d MMM', 'fr_FR');
+    final fallbackCardDateFormat = DateFormat('d MMM', 'fr_FR');
+    final cardDateStr = show.localizedDate(isAr) ??
+        (show.startsAt != null
+            ? fallbackCardDateFormat.format(show.startsAt!.toLocal())
+            : s.homeDateTbc);
 
     return GestureDetector(
       onTap: () => context.push(Routes.showDetail(show.id.toString())),
@@ -759,7 +765,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            show.channel!.toUpperCase(),
+                            (show.localizedChannel(isAr) ?? show.channel!).toUpperCase(),
                             style: AppTypography.caption.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -803,9 +809,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                   child: Text(
                     isComingSoon && !show.isActive
                         ? s.homeDateTbc
-                        : show.startsAt != null
-                            ? dateFormat.format(show.startsAt!.toLocal())
-                            : '—',
+                        : cardDateStr,
                     style: AppTypography.caption.copyWith(
                       color: AppColors.textMuted,
                     ),
