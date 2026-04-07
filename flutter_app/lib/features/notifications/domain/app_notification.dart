@@ -79,13 +79,17 @@ class AppNotification {
     final id = data['id']?.toString() ?? 
         '${DateTime.now().millisecondsSinceEpoch}_${data.hashCode}';
 
-    // Extract title and body - prefer data payload, fallback to notification
-    final title = data['title']?.toString() ?? 
-        notificationTitle ?? 
-        'Notification';
-    
-    final body = data['body']?.toString() ?? 
-        notificationBody ?? 
+    // Extract title and body - prefer data payload, fallback to notification.
+    // Title/body are expected to already be localized by the backend based on
+    // the device's registered locale (see DeviceRepository.registerDevice).
+    // If both payload and notification fields are missing, we leave the title
+    // empty and let the UI render a locale-aware fallback via AppStrings.
+    final title = data['title']?.toString() ??
+        notificationTitle ??
+        '';
+
+    final body = data['body']?.toString() ??
+        notificationBody ??
         '';
 
     // Determine notification type

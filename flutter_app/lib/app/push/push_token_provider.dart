@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:aji_tfarraj/app/push/device_repository.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
 /// Push Token Provider - Manages FCM token state and backend registration
 /// 
@@ -50,9 +51,11 @@ class PushTokenState {
 /// Push Token Notifier
 class PushTokenNotifier extends StateNotifier<PushTokenState> {
   final DeviceRepository _deviceRepository;
+  final Ref _ref;
   StreamSubscription<String>? _tokenRefreshSubscription;
-  
-  PushTokenNotifier(this._deviceRepository) : super(const PushTokenState());
+
+  PushTokenNotifier(this._deviceRepository, this._ref)
+      : super(const PushTokenState());
 
   /// Initialize and get FCM token
   /// Call this after user logs in or registers
@@ -147,8 +150,12 @@ class PushTokenNotifier extends StateNotifier<PushTokenState> {
   /// Public method to allow manual registration (e.g., after login)
   Future<bool> registerTokenWithBackend(String token) async {
     try {
-      _debugLog('Registering token with backend...');
-      final success = await _deviceRepository.registerDevice(token);
+      final locale = _ref.read(localeProvider).languageCode;
+      _debugLog('Registering token with backend... locale=$locale');
+      final success = await _deviceRepository.registerDevice(
+        token,
+        locale: locale,
+      );
       state = state.copyWith(isRegisteredWithBackend: success);
       _debugLog('Backend registration: ${success ? 'success' : 'failed'}');
       return success;
@@ -229,10 +236,23 @@ class PushTokenNotifier extends StateNotifier<PushTokenState> {
 }
 
 /// Provider for push token state
-final pushTokenProvider =
+final StateNotifierProvider<PushTokenNotifier, PushTokenState>
+    pushTokenProvider =
     StateNotifierProvider<PushTokenNotifier, PushTokenState>((ref) {
   final deviceRepository = ref.watch(deviceRepositoryProvider);
-  return PushTokenNotifier(deviceRepository);
+  final notifier = PushTokenNotifier(deviceRepository, ref);
+
+  // Re-register with the backend whenever the user changes language,
+  // so push notifications are delivered in the newly selected locale.
+  ref.listen(localeProvider, (previous, next) {
+    if (previous == next) return;
+    final token = ref.read(pushTokenProvider).token;
+    if (token != null && token.isNotEmpty) {
+      notifier.registerTokenWithBackend(token);
+    }
+  });
+
+  return notifier;
 });
 
 /// Provider for current FCM token only

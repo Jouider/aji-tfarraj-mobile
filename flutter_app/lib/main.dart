@@ -126,6 +126,14 @@ class _AjiTfarrajAppState extends ConsumerState<AjiTfarrajApp> {
         darkTheme: AppTheme.darkTheme,
         themeMode: themeMode,
         routerConfig: router,
+        // AppColors uses static brightness state, so descendants that read
+        // AppColors.xxx directly (instead of Theme.of) don't rebuild on
+        // theme change. Keying the navigator subtree by resolved brightness
+        // forces a full rebuild so every screen picks up the new colors.
+        builder: (context, child) => KeyedSubtree(
+          key: ValueKey(resolvedBrightness),
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
     );
   }

@@ -225,13 +225,14 @@ class _ReservationsList extends ConsumerWidget {
       return RefreshIndicator(
         onRefresh: onRefresh,
         color: AppColors.primary,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height - 250,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                 Icon(
                   Icons.calendar_today_outlined,
                   size: 56,
@@ -277,7 +278,8 @@ class _ReservationsList extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

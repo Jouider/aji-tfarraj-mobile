@@ -57,3 +57,6 @@ app.*.map.json
 
 # iOS build artifacts
 ios/build/
+
+# Fastlane secrets
+**/fastlane/play-store-key.json

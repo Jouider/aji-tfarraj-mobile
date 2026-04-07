@@ -33,8 +33,13 @@ class DeviceRegistration {
 /// Body: {
 ///   "token": "fcm_token_string",
 ///   "platform": "ios" | "android",
+///   "locale": "fr" | "ar",
 ///   "device_name": "optional_device_name"
 /// }
+///
+/// The `locale` field tells the backend which language to use when sending
+/// push notifications to this device. It is sent on registration and again
+/// every time the user changes the in-app language.
 /// 
 /// The backend:
 /// - Saves FCM token into devices table
@@ -52,17 +57,22 @@ class DeviceRepository {
 
   /// Register device token with backend
   /// Call this after login, after registration, and when FCM token refreshes
-  Future<bool> registerDevice(String fcmToken, {String? deviceName}) async {
+  Future<bool> registerDevice(
+    String fcmToken, {
+    required String locale,
+    String? deviceName,
+  }) async {
     try {
       final platform = Platform.isIOS ? 'ios' : 'android';
-      
+
       final registrationData = {
         'token': fcmToken,
         'platform': platform,
+        'locale': locale,
         if (deviceName != null) 'device_name': deviceName,
       };
 
-      _debugLog('Registering device with backend: platform=$platform');
+      _debugLog('Registering device with backend: platform=$platform, locale=$locale');
 
       final response = await _apiClient.post(
         '/api/devices/register',

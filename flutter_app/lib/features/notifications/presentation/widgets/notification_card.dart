@@ -1,15 +1,17 @@
 // filepath: /Users/mouadsmac/aji-tfarraj-mobile/flutter_app/lib/features/notifications/presentation/widgets/notification_card.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/components/cards/app_card.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/notifications/domain/app_notification.dart';
 
 /// Notification Card Widget
 /// Displays a single notification with icon, title, body, timestamp, and read indicator
-class NotificationCard extends StatelessWidget {
+class NotificationCard extends ConsumerWidget {
   final AppNotification notification;
   final VoidCallback? onTap;
   final VoidCallback? onDismiss;
@@ -22,7 +24,10 @@ class NotificationCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    final displayTitle =
+        notification.title.isNotEmpty ? notification.title : s.notificationsTitle;
     return Dismissible(
       key: Key(notification.id),
       direction: onDismiss != null 
@@ -63,7 +68,7 @@ class NotificationCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            notification.title,
+                            displayTitle,
                             style: AppTypography.labelLarge.copyWith(
                               fontWeight: notification.isRead 
                                   ? FontWeight.w500 
