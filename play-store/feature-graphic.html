@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1024" />
+  <title>Feature Graphic — Aji Tfarraj</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1024px;
+      height: 500px;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .wrapper {
+      width: 1024px;
+      height: 500px;
+      position: relative;
+      background: radial-gradient(ellipse at 30% 50%, #8B1A1A 0%, #5C0D0D 40%, #2D0505 100%);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Bokeh light effects */
+    .bokeh {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.25;
+    }
+    .b1 { width: 320px; height: 320px; background: #D4820A; top: -80px; left: 60px; }
+    .b2 { width: 200px; height: 200px; background: #FF6B00; bottom: -60px; right: 200px; }
+    .b3 { width: 160px; height: 160px; background: #FFB800; top: 40px; right: 100px; opacity: 0.15; }
+
+    /* Star sparkles */
+    .sparkle {
+      position: absolute;
+      width: 6px; height: 6px;
+      background: #FFD700;
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      opacity: 0.7;
+    }
+    .s1 { top: 60px; left: 320px; transform: scale(1.8); }
+    .s2 { top: 140px; left: 260px; transform: scale(1.2); opacity: 0.5; }
+    .s3 { bottom: 80px; left: 440px; transform: scale(2.2); }
+    .s4 { top: 50px; right: 280px; transform: scale(1.4); opacity: 0.6; }
+    .s5 { bottom: 120px; right: 340px; transform: scale(1); opacity: 0.4; }
+    .s6 { top: 200px; left: 180px; transform: scale(0.9); opacity: 0.5; }
+
+    /* Left — branding */
+    .left {
+      flex: 0 0 460px;
+      padding: 0 0 0 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-circle {
+      width: 62px; height: 62px;
+      background: linear-gradient(135deg, #F5A623 0%, #E07B00 100%);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 4px 20px rgba(245,166,35,0.5);
+    }
+
+    .app-name {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+    .app-name .aji {
+      font-size: 26px;
+      font-weight: 900;
+      color: #FFFFFF;
+      letter-spacing: 1px;
+    }
+    .app-name .tfarraj {
+      font-size: 15px;
+      font-weight: 700;
+      color: #F5A623;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .headline {
+      font-size: 48px;
+      font-weight: 900;
+      color: #FFFFFF;
+      line-height: 1.05;
+      letter-spacing: -0.5px;
+    }
+    .headline .gold { color: #F5A623; }
+
+    .sub {
+      font-size: 16px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.72);
+      line-height: 1.5;
+      max-width: 340px;
+    }
+
+    .badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .badge {
+      background: rgba(245,166,35,0.15);
+      border: 1.5px solid rgba(245,166,35,0.5);
+      color: #F5A623;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Right — phone mockups */
+    .right {
+      flex: 1;
+      position: relative;
+      height: 500px;
+      z-index: 10;
+    }
+
+    .phone {
+      position: absolute;
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 2px rgba(255,255,255,0.08);
+      background: #1A0A0A;
+    }
+
+    /* Main phone — center */
+    .phone-main {
+      width: 188px;
+      height: 360px;
+      bottom: 30px;
+      left: 80px;
+      transform: rotate(-3deg);
+    }
+
+    /* Second phone — right */
+    .phone-right {
+      width: 168px;
+      height: 320px;
+      bottom: 55px;
+      left: 240px;
+      transform: rotate(4deg);
+    }
+
+    /* Phone screen content */
+    .screen {
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Screen 1 — show detail */
+    .screen-1-bg {
+      background: linear-gradient(180deg, #3D0808 0%, #1A0505 100%);
+      width: 100%; height: 100%;
+      position: relative;
+    }
+    .screen-1-img {
+      width: 100%; height: 55%;
+      background: linear-gradient(135deg, #8B3A3A 0%, #4A1515 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+    }
+    .screen-1-content {
+      padding: 10px 10px;
+    }
+    .sc-channel {
+      display: inline-block;
+      background: #8B0000;
+      color: #fff;
+      font-size: 7px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+    .sc-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+    .sc-info {
+      font-size: 7px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 8px;
+    }
+    .sc-btn {
+      background: linear-gradient(90deg, #C41E1E, #8B0000);
+      color: white;
+      font-size: 8px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .sc-seats {
+      background: linear-gradient(90deg, #F5A623, #E07B00);
+      color: #3D1A00;
+      font-size: 7px;
+      font-weight: 700;
+      padding: 5px 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Screen 2 — ticket */
+    .screen-2-bg {
+      background: #120303;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 14px 10px;
+      gap: 6px;
+    }
+    .sc2-header {
+      font-size: 9px; font-weight: 800; color: #fff; margin-bottom: 2px;
+      align-self: flex-start;
+    }
+    .sc2-card {
+      background: #1E0505;
+      border-radius: 10px;
+      padding: 10px;
+      width: 100%;
+    }
+    .sc2-valid {
+      background: #8B0000;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 7px;
+      font-weight: 700;
+      padding: 3px 6px;
+      text-align: center;
+      margin-bottom: 7px;
+    }
+    .sc2-show-name {
+      font-size: 9px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 5px;
+    }
+    .sc2-detail {
+      font-size: 6px; color: rgba(255,255,255,0.55); text-align: center; line-height: 1.8;
+    }
+    .sc2-qr {
+      width: 60px; height: 60px;
+      background: #fff;
+      border-radius: 6px;
+      margin: 8px auto 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .sc2-badge {
+      background: linear-gradient(90deg, #F5A623, #E07B00);
+      color: #3D1A00;
+      font-size: 7px; font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-top: 4px;
+    }
+
+    /* Divider */
+    .divider {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 300px;
+      background: linear-gradient(180deg, transparent, rgba(245,166,35,0.3), transparent);
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <!-- Bokeh -->
+  <div class="bokeh b1"></div>
+  <div class="bokeh b2"></div>
+  <div class="bokeh b3"></div>
+
+  <!-- Sparkles -->
+  <div class="sparkle s1"></div>
+  <div class="sparkle s2"></div>
+  <div class="sparkle s3"></div>
+  <div class="sparkle s4"></div>
+  <div class="sparkle s5"></div>
+  <div class="sparkle s6"></div>
+
+  <!-- LEFT — Branding -->
+  <div class="left">
+    <div class="logo-row">
+      <div class="logo-circle">🎬</div>
+      <div class="app-name">
+        <span class="aji">Aji</span>
+        <span class="tfarraj">tfarraj</span>
+      </div>
+    </div>
+
+    <div class="headline">
+      Assiste en direct<br>
+      à la <span class="gold">TV marocaine</span>
+    </div>
+
+    <div class="sub">
+      Réserve ta place dans les studios de 2M, Al Aoula et bien d'autres. Ton billet digital, toujours dans ta poche.
+    </div>
+
+    <div class="badges">
+      <span class="badge">🎭 +20 émissions</span>
+      <span class="badge">🎫 Ticket QR</span>
+      <span class="badge">🌐 FR · AR</span>
+    </div>
+  </div>
+
+  <!-- RIGHT — Phone mockups -->
+  <div class="right">
+
+    <!-- Phone 1 — Show detail -->
+    <div class="phone phone-main">
+      <div class="screen-1-bg">
+        <div class="screen-1-img">📺</div>
+        <div class="screen-1-content">
+          <span class="sc-channel">AL AOULA</span>
+          <div class="sc-title">Lalla Laaroussa</div>
+          <div class="sc-info">📅 mardi 7 avril 2026 · 📍 Casablanca</div>
+          <div class="sc-btn">🎟 Réserver</div>
+          <div class="sc-seats">🪑 149 places disponibles</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone 2 — Ticket -->
+    <div class="phone phone-right">
+      <div class="screen-2-bg">
+        <div class="sc2-header">Mes billets</div>
+        <div class="sc2-card">
+          <div class="sc2-valid">✓ Billet valide</div>
+          <div class="sc2-show-name">Lalla Laaroussa</div>
+          <div class="sc2-detail">
+            📅 vendredi 17 avril 2026<br>
+            🕙 21:00<br>
+            📍 Studio 2M Ain Sebaa<br>
+            📺 Al Aoula · 1 place
+          </div>
+          <div class="sc2-qr">▦</div>
+        </div>
+        <div class="sc2-badge">▦ Billet validé</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+</div>
+</body>
+</html>

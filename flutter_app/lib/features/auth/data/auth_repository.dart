@@ -145,14 +145,52 @@ class AuthRepository {
   }
 
   Future<AuthResponse> loginWithGoogle() async {
-    // clientId is intentionally omitted — the google_sign_in plugin reads it
-    // automatically from GoogleService-Info.plist (iOS) and google-services.json (Android).
-    final googleSignIn = GoogleSignIn(scopes: ['email']);
-    final googleUser = await googleSignIn.signIn();
+    // serverClientId is the Web OAuth 2.0 client ID from google-services.json (client_type 3).
+    // Required on Android to obtain an idToken — without it the plugin returns null for idToken.
+    final googleSignIn = GoogleSignIn(
+      scopes: ['email'],
+      serverClientId:
+          '600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com',
+    );
+
+    // Always sign out first to clear any stale cached account.
+    // Without this, signIn() can hang forever on Android if a previous
+    // session is still active but invalid.
+    try {
+      await googleSignIn.signOut();
+    } catch (_) {
+      // Ignore sign-out errors — we only care about the fresh sign-in below.
+    }
+
+    // 60-second timeout prevents an infinite spinner if the native activity
+    // result is never delivered (e.g. Credential Manager issue on Android 14+).
+    GoogleSignInAccount? googleUser;
+    try {
+      googleUser = await googleSignIn
+          .signIn()
+          .timeout(const Duration(seconds: 60));
+    } on Exception catch (e) {
+      // PlatformException, TimeoutException, etc. → surface as a DioException
+      // so the notifier's catch block can handle it uniformly.
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.unknown,
+        error: e,
+        message: 'Google Sign-In échoué : $e',
+      );
+    }
+
     if (googleUser == null) throw _cancelledError();
+
     final auth = await googleUser.authentication;
     final idToken = auth.idToken;
-    if (idToken == null) throw _cancelledError();
+    if (idToken == null) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.unknown,
+        message: 'Impossible d\'obtenir le token Google. Réessayez.',
+      );
+    }
 
     final response = await _dio.post('/api/auth/social', data: {
       'provider': 'google',
@@ -466,10 +504,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
       final message = (e.response?.data is Map)
           ? (e.response!.data as Map)['message'] as String? ??
-              'Erreur de connexion'
-          : 'Erreur de connexion';
+              'Connexion Google échouée. Réessayez.'
+          : e.message ?? 'Connexion Google échouée. Réessayez.';
       state = AuthState(
           status: AuthStatus.unauthenticated, errorMessage: message);
+      rethrow;
+    } catch (e) {
+      // Catch-all — ensures state is ALWAYS reset so spinner never hangs.
+      state = AuthState(
+        status: AuthStatus.unauthenticated,
+        errorMessage: 'Connexion Google échouée. Réessayez.',
+      );
       rethrow;
     }
   }
@@ -518,6 +563,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Clear error message
   void clearError() {
     state = state.copyWith(errorMessage: null);
+  }
+
+  /// Set an explicit error message (used by the UI layer for unexpected errors).
+  void setError(String message) {
+    state = AuthState(status: AuthStatus.unauthenticated, errorMessage: message);
   }
 }
 

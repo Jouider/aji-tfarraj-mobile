@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -313,6 +314,157 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
   }
 
+  /// Drum-roll (CupertinoPicker) bottom sheet for birth date selection.
+  void _showDateDrumPicker(BuildContext context) {
+    final initial = _dateOfBirth ?? DateTime(2000, 1, 1);
+    int selDay = initial.day;
+    int selMonth = initial.month;
+    int selYear = initial.year;
+
+    final years = List.generate(
+        DateTime.now().year - 1939, (i) => 1940 + i); // 1940 → current year
+    final months = List.generate(12, (i) => i + 1);
+
+    int daysInMonth(int m, int y) => DateTime(y, m + 1, 0).day;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surfaceOverlay,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(builder: (ctx, setModalState) {
+          final days =
+              List.generate(daysInMonth(selMonth, selYear), (i) => i + 1);
+          // Clamp selDay if month/year changed
+          if (selDay > days.length) selDay = days.length;
+
+          return SizedBox(
+            height: 340,
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: Text(
+                          'Annuler',
+                          style: AppTypography.bodyMedium
+                              .copyWith(color: AppColors.textSecondary),
+                        ),
+                      ),
+                      Text(
+                        'Date de naissance',
+                        style: AppTypography.labelLarge
+                            .copyWith(color: AppColors.textPrimary),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _dateOfBirth = DateTime(selYear, selMonth, selDay);
+                          });
+                          Navigator.pop(ctx);
+                        },
+                        child: Text(
+                          'OK',
+                          style: AppTypography.bodyMedium
+                              .copyWith(color: AppColors.secondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                // Wheels
+                Expanded(
+                  child: Row(
+                    children: [
+                      // Day
+                      Expanded(
+                        flex: 2,
+                        child: CupertinoPicker(
+                          scrollController: FixedExtentScrollController(
+                              initialItem: selDay - 1),
+                          itemExtent: 40,
+                          onSelectedItemChanged: (i) =>
+                              setModalState(() => selDay = days[i]),
+                          children: days
+                              .map((d) => Center(
+                                    child: Text(
+                                      d.toString().padLeft(2, '0'),
+                                      style: AppTypography.bodyLarge.copyWith(
+                                          color: AppColors.textPrimary),
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                      // Month
+                      Expanded(
+                        flex: 3,
+                        child: CupertinoPicker(
+                          scrollController: FixedExtentScrollController(
+                              initialItem: selMonth - 1),
+                          itemExtent: 40,
+                          onSelectedItemChanged: (i) => setModalState(() {
+                            selMonth = months[i];
+                            final d = daysInMonth(selMonth, selYear);
+                            if (selDay > d) selDay = d;
+                          }),
+                          children: [
+                            'Janvier', 'Février', 'Mars', 'Avril', 'Mai',
+                            'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre',
+                            'Novembre', 'Décembre',
+                          ]
+                              .map((m) => Center(
+                                    child: Text(
+                                      m,
+                                      style: AppTypography.bodyLarge.copyWith(
+                                          color: AppColors.textPrimary),
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                      // Year
+                      Expanded(
+                        flex: 3,
+                        child: CupertinoPicker(
+                          scrollController: FixedExtentScrollController(
+                              initialItem: years.indexOf(selYear)),
+                          itemExtent: 40,
+                          onSelectedItemChanged: (i) => setModalState(() {
+                            selYear = years[i];
+                            final d = daysInMonth(selMonth, selYear);
+                            if (selDay > d) selDay = d;
+                          }),
+                          children: years
+                              .map((y) => Center(
+                                    child: Text(
+                                      y.toString(),
+                                      style: AppTypography.bodyLarge.copyWith(
+                                          color: AppColors.textPrimary),
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+      },
+    );
+  }
+
   /// Brand-token input decoration — filled backgroundGrey, secondary focus border.
   InputDecoration _fieldDecoration(String label, IconData icon) {
     return InputDecoration(
@@ -498,32 +650,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // Date of birth — GestureDetector wraps AbsorbPointer
+              // Date of birth — drum-roll bottom sheet (day / month / year)
               GestureDetector(
-                onTap: _isLoading
-                    ? null
-                    : () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: _dateOfBirth ?? DateTime(2000, 1, 1),
-                          firstDate: DateTime(1940),
-                          lastDate: DateTime(2008, 12, 31),
-                          builder: (ctx, child) => Theme(
-                            data: Theme.of(ctx).copyWith(
-                              colorScheme: ColorScheme.dark(
-                                primary: AppColors.secondary,
-                                onPrimary: Colors.white,
-                                surface: AppColors.surfaceOverlay,
-                                onSurface: AppColors.textPrimary,
-                              ),
-                            ),
-                            child: child!,
-                          ),
-                        );
-                        if (picked != null) {
-                          setState(() => _dateOfBirth = picked);
-                        }
-                      },
+                onTap: _isLoading ? null : () => _showDateDrumPicker(context),
                 child: AbsorbPointer(
                   child: TextFormField(
                     controller: TextEditingController(

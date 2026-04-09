@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "600996591716-s3muh5i7chju1vjcr3ke723b56oupive.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ajitfarraj.aji_tfarraj",
+            "certificate_hash": "2c24ea5810c1f4b11a66c008bd38d5cd33b29347"
+          }
+        },
+        {
           "client_id": "600996591716-v823d0alenrthm8t40rdht5qmr3dhqps.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
