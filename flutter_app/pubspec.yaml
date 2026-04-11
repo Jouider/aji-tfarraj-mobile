@@ -1,7 +1,7 @@
 name: aji_tfarraj
 description: Aji Tfarraj Mobile App - TV Show Reservation System
 publish_to: 'none'
-version: 1.0.0+7
+version: 1.0.0+18
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -52,6 +52,16 @@ dependencies:
   video_player: ^2.11.1
   chewie: ^1.13.0
   path_provider: ^2.1.5
+  flutter_web_auth_2: ^5.0.1
+
+# Force the pre-Credential-Manager google_sign_in_android.
+# 6.2.x migrated to androidx.credentials.CredentialManager, which hangs
+# forever on many devices (Xiaomi/Redmi/Samsung) when the Play Services
+# version, device-locale, or multi-account state is imperfect. 6.1.36 is
+# the last version using the classic GoogleSignInClient activity flow,
+# which is far more reliable in production.
+dependency_overrides:
+  google_sign_in_android: 6.1.36
 
 dev_dependencies:
   flutter_test:

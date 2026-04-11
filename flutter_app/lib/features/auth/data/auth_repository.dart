@@ -1,6 +1,9 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
@@ -144,34 +147,59 @@ class AuthRepository {
     return token != null;
   }
 
+  /// Google OAuth via Chrome Custom Tab — bypasses google_sign_in entirely.
+  ///
+  /// The `google_sign_in` plugin (all versions) triggers DEVELOPER_ERROR (10)
+  /// on many Android devices due to GMS CredentialManager / requestIdToken bugs.
+  /// This approach opens Google's OAuth2 authorization endpoint in a Chrome
+  /// Custom Tab, which works on every Android device regardless of GMS version.
+  ///
+  /// Flow:
+  /// 1. Open Google OAuth in Chrome Custom Tab → user picks account
+  /// 2. Google redirects to our custom scheme with an access_token (implicit grant)
+  /// 3. We send the access_token to our backend `/api/auth/social`
+  /// 4. Backend verifies via Google userinfo API and returns a Sanctum token
   Future<AuthResponse> loginWithGoogle() async {
-    // serverClientId is the Web OAuth 2.0 client ID from google-services.json (client_type 3).
-    // Required on Android to obtain an idToken — without it the plugin returns null for idToken.
-    final googleSignIn = GoogleSignIn(
-      scopes: ['email'],
-      serverClientId:
-          '600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com',
-    );
+    // Web Client ID from Google Cloud Console (same project as Firebase)
+    const webClientId =
+        '600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com';
 
-    // Always sign out first to clear any stale cached account.
-    // Without this, signIn() can hang forever on Android if a previous
-    // session is still active but invalid.
-    try {
-      await googleSignIn.signOut();
-    } catch (_) {
-      // Ignore sign-out errors — we only care about the fresh sign-in below.
-    }
+    // The backend hosts an OAuth relay page at /oauth/callback.
+    // Google redirects there (https:// — accepted by Web client type).
+    // That page reads the id_token from the URL fragment via JS and
+    // redirects to our custom scheme, which flutter_web_auth_2 catches.
+    // URL schemes must not contain underscores — use 'ajitfarraj' as the scheme.
+    const redirectScheme = 'ajitfarraj';
+    const redirectUri =
+        'https://aji-tfarraj-backend-production.up.railway.app/oauth/callback';
 
-    // 60-second timeout prevents an infinite spinner if the native activity
-    // result is never delivered (e.g. Credential Manager issue on Android 14+).
-    GoogleSignInAccount? googleUser;
+    // PKCE-like nonce for CSRF protection
+    final state = _generateRandomString(32);
+
+    // Use a nonce for the OpenID Connect id_token flow (required by Google)
+    final nonce = _generateRandomString(32);
+
+    final authUrl = Uri.https('accounts.google.com', '/o/oauth2/v2/auth', {
+      'client_id': webClientId,
+      'redirect_uri': redirectUri,
+      'response_type': 'id_token',
+      'scope': 'email profile openid',
+      'state': state,
+      'nonce': nonce,
+      'prompt': 'select_account',
+    });
+
+    String resultUrl;
     try {
-      googleUser = await googleSignIn
-          .signIn()
-          .timeout(const Duration(seconds: 60));
+      resultUrl = await FlutterWebAuth2.authenticate(
+        url: authUrl.toString(),
+        callbackUrlScheme: redirectScheme,
+      );
     } on Exception catch (e) {
-      // PlatformException, TimeoutException, etc. → surface as a DioException
-      // so the notifier's catch block can handle it uniformly.
+      if (e.toString().contains('CANCELED') ||
+          e.toString().contains('cancelled')) {
+        throw _cancelledError();
+      }
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         type: DioExceptionType.unknown,
@@ -180,11 +208,22 @@ class AuthRepository {
       );
     }
 
-    if (googleUser == null) throw _cancelledError();
+    // The relay page redirects to ajitfarraj://oauth?id_token=xxx&state=yyy
+    // Params are in the query string (not fragment) after the relay redirect.
+    final uri = Uri.parse(resultUrl);
+    final params = uri.queryParameters;
 
-    final auth = await googleUser.authentication;
-    final idToken = auth.idToken;
-    if (idToken == null) {
+    // Verify state matches to prevent CSRF
+    if (params['state'] != state) {
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.unknown,
+        message: 'Erreur de sécurité. Réessayez.',
+      );
+    }
+
+    final idToken = params['id_token'];
+    if (idToken == null || idToken.isEmpty) {
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         type: DioExceptionType.unknown,
@@ -192,6 +231,7 @@ class AuthRepository {
       );
     }
 
+    // Send id_token (JWT) to backend — it verifies via Google's JWKS endpoint
     final response = await _dio.post('/api/auth/social', data: {
       'provider': 'google',
       'token': idToken,
@@ -199,6 +239,15 @@ class AuthRepository {
     final authResponse = AuthResponse.fromJson(response.data);
     await _saveAuthResponse(authResponse);
     return authResponse;
+  }
+
+  /// Generate a random alphanumeric string for OAuth state parameter
+  String _generateRandomString(int length) {
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random.secure();
+    return List.generate(length, (_) => chars[random.nextInt(chars.length)])
+        .join();
   }
 
   Future<AuthResponse> loginWithApple() async {
@@ -511,9 +560,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       rethrow;
     } catch (e) {
       // Catch-all — ensures state is ALWAYS reset so spinner never hangs.
+      // Show raw error during debugging so we can diagnose.
       state = AuthState(
         status: AuthStatus.unauthenticated,
-        errorMessage: 'Connexion Google échouée. Réessayez.',
+        errorMessage: 'Erreur Google: $e',
       );
       rethrow;
     }

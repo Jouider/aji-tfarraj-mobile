@@ -509,17 +509,26 @@ class _TicketSwiper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 620,
-          child: PageView.builder(
-            controller: pageController,
-            itemCount: tickets.length,
-            onPageChanged: onPageChanged,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              child: _TicketCard(s: s, ticket: tickets[index]),
-            ),
-          ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // On phones: 620px is enough. On iPad/large screens use a
+            // percentage of screen height so the card never overflows.
+            final screenHeight = MediaQuery.of(context).size.height;
+            final cardHeight = screenHeight < 700 ? 560.0 : screenHeight * 0.62;
+            return SizedBox(
+              height: cardHeight,
+              child: PageView.builder(
+                controller: pageController,
+                itemCount: tickets.length,
+                onPageChanged: onPageChanged,
+                itemBuilder: (context, index) => Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                  child: _TicketCard(s: s, ticket: tickets[index]),
+                ),
+              ),
+            );
+          },
         ),
         const SizedBox(height: AppSpacing.md),
 
@@ -598,7 +607,9 @@ class _TicketCard extends ConsumerWidget {
     final show = ticket.show;
     final isUsed = ticket.isCheckedIn;
 
-    return Container(
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.cardDarkElevated,
@@ -716,7 +727,7 @@ class _TicketCard extends ConsumerWidget {
             ),
         ],
       ),
-    );
+    )); // closes SingleChildScrollView + Container
   }
 }
 

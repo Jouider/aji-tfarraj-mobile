@@ -186,11 +186,10 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
       // Error message already set in authState.errorMessage by the notifier.
     } catch (e) {
       // Non-Dio error (PlatformException, TimeoutException, etc.).
-      // The notifier already reset its state in the catch-all block;
-      // we just need the error banner to show — set it explicitly.
+      // Show the raw error so we can diagnose issues in production.
       debugPrint('[Google] unexpected error: $e');
       ref.read(loginAuthStateProvider.notifier).setError(
-            'Connexion Google échouée. Vérifiez votre connexion et réessayez.',
+            'Erreur Google: $e',
           );
     } finally {
       if (mounted) setState(() => _loadingProvider = null);
