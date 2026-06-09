@@ -47,8 +47,16 @@ post_install do |installer|
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
       # Generate dSYM for all pod frameworks to avoid missing dSYM warnings on upload
       config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
-      # iOS 26.x simulators require arm64; exclude only i386 (not arm64) for iphonesimulator
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+      # Exclude arm64 from simulator builds ONLY for Release config — prevents
+      # simulator-tagged arm64 slices from being embedded in App Store IPAs, which
+      # caused a 409 "unsupported platform in the arm64 slice" validation error
+      # (objective_c.framework). On Apple Silicon Macs the iOS Simulator NEEDS
+      # arm64 at build/run time, so we must not exclude it for Debug/Profile.
+      if config.name == 'Release'
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
+      else
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+      end
     end
   end
   

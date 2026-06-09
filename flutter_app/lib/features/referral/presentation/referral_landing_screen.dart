@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -82,8 +81,7 @@ class ReferralLandingScreen extends ConsumerWidget {
                         radius: 24,
                         backgroundColor: AppColors.secondary,
                         backgroundImage: resolved.referrer.avatarUrl != null
-                            ? CachedNetworkImageProvider(
-                                resolved.referrer.avatarUrl!)
+                            ? NetworkImage(resolved.referrer.avatarUrl!)
                             : null,
                         child: resolved.referrer.avatarUrl == null
                             ? const Icon(Icons.person,
@@ -108,12 +106,22 @@ class ReferralLandingScreen extends ConsumerWidget {
                 if (show.imageUrl != null)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                    child: CachedNetworkImage(
-                      imageUrl: show.imageUrl!,
+                    child: Image.network(
+                      show.imageUrl!,
                       width: double.infinity,
                       height: 200,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
+                      loadingBuilder: (_, child, progress) => progress == null
+                          ? child
+                          : Container(
+                              height: 200,
+                              color: AppColors.backgroundGrey,
+                              child: Center(
+                                child: Icon(Icons.tv_outlined,
+                                    size: 48, color: AppColors.textLight),
+                              ),
+                            ),
+                      errorBuilder: (_, __, ___) => Container(
                         height: 200,
                         color: AppColors.backgroundGrey,
                         child: Center(
@@ -146,10 +154,15 @@ class ReferralLandingScreen extends ConsumerWidget {
                 Text(show.localizedTitle(isAr), style: AppTypography.h2),
                 const SizedBox(height: AppSpacing.md),
 
-                // Details row
+                // Details row — use episode date when available
                 _DetailRow(
                   icon: Icons.calendar_today_outlined,
-                  text: dateFormat.format(show.startsAt.toLocal()),
+                  text: dateFormat.format(
+                    (resolved.episodes.isNotEmpty
+                            ? resolved.episodes.first.startsAt
+                            : show.startsAt)
+                        .toLocal(),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 _DetailRow(
@@ -206,12 +219,29 @@ class ReferralLandingScreen extends ConsumerWidget {
                 onPressed: show.isSoldOut
                     ? null
                     : () {
-                        // Store the referral code for the reservation flow
+                        // Store the referral code so it survives through auth
                         ref
                             .read(pendingReferralCodeProvider.notifier)
                             .state = resolved.referralCode;
-                        context
-                            .go(Routes.showReserve(show.id.toString()));
+
+                        // Route to episode-specific reserve when the API
+                        // returned episodes; fall back to show-level reserve.
+                        final String route;
+                        if (resolved.episodes.isNotEmpty) {
+                          route = Routes.episodeReserve(
+                            show.id.toString(),
+                            resolved.episodes.first.id.toString(),
+                          );
+                        } else {
+                          route = Routes.showReserve(show.id.toString());
+                        }
+
+                        // Persist the destination so the router can return
+                        // here after a login redirect instead of going home.
+                        ref
+                            .read(pendingNavigationProvider.notifier)
+                            .state = route;
+                        context.go(route);
                       },
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.secondary,
@@ -264,7 +294,7 @@ class ReferralLandingScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.xl),
             TextButton(
               onPressed: () => context.go(Routes.home),
-              child: Text(s.showDetailBackToHome ?? 'Accueil'),
+              child: Text(s.backToHome),
             ),
           ],
         ),

@@ -45,6 +45,8 @@ class RewardsRepository {
         return disk;
       }
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -53,29 +55,33 @@ class RewardsRepository {
   Future<void> collectReward(int rewardId) async {
     try {
       await _apiClient.post<dynamic>('/api/rewards/$rewardId/collect');
-    } on ApiException catch (e) {
-      switch (e.code) {
+    } on DioException catch (e) {
+      // ApiClient throws DioException; map it so the backend `code` is readable.
+      final api = ApiException.fromDioError(e);
+      switch (api.code) {
         case 'INSUFFICIENT_POINTS':
           throw ApiException(
             message: 'Vous n\'avez pas assez de points.',
-            statusCode: e.statusCode,
-            code: e.code,
+            statusCode: api.statusCode,
+            code: api.code,
           );
         case 'DUPLICATE_PENDING':
           throw ApiException(
             message: 'Vous avez déjà demandé cette récompense.',
-            statusCode: e.statusCode,
-            code: e.code,
+            statusCode: api.statusCode,
+            code: api.code,
           );
         case 'REWARD_INACTIVE':
           throw ApiException(
             message: 'Cette récompense n\'est plus disponible.',
-            statusCode: e.statusCode,
-            code: e.code,
+            statusCode: api.statusCode,
+            code: api.code,
           );
         default:
-          rethrow;
+          throw api;
       }
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
@@ -531,12 +530,12 @@ class _BrowseShowCard extends StatelessWidget {
                 width: 90,
                 height: 90,
                 child: show.imageUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: show.imageUrl!,
+                    ? Image.network(
+                        show.imageUrl!,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) =>
-                            Container(color: AppColors.backgroundWhite),
-                        errorWidget: (_, __, ___) => Container(
+                        loadingBuilder: (_, child, progress) =>
+                            progress == null ? child : Container(color: AppColors.backgroundWhite),
+                        errorBuilder: (_, __, ___) => Container(
                           color: AppColors.backgroundWhite,
                           child: Icon(Icons.tv,
                               size: 28, color: AppColors.textLight),

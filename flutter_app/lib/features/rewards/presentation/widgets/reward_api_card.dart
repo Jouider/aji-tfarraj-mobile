@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
@@ -95,11 +94,12 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
           width: 90,
           height: 90,
           child: reward.imageUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: reward.imageUrl!,
+              ? Image.network(
+                  reward.imageUrl!,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => _imagePlaceholder(),
-                  errorWidget: (_, __, ___) => _imagePlaceholder(),
+                  loadingBuilder: (_, child, progress) =>
+                      progress == null ? child : _imagePlaceholder(),
+                  errorBuilder: (_, __, ___) => _imagePlaceholder(),
                 )
               : _imagePlaceholder(),
         ),
@@ -149,11 +149,12 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
           width: 90,
           height: 90,
           child: reward.imageUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: reward.imageUrl!,
+              ? Image.network(
+                  reward.imageUrl!,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => _imagePlaceholder(),
-                  errorWidget: (_, __, ___) => _imagePlaceholder(),
+                  loadingBuilder: (_, child, progress) =>
+                      progress == null ? child : _imagePlaceholder(),
+                  errorBuilder: (_, __, ___) => _imagePlaceholder(),
                 )
               : _imagePlaceholder(),
         ),

@@ -4,52 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 
-/// Device registration data for push notifications
-class DeviceRegistration {
-  final String token;
-  final String platform;
-  final String? deviceName;
-
-  DeviceRegistration({
-    required this.token,
-    required this.platform,
-    this.deviceName,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'token': token,
-    'platform': platform,
-    if (deviceName != null) 'device_name': deviceName,
-  };
-}
-
 /// Repository for device registration with backend
-/// 
-/// Backend endpoint is implemented and deployed in PRODUCTION:
-/// https://aji-tfarraj-backend-production.up.railway.app
-/// 
-/// POST /api/devices/register
-/// Headers: Authorization: Bearer {token}
-/// Body: {
-///   "token": "fcm_token_string",
-///   "platform": "ios" | "android",
-///   "locale": "fr" | "ar",
-///   "device_name": "optional_device_name"
-/// }
 ///
-/// The `locale` field tells the backend which language to use when sending
-/// push notifications to this device. It is sent on registration and again
-/// every time the user changes the in-app language.
-/// 
-/// The backend:
-/// - Saves FCM token into devices table
-/// - Associates token with authenticated user
-/// - Updates existing token if already exists
-/// - Removes invalid tokens automatically when detected
-/// 
-/// TODO(Backend - Abdellah):
-/// This endpoint is implemented in production.
-/// In staging environment, ensure FIREBASE credentials are configured.
+/// POST /api/devices/register  (auth:sanctum)
+/// Body: { token, platform, locale, device_name? }
+///
+/// The `locale` field tells the backend which language to use for push
+/// notifications sent to this device. It is sent on first registration and
+/// re-sent automatically every time the user switches language in the app.
 class DeviceRepository {
   final ApiClient _apiClient;
 

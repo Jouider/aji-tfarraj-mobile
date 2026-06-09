@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
@@ -15,6 +14,8 @@ import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:aji_tfarraj/features/referral/data/referral_repository.dart'
+    show pendingNavigationProvider;
 import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
 
 /// Home Screen — Cinematic discovery layout inspired by premium streaming apps
@@ -32,6 +33,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // If the user arrived here after following a referral deep link while
+    // logged out, a pending destination route was stored before auth redirect.
+    // Navigate there now that the shell is fully initialized — doing it in the
+    // redirect itself causes StatefulShellRoute to reset the branch to /home.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final pending = ref.read(pendingNavigationProvider);
+      if (pending != null) {
+        ref.read(pendingNavigationProvider.notifier).state = null;
+        context.go(pending);
+      }
+    });
   }
 
   @override
@@ -291,12 +304,12 @@ class _HeroShowCard extends StatelessWidget {
           children: [
             // Background image
             show.imageUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: show.imageUrl!,
+                ? Image.network(
+                    show.imageUrl!,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) =>
-                        Container(color: AppColors.backgroundGrey),
-                    errorWidget: (_, __, ___) => _HeroPlaceholder(),
+                    loadingBuilder: (_, child, progress) =>
+                        progress == null ? child : Container(color: AppColors.backgroundGrey),
+                    errorBuilder: (_, __, ___) => _HeroPlaceholder(),
                   )
                 : _HeroPlaceholder(),
 
@@ -672,12 +685,12 @@ class _ShowHorizontalCard extends StatelessWidget {
                   children: [
                     // Image
                     show.imageUrl != null
-                        ? CachedNetworkImage(
-                            imageUrl: show.imageUrl!,
+                        ? Image.network(
+                            show.imageUrl!,
                             fit: BoxFit.cover,
-                            placeholder: (_, __) =>
-                                Container(color: AppColors.backgroundGrey),
-                            errorWidget: (_, __, ___) => Container(
+                            loadingBuilder: (_, child, progress) =>
+                                progress == null ? child : Container(color: AppColors.backgroundGrey),
+                            errorBuilder: (_, __, ___) => Container(
                               color: AppColors.backgroundGrey,
                               child: Icon(
                                 Icons.tv,

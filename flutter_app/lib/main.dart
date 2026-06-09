@@ -1,9 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/firebase_options.dart';
 import 'package:aji_tfarraj/app/router.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
@@ -18,6 +22,16 @@ import 'package:aji_tfarraj/features/notifications/data/notification_repository.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Android 15+ (SDK 35/36) enforces edge-to-edge. Opt in explicitly and use
+  // fully transparent system bars so content draws behind them consistently
+  // across Android versions (screens handle insets via SafeArea).
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarContrastEnforced: false,
+  ));
 
   // Initialize French and Arabic locale data for date formatting
   await initializeDateFormatting('fr_FR', null);
@@ -40,19 +54,51 @@ void main() async {
     debugPrint('[Main] Firebase/Push init error (expected in dev): $e');
   }
 
-  runApp(
-    ProviderScope(
-      observers: const [AppProviderObserver()],
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-      ],
-      child: const AjiTfarrajApp(),
-    ),
-  );
+  Widget buildApp() => ProviderScope(
+        observers: const [AppProviderObserver()],
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+        ],
+        child: const AjiTfarrajApp(),
+      );
+
+  // Initialize Sentry when a DSN is provided (--dart-define=SENTRY_DSN=...).
+  // The appRunner closure enables automatic capture of uncaught Flutter/Dart
+  // errors (zone + FlutterError). Without a DSN, run the app directly.
+  if (AppConfig.sentryEnabled) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = AppConfig.sentryDsn;
+        options.environment = AppConfig.sentryEnvironment;
+        options.tracesSampleRate = 0.2; // 20% of transactions
+        options.sendDefaultPii = false; // GDPR — no PII by default
+        // Drop expected 401s before they ever leave the device. Token expiry is
+        // a normal, handled condition (ApiClient refreshes or redirects to
+        // login), so a 401 must never surface as a Sentry error — regardless of
+        // which Dio instance threw it. See GitHub issue #2.
+        options.beforeSend = (event, hint) {
+          final exc = event.throwable;
+          if (exc is DioException && exc.response?.statusCode == 401) {
+            return null;
+          }
+          return event;
+        };
+      },
+      appRunner: () => runApp(buildApp()),
+    );
+  } else {
+    runApp(buildApp());
+  }
 }
 
 class AjiTfarrajApp extends ConsumerStatefulWidget {
-  const AjiTfarrajApp({super.key});
+  const AjiTfarrajApp({super.key, this.initializePushServices = true});
+
+  /// Whether to wire up Firebase push notifications and deep-link handling
+  /// after the first frame. Always `true` in production; widget tests pass
+  /// `false` so the smoke test can build the app without a Firebase app or
+  /// the platform channels (FCM, app_links) that aren't available off-device.
+  final bool initializePushServices;
 
   @override
   ConsumerState<AjiTfarrajApp> createState() => _AjiTfarrajAppState();
@@ -62,6 +108,7 @@ class _AjiTfarrajAppState extends ConsumerState<AjiTfarrajApp> {
   @override
   void initState() {
     super.initState();
+    if (!widget.initializePushServices) return;
     // Initialize push token after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializePushServices();
@@ -100,12 +147,14 @@ class _AjiTfarrajAppState extends ConsumerState<AjiTfarrajApp> {
     AppColors.updateBrightness(resolvedBrightness);
 
     // Set context and ref for PushService
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.mounted) {
-        PushService.instance.setContext(context);
-        PushService.instance.setRef(ref);
-      }
-    });
+    if (widget.initializePushServices) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          PushService.instance.setContext(context);
+          PushService.instance.setRef(ref);
+        }
+      });
+    }
 
     return Directionality(
       textDirection: textDirection,

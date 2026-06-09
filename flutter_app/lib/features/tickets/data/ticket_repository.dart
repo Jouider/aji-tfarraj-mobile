@@ -75,7 +75,7 @@ class TicketRepository {
       if (cachedTickets.isNotEmpty) {
         return TicketsFetchResult(tickets: cachedTickets, isOffline: true);
       }
-      rethrow;
+      throw ApiException.from(e);
     }
   }
 

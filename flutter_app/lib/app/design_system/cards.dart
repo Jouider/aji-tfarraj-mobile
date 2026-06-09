@@ -48,6 +48,8 @@ class ShowCard extends StatelessWidget {
                   ? Image.network(
                       imageUrl!,
                       fit: BoxFit.cover,
+                      loadingBuilder: (_, child, progress) =>
+                          progress == null ? child : Container(color: AppColors.backgroundGrey),
                       errorBuilder: (_, __, ___) => const _ImagePlaceholder(),
                     )
                   : const _ImagePlaceholder(),

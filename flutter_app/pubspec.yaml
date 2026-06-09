@@ -1,7 +1,7 @@
 name: aji_tfarraj
 description: Aji Tfarraj Mobile App - TV Show Reservation System
 publish_to: 'none'
-version: 1.0.0+18
+version: 1.0.7+28
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -17,6 +17,8 @@ dependencies:
   cupertino_icons: ^1.0.6
   # API & Networking
   dio: ^5.4.0
+  # Error monitoring & performance (iOS + Android)
+  sentry_flutter: ^8.9.0
   # Secure token storage
   flutter_secure_storage: ^9.0.0
   # Image caching
