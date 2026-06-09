@@ -25,6 +25,8 @@ class ReferralRepository {
       return ReferralLink.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -48,6 +50,8 @@ class ReferralRepository {
           .toList();
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -65,6 +69,8 @@ class ReferralRepository {
       return ResolvedReferral.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -79,6 +85,8 @@ class ReferralRepository {
       return ReferralStats.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 }
@@ -104,3 +112,9 @@ final myReferralStatsProvider = FutureProvider<ReferralStats>((ref) async {
 /// State provider to hold a pending referral code from a deep link
 /// so it persists through auth flow and gets pre-filled on reservation
 final pendingReferralCodeProvider = StateProvider<String?>((ref) => null);
+
+/// State provider to hold a pending navigation route from a deep link
+/// (e.g. /show/123/reserve or /show/123/episode/456/reserve).
+/// The GoRouter redirect reads this after successful auth and routes there
+/// instead of always going to home.
+final pendingNavigationProvider = StateProvider<String?>((ref) => null);

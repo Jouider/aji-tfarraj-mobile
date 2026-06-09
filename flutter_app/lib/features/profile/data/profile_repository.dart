@@ -38,6 +38,8 @@ class ProfileRepository {
       return User.fromJson(data['data'] ?? data);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -56,6 +58,8 @@ class ProfileRepository {
       );
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -79,6 +83,8 @@ class ProfileRepository {
       return User.fromJson(data['data'] ?? data);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -103,6 +109,8 @@ class ProfileRepository {
       return User.fromJson(data['data'] ?? data);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -116,6 +124,8 @@ class ProfileRepository {
       return User.fromJson(data['data'] ?? data);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -136,6 +146,8 @@ class ProfileRepository {
       return list.map((e) => City.fromJson(e as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 }

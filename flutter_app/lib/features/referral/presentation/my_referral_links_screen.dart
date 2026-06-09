@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -63,11 +64,23 @@ class MyReferralLinksScreen extends ConsumerWidget {
             dateFormat: dateFormat,
             s: s,
             isAr: isAr,
-            onShare: () {
-              Share.share(
-                s.referralShareMessage(
-                    link.show.localizedTitle(isAr), link.referralLink),
-              );
+            onShare: () async {
+              try {
+                final box = context.findRenderObject() as RenderBox?;
+                final origin = box != null && box.hasSize
+                    ? box.localToGlobal(Offset.zero) & box.size
+                    : null;
+                await Share.share(
+                  s.referralShareMessage(
+                      link.show.localizedTitle(isAr), link.referralLink),
+                  sharePositionOrigin: origin,
+                );
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(ApiException.from(e).userMessage(s))),
+                );
+              }
             },
           );
         },
@@ -148,7 +161,9 @@ class _LinkCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            dateFormat.format(link.show.startsAt.toLocal()),
+            link.show.startsAt != null
+                ? dateFormat.format(link.show.startsAt!.toLocal())
+                : '—',
             style:
                 AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
           ),

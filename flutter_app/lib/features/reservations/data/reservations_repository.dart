@@ -36,6 +36,8 @@ class ReservationsRepository {
       return [];
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -63,6 +65,8 @@ class ReservationsRepository {
       return Reservation.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -80,6 +84,8 @@ class ReservationsRepository {
       return Reservation.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -89,6 +95,8 @@ class ReservationsRepository {
       await _apiClient.post(AppConfig.cancelReservation(id));
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 }

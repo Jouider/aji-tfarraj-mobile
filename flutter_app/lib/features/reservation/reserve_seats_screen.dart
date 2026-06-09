@@ -303,8 +303,9 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
         e.message.toLowerCase().contains('disponible')) {
       return s.reserveSeatsErrNotEnough;
     }
-    if (e.statusCode == null) return s.networkError;
-    return e.message;
+    // Centralized mapping: 401 → session expired, 429 → rate limit,
+    // parse/5xx → generic, null statusCode → network, else server message.
+    return e.userMessage(s);
   }
 }
 

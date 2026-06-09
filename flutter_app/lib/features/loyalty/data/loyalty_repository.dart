@@ -56,6 +56,8 @@ class LoyaltyRepository {
         return disk;
       }
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 

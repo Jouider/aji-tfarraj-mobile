@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:label="Aji Tfarraj"
         android:name="${applicationName}"
@@ -20,6 +21,19 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Disable Flutter's built-in deep-link handling. Since Flutter 3.27
+                 it defaults to ON, which feeds EVERY incoming intent URI (including
+                 the custom-scheme Google OAuth callback ajitfarraj://oauth?id_token=…)
+                 into go_router's RouteInformationParser. That parser calls
+                 Uri.origin, which throws a StateError for non-http(s) schemes and
+                 crashes the OAuth redirect. We handle all deep links ourselves via
+                 app_links (DeepLinkService for /r/ referral links, and the OAuth
+                 listener in AuthRepository.loginWithGoogle), so Flutter's built-in
+                 routing must stay off. See GitHub issue #1. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false"
+              />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -31,16 +45,12 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="https" android:host="app.ajitfarraj.ma" android:pathPrefix="/r/"/>
             </intent-filter>
-        </activity>
-        <!-- OAuth redirect handler for Google Sign-In via Chrome Custom Tab -->
-        <activity
-            android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
-            android:exported="true">
-            <intent-filter android:label="flutter_web_auth_2">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="ajitfarraj" android:host="oauth" />
+            <!-- Google OAuth callback — system browser redirects here after sign-in -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="ajitfarraj" android:host="oauth"/>
             </intent-filter>
         </activity>
 
@@ -52,9 +62,24 @@
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    <!-- CAMERA: core use — staff QR check-in (mobile_scanner) + profile live photo. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- Google Play "Photos and videos permissions" policy: the app picks a
+         single avatar via the Android Photo Picker (no broad media access).
+         Explicitly strip any READ_MEDIA / storage permission a plugin might
+         inject so the merged manifest never requests broad photo/video access. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:node="remove" />
 
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -66,12 +91,11 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
-        <!-- Required for flutter_web_auth_2 to detect Chrome Custom Tabs support -->
+        <!-- Required to open URLs via url_launcher -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
         </intent>
-        <package android:name="com.android.chrome" />
     </queries>
 </manifest>

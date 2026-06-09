@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +15,12 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/profile/data/profile_repository.dart';
 import 'package:aji_tfarraj/features/profile/domain/city.dart';
+
+/// Session-scoped flag set when the user taps "Skip for now" on the forced
+/// profile-completion screen. While true, the router stops force-redirecting
+/// to [Routes.editProfile]. Reset on logout. Reservation flows still enforce
+/// completion via their own dialogs + server 409 PROFILE_INCOMPLETE.
+final profileCompletionSkippedProvider = StateProvider<bool>((_) => false);
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -532,7 +537,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         actions: [
           if (!canGoBack)
             TextButton(
-              onPressed: () => context.go(Routes.home),
+              onPressed: () {
+                ref.read(profileCompletionSkippedProvider.notifier).state =
+                    true;
+                context.go(Routes.home);
+              },
               child: Text(
                 s.skipForNow,
                 style: AppTypography.labelMedium
@@ -876,13 +885,14 @@ class _AvatarHero extends ConsumerWidget {
                             ),
                           )
                         : (user?.avatarUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: user!.avatarUrl!,
+                            ? Image.network(
+                                user!.avatarUrl!,
                                 width: 104,
                                 height: 104,
                                 fit: BoxFit.cover,
-                                placeholder: (_, __) => _AvatarPlaceholder(),
-                                errorWidget: (_, __, ___) =>
+                                loadingBuilder: (_, child, progress) =>
+                                    progress == null ? child : _AvatarPlaceholder(),
+                                errorBuilder: (_, __, ___) =>
                                     _AvatarPlaceholder(),
                               )
                             : _AvatarPlaceholder()),

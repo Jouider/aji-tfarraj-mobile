@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/app/auth/token_storage.dart';
 
@@ -73,6 +74,9 @@ class ApiClient {
           }
           print('└─────────────────────────────────────────');
         }
+
+        // Structured logging for auth / rate-limit / server errors (release too)
+        _logApiError(error);
 
         // Retry transient errors (timeouts, connection drops, 5xx) with backoff
         if (_isRetryable(error)) {
@@ -247,6 +251,62 @@ class ApiClient {
     }
   }
 
+  /// Emit one structured line for 401 / 429 / 5xx errors so they're visible in
+  /// production logs (`xcrun simctl log` / `adb logcat`). Runs in release too.
+  void _logApiError(DioException error) {
+    final status = error.response?.statusCode;
+    if (status == null) return;
+    final isAuth = status == 401;
+    final isRate = status == 429;
+    final isServer = status >= 500;
+    if (!isAuth && !isRate && !isServer) return;
+
+    final method = error.requestOptions.method;
+    final uri = error.requestOptions.uri;
+    final data = error.response?.data;
+    final code = data is Map ? data['code'] : null;
+
+    debugPrint('API_ERROR status=$status method=$method uri=$uri code=$code');
+
+    if (!AppConfig.sentryEnabled) return;
+
+    // A 401 is an EXPECTED condition: Sanctum tokens expire after 7 days, so
+    // returning users routinely hit one. The interceptor already handles it
+    // (refresh → retry, or clear session → redirect to login), so it must NOT
+    // be reported to Sentry as an error. Leave an info breadcrumb instead, so
+    // we still have context if a genuine error follows. See GitHub issue #2.
+    if (isAuth) {
+      Sentry.addBreadcrumb(Breadcrumb(
+        category: 'auth',
+        type: 'http',
+        level: SentryLevel.info,
+        message: '401 $method $uri — token expired/invalid (handled)',
+        data: {'status_code': status, if (code != null) 'code': code},
+      ));
+      return;
+    }
+
+    // Forward genuine problems (429 rate-limit, 5xx server) to Sentry with HTTP
+    // context (no-op when DSN is unset).
+    final bodyPreview = data?.toString();
+    Sentry.captureException(
+      error,
+      stackTrace: error.stackTrace,
+      withScope: (scope) {
+        scope.level = SentryLevel.error;
+        scope.setContexts('http', {
+          'url': uri.toString(),
+          'method': method,
+          'status_code': status,
+          'code': code,
+          'body_preview': bodyPreview != null && bodyPreview.length > 500
+              ? bodyPreview.substring(0, 500)
+              : bodyPreview,
+        });
+      },
+    );
+  }
+
   /// GET request
   Future<Response<T>> get<T>(
     String path, {
@@ -382,6 +442,42 @@ class ApiException implements Exception {
       code: code,
       errors: errors,
     );
+  }
+
+  /// Normalize ANY thrown object into an [ApiException].
+  /// - already an [ApiException] → returned unchanged
+  /// - [DioException] → network/HTTP mapping via [fromDioError]
+  /// - anything else (JSON parse `TypeError`/`FormatException`, plugin errors)
+  ///   → a `PARSE_ERROR` exception with no statusCode, so it's distinguishable
+  ///   from a genuine network failure.
+  factory ApiException.from(Object error) {
+    if (error is ApiException) return error;
+    if (error is DioException) return ApiException.fromDioError(error);
+    // Truly unexpected: JSON parse TypeError/FormatException, share-sheet
+    // PlatformException, etc. These are caught (so they never reach Sentry's
+    // automatic uncaught handler) — capture them explicitly with a stacktrace.
+    if (AppConfig.sentryEnabled) {
+      Sentry.captureException(
+        error,
+        stackTrace: StackTrace.current,
+        withScope: (scope) => scope.setTag('error_class', 'PARSE_ERROR'),
+      );
+    }
+    return ApiException(
+      message: 'Une erreur inattendue est survenue. Veuillez réessayer.',
+      code: 'PARSE_ERROR',
+    );
+  }
+
+  /// Localized, user-facing message chosen by error class. Never returns the
+  /// "no internet" message for an auth / parse / server error.
+  /// [s] is the app `Strings` object (passed as dynamic to avoid an import cycle).
+  String userMessage(dynamic s) {
+    if (isUnauthenticated) return s.unauthorized as String; // session expired
+    if (isRateLimited) return message; // fromDioError already built the 429 text
+    if (code == 'PARSE_ERROR' || isServerError) return s.genericError as String;
+    if (statusCode == null) return s.networkError as String; // real network/timeout
+    return message; // server-provided message (422 / 409 / 400 …)
   }
 
   bool get isUnauthenticated => statusCode == 401;

@@ -19,6 +19,24 @@ class AppConfig {
   static String get currentBaseUrl =>
       _env == 'local' ? apiBaseUrlLocal : apiBaseUrl;
 
+  // ─── Sentry (error monitoring) ──────────────────────────────────────────────
+  // The Sentry DSN is a client-side identifier (it only allows SENDING events)
+  // and is embedded in every shipped binary — safe to keep in source. Same org
+  // as the backend, so mobile errors link to backend traces. Override per-build
+  // with --dart-define=SENTRY_DSN=... ; set to empty to disable Sentry entirely.
+  static const String sentryDsn = String.fromEnvironment(
+    'SENTRY_DSN',
+    defaultValue:
+        'https://90c78b2f1b2d6f4121504d7ddcf8d278@o4511328504643584.ingest.us.sentry.io/4511328511590400',
+  );
+
+  /// Whether Sentry should be initialized / capture events.
+  static bool get sentryEnabled => sentryDsn.isNotEmpty;
+
+  /// Sentry environment tag — mirrors the API environment.
+  static String get sentryEnvironment =>
+      _env == 'local' ? 'development' : 'production';
+
   /// Safely compose API endpoint URL
   static String apiUrl(String path) {
     final base = currentBaseUrl.endsWith('/')

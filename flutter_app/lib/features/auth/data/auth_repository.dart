@@ -1,14 +1,19 @@
-import 'dart:convert';
+import 'dart:async' show Completer, StreamSubscription, TimeoutException;
+import 'dart:io' show Platform;
 import 'dart:math';
 
+import 'package:app_links/app_links.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/app/push/push_token_provider.dart';
 import 'package:aji_tfarraj/features/auth/domain/user.dart';
+import 'package:aji_tfarraj/features/profile/presentation/edit_profile_screen.dart'
+    show profileCompletionSkippedProvider;
 
 // Re-export the token-based auth state provider for router to use
 export 'package:aji_tfarraj/app/auth/token_storage.dart' show authStateProvider;
@@ -147,36 +152,36 @@ class AuthRepository {
     return token != null;
   }
 
-  /// Google OAuth via Chrome Custom Tab — bypasses google_sign_in entirely.
+  /// Permanently delete the authenticated user's account.
+  /// Revokes all tokens server-side, then clears local storage.
+  Future<void> deleteAccount() async {
+    final token = await _tokenStorage.readToken();
+    if (token != null && token.isNotEmpty) {
+      await _dio.delete(
+        '/api/auth/account',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+    }
+    await _tokenStorage.clearToken();
+  }
+
+  /// Google OAuth — bypasses google_sign_in entirely.
   ///
-  /// The `google_sign_in` plugin (all versions) triggers DEVELOPER_ERROR (10)
-  /// on many Android devices due to GMS CredentialManager / requestIdToken bugs.
-  /// This approach opens Google's OAuth2 authorization endpoint in a Chrome
-  /// Custom Tab, which works on every Android device regardless of GMS version.
+  /// Android (Samsung/OEM): Chrome Custom Tab blocks custom-scheme redirects
+  /// on Samsung Internet and many OEM browsers. Instead, we open the OAuth URL
+  /// in the system browser and use app_links to catch the ajitfarraj://oauth
+  /// deep link when Android routes it back to MainActivity.
   ///
-  /// Flow:
-  /// 1. Open Google OAuth in Chrome Custom Tab → user picks account
-  /// 2. Google redirects to our custom scheme with an access_token (implicit grant)
-  /// 3. We send the access_token to our backend `/api/auth/social`
-  /// 4. Backend verifies via Google userinfo API and returns a Sanctum token
+  /// iOS: flutter_web_auth_2 uses ASWebAuthenticationSession which handles
+  /// custom scheme callbacks natively and works on all devices.
   Future<AuthResponse> loginWithGoogle() async {
-    // Web Client ID from Google Cloud Console (same project as Firebase)
     const webClientId =
         '600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com';
-
-    // The backend hosts an OAuth relay page at /oauth/callback.
-    // Google redirects there (https:// — accepted by Web client type).
-    // That page reads the id_token from the URL fragment via JS and
-    // redirects to our custom scheme, which flutter_web_auth_2 catches.
-    // URL schemes must not contain underscores — use 'ajitfarraj' as the scheme.
     const redirectScheme = 'ajitfarraj';
     const redirectUri =
         'https://aji-tfarraj-backend-production.up.railway.app/oauth/callback';
 
-    // PKCE-like nonce for CSRF protection
     final state = _generateRandomString(32);
-
-    // Use a nonce for the OpenID Connect id_token flow (required by Google)
     final nonce = _generateRandomString(32);
 
     final authUrl = Uri.https('accounts.google.com', '/o/oauth2/v2/auth', {
@@ -189,32 +194,92 @@ class AuthRepository {
       'prompt': 'select_account',
     });
 
-    String resultUrl;
-    try {
-      resultUrl = await FlutterWebAuth2.authenticate(
-        url: authUrl.toString(),
-        callbackUrlScheme: redirectScheme,
-      );
-    } on Exception catch (e) {
-      if (e.toString().contains('CANCELED') ||
-          e.toString().contains('cancelled')) {
-        throw _cancelledError();
+    Uri resultUri;
+
+    if (Platform.isAndroid) {
+      // Open in system browser — avoids Samsung Internet Custom Tab restrictions.
+      // app_links listens on uriLinkStream and delivers the callback when
+      // Android routes ajitfarraj://oauth back to MainActivity.
+      final completer = Completer<Uri>();
+      final appLinks = AppLinks();
+      StreamSubscription<Uri>? sub;
+
+      sub = appLinks.uriLinkStream.listen((uri) {
+        if (uri.scheme == redirectScheme && uri.host == 'oauth') {
+          sub?.cancel();
+          if (!completer.isCompleted) completer.complete(uri);
+        }
+      });
+
+      try {
+        final launched =
+            await launchUrl(authUrl, mode: LaunchMode.externalApplication);
+        if (!launched) {
+          sub.cancel();
+          throw DioException(
+            requestOptions: RequestOptions(path: ''),
+            type: DioExceptionType.unknown,
+            message: 'Impossible d\'ouvrir le navigateur.',
+          );
+        }
+        resultUri = await completer.future.timeout(const Duration(minutes: 3));
+      } on TimeoutException {
+        sub.cancel();
+        throw DioException(
+          requestOptions: RequestOptions(path: ''),
+          type: DioExceptionType.unknown,
+          message: 'Délai dépassé. Réessayez.',
+        );
+      } catch (e) {
+        sub.cancel();
+        if (e is DioException) rethrow;
+        throw DioException(
+          requestOptions: RequestOptions(path: ''),
+          type: DioExceptionType.unknown,
+          message: 'Google Sign-In échoué : $e',
+        );
       }
+    } else {
+      // iOS: ASWebAuthenticationSession handles custom scheme callbacks natively.
+      String resultUrl;
+      try {
+        resultUrl = await FlutterWebAuth2.authenticate(
+          url: authUrl.toString(),
+          callbackUrlScheme: redirectScheme,
+        );
+      } on Exception catch (e) {
+        if (e.toString().contains('CANCELED') ||
+            e.toString().contains('cancelled')) {
+          throw _cancelledError();
+        }
+        throw DioException(
+          requestOptions: RequestOptions(path: ''),
+          type: DioExceptionType.unknown,
+          error: e,
+          message: 'Google Sign-In échoué : $e',
+        );
+      }
+      resultUri = Uri.parse(resultUrl);
+    }
+
+    return _processGoogleCallback(resultUri, state);
+  }
+
+  Future<AuthResponse> _processGoogleCallback(
+      Uri uri, String expectedState) async {
+    final params = uri.queryParameters;
+
+    final error = params['error'];
+    if (error != null) {
+      if (error == 'access_denied') throw _cancelledError();
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         type: DioExceptionType.unknown,
-        error: e,
-        message: 'Google Sign-In échoué : $e',
+        message: 'Google Sign-In échoué : $error',
       );
     }
 
-    // The relay page redirects to ajitfarraj://oauth?id_token=xxx&state=yyy
-    // Params are in the query string (not fragment) after the relay redirect.
-    final uri = Uri.parse(resultUrl);
-    final params = uri.queryParameters;
-
-    // Verify state matches to prevent CSRF
-    if (params['state'] != state) {
+    if (params['state'] != expectedState) {
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         type: DioExceptionType.unknown,
@@ -231,7 +296,6 @@ class AuthRepository {
       );
     }
 
-    // Send id_token (JWT) to backend — it verifies via Google's JWKS endpoint
     final response = await _dio.post('/api/auth/social', data: {
       'provider': 'google',
       'token': idToken,
@@ -529,11 +593,37 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
     
     await _repository.logout();
-    
+
     // Notify the token-based auth provider that router listens to
     await _ref.read(authStateProvider.notifier).clearToken();
-    
+
+    // Reset the session-scoped "skip profile completion" flag so the next
+    // user who signs in on this device goes through the forced flow.
+    _ref.read(profileCompletionSkippedProvider.notifier).state = false;
+
     state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  /// Permanently delete the account — calls repository, clears state on success.
+  Future<void> deleteAccount() async {
+    state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
+    try {
+      await _repository.deleteAccount();
+      await _ref.read(authStateProvider.notifier).clearToken();
+      _ref.read(profileCompletionSkippedProvider.notifier).state = false;
+      state = const AuthState(status: AuthStatus.unauthenticated);
+    } on DioException catch (e) {
+      final message = (e.response?.data is Map)
+          ? (e.response!.data as Map)['message'] as String? ??
+              'Erreur lors de la suppression du compte.'
+          : 'Erreur lors de la suppression du compte.';
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        user: state.user,
+        errorMessage: message,
+      );
+      rethrow;
+    }
   }
 
   /// Sign in with Google — calls repository, updates auth state on success.

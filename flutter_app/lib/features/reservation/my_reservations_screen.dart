@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -717,15 +716,17 @@ class _ShowThumbnail extends StatelessWidget {
         width: 70,
         height: 70,
         child: imageUrl != null
-            ? CachedNetworkImage(
-                imageUrl: imageUrl!,
+            ? Image.network(
+                imageUrl!,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => const SkeletonLoader(
-                  width: 70,
-                  height: 70,
-                  borderRadius: 12,
-                ),
-                errorWidget: (context, url, error) => _placeholder(),
+                loadingBuilder: (_, child, progress) => progress == null
+                    ? child
+                    : const SkeletonLoader(
+                        width: 70,
+                        height: 70,
+                        borderRadius: 12,
+                      ),
+                errorBuilder: (_, __, ___) => _placeholder(),
               )
             : _placeholder(),
       ),

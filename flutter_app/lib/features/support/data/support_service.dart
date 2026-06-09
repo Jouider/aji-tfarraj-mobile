@@ -19,6 +19,8 @@ class SupportService {
           .toList();
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -30,6 +32,8 @@ class SupportService {
           response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 
@@ -46,6 +50,8 @@ class SupportService {
       return SupportTicket.fromJson(data['ticket'] as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
     }
   }
 }

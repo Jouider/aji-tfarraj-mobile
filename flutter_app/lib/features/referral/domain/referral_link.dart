@@ -39,24 +39,25 @@ class ReferralLinkShow {
   final int id;
   final String title;
   final String? titleAr;
-  final DateTime startsAt;
+  final DateTime? startsAt;
 
   ReferralLinkShow({
     required this.id,
     required this.title,
     this.titleAr,
-    required this.startsAt,
+    this.startsAt,
   });
 
   String localizedTitle(bool isAr) =>
       (isAr && titleAr != null && titleAr!.isNotEmpty) ? titleAr! : title;
 
   factory ReferralLinkShow.fromJson(Map<String, dynamic> json) {
+    final startsAtRaw = json['starts_at'] as String?;
     return ReferralLinkShow(
       id: json['id'] as int,
       title: json['title'] as String,
       titleAr: json['title_ar'] as String?,
-      startsAt: DateTime.parse(json['starts_at'] as String),
+      startsAt: startsAtRaw != null ? DateTime.parse(startsAtRaw) : null,
     );
   }
 }

@@ -18,7 +18,8 @@ import 'package:aji_tfarraj/features/reservation/my_reservations_screen.dart';
 import 'package:aji_tfarraj/features/reservation/reservation_detail_screen.dart';
 import 'package:aji_tfarraj/features/ticket/ticket_screen.dart';
 import 'package:aji_tfarraj/features/profile/profile_screen.dart';
-import 'package:aji_tfarraj/features/profile/presentation/edit_profile_screen.dart';
+import 'package:aji_tfarraj/features/profile/presentation/edit_profile_screen.dart'
+    show EditProfileScreen, profileCompletionSkippedProvider;
 import 'package:aji_tfarraj/features/error/error_screen.dart';
 import 'package:aji_tfarraj/features/show/sold_out_screen.dart';
 import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart';
@@ -29,6 +30,7 @@ import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.da
 import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/my_rewards_screen.dart';
+
 import 'package:aji_tfarraj/features/referral/presentation/referral_landing_screen.dart';
 import 'package:aji_tfarraj/features/referral/presentation/referral_stats_screen.dart';
 import 'package:aji_tfarraj/features/referral/presentation/my_referral_links_screen.dart';
@@ -123,14 +125,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         }
       }
 
-      // If authenticated and trying to access login/register -> redirect to home
+      // If authenticated and trying to access login/register -> redirect to home.
+      // (HomeScreen.initState handles any pending deep-link destination.)
       if (isAuthenticated && isAuthRoute) {
         return Routes.home;
       }
 
       // If authenticated but profile is incomplete -> redirect to edit profile
-      // (except when already on the edit profile screen to avoid redirect loops)
-      if (isAuthenticated && currentPath != Routes.editProfile) {
+      // (except when already on the edit profile screen to avoid redirect loops,
+      // or when the user explicitly tapped "Skip for now" this session — the
+      // reservation flow then enforces completion via its own dialog + server
+      // 409 PROFILE_INCOMPLETE).
+      final skippedProfile = ref.read(profileCompletionSkippedProvider);
+      if (isAuthenticated &&
+          currentPath != Routes.editProfile &&
+          !skippedProfile) {
         final user = ref.read(loginAuthStateProvider).user;
         // Exclude photo and phone fields — these are optional until reservation
         // (phone verification enforcement happens server-side via 409 PROFILE_INCOMPLETE)

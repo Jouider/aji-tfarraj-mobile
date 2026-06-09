@@ -131,7 +131,10 @@ class _LanguageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Semantics(
+      label: label,
+      button: true,
+      child: Material(
       color: AppColors.backgroundGrey,
       borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       child: InkWell(
@@ -158,6 +161,7 @@ class _LanguageButton extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

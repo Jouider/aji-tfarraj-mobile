@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -16,6 +15,7 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:share_plus/share_plus.dart';
@@ -351,12 +351,12 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
           else ...[
             // Background image
             show.imageUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: show.imageUrl!,
+                ? Image.network(
+                    show.imageUrl!,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) =>
-                        Container(color: AppColors.backgroundGrey),
-                    errorWidget: (_, __, ___) => Container(
+                    loadingBuilder: (_, child, progress) =>
+                        progress == null ? child : Container(color: AppColors.backgroundGrey),
+                    errorBuilder: (_, __, ___) => Container(
                       color: AppColors.backgroundGrey,
                       child: Center(
                         child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
@@ -1154,19 +1154,30 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
 
   Future<void> _shareShow() async {
     setState(() => _isSharing = true);
+    final s = ref.read(stringsProvider);
     try {
-      final s = ref.read(stringsProvider);
+      // 1. Generate (or fetch) the referral link — repo always throws ApiException.
       final repo = ref.read(referralRepositoryProvider);
       final link = await repo.generateLink(showId: widget.show.id);
       if (!mounted) return;
+      // 2. Open the share sheet. Dismissing it returns ShareResult.dismissed
+      //    (no throw) — a dismiss must NOT surface an error. iPad requires a
+      //    popover anchor (sharePositionOrigin); it's harmless on iPhone.
+      final box = context.findRenderObject() as RenderBox?;
+      final origin = box != null && box.hasSize
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
       await Share.share(
-        s.referralShareMessage(widget.show.localizedTitle(ref.read(isRtlProvider)), link.referralLink),
+        s.referralShareMessage(
+            widget.show.localizedTitle(ref.read(isRtlProvider)), link.referralLink),
+        sharePositionOrigin: origin,
       );
-    } catch (_) {
+    } catch (e) {
+      // Show the REAL error class: 401 → session expired, 429 → rate limit,
+      // parse / share-sheet failure → generic. Never blanket "no internet".
       if (!mounted) return;
-      final s = ref.read(stringsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(s.networkError)),
+        SnackBar(content: Text(ApiException.from(e).userMessage(s))),
       );
     } finally {
       if (mounted) setState(() => _isSharing = false);

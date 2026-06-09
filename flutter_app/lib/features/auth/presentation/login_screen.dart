@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -239,6 +240,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Privacy policy link (required by Apple App Store 5.1.1)
+                const _PrivacyPolicyLink(),
+                const SizedBox(height: AppSpacing.md),
               ],
             ),
           ),
@@ -398,6 +404,46 @@ class _OrDivider extends StatelessWidget {
         ),
         Expanded(child: Divider(color: AppColors.border)),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Privacy Policy Link
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PrivacyPolicyLink extends ConsumerWidget {
+  const _PrivacyPolicyLink();
+
+  static const _url =
+      'https://aji-tfarraj-backend-production.up.railway.app/privacy';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
+    final label = locale == AppLocale.ar
+        ? 'سياسة الخصوصية'
+        : 'Politique de confidentialité';
+
+    return Center(
+      child: TextButton(
+        onPressed: () => launchUrl(
+          Uri.parse(_url),
+          mode: LaunchMode.externalApplication,
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.textMuted,
+          padding: EdgeInsets.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: Text(
+          label,
+          style: AppTypography.bodySmall.copyWith(
+            color: AppColors.textMuted,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+      ),
     );
   }
 }

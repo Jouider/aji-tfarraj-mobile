@@ -53,7 +53,10 @@ class AppTheme {
             statusBarBrightness: Brightness.dark,
             statusBarIconBrightness: Brightness.light,
             statusBarColor: Colors.transparent,
-            systemNavigationBarColor: Color(0xFF0C0C0C),
+            // Edge-to-edge: transparent nav bar, no system scrim. The app's own
+            // bottom bar paints its background behind the gesture area.
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarContrastEnforced: false,
             systemNavigationBarIconBrightness: Brightness.light,
           ),
         ),
@@ -325,7 +328,10 @@ class AppTheme {
             statusBarBrightness: Brightness.light,
             statusBarIconBrightness: Brightness.dark,
             statusBarColor: Colors.transparent,
-            systemNavigationBarColor: Color(0xFFFAFAFA),
+            // Edge-to-edge: transparent nav bar, no system scrim. The app's own
+            // bottom bar paints its background behind the gesture area.
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarContrastEnforced: false,
             systemNavigationBarIconBrightness: Brightness.dark,
           ),
         ),
