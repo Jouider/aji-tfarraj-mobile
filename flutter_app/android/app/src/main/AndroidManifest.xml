@@ -20,6 +20,19 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Disable Flutter's built-in deep-link handling. Since Flutter 3.27
+                 it defaults to ON, which feeds EVERY incoming intent URI (including
+                 the custom-scheme Google OAuth callback ajitfarraj://oauth?id_token=…)
+                 into go_router's RouteInformationParser. That parser calls
+                 Uri.origin, which throws a StateError for non-http(s) schemes and
+                 crashes the OAuth redirect. We handle all deep links ourselves via
+                 app_links (DeepLinkService for /r/ referral links, and the OAuth
+                 listener in AuthRepository.loginWithGoogle), so Flutter's built-in
+                 routing must stay off. See GitHub issue #1. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false"
+              />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

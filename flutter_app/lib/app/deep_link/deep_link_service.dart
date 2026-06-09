@@ -29,11 +29,28 @@ class DeepLinkService {
       debugPrint('[DeepLinkService] Received URI: $uri');
     }
 
-    // Match /r/{token} pattern
-    if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 'r') {
-      final token = uri.pathSegments[1];
-      if (token.isNotEmpty) {
-        _router?.go('/r/$token');
+    try {
+      // The Google OAuth callback (ajitfarraj://oauth?id_token=…) is consumed by
+      // the dedicated listener in AuthRepository.loginWithGoogle — never route it
+      // here. Guard explicitly so this custom-scheme URI is always ignored and
+      // never reaches go_router (whose parser throws on non-http(s) schemes).
+      if (uri.scheme == 'ajitfarraj' && uri.host == 'oauth') {
+        return;
+      }
+
+      // Match /r/{token} referral magic links (works for both the https App Link
+      // and any custom-scheme variant — we only read pathSegments, never origin).
+      if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 'r') {
+        final token = uri.pathSegments[1];
+        if (token.isNotEmpty) {
+          _router?.go('/r/$token');
+        }
+      }
+      // Any other/malformed link is intentionally ignored.
+    } catch (e) {
+      // Never let a bad deep link crash the app.
+      if (kDebugMode) {
+        debugPrint('[DeepLinkService] Ignored malformed URI "$uri": $e');
       }
     }
   }
