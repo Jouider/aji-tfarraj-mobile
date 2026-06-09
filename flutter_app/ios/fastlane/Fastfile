@@ -1,0 +1,15 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build Flutter app and upload to TestFlight"
+  lane :beta do
+    # 1. Build the Flutter IPA
+    sh("cd ../.. && flutter build ipa --release")
+
+    # 2. Upload to TestFlight
+    upload_to_testflight(
+      ipa: "../build/ios/ipa/aji_tfarraj.ipa",
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end

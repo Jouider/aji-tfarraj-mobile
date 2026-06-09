@@ -1,0 +1,4 @@
+/* Arabic permission strings for iOS permission dialogs */
+
+NSPhotoLibraryUsageDescription = "نحتاج إلى الوصول إلى معرضك لتغيير صورة ملفك الشخصي.";
+NSCameraUsageDescription = "نحتاج إلى الوصول إلى كاميرتك لالتقاط صورة ملفك الشخصي.";

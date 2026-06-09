@@ -1,56 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/spacing.dart';
+import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
-/// Error Screen
-/// TODO: Display error message
-/// TODO: Add retry button
-/// TODO: Add go back/home options
-class ErrorScreen extends StatelessWidget {
-  const ErrorScreen({super.key});
+class ErrorScreen extends ConsumerWidget {
+  final String? message;
+  final VoidCallback? onRetry;
+
+  const ErrorScreen({super.key, this.message, this.onRetry});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Erreur'),
+        title: Text(s.errorTitle),
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // TODO: Add error illustration
               const Icon(
                 Icons.error_outline,
                 size: 80,
-                color: Colors.red,
+                color: AppColors.error,
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Une erreur est survenue',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Veuillez réessayer plus tard.',
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                message ?? s.unknownError,
+                style: AppTypography.bodyLarge,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
-              // TODO: Add retry functionality
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement retry logic
-                },
-                child: const Text('Réessayer'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () {
-                  context.go(Routes.home);
-                },
-                child: const Text('Retour à l\'accueil'),
+              const SizedBox(height: AppSpacing.xl),
+              if (onRetry != null) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onRetry,
+                    child: Text(s.retry),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => context.go(Routes.home),
+                  child: Text(s.backToHome),
+                ),
               ),
             ],
           ),

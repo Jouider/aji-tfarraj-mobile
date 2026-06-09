@@ -1,0 +1,18 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build Flutter app and upload to Google Play Internal Testing"
+  lane :beta do
+    # 1. Build the Flutter AAB
+    sh("cd ../.. && flutter build appbundle --release")
+
+    # 2. Upload to Google Play Internal Testing
+    upload_to_play_store(
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      track: "internal",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+end

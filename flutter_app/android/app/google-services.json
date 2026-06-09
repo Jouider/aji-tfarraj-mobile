@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "600996591716",
+    "project_id": "aji-tfarraj",
+    "storage_bucket": "aji-tfarraj.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600996591716:android:c408a5cfb10172a6728771",
+        "android_client_info": {
+          "package_name": "com.ajitfarraj.aji_tfarraj"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600996591716-31blkojmobpkej7sial5r0peu1brsc8u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ajitfarraj.aji_tfarraj",
+            "certificate_hash": "4c66f197336643e567454475be13e072bb03fd71"
+          }
+        },
+        {
+          "client_id": "600996591716-s3muh5i7chju1vjcr3ke723b56oupive.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ajitfarraj.aji_tfarraj",
+            "certificate_hash": "2c24ea5810c1f4b11a66c008bd38d5cd33b29347"
+          }
+        },
+        {
+          "client_id": "600996591716-v823d0alenrthm8t40rdht5qmr3dhqps.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ajitfarraj.aji_tfarraj",
+            "certificate_hash": "0bfbc1ea9b3be439c3a24aa425311957fb624e07"
+          }
+        },
+        {
+          "client_id": "600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuYhmJhfJFbH2etFL60WCN_2bSK2OsRvo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ajitfarraj.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

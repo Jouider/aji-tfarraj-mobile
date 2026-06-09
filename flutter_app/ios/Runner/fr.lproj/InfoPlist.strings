@@ -1,0 +1,4 @@
+/* French permission strings for iOS permission dialogs */
+
+NSPhotoLibraryUsageDescription = "Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil.";
+NSCameraUsageDescription = "Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil.";

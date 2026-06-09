@@ -1,0 +1,21 @@
+flutter_native_splash:
+  # White background to match the logo PNGs (neither has transparency)
+  color: "#FFFFFF"
+  color_dark: "#FFFFFF"
+
+  image: assets/images/ajitfarraj_logo/black_fr_logo_splash.png
+  image_dark: assets/images/ajitfarraj_logo/black_fr_logo_splash.png
+
+  # Display logo at its native size — prevents it filling the full screen
+  ios_content_mode: center
+  android_gravity: center
+
+  fullscreen: false
+
+  android_12:
+    color: "#FFFFFF"
+    color_dark: "#FFFFFF"
+    image: assets/images/ajitfarraj_logo/black_fr_logo_splash.png
+    image_dark: assets/images/ajitfarraj_logo/black_fr_logo_splash.png
+    icon_background_color: "#FFFFFF"
+    icon_background_color_dark: "#FFFFFF"

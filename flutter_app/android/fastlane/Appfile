@@ -1,0 +1,2 @@
+json_key_file("fastlane/play-store-key.json") # Path to the JSON key file
+package_name("com.ajitfarraj.aji_tfarraj") # Your Android app package name
