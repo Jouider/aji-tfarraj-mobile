@@ -185,41 +185,42 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildPointsBadge(reward, strings),
-                    SizedBox(
-                      height: 30,
-                      child: ElevatedButton(
-                        onPressed:
-                            reward.canCollect && !_loading ? _collect : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.textPrimary,
-                          disabledBackgroundColor: AppColors.disabled,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusFull),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: _loading
-                            ? SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.textPrimary,
-                                ),
-                              )
-                            : Text(strings.collectReward,
-                                style: AppTypography.labelSmall),
+                // Points badge and the collect button are stacked vertically.
+                // Side-by-side they don't fit at phone width (the points text
+                // can be wide, especially in Arabic), which made the inner Row
+                // throw "BoxConstraints forces an infinite width" and blank the
+                // whole rewards list. Stacking keeps both fully visible.
+                _buildPointsBadge(reward, strings),
+                const SizedBox(height: AppSpacing.sm),
+                SizedBox(
+                  height: 32,
+                  child: ElevatedButton(
+                    onPressed:
+                        reward.canCollect && !_loading ? _collect : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.textPrimary,
+                      disabledBackgroundColor: AppColors.disabled,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusFull),
                       ),
+                      elevation: 0,
                     ),
-                  ],
+                    child: _loading
+                        ? SizedBox(
+                            width: 12,
+                            height: 12,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.textPrimary,
+                            ),
+                          )
+                        : Text(strings.collectReward,
+                            style: AppTypography.labelSmall),
+                  ),
                 ),
               ],
             ),

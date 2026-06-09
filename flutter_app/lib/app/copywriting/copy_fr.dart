@@ -224,17 +224,17 @@ class RulesCopyFr {
         RuleItem(
           title: 'Restriction d\'âge',
           description:
-              'L\'accès au spectacle est réservé aux personnes âgées de 16 ans et plus.',
+              'L\'accès au spectacle est réservé aux personnes âgées de 18 ans et plus.',
         ),
         RuleItem(
           title: 'Vérification d\'identité',
           description:
-              'Une pièce d\'identité peut être demandée à l\'entrée pour vérifier votre âge.',
+              'Veuillez présenter votre propre pièce d\'identité et joindre une photocopie de votre CIN.',
         ),
         RuleItem(
           title: 'Tenue vestimentaire',
           description:
-              'Une tenue correcte est exigée. L\'accès peut être refusé en cas de tenue inappropriée.',
+              'L\'accès est refusé à toute personne portant une tenue inappropriée ou comportant des logos commerciaux ou publicitaires.',
         ),
         RuleItem(
           title: 'Interdiction de photos et vidéos',
