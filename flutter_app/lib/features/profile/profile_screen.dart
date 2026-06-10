@@ -8,6 +8,7 @@ import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/features/app_lock/data/app_lock_controller.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/app/theme/theme_mode_provider.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
@@ -91,6 +92,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       await ref.read(loginAuthStateProvider.notifier).logout();
     } finally {
       if (mounted) setState(() => _isLoggingOut = false);
+    }
+  }
+
+  /// Toggle the biometric app lock. Enabling prompts for biometrics first
+  /// (handled in the controller); show a hint if it couldn't be enabled.
+  Future<void> _toggleBiometricLock(bool enable) async {
+    final s = ref.read(stringsProvider);
+    final result =
+        await ref.read(appLockProvider.notifier).setEnabled(enable);
+    if (enable && !result && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(s.biometricEnableFailed),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+        ),
+      );
     }
   }
 
@@ -308,6 +329,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: () =>
                     ref.read(themeModeProvider.notifier).toggleTheme(),
               ),
+              // Biometric lock — only when the device supports it
+              if (ref.watch(biometricAvailableProvider).valueOrNull == true)
+                _SettingsRow(
+                  icon: Icons.fingerprint,
+                  iconColor: AppColors.primary,
+                  title: s.biometricLockLabel,
+                  subtitle: s.biometricLockSubtitle,
+                  showChevron: false,
+                  trailing: Switch.adaptive(
+                    value: ref.watch(appLockProvider).enabled,
+                    activeTrackColor: AppColors.secondary,
+                    onChanged: (v) => _toggleBiometricLock(v),
+                  ),
+                  onTap: () =>
+                      _toggleBiometricLock(!ref.read(appLockProvider).enabled),
+                ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -527,6 +564,9 @@ class _ProfileHeader extends StatelessWidget {
                               width: 86,
                               height: 86,
                               fit: BoxFit.cover,
+                              // Bound decoded bitmap so a large avatar can't OOM.
+                              cacheWidth: 258,
+                              cacheHeight: 258,
                               loadingBuilder: (_, child, progress) =>
                                   progress == null ? child : _AvatarPlaceholder(),
                               errorBuilder: (_, __, ___) =>

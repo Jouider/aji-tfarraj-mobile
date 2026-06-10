@@ -12,11 +12,16 @@ class ReferralRepository {
   ReferralRepository(this._apiClient);
 
   /// Generate (or retrieve existing) magic link for a show
-  Future<ReferralLink> generateLink({required int showId}) async {
+  Future<ReferralLink> generateLink({required int showId, int? episodeId}) async {
     try {
       final response = await _apiClient.post(
         AppConfig.myReferralLinks,
-        data: {'show_id': showId},
+        data: {
+          'show_id': showId,
+          // Forward-compatible: lets the backend deep-link the invite straight
+          // to a specific episode's reservation. Ignored until supported.
+          if (episodeId != null) 'episode_id': episodeId,
+        },
       );
       final data = response.data;
       if (data is Map<String, dynamic> && data.containsKey('data')) {

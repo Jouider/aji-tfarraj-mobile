@@ -124,6 +124,38 @@ class CopyAr {
   // Support Tickets / تذاكر الدعم
   // ============================================
   static const support = SupportCopyAr();
+
+  // ============================================
+  // App gate (update prompt + biometric lock)
+  // ============================================
+  static const appGate = AppGateCopyAr();
+}
+
+/// Update-prompt + biometric-lock copy in Arabic
+class AppGateCopyAr {
+  const AppGateCopyAr();
+
+  // Update prompt
+  String get updateTitle => 'تحديث متاح';
+  String get updateMessage =>
+      'تتوفر نسخة جديدة من «أجي تفرّج». قم بالتحديث للاستفادة من آخر التحسينات.';
+  String get updateForcedTitle => 'التحديث مطلوب';
+  String get updateForcedMessage =>
+      'هذه النسخة لم تعد مدعومة. يرجى التحديث لمواصلة استخدام التطبيق.';
+  String get updateNow => 'تحديث الآن';
+  String get updateLater => 'لاحقًا';
+
+  // Biometric lock
+  String get biometricLockLabel => 'القفل البيومتري';
+  String get biometricLockSubtitle => 'Face ID / البصمة عند الفتح';
+  String get biometricUnlockTitle => 'التطبيق مقفل';
+  String get biometricUnlockSubtitle =>
+      'تحقّق من هويتك للوصول إلى تذاكرك وملفك الشخصي.';
+  String get biometricUnlockButton => 'إلغاء القفل';
+  String get biometricReason => 'أكّد هويتك لفتح «أجي تفرّج»';
+  String get biometricUnavailable =>
+      'لا توجد طريقة بيومترية مُعدّة على هذا الجهاز.';
+  String get biometricEnableFailed => 'تعذّر تفعيل القفل. حاول مرة أخرى.';
 }
 
 /// Rewards screen copy in Arabic
@@ -221,17 +253,17 @@ class RulesCopyAr {
   List<RuleItemAr> get items => const [
         RuleItemAr(
           title: 'شرط السن',
-          description: 'الدخول مخصص للأشخاص الذين تبلغ أعمارهم 16 سنة فما فوق.',
+          description: 'الدخول مخصص للأشخاص الذين تبلغ أعمارهم 18 سنة فما فوق.',
         ),
         RuleItemAr(
           title: 'التحقق من الهوية',
           description:
-              'قد يُطلب منك إبراز بطاقة الهوية عند الدخول للتحقق من عمرك.',
+              'يرجى تقديم بطاقة هوية خاصة بك مع إرفاق صورة من البطاقة الشخصية.',
         ),
         RuleItemAr(
           title: 'اللباس المناسب',
           description:
-              'يُشترط ارتداء لباس لائق. قد يُرفض الدخول في حالة اللباس غير المناسب.',
+              'يُرفض دخول أي شخص يرتدي ملابس غير مناسبة أو فيها أي علامات تجارية أو إشهارية.',
         ),
         RuleItemAr(
           title: 'منع التصوير',
@@ -394,6 +426,12 @@ class ProfileCopyAr {
   // Date of birth
   String get dateOfBirthLabel => 'تاريخ الميلاد';
   String get dateOfBirthRequired => 'يرجى إدخال تاريخ ميلادك';
+
+  // Gender
+  String get genderLabel => 'الجنس';
+  String get genderMale => 'ذكر';
+  String get genderFemale => 'أنثى';
+  String get genderRequired => 'يرجى اختيار الجنس';
 
   // Avatar
   String get avatarRequiredHint => 'الصورة مطلوبة لإكمال الملف الشخصي';
@@ -752,6 +790,10 @@ class ReferralCopyAr {
   String get showUnavailable => 'هذه الحلقة لم تعد متاحة';
   String shareMessage(String showTitle, String link) =>
       'انضم إلي لحضور $showTitle! احجز مكانك هنا: $link';
+  String episodeShareMessage(
+          String showTitle, String episodeLabel, String dateStr, String link) =>
+      'انضم إليّ في «$showTitle» — $episodeLabel ($dateStr)! '
+      'احجز مكانك مجانًا هنا: $link';
   String get noLinksYet => 'لا توجد روابط مشتركة';
   String get noReferralsYet => 'لا توجد إحالات حتى الآن';
   String get inviteFriendsEarnPoints => 'ادعُ أصدقاءك واكسب نقاطًا!';

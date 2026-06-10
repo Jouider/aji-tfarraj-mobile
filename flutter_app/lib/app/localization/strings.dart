@@ -509,6 +509,22 @@ class AppStrings {
       ? CopyFr.profile.districtRequired
       : CopyAr.profile.districtRequired;
 
+  String get genderLabel => locale == AppLocale.fr
+      ? CopyFr.profile.genderLabel
+      : CopyAr.profile.genderLabel;
+
+  String get genderMale => locale == AppLocale.fr
+      ? CopyFr.profile.genderMale
+      : CopyAr.profile.genderMale;
+
+  String get genderFemale => locale == AppLocale.fr
+      ? CopyFr.profile.genderFemale
+      : CopyAr.profile.genderFemale;
+
+  String get genderRequired => locale == AppLocale.fr
+      ? CopyFr.profile.genderRequired
+      : CopyAr.profile.genderRequired;
+
   String get saveChanges => locale == AppLocale.fr
       ? CopyFr.profile.saveChanges
       : CopyAr.profile.saveChanges;
@@ -1324,6 +1340,14 @@ class AppStrings {
           ? CopyFr.referral.shareMessage(showTitle, link)
           : CopyAr.referral.shareMessage(showTitle, link);
 
+  String episodeShareMessage(
+          String showTitle, String episodeLabel, String dateStr, String link) =>
+      locale == AppLocale.fr
+          ? CopyFr.referral
+              .episodeShareMessage(showTitle, episodeLabel, dateStr, link)
+          : CopyAr.referral
+              .episodeShareMessage(showTitle, episodeLabel, dateStr, link);
+
   String get referralNoLinksYet => locale == AppLocale.fr
       ? CopyFr.referral.noLinksYet
       : CopyAr.referral.noLinksYet;
@@ -1681,4 +1705,41 @@ class AppStrings {
       ? CopyFr.support.profileTitle : CopyAr.support.profileTitle;
   String get supportProfileSubtitle => locale == AppLocale.fr
       ? CopyFr.support.profileSubtitle : CopyAr.support.profileSubtitle;
+
+  // ── App gate: update prompt + biometric lock ──
+  String get updateTitle => locale == AppLocale.fr
+      ? CopyFr.appGate.updateTitle : CopyAr.appGate.updateTitle;
+  String get updateMessage => locale == AppLocale.fr
+      ? CopyFr.appGate.updateMessage : CopyAr.appGate.updateMessage;
+  String get updateForcedTitle => locale == AppLocale.fr
+      ? CopyFr.appGate.updateForcedTitle : CopyAr.appGate.updateForcedTitle;
+  String get updateForcedMessage => locale == AppLocale.fr
+      ? CopyFr.appGate.updateForcedMessage : CopyAr.appGate.updateForcedMessage;
+  String get updateNow => locale == AppLocale.fr
+      ? CopyFr.appGate.updateNow : CopyAr.appGate.updateNow;
+  String get updateLater => locale == AppLocale.fr
+      ? CopyFr.appGate.updateLater : CopyAr.appGate.updateLater;
+
+  String get biometricLockLabel => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricLockLabel : CopyAr.appGate.biometricLockLabel;
+  String get biometricLockSubtitle => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricLockSubtitle
+      : CopyAr.appGate.biometricLockSubtitle;
+  String get biometricUnlockTitle => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricUnlockTitle
+      : CopyAr.appGate.biometricUnlockTitle;
+  String get biometricUnlockSubtitle => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricUnlockSubtitle
+      : CopyAr.appGate.biometricUnlockSubtitle;
+  String get biometricUnlockButton => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricUnlockButton
+      : CopyAr.appGate.biometricUnlockButton;
+  String get biometricReason => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricReason : CopyAr.appGate.biometricReason;
+  String get biometricUnavailable => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricUnavailable
+      : CopyAr.appGate.biometricUnavailable;
+  String get biometricEnableFailed => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricEnableFailed
+      : CopyAr.appGate.biometricEnableFailed;
 }

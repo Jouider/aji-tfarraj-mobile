@@ -1406,6 +1406,7 @@ class _EpisodesSection extends ConsumerWidget {
         ...upcoming.map((episode) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: _EpisodeCard(
+                show: show,
                 episode: episode,
                 showId: showId,
                 isPast: false,
@@ -1416,6 +1417,7 @@ class _EpisodesSection extends ConsumerWidget {
         ...past.map((episode) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: _EpisodeCard(
+                show: show,
                 episode: episode,
                 showId: showId,
                 isPast: true,
@@ -1426,12 +1428,100 @@ class _EpisodesSection extends ConsumerWidget {
   }
 }
 
+/// Compact share button on each upcoming episode card. Generates a referral
+/// link scoped to the episode and opens the share sheet with an episode-specific
+/// invite message.
+class _EpisodeShareButton extends ConsumerStatefulWidget {
+  final Show show;
+  final Episode episode;
+
+  const _EpisodeShareButton({required this.show, required this.episode});
+
+  @override
+  ConsumerState<_EpisodeShareButton> createState() =>
+      _EpisodeShareButtonState();
+}
+
+class _EpisodeShareButtonState extends ConsumerState<_EpisodeShareButton> {
+  bool _sharing = false;
+
+  Future<void> _share() async {
+    if (_sharing) return;
+    setState(() => _sharing = true);
+    final s = ref.read(stringsProvider);
+    final isAr = ref.read(isRtlProvider);
+    try {
+      final link = await ref.read(referralRepositoryProvider).generateLink(
+            showId: widget.show.id,
+            episodeId: widget.episode.id,
+          );
+      if (!mounted) return;
+      final dateStr = widget.episode.localizedDate(isAr) ??
+          (widget.episode.startsAt != null
+              ? DateFormat('EEE d MMM • HH:mm', isAr ? 'ar' : 'fr_FR')
+                  .format(widget.episode.startsAt!.toLocal())
+              : s.homeDateTbc);
+      final box = context.findRenderObject() as RenderBox?;
+      final origin = box != null && box.hasSize
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
+      await Share.share(
+        s.episodeShareMessage(
+          widget.show.localizedTitle(isAr),
+          widget.episode.label,
+          dateStr,
+          link.referralLink,
+        ),
+        sharePositionOrigin: origin,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ApiException.from(e).userMessage(s))),
+      );
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: _sharing ? null : _share,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppColors.secondary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+            border:
+                Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
+          ),
+          child: _sharing
+              ? const Padding(
+                  padding: EdgeInsets.all(9),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: AppColors.secondary),
+                )
+              : const Icon(Icons.share_outlined,
+                  size: 18, color: AppColors.secondary),
+        ),
+      ),
+    );
+  }
+}
+
 class _EpisodeCard extends ConsumerWidget {
+  final Show show;
   final Episode episode;
   final String showId;
   final bool isPast;
 
   const _EpisodeCard({
+    required this.show,
     required this.episode,
     required this.showId,
     required this.isPast,
@@ -1535,6 +1625,12 @@ class _EpisodeCard extends ConsumerWidget {
               ],
             ),
           ),
+
+          // Per-episode share — invite friends to join this upcoming episode
+          if (!isPast && !isSoldOut) ...[
+            const SizedBox(width: AppSpacing.sm),
+            _EpisodeShareButton(show: show, episode: episode),
+          ],
 
           const SizedBox(width: AppSpacing.sm),
 

@@ -122,6 +122,39 @@ class CopyFr {
   // Support Tickets
   // ============================================
   static const support = SupportCopyFr();
+
+  // ============================================
+  // App gate (update prompt + biometric lock)
+  // ============================================
+  static const appGate = AppGateCopyFr();
+}
+
+/// Update-prompt + biometric-lock copy in French
+class AppGateCopyFr {
+  const AppGateCopyFr();
+
+  // Update prompt
+  String get updateTitle => 'Mise à jour disponible';
+  String get updateMessage =>
+      'Une nouvelle version d\'Aji Tfarraj est disponible. Mettez à jour pour profiter des dernières améliorations.';
+  String get updateForcedTitle => 'Mise à jour requise';
+  String get updateForcedMessage =>
+      'Cette version n\'est plus prise en charge. Veuillez mettre à jour pour continuer à utiliser l\'application.';
+  String get updateNow => 'Mettre à jour';
+  String get updateLater => 'Plus tard';
+
+  // Biometric lock
+  String get biometricLockLabel => 'Verrouillage biométrique';
+  String get biometricLockSubtitle => 'Face ID / empreinte à l\'ouverture';
+  String get biometricUnlockTitle => 'Application verrouillée';
+  String get biometricUnlockSubtitle =>
+      'Authentifiez-vous pour accéder à vos billets et à votre profil.';
+  String get biometricUnlockButton => 'Déverrouiller';
+  String get biometricReason => 'Confirmez votre identité pour déverrouiller Aji Tfarraj';
+  String get biometricUnavailable =>
+      'Aucune méthode biométrique n\'est configurée sur cet appareil.';
+  String get biometricEnableFailed =>
+      'Impossible d\'activer le verrouillage. Réessayez.';
 }
 
 /// Rewards screen copy in French
@@ -224,17 +257,17 @@ class RulesCopyFr {
         RuleItem(
           title: 'Restriction d\'âge',
           description:
-              'L\'accès au spectacle est réservé aux personnes âgées de 16 ans et plus.',
+              'L\'accès au spectacle est réservé aux personnes âgées de 18 ans et plus.',
         ),
         RuleItem(
           title: 'Vérification d\'identité',
           description:
-              'Une pièce d\'identité peut être demandée à l\'entrée pour vérifier votre âge.',
+              'Veuillez présenter votre propre pièce d\'identité et joindre une photocopie de votre CIN.',
         ),
         RuleItem(
           title: 'Tenue vestimentaire',
           description:
-              'Une tenue correcte est exigée. L\'accès peut être refusé en cas de tenue inappropriée.',
+              'L\'accès est refusé à toute personne portant une tenue inappropriée ou comportant des logos commerciaux ou publicitaires.',
         ),
         RuleItem(
           title: 'Interdiction de photos et vidéos',
@@ -413,6 +446,12 @@ class ProfileCopyFr {
   // Date of birth
   String get dateOfBirthLabel => 'Date de naissance';
   String get dateOfBirthRequired => 'Veuillez saisir votre date de naissance';
+
+  // Gender
+  String get genderLabel => 'Genre';
+  String get genderMale => 'Homme';
+  String get genderFemale => 'Femme';
+  String get genderRequired => 'Veuillez sélectionner votre genre';
 
   // Avatar
   String get avatarRequiredHint => 'Photo requise pour compléter le profil';
@@ -771,6 +810,10 @@ class ReferralCopyFr {
   String get showUnavailable => 'Cette émission n\'est plus disponible';
   String shareMessage(String showTitle, String link) =>
       'Rejoins-moi pour assister à $showTitle ! Réserve ta place ici : $link';
+  String episodeShareMessage(
+          String showTitle, String episodeLabel, String dateStr, String link) =>
+      'Rejoins-moi à « $showTitle » — $episodeLabel ($dateStr) ! '
+      'Réserve ta place gratuitement ici : $link';
   String get noLinksYet => 'Aucun lien partagé';
   String get noReferralsYet => 'Aucun parrainage pour le moment';
   String get inviteFriendsEarnPoints =>

@@ -82,6 +82,11 @@ class TicketRepository {
   /// Fetch all tickets from network by combining multiple sources
   Future<List<Ticket>> _fetchAllTicketsFromNetwork() async {
     final List<Ticket> allTickets = [];
+    // Track whether any source failed specifically because the network is down.
+    // If both sources yield nothing AND the network was down, we must surface a
+    // network error so the caller falls back to the offline cache — otherwise
+    // offline users would wrongly see an empty ticket list.
+    bool sawNetworkError = false;
 
     // 1. Fetch latest ticket from /api/me/ticket
     try {
@@ -90,9 +95,12 @@ class TicketRepository {
         allTickets.add(latestTicket);
         _debugLog('Fetched latest ticket: ${latestTicket.ticketCode}');
       }
-    } catch (e) {
+    } on DioException catch (e) {
+      if (_isNetworkError(e)) sawNetworkError = true;
       _debugLog('Failed to fetch latest ticket: $e');
       // Continue even if this fails - we'll try reservations
+    } catch (e) {
+      _debugLog('Failed to fetch latest ticket: $e');
     }
 
     // 2. Fetch tickets from reservations (with detail fetching for missing tickets)
@@ -100,9 +108,21 @@ class TicketRepository {
       final reservationTickets = await _fetchTicketsFromReservations();
       allTickets.addAll(reservationTickets);
       _debugLog('Fetched ${reservationTickets.length} tickets from reservations');
-    } catch (e) {
+    } on DioException catch (e) {
+      if (_isNetworkError(e)) sawNetworkError = true;
       _debugLog('Failed to fetch tickets from reservations: $e');
       // Continue even if this fails
+    } catch (e) {
+      _debugLog('Failed to fetch tickets from reservations: $e');
+    }
+
+    // If we're offline and got nothing live, signal it so the caller loads the
+    // cached tickets instead of returning an empty (but "online") list.
+    if (allTickets.isEmpty && sawNetworkError) {
+      throw DioException(
+        requestOptions: RequestOptions(path: AppConfig.myTicket),
+        type: DioExceptionType.connectionError,
+      );
     }
 
     // 3. Deduplicate and sort
