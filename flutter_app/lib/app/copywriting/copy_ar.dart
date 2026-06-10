@@ -758,6 +758,10 @@ class ReferralCopyAr {
   String get showUnavailable => 'هذه الحلقة لم تعد متاحة';
   String shareMessage(String showTitle, String link) =>
       'انضم إلي لحضور $showTitle! احجز مكانك هنا: $link';
+  String episodeShareMessage(
+          String showTitle, String episodeLabel, String dateStr, String link) =>
+      'انضم إليّ في «$showTitle» — $episodeLabel ($dateStr)! '
+      'احجز مكانك مجانًا هنا: $link';
   String get noLinksYet => 'لا توجد روابط مشتركة';
   String get noReferralsYet => 'لا توجد إحالات حتى الآن';
   String get inviteFriendsEarnPoints => 'ادعُ أصدقاءك واكسب نقاطًا!';

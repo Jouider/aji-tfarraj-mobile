@@ -777,6 +777,10 @@ class ReferralCopyFr {
   String get showUnavailable => 'Cette émission n\'est plus disponible';
   String shareMessage(String showTitle, String link) =>
       'Rejoins-moi pour assister à $showTitle ! Réserve ta place ici : $link';
+  String episodeShareMessage(
+          String showTitle, String episodeLabel, String dateStr, String link) =>
+      'Rejoins-moi à « $showTitle » — $episodeLabel ($dateStr) ! '
+      'Réserve ta place gratuitement ici : $link';
   String get noLinksYet => 'Aucun lien partagé';
   String get noReferralsYet => 'Aucun parrainage pour le moment';
   String get inviteFriendsEarnPoints =>

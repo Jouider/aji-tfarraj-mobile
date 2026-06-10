@@ -1340,6 +1340,14 @@ class AppStrings {
           ? CopyFr.referral.shareMessage(showTitle, link)
           : CopyAr.referral.shareMessage(showTitle, link);
 
+  String episodeShareMessage(
+          String showTitle, String episodeLabel, String dateStr, String link) =>
+      locale == AppLocale.fr
+          ? CopyFr.referral
+              .episodeShareMessage(showTitle, episodeLabel, dateStr, link)
+          : CopyAr.referral
+              .episodeShareMessage(showTitle, episodeLabel, dateStr, link);
+
   String get referralNoLinksYet => locale == AppLocale.fr
       ? CopyFr.referral.noLinksYet
       : CopyAr.referral.noLinksYet;
