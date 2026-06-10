@@ -509,6 +509,22 @@ class AppStrings {
       ? CopyFr.profile.districtRequired
       : CopyAr.profile.districtRequired;
 
+  String get genderLabel => locale == AppLocale.fr
+      ? CopyFr.profile.genderLabel
+      : CopyAr.profile.genderLabel;
+
+  String get genderMale => locale == AppLocale.fr
+      ? CopyFr.profile.genderMale
+      : CopyAr.profile.genderMale;
+
+  String get genderFemale => locale == AppLocale.fr
+      ? CopyFr.profile.genderFemale
+      : CopyAr.profile.genderFemale;
+
+  String get genderRequired => locale == AppLocale.fr
+      ? CopyFr.profile.genderRequired
+      : CopyAr.profile.genderRequired;
+
   String get saveChanges => locale == AppLocale.fr
       ? CopyFr.profile.saveChanges
       : CopyAr.profile.saveChanges;

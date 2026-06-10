@@ -395,6 +395,12 @@ class ProfileCopyAr {
   String get dateOfBirthLabel => 'تاريخ الميلاد';
   String get dateOfBirthRequired => 'يرجى إدخال تاريخ ميلادك';
 
+  // Gender
+  String get genderLabel => 'الجنس';
+  String get genderMale => 'ذكر';
+  String get genderFemale => 'أنثى';
+  String get genderRequired => 'يرجى اختيار الجنس';
+
   // Avatar
   String get avatarRequiredHint => 'الصورة مطلوبة لإكمال الملف الشخصي';
 

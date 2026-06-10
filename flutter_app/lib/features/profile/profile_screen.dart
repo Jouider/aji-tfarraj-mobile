@@ -527,6 +527,9 @@ class _ProfileHeader extends StatelessWidget {
                               width: 86,
                               height: 86,
                               fit: BoxFit.cover,
+                              // Bound decoded bitmap so a large avatar can't OOM.
+                              cacheWidth: 258,
+                              cacheHeight: 258,
                               loadingBuilder: (_, child, progress) =>
                                   progress == null ? child : _AvatarPlaceholder(),
                               errorBuilder: (_, __, ___) =>

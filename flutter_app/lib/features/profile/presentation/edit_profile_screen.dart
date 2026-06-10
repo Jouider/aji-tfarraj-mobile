@@ -41,6 +41,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   bool _isAvatarLoading = false;
   String? _errorMessage;
   DateTime? _dateOfBirth;
+  String? _gender; // 'male' | 'female'
   // Fixed country code for now — Morocco (+212)
   final String _countryCode = '+212';
 
@@ -55,6 +56,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _selectedDistrict = user.district;
       _phoneController.text = user.phoneNumber ?? '';
       _dateOfBirth = user.dateOfBirth;
+      _gender = user.gender;
     }
   }
 
@@ -83,6 +85,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           () => _errorMessage = ref.read(stringsProvider).districtRequired);
       return;
     }
+    if (_gender == null) {
+      setState(() => _errorMessage = ref.read(stringsProvider).genderRequired);
+      return;
+    }
 
     if (!_formKey.currentState!.validate()) return;
 
@@ -100,6 +106,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             phoneCountryCode: phone.isNotEmpty ? _countryCode : null,
             phoneNumber: phone.isNotEmpty ? phone : null,
             dateOfBirth: _dateOfBirth,
+            gender: _gender,
           );
       debugPrint('[EditProfile] PATCH user: profileComplete=${updatedUser.profileComplete}, missing=${updatedUser.missingProfileFields}');
       ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
@@ -144,7 +151,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final picker = ImagePicker();
     final XFile? picked;
     try {
-      picked = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+      // Cap dimensions + re-encode so the avatar stays small. A raw camera
+      // capture is 8–12 MP / several MB, which made the upload fail as "too
+      // big" on iOS and the full-bitmap re-encode OOM-crash the app on Android.
+      // image_picker downsamples natively (bounded memory) → ~100–250 KB JPEG.
+      picked = await picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
+      );
     } on PlatformException catch (e) {
       if (mounted) {
         final msg = e.code == 'camera_access_denied'
@@ -676,6 +692,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
+
+              // ── Gender — friendly two-option toggle ───────────
+              _GenderField(
+                label: s.genderLabel,
+                value: _gender,
+                maleLabel: s.genderMale,
+                femaleLabel: s.genderFemale,
+                enabled: !_isLoading,
+                onChanged: (g) => setState(() => _gender = g),
+              ),
               const SizedBox(height: AppSpacing.xl),
 
               // ── Location ──────────────────────────────────────
@@ -890,6 +917,10 @@ class _AvatarHero extends ConsumerWidget {
                                 width: 104,
                                 height: 104,
                                 fit: BoxFit.cover,
+                                // Bound the decoded bitmap so a large source
+                                // image can't OOM the render (displayed at 104).
+                                cacheWidth: 312,
+                                cacheHeight: 312,
                                 loadingBuilder: (_, child, progress) =>
                                     progress == null ? child : _AvatarPlaceholder(),
                                 errorBuilder: (_, __, ___) =>
@@ -967,6 +998,129 @@ class _SectionLabel extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Gender field — two large, tappable options (Homme / Femme · ذكر / أنثى)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _GenderField extends StatelessWidget {
+  final String label;
+  final String? value; // 'male' | 'female'
+  final String maleLabel;
+  final String femaleLabel;
+  final bool enabled;
+  final ValueChanged<String> onChanged;
+
+  const _GenderField({
+    required this.label,
+    required this.value,
+    required this.maleLabel,
+    required this.femaleLabel,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label,
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: _GenderOption(
+                label: maleLabel,
+                icon: Icons.male_rounded,
+                selected: value == 'male',
+                onTap: enabled ? () => onChanged('male') : null,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _GenderOption(
+                label: femaleLabel,
+                icon: Icons.female_rounded,
+                selected: value == 'female',
+                onTap: enabled ? () => onChanged('female') : null,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _GenderOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  const _GenderOption({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = selected ? AppColors.secondary : AppColors.textMuted;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          height: 52,
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.secondary.withValues(alpha: 0.10)
+                : AppColors.backgroundGrey,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(
+              color: selected ? AppColors.secondary : AppColors.border,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 20, color: accent),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: selected
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (selected) ...[
+                const SizedBox(width: 6),
+                const Icon(Icons.check_circle,
+                    size: 16, color: AppColors.secondary),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

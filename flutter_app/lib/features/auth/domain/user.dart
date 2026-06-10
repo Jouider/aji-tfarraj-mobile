@@ -14,6 +14,8 @@ class User {
   final String? phoneNumber;
   final DateTime? phoneVerifiedAt;
   final DateTime? dateOfBirth;
+  /// 'male' | 'female' (null if not set yet)
+  final String? gender;
   final DateTime createdAt;
   final DateTime updatedAt;
   /// User role: 'client' | 'staff' | 'admin' (null treated as 'client')
@@ -36,6 +38,7 @@ class User {
     this.phoneNumber,
     this.phoneVerifiedAt,
     this.dateOfBirth,
+    this.gender,
     required this.createdAt,
     required this.updatedAt,
     this.role,
@@ -70,6 +73,7 @@ class User {
       dateOfBirth: json['birthday'] != null
           ? DateTime.tryParse(json['birthday'] as String)
           : null,
+      gender: json['gender'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       role: json['role'] as String?,
@@ -93,6 +97,7 @@ class User {
       'phone_number': phoneNumber,
       'phone_verified_at': phoneVerifiedAt?.toIso8601String(),
       'birthday': dateOfBirth?.toIso8601String().split('T').first,
+      'gender': gender,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'role': role,
@@ -115,6 +120,7 @@ class User {
     String? phoneNumber,
     DateTime? phoneVerifiedAt,
     DateTime? dateOfBirth,
+    String? gender,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? role,
@@ -137,6 +143,7 @@ class User {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       phoneVerifiedAt: clearPhoneVerification ? null : (phoneVerifiedAt ?? this.phoneVerifiedAt),
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      gender: gender ?? this.gender,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       role: role ?? this.role,

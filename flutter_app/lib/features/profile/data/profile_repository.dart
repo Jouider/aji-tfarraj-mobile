@@ -20,6 +20,7 @@ class ProfileRepository {
     String? phoneCountryCode,
     String? phoneNumber,
     DateTime? dateOfBirth,
+    String? gender,
   }) async {
     try {
       final response = await _client.patch<Map<String, dynamic>>(
@@ -32,6 +33,7 @@ class ProfileRepository {
           if (phoneCountryCode != null) 'phone_country_code': phoneCountryCode,
           if (phoneNumber != null) 'phone_number': phoneNumber,
           if (dateOfBirth != null) 'birthday': dateOfBirth.toIso8601String().split('T').first,
+          if (gender != null) 'gender': gender,
         },
       );
       final data = response.data!;

@@ -414,6 +414,12 @@ class ProfileCopyFr {
   String get dateOfBirthLabel => 'Date de naissance';
   String get dateOfBirthRequired => 'Veuillez saisir votre date de naissance';
 
+  // Gender
+  String get genderLabel => 'Genre';
+  String get genderMale => 'Homme';
+  String get genderFemale => 'Femme';
+  String get genderRequired => 'Veuillez sélectionner votre genre';
+
   // Avatar
   String get avatarRequiredHint => 'Photo requise pour compléter le profil';
 
