@@ -124,6 +124,38 @@ class CopyAr {
   // Support Tickets / تذاكر الدعم
   // ============================================
   static const support = SupportCopyAr();
+
+  // ============================================
+  // App gate (update prompt + biometric lock)
+  // ============================================
+  static const appGate = AppGateCopyAr();
+}
+
+/// Update-prompt + biometric-lock copy in Arabic
+class AppGateCopyAr {
+  const AppGateCopyAr();
+
+  // Update prompt
+  String get updateTitle => 'تحديث متاح';
+  String get updateMessage =>
+      'تتوفر نسخة جديدة من «أجي تفرّج». قم بالتحديث للاستفادة من آخر التحسينات.';
+  String get updateForcedTitle => 'التحديث مطلوب';
+  String get updateForcedMessage =>
+      'هذه النسخة لم تعد مدعومة. يرجى التحديث لمواصلة استخدام التطبيق.';
+  String get updateNow => 'تحديث الآن';
+  String get updateLater => 'لاحقًا';
+
+  // Biometric lock
+  String get biometricLockLabel => 'القفل البيومتري';
+  String get biometricLockSubtitle => 'Face ID / البصمة عند الفتح';
+  String get biometricUnlockTitle => 'التطبيق مقفل';
+  String get biometricUnlockSubtitle =>
+      'تحقّق من هويتك للوصول إلى تذاكرك وملفك الشخصي.';
+  String get biometricUnlockButton => 'إلغاء القفل';
+  String get biometricReason => 'أكّد هويتك لفتح «أجي تفرّج»';
+  String get biometricUnavailable =>
+      'لا توجد طريقة بيومترية مُعدّة على هذا الجهاز.';
+  String get biometricEnableFailed => 'تعذّر تفعيل القفل. حاول مرة أخرى.';
 }
 
 /// Rewards screen copy in Arabic

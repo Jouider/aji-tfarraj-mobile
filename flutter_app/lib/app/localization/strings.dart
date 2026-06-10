@@ -1681,4 +1681,41 @@ class AppStrings {
       ? CopyFr.support.profileTitle : CopyAr.support.profileTitle;
   String get supportProfileSubtitle => locale == AppLocale.fr
       ? CopyFr.support.profileSubtitle : CopyAr.support.profileSubtitle;
+
+  // ── App gate: update prompt + biometric lock ──
+  String get updateTitle => locale == AppLocale.fr
+      ? CopyFr.appGate.updateTitle : CopyAr.appGate.updateTitle;
+  String get updateMessage => locale == AppLocale.fr
+      ? CopyFr.appGate.updateMessage : CopyAr.appGate.updateMessage;
+  String get updateForcedTitle => locale == AppLocale.fr
+      ? CopyFr.appGate.updateForcedTitle : CopyAr.appGate.updateForcedTitle;
+  String get updateForcedMessage => locale == AppLocale.fr
+      ? CopyFr.appGate.updateForcedMessage : CopyAr.appGate.updateForcedMessage;
+  String get updateNow => locale == AppLocale.fr
+      ? CopyFr.appGate.updateNow : CopyAr.appGate.updateNow;
+  String get updateLater => locale == AppLocale.fr
+      ? CopyFr.appGate.updateLater : CopyAr.appGate.updateLater;
+
+  String get biometricLockLabel => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricLockLabel : CopyAr.appGate.biometricLockLabel;
+  String get biometricLockSubtitle => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricLockSubtitle
+      : CopyAr.appGate.biometricLockSubtitle;
+  String get biometricUnlockTitle => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricUnlockTitle
+      : CopyAr.appGate.biometricUnlockTitle;
+  String get biometricUnlockSubtitle => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricUnlockSubtitle
+      : CopyAr.appGate.biometricUnlockSubtitle;
+  String get biometricUnlockButton => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricUnlockButton
+      : CopyAr.appGate.biometricUnlockButton;
+  String get biometricReason => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricReason : CopyAr.appGate.biometricReason;
+  String get biometricUnavailable => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricUnavailable
+      : CopyAr.appGate.biometricUnavailable;
+  String get biometricEnableFailed => locale == AppLocale.fr
+      ? CopyFr.appGate.biometricEnableFailed
+      : CopyAr.appGate.biometricEnableFailed;
 }
