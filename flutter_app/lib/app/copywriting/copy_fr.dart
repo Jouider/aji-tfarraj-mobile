@@ -122,6 +122,39 @@ class CopyFr {
   // Support Tickets
   // ============================================
   static const support = SupportCopyFr();
+
+  // ============================================
+  // App gate (update prompt + biometric lock)
+  // ============================================
+  static const appGate = AppGateCopyFr();
+}
+
+/// Update-prompt + biometric-lock copy in French
+class AppGateCopyFr {
+  const AppGateCopyFr();
+
+  // Update prompt
+  String get updateTitle => 'Mise à jour disponible';
+  String get updateMessage =>
+      'Une nouvelle version d\'Aji Tfarraj est disponible. Mettez à jour pour profiter des dernières améliorations.';
+  String get updateForcedTitle => 'Mise à jour requise';
+  String get updateForcedMessage =>
+      'Cette version n\'est plus prise en charge. Veuillez mettre à jour pour continuer à utiliser l\'application.';
+  String get updateNow => 'Mettre à jour';
+  String get updateLater => 'Plus tard';
+
+  // Biometric lock
+  String get biometricLockLabel => 'Verrouillage biométrique';
+  String get biometricLockSubtitle => 'Face ID / empreinte à l\'ouverture';
+  String get biometricUnlockTitle => 'Application verrouillée';
+  String get biometricUnlockSubtitle =>
+      'Authentifiez-vous pour accéder à vos billets et à votre profil.';
+  String get biometricUnlockButton => 'Déverrouiller';
+  String get biometricReason => 'Confirmez votre identité pour déverrouiller Aji Tfarraj';
+  String get biometricUnavailable =>
+      'Aucune méthode biométrique n\'est configurée sur cet appareil.';
+  String get biometricEnableFailed =>
+      'Impossible d\'activer le verrouillage. Réessayez.';
 }
 
 /// Rewards screen copy in French

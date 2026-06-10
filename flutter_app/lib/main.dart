@@ -10,6 +10,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/firebase_options.dart';
 import 'package:aji_tfarraj/app/router.dart';
+import 'package:aji_tfarraj/app/app_gate.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/push/push_service.dart';
 import 'package:aji_tfarraj/app/push/push_token_provider.dart';
@@ -179,10 +180,18 @@ class _AjiTfarrajAppState extends ConsumerState<AjiTfarrajApp> {
         // AppColors.xxx directly (instead of Theme.of) don't rebuild on
         // theme change. Keying the navigator subtree by resolved brightness
         // forces a full rebuild so every screen picks up the new colors.
-        builder: (context, child) => KeyedSubtree(
-          key: ValueKey(resolvedBrightness),
-          child: child ?? const SizedBox.shrink(),
-        ),
+        builder: (context, child) {
+          final content = child ?? const SizedBox.shrink();
+          return KeyedSubtree(
+            key: ValueKey(resolvedBrightness),
+            // AppGate overlays the update prompt + biometric lock. Skipped in
+            // widget tests (initializePushServices=false) so they don't hit
+            // package_info / local_auth / secure-storage platform channels.
+            child: widget.initializePushServices
+                ? AppGate(child: content)
+                : content,
+          );
+        },
       ),
     );
   }

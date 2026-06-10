@@ -70,4 +70,7 @@ class AppConfig {
   static const String supportTickets = '/api/support/tickets';
   static const String mySupportTickets = '/api/me/support-tickets';
   static String supportTicketDetail(int id) => '/api/me/support-tickets/$id';
+
+  // App version gate (public): { latest_version, min_version, ios_url, android_url }
+  static const String appConfig = '/api/app-config';
 }

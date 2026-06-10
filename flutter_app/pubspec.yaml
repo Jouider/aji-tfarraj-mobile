@@ -55,6 +55,10 @@ dependencies:
   chewie: ^1.13.0
   path_provider: ^2.1.5
   flutter_web_auth_2: ^5.0.1
+  # App version gate (compare installed vs backend latest/min)
+  package_info_plus: ^8.0.0
+  # Biometric unlock (Face ID / Touch ID / fingerprint)
+  local_auth: ^2.3.0
 
 # Force the pre-Credential-Manager google_sign_in_android.
 # 6.2.x migrated to androidx.credentials.CredentialManager, which hangs

@@ -65,6 +65,8 @@
     <!-- CAMERA: core use — staff QR check-in (mobile_scanner) + profile live photo. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Biometric unlock (local_auth) -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <!-- Google Play "Photos and videos permissions" policy: the app picks a
          single avatar via the Android Photo Picker (no broad media access).
