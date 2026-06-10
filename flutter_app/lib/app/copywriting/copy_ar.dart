@@ -395,6 +395,12 @@ class ProfileCopyAr {
   String get dateOfBirthLabel => 'تاريخ الميلاد';
   String get dateOfBirthRequired => 'يرجى إدخال تاريخ ميلادك';
 
+  // Gender
+  String get genderLabel => 'الجنس';
+  String get genderMale => 'ذكر';
+  String get genderFemale => 'أنثى';
+  String get genderRequired => 'يرجى اختيار الجنس';
+
   // Avatar
   String get avatarRequiredHint => 'الصورة مطلوبة لإكمال الملف الشخصي';
 
@@ -752,6 +758,10 @@ class ReferralCopyAr {
   String get showUnavailable => 'هذه الحلقة لم تعد متاحة';
   String shareMessage(String showTitle, String link) =>
       'انضم إلي لحضور $showTitle! احجز مكانك هنا: $link';
+  String episodeShareMessage(
+          String showTitle, String episodeLabel, String dateStr, String link) =>
+      'انضم إليّ في «$showTitle» — $episodeLabel ($dateStr)! '
+      'احجز مكانك مجانًا هنا: $link';
   String get noLinksYet => 'لا توجد روابط مشتركة';
   String get noReferralsYet => 'لا توجد إحالات حتى الآن';
   String get inviteFriendsEarnPoints => 'ادعُ أصدقاءك واكسب نقاطًا!';
