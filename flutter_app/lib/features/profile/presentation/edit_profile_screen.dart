@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
@@ -89,6 +90,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       setState(() => _errorMessage = ref.read(stringsProvider).genderRequired);
       return;
     }
+    // Birthday is a server-required field; without this guard a user could save
+    // with it empty, the backend keeps it in missing_profile_fields, and the
+    // router silently bounces back here — the reported "sign-up loop".
+    if (_dateOfBirth == null) {
+      setState(() =>
+          _errorMessage = ref.read(stringsProvider).dateOfBirthRequired);
+      return;
+    }
 
     if (!_formKey.currentState!.validate()) return;
 
@@ -113,6 +122,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       await ref.read(loginAuthStateProvider.notifier).refreshUser();
       final refreshedUser = ref.read(loginAuthStateProvider).user;
       debugPrint('[EditProfile] Refreshed user: profileComplete=${refreshedUser?.profileComplete}, missing=${refreshedUser?.missingProfileFields}');
+      // Safety net against a silent redirect loop: if the server STILL reports a
+      // required field missing (one the form couldn't satisfy), the global router
+      // would immediately bounce us back to this screen. Show a clear message and
+      // stay, instead of a misleading "saved" followed by the loop.
+      const optionalFields = {
+        'avatar', 'avatar_url', 'live_photo_captured_at', 'phone_verified_at',
+      };
+      final stillMissingRequired = refreshedUser != null &&
+          !refreshedUser.profileComplete &&
+          refreshedUser.missingProfileFields
+              .where((f) => !optionalFields.contains(f))
+              .isNotEmpty;
+      if (stillMissingRequired) {
+        if (mounted) {
+          setState(() => _errorMessage =
+              ref.read(stringsProvider).profileStillIncomplete);
+        }
+        return;
+      }
       if (mounted) {
         final s = ref.read(stringsProvider);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +174,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
   }
 
-  Future<void> _pickAvatar() async {
+  Future<void> _pickAvatar(ImageSource source) async {
     Navigator.of(context).pop();
     final picker = ImagePicker();
     final XFile? picked;
@@ -156,26 +184,23 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       // big" on iOS and the full-bitmap re-encode OOM-crash the app on Android.
       // image_picker downsamples natively (bounded memory) → ~100–250 KB JPEG.
       picked = await picker.pickImage(
-        source: ImageSource.camera,
+        source: source,
         maxWidth: 1024,
         maxHeight: 1024,
         imageQuality: 80,
       );
     } on PlatformException catch (e) {
+      // A previously-denied permission can't be re-prompted by image_picker, so
+      // the user gets stuck. Guide them straight to the OS settings with a
+      // button instead of showing a dead-end error.
+      final denied =
+          e.code == 'camera_access_denied' || e.code == 'photo_access_denied';
       if (mounted) {
-        final msg = e.code == 'camera_access_denied'
-            ? ref.read(stringsProvider).cameraAccessDenied
-            : ref.read(stringsProvider).genericError;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            ),
-          ),
-        );
+        if (denied) {
+          _showPermissionDialog(source);
+        } else {
+          _showAvatarSnackBar(ref.read(stringsProvider).genericError);
+        }
       }
       return;
     } catch (_) {
@@ -218,6 +243,48 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } finally {
       if (mounted) setState(() => _isAvatarLoading = false);
     }
+  }
+
+  /// Shown when the camera/photo permission was previously denied. iOS won't
+  /// re-prompt, so we offer a one-tap shortcut to the OS settings page.
+  void _showPermissionDialog(ImageSource source) {
+    final s = ref.read(stringsProvider);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(s.permissionNeededTitle),
+        content: Text(source == ImageSource.camera
+            ? s.cameraPermissionMessage
+            : s.galleryPermissionMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(s.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              AppSettings.openAppSettings();
+            },
+            child: Text(s.openSettings),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAvatarSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+      ),
+    );
   }
 
   Future<void> _deleteAvatar() async {
@@ -309,7 +376,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               title: Text(s.takePhoto,
                   style: AppTypography.bodyMedium
                       .copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w500)),
-              onTap: _pickAvatar,
+              onTap: () => _pickAvatar(ImageSource.camera),
+            ),
+            ListTile(
+              leading: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                child: const Icon(Icons.photo_library_outlined,
+                    size: 18, color: AppColors.secondary),
+              ),
+              title: Text(s.chooseFromGallery,
+                  style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500)),
+              onTap: () => _pickAvatar(ImageSource.gallery),
             ),
             if (user?.avatarUrl != null)
               ListTile(
