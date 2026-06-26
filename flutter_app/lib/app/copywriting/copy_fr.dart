@@ -433,6 +433,16 @@ class ProfileCopyFr {
   String get skipForNow => "Ignorer pour l'instant";
   String get cameraAccessDenied =>
       "Accès à la caméra refusé. Autorisez l'accès dans les réglages.";
+  String get permissionNeededTitle => 'Autorisation requise';
+  String get cameraPermissionMessage =>
+      "Pour prendre une photo, autorisez l'accès à la caméra dans les réglages. "
+      'Vous pouvez aussi choisir une photo depuis votre galerie.';
+  String get galleryPermissionMessage =>
+      "Pour choisir une photo, autorisez l'accès aux photos dans les réglages.";
+  String get openSettings => 'Ouvrir les réglages';
+  String get profileStillIncomplete =>
+      'Certaines informations obligatoires sont encore manquantes. '
+      'Veuillez vérifier le formulaire avant de continuer.';
 
   // Phone section
   String get phoneLabel => 'Téléphone';
