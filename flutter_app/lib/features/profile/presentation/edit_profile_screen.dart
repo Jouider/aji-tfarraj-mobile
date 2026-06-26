@@ -174,30 +174,30 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
   }
 
-  Future<void> _pickAvatar(ImageSource source) async {
+  Future<void> _pickAvatar() async {
     Navigator.of(context).pop();
     final picker = ImagePicker();
     final XFile? picked;
     try {
-      // Cap dimensions + re-encode so the avatar stays small. A raw camera
-      // capture is 8–12 MP / several MB, which made the upload fail as "too
-      // big" on iOS and the full-bitmap re-encode OOM-crash the app on Android.
-      // image_picker downsamples natively (bounded memory) → ~100–250 KB JPEG.
+      // Camera only — the avatar must be a live capture (the backend records
+      // live_photo_captured_at for identity), so gallery selection is not
+      // offered. Cap dimensions + re-encode so the avatar stays small: a raw
+      // camera capture is 8–12 MP / several MB, which made the upload fail as
+      // "too big" on iOS and OOM-crash the app on Android. image_picker
+      // downsamples natively (bounded memory) → ~100–250 KB JPEG.
       picked = await picker.pickImage(
-        source: source,
+        source: ImageSource.camera,
         maxWidth: 1024,
         maxHeight: 1024,
         imageQuality: 80,
       );
     } on PlatformException catch (e) {
-      // A previously-denied permission can't be re-prompted by image_picker, so
-      // the user gets stuck. Guide them straight to the OS settings with a
-      // button instead of showing a dead-end error.
-      final denied =
-          e.code == 'camera_access_denied' || e.code == 'photo_access_denied';
+      // A previously-denied camera permission can't be re-prompted by
+      // image_picker, so the user gets stuck. Guide them straight to the OS
+      // settings with a button instead of showing a dead-end error.
       if (mounted) {
-        if (denied) {
-          _showPermissionDialog(source);
+        if (e.code == 'camera_access_denied') {
+          _showPermissionDialog();
         } else {
           _showAvatarSnackBar(ref.read(stringsProvider).genericError);
         }
@@ -245,17 +245,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
   }
 
-  /// Shown when the camera/photo permission was previously denied. iOS won't
+  /// Shown when the camera permission was previously denied. iOS won't
   /// re-prompt, so we offer a one-tap shortcut to the OS settings page.
-  void _showPermissionDialog(ImageSource source) {
+  void _showPermissionDialog() {
     final s = ref.read(stringsProvider);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(s.permissionNeededTitle),
-        content: Text(source == ImageSource.camera
-            ? s.cameraPermissionMessage
-            : s.galleryPermissionMessage),
+        content: Text(s.cameraPermissionMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -376,24 +374,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               title: Text(s.takePhoto,
                   style: AppTypography.bodyMedium
                       .copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w500)),
-              onTap: () => _pickAvatar(ImageSource.camera),
-            ),
-            ListTile(
-              leading: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                child: const Icon(Icons.photo_library_outlined,
-                    size: 18, color: AppColors.secondary),
-              ),
-              title: Text(s.chooseFromGallery,
-                  style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w500)),
-              onTap: () => _pickAvatar(ImageSource.gallery),
+              onTap: _pickAvatar,
             ),
             if (user?.avatarUrl != null)
               ListTile(

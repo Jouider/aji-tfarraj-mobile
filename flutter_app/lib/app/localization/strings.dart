@@ -561,10 +561,6 @@ class AppStrings {
       ? CopyFr.profile.cameraPermissionMessage
       : CopyAr.profile.cameraPermissionMessage;
 
-  String get galleryPermissionMessage => locale == AppLocale.fr
-      ? CopyFr.profile.galleryPermissionMessage
-      : CopyAr.profile.galleryPermissionMessage;
-
   String get openSettings => locale == AppLocale.fr
       ? CopyFr.profile.openSettings
       : CopyAr.profile.openSettings;

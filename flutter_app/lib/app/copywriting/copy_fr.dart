@@ -435,10 +435,8 @@ class ProfileCopyFr {
       "Accès à la caméra refusé. Autorisez l'accès dans les réglages.";
   String get permissionNeededTitle => 'Autorisation requise';
   String get cameraPermissionMessage =>
-      "Pour prendre une photo, autorisez l'accès à la caméra dans les réglages. "
-      'Vous pouvez aussi choisir une photo depuis votre galerie.';
-  String get galleryPermissionMessage =>
-      "Pour choisir une photo, autorisez l'accès aux photos dans les réglages.";
+      "Pour prendre votre photo de profil, autorisez l'accès à la caméra dans "
+      'les réglages.';
   String get openSettings => 'Ouvrir les réglages';
   String get profileStillIncomplete =>
       'Certaines informations obligatoires sont encore manquantes. '
