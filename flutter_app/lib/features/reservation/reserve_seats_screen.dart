@@ -17,6 +17,7 @@ import 'package:aji_tfarraj/features/shows/domain/show.dart';
 import 'package:aji_tfarraj/features/shows/domain/episode.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
+import 'package:aji_tfarraj/features/referral/data/referral_attribution_service.dart';
 import 'package:aji_tfarraj/features/reservation/booking_show_summary_card_widget.dart';
 import 'package:aji_tfarraj/features/reservation/seats_availability_banner_widget.dart';
 import 'package:aji_tfarraj/features/reservation/booking_info_card_widget.dart';
@@ -226,7 +227,10 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
             referralCode: referralCode.isNotEmpty ? referralCode : null,
           );
 
+      // Attribution consumed — clear both the in-memory and the persisted code
+      // so a future organic reservation isn't wrongly attributed to the CP.
       ref.read(pendingReferralCodeProvider.notifier).state = null;
+      ref.read(referralAttributionServiceProvider).clearStoredCode();
 
       if (!mounted) return;
 

@@ -15,6 +15,7 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/push/push_service.dart';
 import 'package:aji_tfarraj/app/push/push_token_provider.dart';
 import 'package:aji_tfarraj/app/deep_link/deep_link_service.dart';
+import 'package:aji_tfarraj/features/referral/data/referral_attribution_service.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/theme.dart';
 import 'package:aji_tfarraj/app/theme/theme_mode_provider.dart';
@@ -126,6 +127,13 @@ class _AjiTfarrajAppState extends ConsumerState<AjiTfarrajApp> {
 
     // Initialize deep link service for referral magic links
     ref.read(deepLinkServiceProvider).init(router);
+
+    // Referral attribution: re-populate any code captured in a previous session,
+    // then read the deferred deep link (Android install referrer / iOS clipboard)
+    // exactly once on first launch. Fire-and-forget — never blocks the UI.
+    final attribution = ref.read(referralAttributionServiceProvider);
+    attribution.hydratePending();
+    attribution.captureOnFirstLaunch();
   }
 
   @override
