@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -45,12 +46,14 @@ class ShowCard extends StatelessWidget {
               width: double.infinity,
               color: AppColors.backgroundGrey,
               child: imageUrl != null
-                  ? Image.network(
-                      imageUrl!,
+                  // HOTFIX: CachedNetworkImage (not Image.network) so an image
+                  // seen once stays visible offline instead of disappearing.
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl!,
                       fit: BoxFit.cover,
-                      loadingBuilder: (_, child, progress) =>
-                          progress == null ? child : Container(color: AppColors.backgroundGrey),
-                      errorBuilder: (_, __, ___) => const _ImagePlaceholder(),
+                      placeholder: (_, __) =>
+                          Container(color: AppColors.backgroundGrey),
+                      errorWidget: (_, __, ___) => const _ImagePlaceholder(),
                     )
                   : const _ImagePlaceholder(),
             ),
