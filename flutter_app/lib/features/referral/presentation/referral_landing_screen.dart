@@ -10,6 +10,7 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
+import 'package:aji_tfarraj/features/referral/data/referral_attribution_service.dart';
 import 'package:aji_tfarraj/features/referral/domain/resolved_referral.dart';
 
 /// Provider that resolves a referral token
@@ -220,9 +221,11 @@ class ReferralLandingScreen extends ConsumerWidget {
                     ? null
                     : () {
                         // Store the referral code so it survives through auth
+                        // AND an app kill (persisted to disk), so attribution
+                        // holds even if the user reserves in a later session.
                         ref
-                            .read(pendingReferralCodeProvider.notifier)
-                            .state = resolved.referralCode;
+                            .read(referralAttributionServiceProvider)
+                            .persistCode(resolved.referralCode);
 
                         // Route to episode-specific reserve when the API
                         // returned episodes; fall back to show-level reserve.

@@ -413,6 +413,12 @@ class ProfileCopyAr {
   String get skipForNow => 'تخطى الآن';
   String get cameraAccessDenied =>
       'تم رفض الوصول إلى الكاميرا. يرجى السماح بالوصول في الإعدادات.';
+  String get permissionNeededTitle => 'إذن مطلوب';
+  String get cameraPermissionMessage =>
+      'لالتقاط صورة ملفك الشخصي، يرجى السماح بالوصول إلى الكاميرا في الإعدادات.';
+  String get openSettings => 'فتح الإعدادات';
+  String get profileStillIncomplete =>
+      'لا تزال بعض المعلومات المطلوبة ناقصة. يرجى التحقق من النموذج قبل المتابعة.';
 
   // Phone section
   String get phoneLabel => 'رقم الهاتف';
