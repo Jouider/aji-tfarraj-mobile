@@ -553,6 +553,22 @@ class AppStrings {
       ? CopyFr.profile.cameraAccessDenied
       : CopyAr.profile.cameraAccessDenied;
 
+  String get permissionNeededTitle => locale == AppLocale.fr
+      ? CopyFr.profile.permissionNeededTitle
+      : CopyAr.profile.permissionNeededTitle;
+
+  String get cameraPermissionMessage => locale == AppLocale.fr
+      ? CopyFr.profile.cameraPermissionMessage
+      : CopyAr.profile.cameraPermissionMessage;
+
+  String get openSettings => locale == AppLocale.fr
+      ? CopyFr.profile.openSettings
+      : CopyAr.profile.openSettings;
+
+  String get profileStillIncomplete => locale == AppLocale.fr
+      ? CopyFr.profile.profileStillIncomplete
+      : CopyAr.profile.profileStillIncomplete;
+
   String get uploadPhoto => locale == AppLocale.fr
       ? CopyFr.profile.uploadPhoto
       : CopyAr.profile.uploadPhoto;

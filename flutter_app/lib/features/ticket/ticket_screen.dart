@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -490,7 +491,12 @@ class _RefreshButtonState extends State<_RefreshButton>
 
 // ─── Ticket Swiper ────────────────────────────────────────────────────────────
 
-class _TicketSwiper extends StatelessWidget {
+// HOTFIX: content-measured height. Previously the PageView used a fixed /
+// screen-proportional height (screenHeight * 0.62), which still clipped taller
+// ticket cards (2-line titles, channel row, checked-in footer…) so the QR at
+// the bottom was cropped and could not be scanned. The viewport now measures
+// each card and sizes itself to the current one, so nothing is ever clipped.
+class _TicketSwiper extends StatefulWidget {
   final AppStrings s;
   final List<Ticket> tickets;
   final PageController pageController;
@@ -506,45 +512,97 @@ class _TicketSwiper extends StatelessWidget {
   });
 
   @override
+  State<_TicketSwiper> createState() => _TicketSwiperState();
+}
+
+class _TicketSwiperState extends State<_TicketSwiper> {
+  // Generous first-frame estimate so a card is never clipped before it is
+  // measured; heights only shrink to the real card height afterwards.
+  static const double _initialHeight = 760;
+
+  late List<double> _heights;
+  late int _current;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.currentPage.clamp(0, widget.tickets.length - 1);
+    _heights = List<double>.filled(widget.tickets.length, _initialHeight);
+  }
+
+  @override
+  void didUpdateWidget(covariant _TicketSwiper old) {
+    super.didUpdateWidget(old);
+    // Ticket set changed (refresh) — reset measurements to stay in sync.
+    if (widget.tickets.length != _heights.length) {
+      _heights = List<double>.filled(widget.tickets.length, _initialHeight);
+      _current = _current.clamp(0, widget.tickets.length - 1);
+    }
+  }
+
+  void _onMeasured(int index, double height) {
+    if (index < 0 || index >= _heights.length) return;
+    if ((_heights[index] - height).abs() < 1) return;
+    // Defer to the next frame to avoid setState during layout.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && index < _heights.length) {
+        setState(() => _heights[index] = height);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final height = (_current >= 0 && _current < _heights.length)
+        ? _heights[_current]
+        : _initialHeight;
+
     return Column(
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // On phones: 620px is enough. On iPad/large screens use a
-            // percentage of screen height so the card never overflows.
-            final screenHeight = MediaQuery.of(context).size.height;
-            final cardHeight = screenHeight < 700 ? 560.0 : screenHeight * 0.62;
-            return SizedBox(
-              height: cardHeight,
-              child: PageView.builder(
-                controller: pageController,
-                itemCount: tickets.length,
-                onPageChanged: onPageChanged,
-                itemBuilder: (context, index) => Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                  child: _TicketCard(s: s, ticket: tickets[index]),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          child: SizedBox(
+            height: height,
+            child: PageView.builder(
+              controller: widget.pageController,
+              itemCount: widget.tickets.length,
+              onPageChanged: (i) {
+                setState(() => _current = i);
+                widget.onPageChanged(i);
+              },
+              // Each page can scroll as a safety net during height transitions
+              // and reports its natural height so the viewport can match it.
+              itemBuilder: (context, index) => SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: _MeasureSize(
+                  onChange: (size) => _onMeasured(index, size.height),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                    child:
+                        _TicketCard(s: widget.s, ticket: widget.tickets[index]),
+                  ),
                 ),
               ),
-            );
-          },
+            ),
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
 
         // FIX: Pagination dots — primary pill active, border inactive, animated
-        _PageIndicator(count: tickets.length, currentPage: currentPage),
+        _PageIndicator(count: widget.tickets.length, currentPage: _current),
         const SizedBox(height: AppSpacing.sm),
 
         // FIX: Swipe hint — only when 2+ tickets, with arrow icons
-        if (tickets.length > 1)
+        if (widget.tickets.length > 1)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.arrow_back_ios, size: 14, color: AppColors.textMuted),
               const SizedBox(width: 4),
               Text(
-                s.ticketSwipeHint,
+                widget.s.ticketSwipeHint,
                 style: AppTypography.labelSmall.copyWith(
                   color: AppColors.textMuted,
                   fontSize: 12,
@@ -556,6 +614,44 @@ class _TicketSwiper extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+// ─── Measure Size helper ──────────────────────────────────────────────────────
+
+typedef _OnSizeChange = void Function(Size size);
+
+/// Reports its child's laid-out size via [onChange]. Used to size the ticket
+/// PageView to the current card so the QR is never clipped.
+class _MeasureSize extends SingleChildRenderObjectWidget {
+  final _OnSizeChange onChange;
+
+  const _MeasureSize({required this.onChange, required Widget super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _MeasureSizeRenderObject(onChange);
+
+  @override
+  void updateRenderObject(
+      BuildContext context, _MeasureSizeRenderObject renderObject) {
+    renderObject.onChange = onChange;
+  }
+}
+
+class _MeasureSizeRenderObject extends RenderProxyBox {
+  _OnSizeChange onChange;
+  Size? _oldSize;
+
+  _MeasureSizeRenderObject(this.onChange);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final newSize = child?.size ?? Size.zero;
+    if (_oldSize == newSize) return;
+    _oldSize = newSize;
+    onChange(newSize);
   }
 }
 

@@ -146,7 +146,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         show.nextEpisode?.startsAt ?? show.startsAt;
 
     // Hero show: first upcoming active show (prefer shows with upcoming episodes)
-    final Show? heroShow = allShows
+    final Show heroShow = allShows
         .where((show) {
           final date = effectiveDate(show);
           return date != null &&
@@ -171,7 +171,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
               ? show
               : prev;
-        });
+        }) ??
+        // No dated upcoming show at all (e.g. everything is "Date à confirmer").
+        // Still surface a hero so the home doesn't open on a cramped section
+        // header — prefer the most-reserved active show, else just the first.
+        (List<Show>.from(allShows)
+              ..sort((a, b) => b.reservedSeats.compareTo(a.reservedSeats)))
+            .firstWhere((show) => show.isActive, orElse: () => allShows.first);
 
     // Upcoming within 60 days, excluding hero
     final prochains = allShows
@@ -182,7 +188,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 date.isAfter(now) &&
                 date.isBefore(upcoming60Days) &&
                 show.isActive &&
-                show.id != heroShow?.id;
+                show.id != heroShow.id;
           },
         )
         .toList()
@@ -193,16 +199,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final bientot = allShows
         .where((show) {
           final date = effectiveDate(show);
-          return !show.isActive ||
-              date == null ||
-              date.isAfter(upcoming60Days);
+          return show.id != heroShow.id &&
+              (!show.isActive ||
+                  date == null ||
+                  date.isAfter(upcoming60Days));
         })
         .toList()
       ..sort((a, b) =>
           (effectiveDate(a) ?? now).compareTo(effectiveDate(b) ?? now));
 
-    // Sorted by reserved seats descending
-    final populaires = List<Show>.from(allShows)
+    // Sorted by reserved seats descending (excluding the hero to avoid showing
+    // the same show twice when it was chosen as a fallback hero)
+    final populaires = allShows
+        .where((show) => show.id != heroShow.id)
+        .toList()
       ..sort((a, b) => b.reservedSeats.compareTo(a.reservedSeats));
 
     return RefreshIndicator(
@@ -212,9 +222,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // Hero show
-          if (heroShow != null)
-            SliverToBoxAdapter(child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
+          // Hero show — always present (falls back to a popular show when nothing
+          // has a confirmed date) so the home never opens on a bare header.
+          SliverToBoxAdapter(child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
 
           // Upcoming section
           if (prochains.isNotEmpty) ...[

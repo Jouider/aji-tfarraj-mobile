@@ -1,7 +1,7 @@
 name: aji_tfarraj
 description: Aji Tfarraj Mobile App - TV Show Reservation System
 publish_to: 'none'
-version: 1.0.8+29
+version: 1.0.9+30
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -59,6 +59,12 @@ dependencies:
   package_info_plus: ^8.0.0
   # Biometric unlock (Face ID / Touch ID / fingerprint)
   local_auth: ^2.3.0
+  # Deferred deep-link attribution (CP referral): Android Play Install Referrer.
+  # iOS uses the clipboard (flutter/services) — no plugin needed there.
+  android_play_install_referrer: ^0.4.0
+  # Open the OS app-settings page (deep-link users to enable camera/photos when
+  # a permission was previously denied). Lightweight, no iOS Podfile macros.
+  app_settings: ^5.1.1
 
 # Force the pre-Credential-Manager google_sign_in_android.
 # 6.2.x migrated to androidx.credentials.CredentialManager, which hangs
