@@ -351,6 +351,10 @@ class AppStrings {
   String get seeAll =>
       locale == AppLocale.fr ? CopyFr.common.seeAll : CopyAr.common.seeAll;
 
+  String get back => locale == AppLocale.fr
+      ? CopyFr.common.back
+      : CopyAr.common.back;
+
   String get backToHome => locale == AppLocale.fr
       ? CopyFr.common.backToHome
       : CopyAr.common.backToHome;
@@ -983,6 +987,21 @@ class AppStrings {
       ? CopyFr.ticket.usedLabel
       : CopyAr.ticket.usedLabel;
 
+  String get ticketHolderLabel =>
+      locale == AppLocale.fr ? 'Titulaire du billet' : 'صاحب التذكرة';
+
+  String get avatarNoFace => locale == AppLocale.fr
+      ? 'Aucun visage détecté. Prends une photo de ton visage.'
+      : 'لم يتم اكتشاف وجه. التقط صورة لوجهك.';
+
+  String get avatarFrameHint => locale == AppLocale.fr
+      ? 'Placez votre visage dans le cadre'
+      : 'ضع وجهك داخل الإطار';
+
+  String get avatarCameraError => locale == AppLocale.fr
+      ? 'Impossible d\'ouvrir la caméra.'
+      : 'تعذّر فتح الكاميرا.';
+
   String ticketSeats(int n) =>
       locale == AppLocale.fr ? CopyFr.ticket.seats(n) : CopyAr.ticket.seats(n);
 
@@ -1259,6 +1278,106 @@ class AppStrings {
   List<ConditionSection> get conditionsSections => locale == AppLocale.fr
       ? CopyFr.conditions.sections
       : CopyAr.conditions.sections;
+
+  // ============================================
+  // How it works / Comment ça marche
+  // ============================================
+  String get howItWorksTitle => locale == AppLocale.fr
+      ? CopyFr.howItWorks.title
+      : CopyAr.howItWorks.title;
+
+  String get howItWorksProfileTileLabel => locale == AppLocale.fr
+      ? CopyFr.howItWorks.profileTileLabel
+      : CopyAr.howItWorks.profileTileLabel;
+
+  String get howItWorksProfileTileSubtitle => locale == AppLocale.fr
+      ? CopyFr.howItWorks.profileTileSubtitle
+      : CopyAr.howItWorks.profileTileSubtitle;
+
+  String get howItWorksTrackClient => locale == AppLocale.fr
+      ? CopyFr.howItWorks.trackClient
+      : CopyAr.howItWorks.trackClient;
+
+  String get howItWorksTrackParrain => locale == AppLocale.fr
+      ? CopyFr.howItWorks.trackParrain
+      : CopyAr.howItWorks.trackParrain;
+
+  String get howItWorksWatchVideo => locale == AppLocale.fr
+      ? CopyFr.howItWorks.watchVideo
+      : CopyAr.howItWorks.watchVideo;
+
+  String get howItWorksGotIt => locale == AppLocale.fr
+      ? CopyFr.howItWorks.gotIt
+      : CopyAr.howItWorks.gotIt;
+
+  String get howItWorksNext => locale == AppLocale.fr
+      ? CopyFr.howItWorks.next
+      : CopyAr.howItWorks.next;
+
+  // ============================================
+  // Charge public ("Mode Chargé Public")
+  // ============================================
+  ChargePublicCopy get cp =>
+      locale == AppLocale.fr ? CopyFr.chargePublic : CopyAr.chargePublic;
+
+  // ============================================
+  // Badges & levels (gamification)
+  // ============================================
+  bool get _fr => locale == AppLocale.fr;
+
+  String get badgeProfileTitle => _fr ? 'Mon badge' : 'شارتي';
+  String get badgeCpTitle => _fr ? 'Mon niveau' : 'مستواي';
+  String badgeLevelShort(int level) => _fr ? 'Niv. $level' : 'مستوى $level';
+  String get badgeMaxReached =>
+      _fr ? 'Niveau maximum atteint 🎉' : 'بلغت أعلى مستوى 🎉';
+
+  String badgeAttendanceCount(int n) =>
+      _fr ? '$n présence${n > 1 ? 's' : ''}' : '$n حضور';
+  String badgeCpCount(int n) =>
+      _fr ? '$n invité${n > 1 ? 's' : ''} ramené${n > 1 ? 's' : ''}' : '$n مدعو';
+
+  String badgeRemainingAttendance(int n) => _fr
+      ? 'Encore $n présence${n > 1 ? 's' : ''} pour le niveau suivant'
+      : 'بقي $n حضور للمستوى التالي';
+  String badgeRemainingCp(int n) => _fr
+      ? 'Encore $n invité${n > 1 ? 's' : ''} pour le niveau suivant'
+      : 'بقي $n مدعو للمستوى التالي';
+
+  String howItWorksStepCounter(int current, int total) => locale == AppLocale.fr
+      ? CopyFr.howItWorks.stepCounter(current, total)
+      : CopyAr.howItWorks.stepCounter(current, total);
+
+  String get howItWorksClientHeadline => locale == AppLocale.fr
+      ? CopyFr.howItWorks.clientHeadline
+      : CopyAr.howItWorks.clientHeadline;
+
+  String get howItWorksClientSubtitle => locale == AppLocale.fr
+      ? CopyFr.howItWorks.clientSubtitle
+      : CopyAr.howItWorks.clientSubtitle;
+
+  List<HowToStep> get howItWorksClientSteps => locale == AppLocale.fr
+      ? CopyFr.howItWorks.clientSteps
+      : CopyAr.howItWorks.clientSteps;
+
+  String get howItWorksParrainHeadline => locale == AppLocale.fr
+      ? CopyFr.howItWorks.parrainHeadline
+      : CopyAr.howItWorks.parrainHeadline;
+
+  String get howItWorksParrainSubtitle => locale == AppLocale.fr
+      ? CopyFr.howItWorks.parrainSubtitle
+      : CopyAr.howItWorks.parrainSubtitle;
+
+  List<HowToStep> get howItWorksParrainSteps => locale == AppLocale.fr
+      ? CopyFr.howItWorks.parrainSteps
+      : CopyAr.howItWorks.parrainSteps;
+
+  String? get howItWorksClientVideoUrl => locale == AppLocale.fr
+      ? CopyFr.howItWorks.clientVideoUrl
+      : CopyAr.howItWorks.clientVideoUrl;
+
+  String? get howItWorksParrainVideoUrl => locale == AppLocale.fr
+      ? CopyFr.howItWorks.parrainVideoUrl
+      : CopyAr.howItWorks.parrainVideoUrl;
 
   // ============================================
   // Referral / Parrainage

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:aji_tfarraj/app/auth/token_storage.dart' show authStateProvider;
 import 'package:aji_tfarraj/features/notifications/data/notification_repository.dart'
     show sharedPreferencesProvider;
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
@@ -18,6 +19,12 @@ const String _kReferralCheckedFlag = 'referral_attribution_checked';
 /// kill so a new user who installs via a CP link is still attributed when they
 /// reserve later. Cleared once a reservation is created.
 const String _kPendingReferralCode = 'pending_referral_code';
+
+/// Persisted **raw** referral token from a `/r/{token}` deep link (live,
+/// cold-start, or deferred install). Kept until we can resolve it *authenticated*
+/// so the backend binds the permanent referrer link. Survives an app kill and an
+/// unauthenticated tap (user not yet logged in). Cleared once bound.
+const String _kPendingReferralToken = 'pending_referral_token';
 
 /// Handles **deferred** deep-link attribution for CP (chargé public) referral
 /// links — the case where a user clicks a CP link *before* installing the app,
@@ -52,6 +59,57 @@ class ReferralAttributionService {
   /// Clear the captured code (call after a reservation is successfully created).
   Future<void> clearStoredCode() async {
     await _prefs.remove(_kPendingReferralCode);
+  }
+
+  /// Raw referral token awaiting an authenticated resolve (see
+  /// [resolvePendingTokenIfAuthenticated]).
+  String? get pendingToken => _prefs.getString(_kPendingReferralToken);
+
+  /// Persist a raw referral token from a `/r/{token}` deep link so we can resolve
+  /// it *authenticated* once the user is (or becomes) logged in. Survives an app
+  /// kill, so a tap made while logged out is still bound after the next login.
+  Future<void> persistToken(String token) async {
+    if (token.isEmpty) return;
+    await _prefs.setString(_kPendingReferralToken, token);
+  }
+
+  Future<void> _clearPendingToken() async {
+    await _prefs.remove(_kPendingReferralToken);
+  }
+
+  /// If a referral token is pending **and** the user is authenticated, resolve it
+  /// via the authenticated endpoint so the backend binds the **permanent**
+  /// referrer link (`referrer_user_id`). After that, every future reservation is
+  /// attributed to the CP automatically — the `referral_code` field no longer
+  /// matters, and the user never has to re-tap the link.
+  ///
+  /// Fire-and-forget from startup (post-auth) and whenever auth becomes available
+  /// (login / register / social). Idempotent and fail-safe:
+  /// - no pending token → no-op.
+  /// - not authenticated → keep the token, retry after the user logs in.
+  /// - resolve failure → keep the token, retry next launch.
+  /// - success → persist the code (form fallback) and clear the pending token.
+  Future<void> resolvePendingTokenIfAuthenticated() async {
+    final token = pendingToken;
+    if (token == null || token.isEmpty) return;
+
+    final authToken = _ref.read(authStateProvider).valueOrNull;
+    if (authToken == null || authToken.isEmpty) return; // resolve after login
+
+    try {
+      final resolved = await _ref
+          .read(referralRepositoryProvider)
+          .resolveLinkAuthenticated(token);
+      // Backend has now bound the permanent link; keep the code as a form
+      // fallback for the reserve screen, then drop the pending token.
+      await persistCode(resolved.referralCode);
+      await _clearPendingToken();
+    } catch (e) {
+      // Keep the pending token so we retry on the next auth change / launch.
+      if (kDebugMode) {
+        debugPrint('[ReferralAttribution] authed resolve failed: $e');
+      }
+    }
   }
 
   /// Re-populate the in-memory pending-code provider from disk at startup, so a
@@ -89,6 +147,11 @@ class ReferralAttributionService {
       await _prefs.setBool(_kReferralCheckedFlag, true);
       return;
     }
+
+    // Persist the raw token so that once this fresh install registers/logs in,
+    // resolvePendingTokenIfAuthenticated binds the permanent referrer link.
+    // Fixes the gap where sign-up captured no parrainage on its own.
+    await persistToken(token);
 
     try {
       final resolved =

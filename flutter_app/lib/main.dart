@@ -15,6 +15,7 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/push/push_service.dart';
 import 'package:aji_tfarraj/app/push/push_token_provider.dart';
 import 'package:aji_tfarraj/app/deep_link/deep_link_service.dart';
+import 'package:aji_tfarraj/app/auth/token_storage.dart' show authStateProvider;
 import 'package:aji_tfarraj/features/referral/data/referral_attribution_service.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/theme.dart';
@@ -134,6 +135,18 @@ class _AjiTfarrajAppState extends ConsumerState<AjiTfarrajApp> {
     final attribution = ref.read(referralAttributionServiceProvider);
     attribution.hydratePending();
     attribution.captureOnFirstLaunch();
+
+    // Bind any pending referral token to the CP the moment we have auth. Fires
+    // now for an already-authenticated cold start, and again whenever the token
+    // appears (login / register / social) so a link tapped while logged out is
+    // still bound right after sign-in.
+    attribution.resolvePendingTokenIfAuthenticated();
+    ref.listenManual(authStateProvider, (previous, next) {
+      final token = next.valueOrNull;
+      if (token != null && token.isNotEmpty) {
+        attribution.resolvePendingTokenIfAuthenticated();
+      }
+    });
   }
 
   @override

@@ -62,7 +62,10 @@ class AppUpdateRepository {
   /// lock the user out (the only hard gate is an explicit `min_version`).
   Future<UpdateStatus> check() async {
     try {
-      final res = await _client.get<dynamic>(AppConfig.appConfig);
+      final res = await _client.get<dynamic>(
+        AppConfig.appConfig,
+        queryParameters: {'platform': Platform.isIOS ? 'ios' : 'android'},
+      );
       final data = res.data;
       final map = (data is Map && data['data'] is Map)
           ? data['data'] as Map<String, dynamic>

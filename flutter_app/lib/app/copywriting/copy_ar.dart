@@ -1,4 +1,5 @@
-import 'package:aji_tfarraj/app/copywriting/copy_fr.dart' show ConditionSection;
+import 'package:aji_tfarraj/app/copywriting/copy_fr.dart'
+    show ConditionSection, HowToStep, ChargePublicCopy;
 
 /// Arabic copywriting for Aji Tfarraj app
 /// Starter pack - not final marketing copy
@@ -104,6 +105,16 @@ class CopyAr {
   // Referral / الإحالة
   // ============================================
   static const referral = ReferralCopyAr();
+
+  // ============================================
+  // How it works / كيفاش كيخدم
+  // ============================================
+  static const howItWorks = HowItWorksCopyAr();
+
+  // ============================================
+  // Charge public ("Mode Chargé Public")
+  // ============================================
+  static const chargePublic = ChargePublicCopyAr();
 
   // ============================================
   // Episodes / الحلقات
@@ -357,6 +368,7 @@ class CommonCopyAr {
   String get unknownUser => 'مستخدم';
   String get place => 'مقعد';
   String get places => 'مقاعد';
+  String get back => 'رجوع';
   String get backToHome => 'العودة إلى الرئيسية';
   String get browseShows => 'استعراض البرامج الأخرى';
   String get reservationSuccessBody =>
@@ -808,6 +820,93 @@ class ReferralCopyAr {
   String get linksTitle => 'روابطي';
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// How it works / كيفاش كتخدم
+// ─────────────────────────────────────────────────────────────────────────────
+class HowItWorksCopyAr {
+  const HowItWorksCopyAr();
+
+  String get title => 'كيفاش كتخدم';
+
+  // Profile entry point
+  String get profileTileLabel => 'كيفاش كتخدم';
+  String get profileTileSubtitle => 'دليل استعمال التطبيق';
+
+  // Track selector
+  String get trackClient => 'للمتفرجين';
+  String get trackParrain => 'للمُحيلين';
+
+  // Actions
+  String get watchVideo => 'شاهد الفيديو';
+  String get gotIt => 'فهمت';
+  String get next => 'التالي';
+  String stepCounter(int current, int total) => 'خطوة $current / $total';
+
+  // Client track — how to use the app
+  String get clientHeadline => 'احجز مكانك في 5 خطوات';
+  String get clientSubtitle =>
+      'احضر مجانًا تصوير برامجك المفضلة.';
+  List<HowToStep> get clientSteps => const [
+        HowToStep(
+          title: 'استكشف البرامج',
+          body: 'تصفّح التصويرات التلفزيونية المتاحة واختر البرنامج اللي عجبك.',
+        ),
+        HowToStep(
+          title: 'اختر مقاعدك',
+          body: 'افتح برنامجًا واحجز حتى 4 مقاعد، مجانًا.',
+        ),
+        HowToStep(
+          title: 'انتظر التأكيد',
+          body:
+              'فريقنا كيتواصل معاك لتأكيد حضورك. كتوصلك إشعارات في كل مرحلة.',
+        ),
+        HowToStep(
+          title: 'استلم تذكرتك',
+          body: 'من بعد الموافقة، كتبان تذكرتك برمز QR داخل التطبيق.',
+        ),
+        HowToStep(
+          title: 'احضر إلى التصوير',
+          body: 'ورّي رمز QR ديالك في المدخل نهار التصوير واستمتع بالعرض!',
+        ),
+      ];
+
+  // Parrain track — how to refer and earn
+  String get parrainHeadline => 'ادعُ، شارك واربح';
+  String get parrainSubtitle =>
+      'شارك روابطك، عمّر الاستوديوهات وتقاضى عن كل مدعو حاضر.';
+  List<HowToStep> get parrainSteps => const [
+        HowToStep(
+          title: 'احصل على رابطك',
+          body:
+              'افتح برنامجًا وأنشئ رابط الإحالة الخاص بك من زر المشاركة.',
+        ),
+        HowToStep(
+          title: 'شاركه مع معارفك',
+          body:
+              'أرسل الرابط عبر واتساب أو الرسائل أو مواقع التواصل لأكبر عدد ممكن.',
+        ),
+        HowToStep(
+          title: 'كيحجزو أماكنهم',
+          body:
+              'كل شخص كيحجز عبر رابطك كيترتبط تلقائيًا بحسابك.',
+        ),
+        HowToStep(
+          title: 'تابع نتائجك مباشرة',
+          body:
+              'شوف النقرات والحجوزات ديال كل رابط في «إحالاتي».',
+        ),
+        HowToStep(
+          title: 'اربح مقابلك',
+          body:
+              'كتخلّص عن كل مدعو حاضر فعليًا في التصوير. كل ما عمّرت أكثر، ربحت أكثر.',
+        ),
+      ];
+
+  /// Video URLs — null until the tutorial clips are produced/hosted.
+  String? get clientVideoUrl => null;
+  String? get parrainVideoUrl => null;
+}
+
 // ──────────────────────────────���───────────────────────────���──────────────────
 // Episodes / الحلقات
 // ────────────────���────────────────────────────��───────────────────────────────
@@ -990,4 +1089,130 @@ class SupportCopyAr {
   // Profile entry point
   String get profileTitle => 'الدعم / المساعدة';
   String get profileSubtitle => 'تواصل مع فريقنا';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Charge public / المكلف بالجمهور
+// ─────────────────────────────────────────────────────────────────────────────
+class ChargePublicCopyAr extends ChargePublicCopy {
+  const ChargePublicCopyAr();
+
+  @override
+  String get spaceSubtitle => 'مساحة المكلف بالجمهور';
+  @override
+  String get modePublic => 'الوضع العام';
+  @override
+  String get roleFallbackName => 'مكلف بالجمهور';
+  @override
+  String get modeCardTitle => 'وضع المكلف بالجمهور';
+  @override
+  String get modeCardSubtitle => 'اطّلع على مدعوّيك وأرباحك';
+
+  @override
+  String get tabHome => 'مساحتي';
+  @override
+  String get tabShare => 'مشاركة';
+  @override
+  String get tabGuests => 'مدعوّيّ';
+  @override
+  String get tabEarnings => 'أرباحي';
+
+  @override
+  String get navHome => 'الرئيسية';
+  @override
+  String get navShare => 'مشاركة';
+  @override
+  String get navGuests => 'المدعوون';
+  @override
+  String get navEarnings => 'الأرباح';
+
+  @override
+  String get greetingMorning => 'صباح الخير';
+  @override
+  String get greetingEvening => 'مساء الخير';
+
+  @override
+  String get balanceTitle => 'الرصيد المستحق';
+  @override
+  String money(int v) => '$v درهم';
+  @override
+  String earnedShort(int v) => 'ربحت $v درهم';
+  @override
+  String paidShort(int v) => 'دُفع $v درهم';
+
+  @override
+  String get kpiBrought => 'أشخاص جلبتهم';
+  @override
+  String get kpiAttended => 'حضروا';
+  @override
+  String get kpiPending => 'قيد الانتظار';
+  @override
+  String get kpiPoints => 'نقاطي';
+
+  @override
+  String get earningsByShow => 'الأرباح حسب البرنامج';
+  @override
+  String get recentGuests => 'مدعوّون حديثاً';
+  @override
+  String get myReferred => 'مُحالوني';
+  @override
+  String get seeAll => 'عرض الكل';
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get noGuests => 'لا يوجد مدعوّون حالياً';
+  @override
+  String get detailSoon => 'القائمة التفصيلية قريباً.';
+  @override
+  String filterAll(int n) => 'الكل ($n)';
+  @override
+  String filterAttended(int n) => 'الحاضرون ($n)';
+  @override
+  String filterApproved(int n) => 'المقبولون ($n)';
+  @override
+  String filterPending(int n) => 'قيد الانتظار ($n)';
+  @override
+  String filterCancelled(int n) => 'الملغاة ($n)';
+
+  @override
+  String get statusPresent => 'حاضر';
+  @override
+  String get statusApproved => 'مقبولة';
+  @override
+  String get statusContacting => 'قيد التواصل';
+  @override
+  String get statusRejected => 'مرفوضة';
+  @override
+  String get statusCancelled => 'ملغاة';
+  @override
+  String get statusExpired => 'منتهية';
+  @override
+  String get statusPending => 'قيد الانتظار';
+
+  @override
+  String visitsCount(int n) => '$n حضور';
+  @override
+  String gain(int v) => '+$v درهم';
+  @override
+  String get totalEarned => 'إجمالي الأرباح';
+  @override
+  String get alreadyPaid => 'المدفوع';
+  @override
+  String get paymentHistory => 'سجل المدفوعات';
+  @override
+  String get payment => 'دفعة';
+  @override
+  String invitedAttended(int inv, int att) => '$inv مدعو · $att حاضر';
+
+  @override
+  String get noUpcoming => 'لا توجد برامج قادمة';
+  @override
+  String get shareHeader => 'شارك برنامجاً لدعوة معارفك واربح عن كل حضور.';
+  @override
+  String get soldOut => 'مكتمل';
+  @override
+  String seatsCount(int n) => '$n مقاعد';
+  @override
+  String get shareBtn => 'مشاركة';
 }

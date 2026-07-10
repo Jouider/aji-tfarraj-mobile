@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +19,7 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/tickets/data/ticket_repository.dart';
 import 'package:aji_tfarraj/features/tickets/domain/ticket.dart';
+import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
 // ─── Ticket ordering helpers ──────────────────────────────────────────────────
 
@@ -490,7 +492,12 @@ class _RefreshButtonState extends State<_RefreshButton>
 
 // ─── Ticket Swiper ────────────────────────────────────────────────────────────
 
-class _TicketSwiper extends StatelessWidget {
+// HOTFIX: content-measured height. Previously the PageView used a fixed /
+// screen-proportional height (screenHeight * 0.62), which still clipped taller
+// ticket cards (2-line titles, channel row, checked-in footer…) so the QR at
+// the bottom was cropped and could not be scanned. The viewport now measures
+// each card and sizes itself to the current one, so nothing is ever clipped.
+class _TicketSwiper extends StatefulWidget {
   final AppStrings s;
   final List<Ticket> tickets;
   final PageController pageController;
@@ -506,45 +513,97 @@ class _TicketSwiper extends StatelessWidget {
   });
 
   @override
+  State<_TicketSwiper> createState() => _TicketSwiperState();
+}
+
+class _TicketSwiperState extends State<_TicketSwiper> {
+  // Generous first-frame estimate so a card is never clipped before it is
+  // measured; heights only shrink to the real card height afterwards.
+  static const double _initialHeight = 760;
+
+  late List<double> _heights;
+  late int _current;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.currentPage.clamp(0, widget.tickets.length - 1);
+    _heights = List<double>.filled(widget.tickets.length, _initialHeight);
+  }
+
+  @override
+  void didUpdateWidget(covariant _TicketSwiper old) {
+    super.didUpdateWidget(old);
+    // Ticket set changed (refresh) — reset measurements to stay in sync.
+    if (widget.tickets.length != _heights.length) {
+      _heights = List<double>.filled(widget.tickets.length, _initialHeight);
+      _current = _current.clamp(0, widget.tickets.length - 1);
+    }
+  }
+
+  void _onMeasured(int index, double height) {
+    if (index < 0 || index >= _heights.length) return;
+    if ((_heights[index] - height).abs() < 1) return;
+    // Defer to the next frame to avoid setState during layout.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && index < _heights.length) {
+        setState(() => _heights[index] = height);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final height = (_current >= 0 && _current < _heights.length)
+        ? _heights[_current]
+        : _initialHeight;
+
     return Column(
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // On phones: 620px is enough. On iPad/large screens use a
-            // percentage of screen height so the card never overflows.
-            final screenHeight = MediaQuery.of(context).size.height;
-            final cardHeight = screenHeight < 700 ? 560.0 : screenHeight * 0.62;
-            return SizedBox(
-              height: cardHeight,
-              child: PageView.builder(
-                controller: pageController,
-                itemCount: tickets.length,
-                onPageChanged: onPageChanged,
-                itemBuilder: (context, index) => Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                  child: _TicketCard(s: s, ticket: tickets[index]),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          child: SizedBox(
+            height: height,
+            child: PageView.builder(
+              controller: widget.pageController,
+              itemCount: widget.tickets.length,
+              onPageChanged: (i) {
+                setState(() => _current = i);
+                widget.onPageChanged(i);
+              },
+              // Each page can scroll as a safety net during height transitions
+              // and reports its natural height so the viewport can match it.
+              itemBuilder: (context, index) => SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: _MeasureSize(
+                  onChange: (size) => _onMeasured(index, size.height),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                    child:
+                        _TicketCard(s: widget.s, ticket: widget.tickets[index]),
+                  ),
                 ),
               ),
-            );
-          },
+            ),
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
 
         // FIX: Pagination dots — primary pill active, border inactive, animated
-        _PageIndicator(count: tickets.length, currentPage: currentPage),
+        _PageIndicator(count: widget.tickets.length, currentPage: _current),
         const SizedBox(height: AppSpacing.sm),
 
         // FIX: Swipe hint — only when 2+ tickets, with arrow icons
-        if (tickets.length > 1)
+        if (widget.tickets.length > 1)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.arrow_back_ios, size: 14, color: AppColors.textMuted),
               const SizedBox(width: 4),
               Text(
-                s.ticketSwipeHint,
+                widget.s.ticketSwipeHint,
                 style: AppTypography.labelSmall.copyWith(
                   color: AppColors.textMuted,
                   fontSize: 12,
@@ -556,6 +615,44 @@ class _TicketSwiper extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+// ─── Measure Size helper ──────────────────────────────────────────────────────
+
+typedef _OnSizeChange = void Function(Size size);
+
+/// Reports its child's laid-out size via [onChange]. Used to size the ticket
+/// PageView to the current card so the QR is never clipped.
+class _MeasureSize extends SingleChildRenderObjectWidget {
+  final _OnSizeChange onChange;
+
+  const _MeasureSize({required this.onChange, required Widget super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _MeasureSizeRenderObject(onChange);
+
+  @override
+  void updateRenderObject(
+      BuildContext context, _MeasureSizeRenderObject renderObject) {
+    renderObject.onChange = onChange;
+  }
+}
+
+class _MeasureSizeRenderObject extends RenderProxyBox {
+  _OnSizeChange onChange;
+  Size? _oldSize;
+
+  _MeasureSizeRenderObject(this.onChange);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final newSize = child?.size ?? Size.zero;
+    if (_oldSize == newSize) return;
+    _oldSize = newSize;
+    onChange(newSize);
   }
 }
 
@@ -877,11 +974,110 @@ class _DashedDivider extends StatelessWidget {
   }
 }
 
+// ─── Ticket Holder (identity) ────────────────────────────────────────────────
+
+/// Live identity photo + name shown above the QR so staff can visually confirm
+/// the ticket belongs to the person presenting it.
+class _TicketHolder extends StatelessWidget {
+  final AppStrings s;
+  final String name;
+  final String? avatarUrl;
+  final bool isUsed;
+
+  const _TicketHolder({
+    required this.s,
+    required this.name,
+    required this.avatarUrl,
+    required this.isUsed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final initials =
+        name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+    final ringColor = isUsed ? AppColors.textMuted : AppColors.secondary;
+
+    return Column(
+      children: [
+        // Avatar with a colored ring
+        Container(
+          width: 76,
+          height: 76,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [ringColor, ringColor.withValues(alpha: 0.55)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.backgroundWhite,
+              border: Border.all(color: AppColors.backgroundWhite, width: 2),
+            ),
+            child: ClipOval(
+              child: avatarUrl != null && avatarUrl!.isNotEmpty
+                  ? Image.network(
+                      avatarUrl!,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      // Cap only width — capping both distorts non-square photos.
+                      cacheWidth: 192,
+                      loadingBuilder: (_, child, progress) =>
+                          progress == null ? child : _placeholder(initials),
+                      errorBuilder: (_, __, ___) => _placeholder(initials),
+                    )
+                  : _placeholder(initials),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          name.isNotEmpty ? name : s.ticketHolderLabel,
+          style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 3),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.verified_user_outlined,
+                size: 13, color: AppColors.secondary),
+            const SizedBox(width: 4),
+            Text(
+              s.ticketHolderLabel,
+              style: AppTypography.labelSmall
+                  .copyWith(color: AppColors.textMuted, fontSize: 12),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _placeholder(String initials) {
+    return Container(
+      width: 64,
+      height: 64,
+      color: AppColors.backgroundGrey,
+      alignment: Alignment.center,
+      child: Text(initials,
+          style: AppTypography.h3.copyWith(color: AppColors.textMuted)),
+    );
+  }
+}
+
 // ─── QR Section ───────────────────────────────────────────────────────────────
 
 // FIX: QR section — backgroundLight container, radius 16, border, 160px QR,
 //      primary corner accents, secondary copy icon, primary snackbar
-class _TicketQrSection extends StatelessWidget {
+class _TicketQrSection extends ConsumerWidget {
   final AppStrings s;
   final Ticket ticket;
   final bool isUsed;
@@ -893,11 +1089,22 @@ class _TicketQrSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(loginAuthStateProvider).user;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
       child: Column(
         children: [
+          // Ticket holder — live identity photo + name, so staff can match the
+          // person to the ticket at check-in.
+          _TicketHolder(
+            s: s,
+            name: user?.displayName ?? '',
+            avatarUrl: user?.avatarUrl,
+            isUsed: isUsed,
+          ),
+          const SizedBox(height: AppSpacing.md),
+
           // QR container with corner accents
           Container(
             padding: const EdgeInsets.all(16),

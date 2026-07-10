@@ -104,6 +104,16 @@ class CopyFr {
   static const referral = ReferralCopyFr();
 
   // ============================================
+  // How it works / Comment ça marche
+  // ============================================
+  static const howItWorks = HowItWorksCopyFr();
+
+  // ============================================
+  // Charge public ("Mode Chargé Public")
+  // ============================================
+  static const chargePublic = ChargePublicCopyFr();
+
+  // ============================================
   // Episodes
   // ============================================
   static const episode = EpisodeCopyFr();
@@ -377,6 +387,7 @@ class CommonCopyFr {
   String get unknownUser => 'Utilisateur';
   String get place => 'place';
   String get places => 'places';
+  String get back => 'Retour';
   String get backToHome => 'Retour à l\'accueil';
   String get browseShows => 'Voir d\'autres émissions';
   String get reservationSuccessBody =>
@@ -665,6 +676,13 @@ class ConditionSection {
   const ConditionSection({required this.title, required this.body});
 }
 
+/// A single step in a "Comment ça marche" tutorial track.
+class HowToStep {
+  final String title;
+  final String body;
+  const HowToStep({required this.title, required this.body});
+}
+
 /// Conditions de participation du public — French
 class ConditionsCopyFr {
   const ConditionsCopyFr();
@@ -829,6 +847,297 @@ class ReferralCopyFr {
   String get profileTileLabel => 'Parrainage';
   String get statsTitle => 'Mes parrainages';
   String get linksTitle => 'Mes liens';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// How it works / Comment ça marche
+// ─────────────────────────────────────────────────────────────────────────────
+class HowItWorksCopyFr {
+  const HowItWorksCopyFr();
+
+  String get title => 'Comment ça marche';
+
+  // Profile entry point
+  String get profileTileLabel => 'Comment ça marche';
+  String get profileTileSubtitle => 'Guide d\'utilisation de l\'application';
+
+  // Track selector
+  String get trackClient => 'Pour les spectateurs';
+  String get trackParrain => 'Pour les parrains';
+
+  // Actions
+  String get watchVideo => 'Regarder la vidéo';
+  String get gotIt => 'J\'ai compris';
+  String get next => 'Suivant';
+  String stepCounter(int current, int total) => 'Étape $current / $total';
+
+  // Client track — how to use the app
+  String get clientHeadline => 'Réserve ta place en 5 étapes';
+  String get clientSubtitle =>
+      'Assiste gratuitement à l\'enregistrement de tes émissions préférées.';
+  List<HowToStep> get clientSteps => const [
+        HowToStep(
+          title: 'Explore les émissions',
+          body:
+              'Parcours les tournages TV disponibles et trouve l\'émission qui te plaît.',
+        ),
+        HowToStep(
+          title: 'Choisis tes places',
+          body:
+              'Ouvre une émission et réserve jusqu\'à 4 places, gratuitement.',
+        ),
+        HowToStep(
+          title: 'Attends la validation',
+          body:
+              'Notre équipe te contacte pour confirmer ta présence. Tu reçois une notification à chaque étape.',
+        ),
+        HowToStep(
+          title: 'Reçois ton billet',
+          body:
+              'Une fois approuvé, ton billet avec QR code apparaît dans l\'application.',
+        ),
+        HowToStep(
+          title: 'Présente-toi au tournage',
+          body:
+              'Montre ton QR code à l\'entrée le jour J et profite du spectacle !',
+        ),
+      ];
+
+  // Parrain track — how to refer and earn
+  String get parrainHeadline => 'Invite, partage et gagne';
+  String get parrainSubtitle =>
+      'Partage tes liens, remplis les studios et sois rémunéré pour chaque invité présent.';
+  List<HowToStep> get parrainSteps => const [
+        HowToStep(
+          title: 'Récupère ton lien',
+          body:
+              'Ouvre une émission et génère ton lien de parrainage personnalisé depuis le bouton Partager.',
+        ),
+        HowToStep(
+          title: 'Partage avec tes contacts',
+          body:
+              'Envoie le lien par WhatsApp, SMS ou sur les réseaux sociaux à un maximum de personnes.',
+        ),
+        HowToStep(
+          title: 'Ils réservent leur place',
+          body:
+              'Chaque personne qui réserve via ton lien est automatiquement rattachée à ton compte.',
+        ),
+        HowToStep(
+          title: 'Suis tes résultats en direct',
+          body:
+              'Consulte les clics et les réservations de chaque lien dans « Mes parrainages ».',
+        ),
+        HowToStep(
+          title: 'Gagne ta rémunération',
+          body:
+              'Tu es payé pour chaque invité réellement présent au tournage. Plus tu remplis, plus tu gagnes.',
+        ),
+      ];
+
+  /// Video URLs — null until the tutorial clips are produced/hosted.
+  /// When set, a "Regarder la vidéo" button appears at the top of the track.
+  String? get clientVideoUrl => null;
+  String? get parrainVideoUrl => null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Charge public ("Mode Chargé Public") — shared FR/AR contract
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Localized copy for the "Mode Chargé Public" space. FR/AR implementations
+/// share this contract so `AppStrings.cp` can return one type.
+abstract class ChargePublicCopy {
+  const ChargePublicCopy();
+
+  String get spaceSubtitle;
+  String get modePublic;
+  String get roleFallbackName;
+  String get modeCardTitle;
+  String get modeCardSubtitle;
+
+  String get tabHome;
+  String get tabShare;
+  String get tabGuests;
+  String get tabEarnings;
+
+  String get navHome;
+  String get navShare;
+  String get navGuests;
+  String get navEarnings;
+
+  String get greetingMorning;
+  String get greetingEvening;
+
+  String get balanceTitle;
+  String money(int v);
+  String earnedShort(int v);
+  String paidShort(int v);
+
+  String get kpiBrought;
+  String get kpiAttended;
+  String get kpiPending;
+  String get kpiPoints;
+
+  String get earningsByShow;
+  String get recentGuests;
+  String get myReferred;
+  String get seeAll;
+  String get retry;
+
+  String get noGuests;
+  String get detailSoon;
+  String filterAll(int n);
+  String filterAttended(int n);
+  String filterApproved(int n);
+  String filterPending(int n);
+  String filterCancelled(int n);
+
+  String get statusPresent;
+  String get statusApproved;
+  String get statusContacting;
+  String get statusRejected;
+  String get statusCancelled;
+  String get statusExpired;
+  String get statusPending;
+
+  String visitsCount(int n);
+  String gain(int v);
+  String get totalEarned;
+  String get alreadyPaid;
+  String get paymentHistory;
+  String get payment;
+  String invitedAttended(int inv, int att);
+
+  String get noUpcoming;
+  String get shareHeader;
+  String get soldOut;
+  String seatsCount(int n);
+  String get shareBtn;
+}
+
+class ChargePublicCopyFr extends ChargePublicCopy {
+  const ChargePublicCopyFr();
+
+  @override
+  String get spaceSubtitle => 'Espace Chargé public';
+  @override
+  String get modePublic => 'Mode public';
+  @override
+  String get roleFallbackName => 'Chargé public';
+  @override
+  String get modeCardTitle => 'Mode Chargé public';
+  @override
+  String get modeCardSubtitle => 'Voir mes invités et mes gains';
+
+  @override
+  String get tabHome => 'Mon espace';
+  @override
+  String get tabShare => 'Partager';
+  @override
+  String get tabGuests => 'Mes invités';
+  @override
+  String get tabEarnings => 'Mes gains';
+
+  @override
+  String get navHome => 'Accueil';
+  @override
+  String get navShare => 'Partager';
+  @override
+  String get navGuests => 'Invités';
+  @override
+  String get navEarnings => 'Gains';
+
+  @override
+  String get greetingMorning => 'Bonjour';
+  @override
+  String get greetingEvening => 'Bonsoir';
+
+  @override
+  String get balanceTitle => 'Solde à recevoir';
+  @override
+  String money(int v) => '$v DH';
+  @override
+  String earnedShort(int v) => 'Gagné $v DH';
+  @override
+  String paidShort(int v) => 'Payé $v DH';
+
+  @override
+  String get kpiBrought => 'Personnes ramenées';
+  @override
+  String get kpiAttended => 'Ont assisté';
+  @override
+  String get kpiPending => 'En attente';
+  @override
+  String get kpiPoints => 'Mes points';
+
+  @override
+  String get earningsByShow => 'Gains par émission';
+  @override
+  String get recentGuests => 'Invités récents';
+  @override
+  String get myReferred => 'Mes filleuls';
+  @override
+  String get seeAll => 'Tout voir';
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get noGuests => 'Aucun invité pour le moment';
+  @override
+  String get detailSoon => 'Liste détaillée bientôt disponible.';
+  @override
+  String filterAll(int n) => 'Tous ($n)';
+  @override
+  String filterAttended(int n) => 'Présents ($n)';
+  @override
+  String filterApproved(int n) => 'Approuvés ($n)';
+  @override
+  String filterPending(int n) => 'En attente ($n)';
+  @override
+  String filterCancelled(int n) => 'Annulés ($n)';
+
+  @override
+  String get statusPresent => 'Présent';
+  @override
+  String get statusApproved => 'Approuvée';
+  @override
+  String get statusContacting => 'En contact';
+  @override
+  String get statusRejected => 'Rejetée';
+  @override
+  String get statusCancelled => 'Annulée';
+  @override
+  String get statusExpired => 'Expirée';
+  @override
+  String get statusPending => 'En attente';
+
+  @override
+  String visitsCount(int n) => '$n présence${n > 1 ? 's' : ''}';
+  @override
+  String gain(int v) => '+$v DH';
+  @override
+  String get totalEarned => 'Total gagné';
+  @override
+  String get alreadyPaid => 'Déjà payé';
+  @override
+  String get paymentHistory => 'Historique des paiements';
+  @override
+  String get payment => 'Paiement';
+  @override
+  String invitedAttended(int inv, int att) => '$inv invités · $att présents';
+
+  @override
+  String get noUpcoming => 'Aucune émission à venir';
+  @override
+  String get shareHeader =>
+      'Partage une émission pour inviter tes contacts et gagner à chaque présence.';
+  @override
+  String get soldOut => 'Complet';
+  @override
+  String seatsCount(int n) => '$n places';
+  @override
+  String get shareBtn => 'Partager';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

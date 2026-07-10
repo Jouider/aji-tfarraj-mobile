@@ -28,6 +28,9 @@ import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.dart';
 import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
+import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
+import 'package:aji_tfarraj/features/how_it_works/presentation/how_it_works_screen.dart';
+import 'package:aji_tfarraj/features/charge_public/presentation/charge_public_shell.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/my_rewards_screen.dart';
 
@@ -353,6 +356,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.rules,
         name: 'rules',
         builder: (context, state) => const RulesScreen(),
+      ),
+      GoRoute(
+        path: Routes.howItWorks,
+        name: 'howItWorks',
+        builder: (context, state) => HowItWorksScreen(
+          initialTrack:
+              state.extra is HowToTrack ? state.extra as HowToTrack : HowToTrack.client,
+        ),
+      ),
+      GoRoute(
+        path: Routes.chargePublic,
+        name: 'chargePublic',
+        builder: (context, state) => const ChargePublicShell(),
       ),
       GoRoute(
         path: Routes.rewards,

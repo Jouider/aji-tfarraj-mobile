@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:aji_tfarraj/app/push/push_router.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/features/notifications/domain/app_notification.dart';
@@ -264,9 +265,16 @@ class PushService {
     }
   }
 
-  /// Handle message when app is opened from background
+  /// Handle message when app is opened from background (or terminated).
   void _handleMessageOpenedApp(RemoteMessage message) {
     _debugLog('App opened from notification: ${message.messageId}');
+
+    // Store-redirect push (mass "please update" campaign): open the platform
+    // store and stop — these have no in-app destination.
+    if (message.data['action'] == 'open_store') {
+      _openStore(message.data);
+      return;
+    }
 
     try {
       final notification = AppNotification.fromRemoteMessage(
@@ -282,6 +290,23 @@ class PushService {
       _handleNotificationTap(notification);
     } catch (e) {
       _debugLog('Error handling message opened app: $e');
+    }
+  }
+
+  /// Open the platform store URL for an "open_store" notification.
+  /// Backend data: { action: open_store, ios_url, android_url }.
+  Future<void> _openStore(Map<String, dynamic> data) async {
+    final url = (Platform.isIOS ? data['ios_url'] : data['android_url']) as String?;
+
+    if (url == null || url.isEmpty) {
+      _debugLog('open_store: no store URL for this platform');
+      return;
+    }
+
+    try {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (e) {
+      _debugLog('Error opening store URL: $e');
     }
   }
 

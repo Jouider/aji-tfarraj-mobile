@@ -410,11 +410,15 @@ class _HeroShowCard extends StatelessWidget {
                         color: AppColors.secondary,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        dateStr,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
+                      Flexible(
+                        child: Text(
+                          dateStr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
@@ -424,11 +428,15 @@ class _HeroShowCard extends StatelessWidget {
                         color: AppColors.secondary,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        show.nextEpisode?.localizedCity(isAr) ?? show.city,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
+                      Flexible(
+                        child: Text(
+                          show.nextEpisode?.localizedCity(isAr) ?? show.city,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ],

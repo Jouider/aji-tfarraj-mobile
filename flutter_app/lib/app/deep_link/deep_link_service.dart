@@ -3,10 +3,14 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:aji_tfarraj/features/referral/data/referral_attribution_service.dart';
 
 /// Service that listens for incoming deep links (Universal Links / App Links)
 /// and routes referral magic links (/r/{token}) to the appropriate screen.
 class DeepLinkService {
+  DeepLinkService(this._ref);
+
+  final Ref _ref;
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri>? _sub;
   GoRouter? _router;
@@ -43,6 +47,14 @@ class DeepLinkService {
       if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 'r') {
         final token = uri.pathSegments[1];
         if (token.isNotEmpty) {
+          // Persist the raw token first so it survives even if the user isn't
+          // logged in yet or the app is killed, then try to bind the permanent
+          // referrer link immediately if already authenticated. Ordered so the
+          // resolve reads the token we just wrote.
+          final attribution = _ref.read(referralAttributionServiceProvider);
+          attribution.persistToken(token).then(
+                (_) => attribution.resolvePendingTokenIfAuthenticated(),
+              );
           _router?.go('/r/$token');
         }
       }
@@ -62,7 +74,7 @@ class DeepLinkService {
 
 /// Global singleton provider for [DeepLinkService]
 final deepLinkServiceProvider = Provider<DeepLinkService>((ref) {
-  final service = DeepLinkService();
+  final service = DeepLinkService(ref);
   ref.onDispose(() => service.dispose());
   return service;
 });

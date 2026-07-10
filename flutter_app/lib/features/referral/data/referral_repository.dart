@@ -79,6 +79,30 @@ class ReferralRepository {
     }
   }
 
+  /// Resolve a magic link token **while authenticated** so the backend can bind
+  /// a permanent referrer link (`referrer_user_id`) between the current user and
+  /// the CP (chargé public). Once bound, every future reservation is attributed
+  /// to the CP automatically — even when the `referral_code` field is empty.
+  ///
+  /// Unlike [resolveLink], this goes through the authenticated [ApiClient] so the
+  /// auth interceptor attaches the Bearer token. Call it once the user is (or
+  /// becomes) logged in; see [ReferralAttributionService.resolvePendingTokenIfAuthenticated].
+  Future<ResolvedReferral> resolveLinkAuthenticated(String token) async {
+    try {
+      final response =
+          await _apiClient.get(AppConfig.resolveReferralLink(token));
+      final data = response.data;
+      if (data is Map<String, dynamic> && data.containsKey('data')) {
+        return ResolvedReferral.fromJson(data['data'] as Map<String, dynamic>);
+      }
+      return ResolvedReferral.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
   /// Fetch the current user's referral stats
   Future<ReferralStats> fetchMyReferralStats() async {
     try {
