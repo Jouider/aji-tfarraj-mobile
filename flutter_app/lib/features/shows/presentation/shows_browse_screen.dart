@@ -609,10 +609,14 @@ class _BrowseShowCard extends StatelessWidget {
                         Icon(Icons.calendar_today_outlined,
                             size: 12, color: AppColors.secondary),
                         const SizedBox(width: 4),
-                        Text(
-                          browseDateStr,
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textMuted,
+                        Expanded(
+                          child: Text(
+                            browseDateStr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.textMuted,
+                            ),
                           ),
                         ),
                       ],
@@ -626,10 +630,14 @@ class _BrowseShowCard extends StatelessWidget {
                         Icon(Icons.location_on_outlined,
                             size: 12, color: AppColors.secondary),
                         const SizedBox(width: 4),
-                        Text(
-                          show.nextEpisode?.localizedCity(isAr) ?? show.city,
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textMuted,
+                        Flexible(
+                          child: Text(
+                            show.nextEpisode?.localizedCity(isAr) ?? show.city,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.textMuted,
+                            ),
                           ),
                         ),
                         const Spacer(),

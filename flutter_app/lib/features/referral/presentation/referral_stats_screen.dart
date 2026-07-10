@@ -12,6 +12,7 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
 import 'package:aji_tfarraj/features/referral/domain/referral_stats.dart';
+import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
 
 /// Referral stats dashboard — shows totals and links to My Links screen
 class ReferralStatsScreen extends ConsumerWidget {
@@ -29,6 +30,19 @@ class ReferralStatsScreen extends ConsumerWidget {
         title: Text(s.referralStatsTitle, style: AppTypography.h3),
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
+        actions: [
+          // "How to earn" guide — parrain track, staff/admin only.
+          if (user?.isReferrerOrStaff ?? false)
+            IconButton(
+              icon: const Icon(Icons.help_outline),
+              color: AppColors.secondary,
+              tooltip: s.howItWorksTitle,
+              onPressed: () => context.push(
+                Routes.howItWorks,
+                extra: HowToTrack.parrain,
+              ),
+            ),
+        ],
       ),
       body: statsAsync.when(
         loading: () => _buildSkeleton(),

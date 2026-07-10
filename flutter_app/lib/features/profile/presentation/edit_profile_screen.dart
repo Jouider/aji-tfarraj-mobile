@@ -3,9 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:app_settings/app_settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -15,6 +13,7 @@ import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/profile/data/profile_repository.dart';
+import 'package:aji_tfarraj/features/profile/presentation/face_capture_screen.dart';
 import 'package:aji_tfarraj/features/profile/domain/city.dart';
 
 /// Session-scoped flag set when the user taps "Skip for now" on the forced
@@ -176,43 +175,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _pickAvatar() async {
     Navigator.of(context).pop();
-    final picker = ImagePicker();
-    final XFile? picked;
-    try {
-      // Camera only — the avatar must be a live capture (the backend records
-      // live_photo_captured_at for identity), so gallery selection is not
-      // offered. Cap dimensions + re-encode so the avatar stays small: a raw
-      // camera capture is 8–12 MP / several MB, which made the upload fail as
-      // "too big" on iOS and OOM-crash the app on Android. image_picker
-      // downsamples natively (bounded memory) → ~100–250 KB JPEG.
-      picked = await picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 80,
-      );
-    } on PlatformException catch (e) {
-      // A previously-denied camera permission can't be re-prompted by
-      // image_picker, so the user gets stuck. Guide them straight to the OS
-      // settings with a button instead of showing a dead-end error.
-      if (mounted) {
-        if (e.code == 'camera_access_denied') {
-          _showPermissionDialog();
-        } else {
-          _showAvatarSnackBar(ref.read(stringsProvider).genericError);
-        }
-      }
-      return;
-    } catch (_) {
-      return;
-    }
-    if (picked == null) return;
+
+    // Custom camera with an oval face-guide frame. It validates that a face is
+    // present and returns the captured file path (camera-only live capture —
+    // the backend records live_photo_captured_at for identity).
+    final path = await Navigator.of(context).push<String?>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => const FaceCaptureScreen(),
+      ),
+    );
+    if (path == null || !mounted) return;
 
     setState(() => _isAvatarLoading = true);
+
     try {
       final updatedUser = await ref
           .read(profileRepositoryProvider)
-          .uploadAvatar(File(picked.path));
+          .uploadAvatar(File(path));
       ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
     } on ApiException catch (e) {
       if (mounted) {
@@ -243,46 +223,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } finally {
       if (mounted) setState(() => _isAvatarLoading = false);
     }
-  }
-
-  /// Shown when the camera permission was previously denied. iOS won't
-  /// re-prompt, so we offer a one-tap shortcut to the OS settings page.
-  void _showPermissionDialog() {
-    final s = ref.read(stringsProvider);
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(s.permissionNeededTitle),
-        content: Text(s.cameraPermissionMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(s.cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              AppSettings.openAppSettings();
-            },
-            child: Text(s.openSettings),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAvatarSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-      ),
-    );
   }
 
   Future<void> _deleteAvatar() async {

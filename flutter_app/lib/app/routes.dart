@@ -59,6 +59,12 @@ class Routes {
   // Legal / participation conditions (full screen, outside shell — public)
   static const rules = '/rules';
 
+  // How it works / Comment ça marche (full screen, outside shell — public)
+  static const howItWorks = '/how-it-works';
+
+  // Mode Chargé Public (full-screen space, outside shell — CP only)
+  static const chargePublic = '/charge-public';
+
   // Referral / Parrainage
   static const referralStats = '/referral-stats';
   static const referralLinks = '/referral-links';

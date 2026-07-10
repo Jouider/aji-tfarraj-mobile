@@ -19,6 +19,7 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/tickets/data/ticket_repository.dart';
 import 'package:aji_tfarraj/features/tickets/domain/ticket.dart';
+import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
 // ─── Ticket ordering helpers ──────────────────────────────────────────────────
 
@@ -973,11 +974,110 @@ class _DashedDivider extends StatelessWidget {
   }
 }
 
+// ─── Ticket Holder (identity) ────────────────────────────────────────────────
+
+/// Live identity photo + name shown above the QR so staff can visually confirm
+/// the ticket belongs to the person presenting it.
+class _TicketHolder extends StatelessWidget {
+  final AppStrings s;
+  final String name;
+  final String? avatarUrl;
+  final bool isUsed;
+
+  const _TicketHolder({
+    required this.s,
+    required this.name,
+    required this.avatarUrl,
+    required this.isUsed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final initials =
+        name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+    final ringColor = isUsed ? AppColors.textMuted : AppColors.secondary;
+
+    return Column(
+      children: [
+        // Avatar with a colored ring
+        Container(
+          width: 76,
+          height: 76,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [ringColor, ringColor.withValues(alpha: 0.55)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.backgroundWhite,
+              border: Border.all(color: AppColors.backgroundWhite, width: 2),
+            ),
+            child: ClipOval(
+              child: avatarUrl != null && avatarUrl!.isNotEmpty
+                  ? Image.network(
+                      avatarUrl!,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      // Cap only width — capping both distorts non-square photos.
+                      cacheWidth: 192,
+                      loadingBuilder: (_, child, progress) =>
+                          progress == null ? child : _placeholder(initials),
+                      errorBuilder: (_, __, ___) => _placeholder(initials),
+                    )
+                  : _placeholder(initials),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          name.isNotEmpty ? name : s.ticketHolderLabel,
+          style: AppTypography.h4.copyWith(fontWeight: FontWeight.w700),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 3),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.verified_user_outlined,
+                size: 13, color: AppColors.secondary),
+            const SizedBox(width: 4),
+            Text(
+              s.ticketHolderLabel,
+              style: AppTypography.labelSmall
+                  .copyWith(color: AppColors.textMuted, fontSize: 12),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _placeholder(String initials) {
+    return Container(
+      width: 64,
+      height: 64,
+      color: AppColors.backgroundGrey,
+      alignment: Alignment.center,
+      child: Text(initials,
+          style: AppTypography.h3.copyWith(color: AppColors.textMuted)),
+    );
+  }
+}
+
 // ─── QR Section ───────────────────────────────────────────────────────────────
 
 // FIX: QR section — backgroundLight container, radius 16, border, 160px QR,
 //      primary corner accents, secondary copy icon, primary snackbar
-class _TicketQrSection extends StatelessWidget {
+class _TicketQrSection extends ConsumerWidget {
   final AppStrings s;
   final Ticket ticket;
   final bool isUsed;
@@ -989,11 +1089,22 @@ class _TicketQrSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(loginAuthStateProvider).user;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
       child: Column(
         children: [
+          // Ticket holder — live identity photo + name, so staff can match the
+          // person to the ticket at check-in.
+          _TicketHolder(
+            s: s,
+            name: user?.displayName ?? '',
+            avatarUrl: user?.avatarUrl,
+            isUsed: isUsed,
+          ),
+          const SizedBox(height: AppSpacing.md),
+
           // QR container with corner accents
           Container(
             padding: const EdgeInsets.all(16),

@@ -223,9 +223,13 @@ class ReferralLandingScreen extends ConsumerWidget {
                         // Store the referral code so it survives through auth
                         // AND an app kill (persisted to disk), so attribution
                         // holds even if the user reserves in a later session.
-                        ref
-                            .read(referralAttributionServiceProvider)
-                            .persistCode(resolved.referralCode);
+                        // Also keep the raw token so the backend can bind the
+                        // permanent referrer link once the user is authenticated
+                        // (resolved via resolvePendingTokenIfAuthenticated).
+                        final attribution =
+                            ref.read(referralAttributionServiceProvider);
+                        attribution.persistCode(resolved.referralCode);
+                        attribution.persistToken(token);
 
                         // Route to episode-specific reserve when the API
                         // returned episodes; fall back to show-level reserve.

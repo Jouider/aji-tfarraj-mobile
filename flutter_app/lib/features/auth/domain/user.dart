@@ -1,3 +1,5 @@
+import 'package:aji_tfarraj/features/badges/domain/badge.dart';
+
 /// User model for authentication
 class User {
   final int id;
@@ -22,6 +24,11 @@ class User {
   final String? role;
   /// Unique 8-char referral code for this user
   final String? referralCode;
+  /// Backend `is_charge_public` — already combines role `charge_public` OR the
+  /// admin-set capability. Drives whether to offer "Mode Chargé Public".
+  final bool chargePublicEnabled;
+  /// Gamification badges (attendance always present; charge_public/staff optional).
+  final UserBadges? badges;
 
   User({
     required this.id,
@@ -43,6 +50,8 @@ class User {
     required this.updatedAt,
     this.role,
     this.referralCode,
+    this.chargePublicEnabled = false,
+    this.badges,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -78,6 +87,10 @@ class User {
       updatedAt: DateTime.parse(json['updated_at'] as String),
       role: json['role'] as String?,
       referralCode: json['referral_code'] as String?,
+      chargePublicEnabled: json['is_charge_public'] as bool? ?? false,
+      badges: json['badges'] is Map<String, dynamic>
+          ? UserBadges.fromJson(json['badges'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -102,6 +115,8 @@ class User {
       'updated_at': updatedAt.toIso8601String(),
       'role': role,
       'referral_code': referralCode,
+      'is_charge_public': chargePublicEnabled,
+      'badges': badges?.toJson(),
     };
   }
 
@@ -125,6 +140,8 @@ class User {
     DateTime? updatedAt,
     String? role,
     String? referralCode,
+    bool? chargePublicEnabled,
+    UserBadges? badges,
     bool clearAvatar = false,
     bool clearPhoneVerification = false,
   }) {
@@ -148,6 +165,8 @@ class User {
       updatedAt: updatedAt ?? this.updatedAt,
       role: role ?? this.role,
       referralCode: referralCode ?? this.referralCode,
+      chargePublicEnabled: chargePublicEnabled ?? this.chargePublicEnabled,
+      badges: badges ?? this.badges,
     );
   }
 
@@ -157,6 +176,17 @@ class User {
   bool get isStaff => role == 'staff';
   bool get isAdmin => role == 'admin';
   bool get isStaffOrAdmin => role == 'staff' || role == 'admin';
+
+  /// Chargé public by role only.
+  bool get isChargePublic => role == 'charge_public';
+
+  /// Whether "Mode Chargé Public" should be offered. Backend `is_charge_public`
+  /// already combines the role and the admin-set capability, so a staff member
+  /// flagged as charge public qualifies too.
+  bool get canUseChargePublicMode => chargePublicEnabled || isChargePublic;
+
+  /// Who can see the parrain "how to earn" guide + referral earning tools.
+  bool get isReferrerOrStaff => canUseChargePublicMode || isStaffOrAdmin;
 
   /// Display name: first + last if available, otherwise full name
   String get displayName {

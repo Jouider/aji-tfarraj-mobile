@@ -1190,6 +1190,9 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
     final show = widget.show;
     final episode = show.nextEpisode;
     final isSoldOut = episode?.isSoldOut ?? show.isSoldOut;
+    // No confirmed date yet ("bientôt") → reservation disabled until scheduled.
+    final dateUnconfirmed =
+        episode != null ? episode.startsAt == null : show.startsAt == null;
 
     // FIX: Bottom bar — backgroundLight, 12px h-padding, 8px v-padding
     return Container(
@@ -1257,6 +1260,25 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
                             size: 18, color: AppColors.textLight),
                         label: Text(
                           s.showDetailSoldOutCta,
+                          style: AppTypography.buttonLarge
+                              .copyWith(color: AppColors.textLight),
+                        ),
+                      )
+                    : dateUnconfirmed
+                    // Date not confirmed — disabled until the show is scheduled.
+                    ? OutlinedButton.icon(
+                        onPressed: null,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: AppColors.border, width: 1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusMd),
+                          ),
+                        ),
+                        icon: Icon(Icons.schedule,
+                            size: 18, color: AppColors.textLight),
+                        label: Text(
+                          s.homeDateTbc,
                           style: AppTypography.buttonLarge
                               .copyWith(color: AppColors.textLight),
                         ),
@@ -1680,8 +1702,37 @@ class _EpisodeCard extends ConsumerWidget {
                     textAlign: TextAlign.end,
                   ),
                   const SizedBox(height: 6),
-                  // FIX: Episode reserve button — primary bg, white, shadow
-                  Container(
+                  if (episode.startsAt == null)
+                    // Date not confirmed — reservation disabled until scheduled.
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: AppColors.secondary.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.schedule,
+                              size: 14, color: AppColors.secondaryDark),
+                          const SizedBox(width: 4),
+                          Text(
+                            s.homeDateTbc,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.secondaryDark,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    // FIX: Episode reserve button — primary bg, white, shadow
+                    Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [

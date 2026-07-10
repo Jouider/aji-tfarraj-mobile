@@ -9,7 +9,11 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 /// FIX: primary bg + shadow for "Voir mes réservations";
 ///      outline primary for "Retour à l'accueil".
 class ConfirmationActions extends ConsumerWidget {
-  const ConfirmationActions({super.key});
+  /// When false, the secondary "Retour à l'accueil" button is hidden
+  /// (used when a top-left back control already provides that action).
+  final bool showHomeButton;
+
+  const ConfirmationActions({super.key, this.showHomeButton = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,12 +26,14 @@ class ConfirmationActions extends ConsumerWidget {
           label: s.reservationResultCtaMyReservations,
           onTap: () => context.go(Routes.myReservations),
         ),
-        const SizedBox(height: 12),
-        // FIX: Secondary button — transparent bg, primary 1.5px border, radius 14, h54
-        _SecondaryActionButton(
-          label: s.reservationResultCtaHome,
-          onTap: () => context.go(Routes.home),
-        ),
+        if (showHomeButton) ...[
+          const SizedBox(height: 12),
+          // FIX: Secondary button — transparent bg, primary 1.5px border, radius 14, h54
+          _SecondaryActionButton(
+            label: s.reservationResultCtaHome,
+            onTap: () => context.go(Routes.home),
+          ),
+        ],
       ],
     );
   }

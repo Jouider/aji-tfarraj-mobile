@@ -16,6 +16,8 @@ import 'package:aji_tfarraj/features/auth/domain/user.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:aji_tfarraj/features/loyalty/data/loyalty_repository.dart';
 import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
+import 'package:aji_tfarraj/features/charge_public/presentation/cp_mode_provider.dart';
+import 'package:aji_tfarraj/features/badges/presentation/level_badge_card.dart';
 
 // ─────────────────────────────────────────────
 // Profile Screen
@@ -299,7 +301,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             s: s,
             onEditTap: () => context.push(Routes.editProfile),
           ),
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.xl),
+
+          // Attendance badge — shown to every user.
+          if (user?.badges?.attendance != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 10),
+              child: Text(
+                s.badgeProfileTitle.toUpperCase(),
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textMuted,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            LevelBadgeCard(badge: user!.badges!.attendance!, isCp: false),
+            const SizedBox(height: AppSpacing.xl),
+          ],
+
+          // Mode Chargé Public switch — inDrive-style. Offered when the backend
+          // is_charge_public capability (role or admin-set) is true.
+          if (user != null && user.canUseChargePublicMode) ...[
+            _ChargePublicModeCard(
+              title: s.cp.modeCardTitle,
+              subtitle: s.cp.modeCardSubtitle,
+              onTap: () {
+                ref.read(cpModeProvider.notifier).setEnabled(true);
+                context.go(Routes.chargePublic);
+              },
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          const SizedBox(height: AppSpacing.md),
 
           // ── Préférences ──────────────────────────────
           _SettingsGroup(
@@ -420,6 +455,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               _SettingsRow(
+                icon: Icons.help_outline,
+                iconColor: AppColors.secondary,
+                title: s.howItWorksProfileTileLabel,
+                subtitle: s.howItWorksProfileTileSubtitle,
+                onTap: () => context.push(Routes.howItWorks),
+              ),
+              _SettingsRow(
                 icon: Icons.gavel_outlined,
                 iconColor: AppColors.textMuted,
                 title: s.conditionsProfileTileLabel,
@@ -444,6 +486,90 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: AppSpacing.xl),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Charge Public Mode Card (inDrive-style switch)
+// ─────────────────────────────────────────────
+
+class _ChargePublicModeCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ChargePublicModeCard({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.secondary, AppColors.secondaryDark],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.secondary.withValues(alpha: 0.3),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.workspace_premium_outlined,
+                  color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.arrow_back_ios
+                  : Icons.arrow_forward_ios,
+              color: Colors.white,
+              size: 16,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -565,8 +691,9 @@ class _ProfileHeader extends StatelessWidget {
                               height: 86,
                               fit: BoxFit.cover,
                               // Bound decoded bitmap so a large avatar can't OOM.
+                              // Only cap width — capping both distorts non-square
+                              // photos (the decode ignores aspect ratio).
                               cacheWidth: 258,
-                              cacheHeight: 258,
                               loadingBuilder: (_, child, progress) =>
                                   progress == null ? child : _AvatarPlaceholder(),
                               errorBuilder: (_, __, ___) =>

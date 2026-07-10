@@ -66,6 +66,9 @@ class AppConfig {
       '/api/referral-links/$token';
   static const String myReferrals = '/api/me/referrals';
 
+  // Charge public ("Mode Chargé Public") dashboard — CP-only
+  static const String chargePublicDashboard = '/api/me/charge-public/dashboard';
+
   // Support Tickets
   static const String supportTickets = '/api/support/tickets';
   static const String mySupportTickets = '/api/me/support-tickets';

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/components/loading/skeleton_loader.dart';
@@ -47,16 +51,16 @@ class ReservationResultScreen extends ConsumerWidget {
 // Animated Content
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ResultContent extends StatefulWidget {
+class _ResultContent extends ConsumerStatefulWidget {
   final Reservation reservation;
 
   const _ResultContent({required this.reservation});
 
   @override
-  State<_ResultContent> createState() => _ResultContentState();
+  ConsumerState<_ResultContent> createState() => _ResultContentState();
 }
 
-class _ResultContentState extends State<_ResultContent>
+class _ResultContentState extends ConsumerState<_ResultContent>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
 
@@ -106,50 +110,124 @@ class _ResultContentState extends State<_ResultContent>
     super.dispose();
   }
 
+  /// Navigate back to the home screen. Used by the top-left back control
+  /// and the swipe-to-go-back gesture.
+  void _goHome() => context.go(Routes.home);
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+    final s = ref.watch(stringsProvider);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    // FIX: Actions pinned to a persistent bottom bar. A top-left back control
+    // ("Retour") + an edge swipe both return to home.
+    return GestureDetector(
+      // Swipe-to-go-back: right-swipe in LTR, left-swipe in RTL.
+      onHorizontalDragEnd: (details) {
+        final v = details.primaryVelocity ?? 0;
+        if (!isRtl && v > 250) _goHome();
+        if (isRtl && v < -250) _goHome();
+      },
       child: Column(
         children: [
-          // FIX: Top spacing — 40px from safe area
-          const SizedBox(height: 40),
-
-          // Hero: icon + title + status badge (animated separately but in same widget)
-          // We split into 3 animated wrappers to match the stagger
+          // Top-left back control (arrow + "Retour") → home.
           _Animated(
             opacity: _heroOpacity,
             slide: _heroSlide,
-            child: const ConfirmationHero(),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: TextButton.icon(
+                  onPressed: _goHome,
+                  icon: Icon(
+                    isRtl ? Icons.arrow_forward_ios : Icons.arrow_back_ios_new,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                  label: Text(
+                    s.back,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ),
+            ),
           ),
 
-          // FIX: status badge → title spacing 28px, badge → card 28px
-          const SizedBox(height: 28),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: Column(
+                children: [
+                  // FIX: Top spacing below the back control
+                  const SizedBox(height: 16),
 
-          _Animated(
-            opacity: _cardOpacity,
-            slide: _cardSlide,
-            child: ReservationSummaryCard(reservation: widget.reservation),
+                  // Hero: icon + title + status badge (animated separately but in same widget)
+                  // We split into 3 animated wrappers to match the stagger
+                  _Animated(
+                    opacity: _heroOpacity,
+                    slide: _heroSlide,
+                    child: const ConfirmationHero(),
+                  ),
+
+                // FIX: status badge → title spacing 28px, badge → card 28px
+                const SizedBox(height: 28),
+
+                _Animated(
+                  opacity: _cardOpacity,
+                  slide: _cardSlide,
+                  child: ReservationSummaryCard(reservation: widget.reservation),
+                ),
+
+                const SizedBox(height: 28),
+
+                _Animated(
+                  opacity: _stepsOpacity,
+                  slide: _stepsSlide,
+                  child: const NextStepsSection(),
+                ),
+
+                // FIX: Bottom spacing before the pinned action bar
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
+        ),
 
-          const SizedBox(height: 28),
-
+          // FIX: Persistent action bar — primary CTA only ("Voir mes
+          // réservations"); "Retour" now lives top-left + swipe-back.
           _Animated(
             opacity: _stepsOpacity,
             slide: _stepsSlide,
-            child: const NextStepsSection(),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundWhite,
+                border: Border(
+                  top: BorderSide(color: AppColors.border, width: 1),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, 16, AppSpacing.lg, 12),
+              child: const ConfirmationActions(showHomeButton: false),
+            ),
           ),
-
-          const SizedBox(height: 32),
-
-          _Animated(
-            opacity: _stepsOpacity,
-            slide: _stepsSlide,
-            child: const ConfirmationActions(),
-          ),
-
-          // FIX: Bottom spacing — 24px from bottom safe area
-          const SizedBox(height: 24),
         ],
       ),
     );
