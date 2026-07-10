@@ -1,5 +1,6 @@
 // filepath: /Users/mouadsmac/aji-tfarraj-mobile/flutter_app/lib/app/push/push_service.dart
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -60,6 +61,12 @@ class PushService {
   GoRouter? _router;
   BuildContext? _context;
   bool _isInitialized = false;
+
+  /// A notification tap that arrived before the router was wired (cold start from
+  /// a terminated state: getInitialMessage fires in main() before setRouter runs
+  /// in the post-first-frame callback). Held here and flushed by [setRouter] so
+  /// the tap is never silently dropped.
+  AppNotification? _pendingNotification;
   
   // Stream controller for notification taps
   final StreamController<AppNotification> _notificationTapController = 
@@ -104,9 +111,17 @@ class PushService {
     _ref = ref;
   }
 
-  /// Set router for navigation
+  /// Set router for navigation. Flushes any notification tap that arrived while
+  /// the router wasn't ready yet (terminated-state cold start).
   void setRouter(GoRouter router) {
     _router = router;
+
+    final pending = _pendingNotification;
+    if (pending != null) {
+      _pendingNotification = null;
+      _debugLog('Flushing queued notification tap: ${pending.id}');
+      PushRouter.navigateToNotification(router, pending);
+    }
   }
 
   /// Set context for showing UI elements
@@ -138,20 +153,29 @@ class PushService {
   /// Handle local notification tap
   void _onLocalNotificationTap(NotificationResponse response) {
     _debugLog('Local notification tapped: ${response.payload}');
-    
-    if (response.payload != null && response.payload!.isNotEmpty) {
-      try {
-        // Parse the notification from payload
-        final data = <String, dynamic>{
-          'id': response.id.toString(),
-          'deep_link': response.payload,
-        };
-        
-        final notification = AppNotification.fromRemoteMessage(data);
-        _handleNotificationTap(notification);
-      } catch (e) {
-        _debugLog('Error parsing local notification payload: $e');
-      }
+
+    final payload = response.payload;
+    if (payload == null || payload.isEmpty) return;
+
+    try {
+      // Newer payloads are a JSON map carrying the real notification id + fields
+      // so mark-as-read targets the correct stored notification. Older payloads
+      // were a bare route string — fall back to treating them as a deep link.
+      Map<String, dynamic> data;
+      final decoded = jsonDecode(payload);
+      data = (decoded is Map)
+          ? Map<String, dynamic>.from(decoded)
+          : <String, dynamic>{'deep_link': payload};
+
+      final notification = AppNotification.fromRemoteMessage(data);
+      _handleNotificationTap(notification);
+    } on FormatException {
+      // Bare route string (legacy payload) — not valid JSON.
+      final notification =
+          AppNotification.fromRemoteMessage(<String, dynamic>{'deep_link': payload});
+      _handleNotificationTap(notification);
+    } catch (e) {
+      _debugLog('Error parsing local notification payload: $e');
     }
   }
 
@@ -411,9 +435,19 @@ class PushService {
         iOS: iosDetails,
       );
 
-      // Use deep link or route as payload
-      final payload = notification.deepLink ?? 
-          PushRouter.getRouteForNotification(notification);
+      // Encode the real id + routing fields so a tap can mark the correct
+      // stored notification as read AND resolve the destination. deep_link holds
+      // an explicit link when present, else the type-resolved route.
+      final payload = jsonEncode(<String, dynamic>{
+        'id': notification.id,
+        'type': notification.type.toJson(),
+        if (notification.reservationId != null)
+          'reservation_id': notification.reservationId,
+        if (notification.ticketCode != null)
+          'ticket_code': notification.ticketCode,
+        'deep_link': notification.deepLink ??
+            PushRouter.getRouteForNotification(notification),
+      });
 
       await _localNotifications.show(
         notification.id.hashCode,
@@ -437,11 +471,13 @@ class PushService {
     // Mark as read
     _ref?.read(notificationsProvider.notifier).markAsRead(notification.id);
 
-    // Navigate
+    // Navigate — or queue if the router isn't wired yet (cold start). setRouter
+    // flushes the pending tap the moment it runs, so we never lose it.
     if (_router != null) {
       PushRouter.navigateToNotification(_router!, notification);
     } else {
-      _debugLog('Router not available for navigation');
+      _debugLog('Router not ready — queueing notification tap for flush');
+      _pendingNotification = notification;
     }
   }
 
