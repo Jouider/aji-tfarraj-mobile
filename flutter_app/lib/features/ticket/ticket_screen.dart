@@ -23,15 +23,14 @@ import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 
 // ─── Ticket ordering helpers ──────────────────────────────────────────────────
 
-// FIX: Ticket ordering — sort upcoming by show date ascending (nearest first)
+// A ticket stays "upcoming" until the END of the recording, not its start —
+// see Ticket.isUpcomingAt / Ticket.grace. The two lists below are exact
+// complements, so a ticket can never fall out of both and vanish.
+
+// Ticket ordering — sort upcoming by show date ascending (nearest first)
 List<Ticket> _upcomingTickets(List<Ticket> tickets) {
   final now = DateTime.now();
-  return tickets
-      .where((t) {
-        final d = t.show?.startsAt;
-        return d == null || !d.isBefore(now);
-      })
-      .toList()
+  return tickets.where((t) => t.isUpcomingAt(now)).toList()
     ..sort((a, b) {
       final aDate = a.show?.startsAt ?? DateTime(9999);
       final bDate = b.show?.startsAt ?? DateTime(9999);
@@ -39,16 +38,16 @@ List<Ticket> _upcomingTickets(List<Ticket> tickets) {
     });
 }
 
-// FIX: Past tickets — separated into their own section, not hidden
+// Past tickets — separated into their own section, not hidden.
 List<Ticket> _pastTickets(List<Ticket> tickets) {
   final now = DateTime.now();
-  return tickets
-      .where((t) {
-        final d = t.show?.startsAt;
-        return d != null && d.isBefore(now);
-      })
-      .toList()
-    ..sort((a, b) => b.show!.startsAt!.compareTo(a.show!.startsAt!));
+  return tickets.where((t) => !t.isUpcomingAt(now)).toList()
+    // Null-safe: a show can have ends_at without starts_at, so never bang.
+    ..sort((a, b) {
+      final aDate = a.show?.startsAt ?? a.validUntil ?? DateTime(1970);
+      final bDate = b.show?.startsAt ?? b.validUntil ?? DateTime(1970);
+      return bDate.compareTo(aDate);
+    });
 }
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────

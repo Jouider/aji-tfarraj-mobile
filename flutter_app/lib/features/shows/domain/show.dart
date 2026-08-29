@@ -28,6 +28,9 @@ class Show {
   final String city;
   final String? studio;
   final DateTime? startsAt;
+  /// End of the recording. Often null in production (episodes.ends_at is not
+  /// filled yet), so callers must keep a fallback — see TicketScreen's grace.
+  final DateTime? endsAt;
   final int capacity;
   final int reservedSeats;
   final int? rewardPoints;
@@ -55,6 +58,7 @@ class Show {
     required this.city,
     this.studio,
     this.startsAt,
+    this.endsAt,
     required this.capacity,
     required this.reservedSeats,
     this.rewardPoints,
@@ -132,6 +136,9 @@ class Show {
       startsAt: json['starts_at'] != null
           ? DateTime.parse(json['starts_at'] as String)
           : null,
+      endsAt: json['ends_at'] != null
+          ? DateTime.parse(json['ends_at'] as String)
+          : null,
       capacity: json['capacity'] as int? ?? 0,
       reservedSeats: json['reserved_seats'] as int? ?? 0,
       rewardPoints: json['reward_points'] as int?,
@@ -163,6 +170,7 @@ class Show {
       'city': city,
       'studio': studio,
       'starts_at': startsAt?.toIso8601String(),
+      'ends_at': endsAt?.toIso8601String(),
       'capacity': capacity,
       'reserved_seats': reservedSeats,
       'reward_points': rewardPoints,
