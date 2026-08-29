@@ -63,11 +63,42 @@ class Ticket {
     this.reservationInfo,
   });
 
+  /// How long a ticket stays valid after the recording starts, when the backend
+  /// gives us no explicit end time. A recording runs for a few hours and staff
+  /// keep scanning latecomers throughout, so a ticket must NOT expire at its
+  /// start time — doing that hid the QR from everyone arriving during the shoot.
+  /// Mirrors the server-side rule in TicketController (ends_at, else +12h).
+  static const Duration grace = Duration(hours: 12);
+
   /// Check if ticket has been used (checked in)
   bool get isCheckedIn => checkedInAt != null;
 
   /// Get show from reservation info (convenience getter)
   Show? get show => reservationInfo?.show;
+
+  /// The moment this ticket stops being "upcoming".
+  ///
+  /// Uses the recording's end when known; `episodes.ends_at` is still NULL in
+  /// production, so we fall back to start + [grace]. Null when the show has no
+  /// dates at all.
+  DateTime? get validUntil {
+    final s = show;
+    if (s == null) return null;
+
+    final end = s.endsAt;
+    if (end != null) return end;
+
+    return s.startsAt?.add(grace);
+  }
+
+  /// Whether the ticket should still be shown as usable at [now].
+  ///
+  /// A ticket with no dates at all stays upcoming — never hidden — which is the
+  /// safe side for someone standing at the door with a QR to scan.
+  bool isUpcomingAt(DateTime now) {
+    final until = validUntil;
+    return until == null || !until.isBefore(now);
+  }
 
   /// Get seats count from reservation info
   int get seats => reservationInfo?.seats ?? 1;
