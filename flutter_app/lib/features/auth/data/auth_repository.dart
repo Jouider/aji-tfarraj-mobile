@@ -12,6 +12,7 @@ import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/app/push/push_token_provider.dart';
 import 'package:aji_tfarraj/features/auth/domain/user.dart';
+import 'package:aji_tfarraj/features/guided_tour/data/guided_tour_controller.dart';
 import 'package:aji_tfarraj/features/profile/presentation/edit_profile_screen.dart'
     show profileCompletionSkippedProvider;
 
@@ -600,6 +601,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // Reset the session-scoped "skip profile completion" flag so the next
     // user who signs in on this device goes through the forced flow.
     _ref.read(profileCompletionSkippedProvider.notifier).state = false;
+
+    // Same idea for onboarding: the next account on this device should be
+    // walked through the app rather than inheriting this user's "seen" flags.
+    await _ref.read(guidedTourControllerProvider.notifier).resetAll();
 
     state = const AuthState(status: AuthStatus.unauthenticated);
   }

@@ -5,11 +5,14 @@ import 'package:aji_tfarraj/features/app_lock/data/app_lock_controller.dart';
 import 'package:aji_tfarraj/features/app_lock/presentation/lock_screen.dart';
 import 'package:aji_tfarraj/features/app_update/data/app_update_service.dart';
 import 'package:aji_tfarraj/features/app_update/presentation/update_widgets.dart';
+import 'package:aji_tfarraj/features/guided_tour/presentation/guided_tour_overlay.dart';
 
 /// Wraps the whole app (via MaterialApp.builder) and overlays, in priority:
 ///   1. forced-update blocker (below min_version),
 ///   2. biometric lock screen (when enabled + locked),
-///   3. a dismissible "update available" sheet (optional update).
+///   3. a dismissible "update available" sheet (optional update),
+///   4. the contextual guided tour (lowest priority — an update or lock always
+///      wins, so onboarding never blocks a critical prompt).
 /// Also drives the biometric lock's foreground/background lifecycle.
 class AppGate extends ConsumerStatefulWidget {
   final Widget child;
@@ -64,9 +67,14 @@ class _AppGateState extends ConsumerState<AppGate>
         !_updateDismissed &&
         update.requirement == UpdateRequirement.optional;
 
+    // The tour explains the screen underneath, so it must stay out of the way
+    // while a gate is up — otherwise it would dim a lock or update prompt.
+    final gateVisible = forced || lock.isLocked || showOptional;
+
     return Stack(
       children: [
         widget.child,
+        if (!gateVisible) const GuidedTourOverlay(),
         if (showOptional)
           UpdateAvailableOverlay(
             storeUrl: update.storeUrl,

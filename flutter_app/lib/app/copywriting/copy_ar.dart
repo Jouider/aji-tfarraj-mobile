@@ -1,5 +1,5 @@
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart'
-    show ConditionSection, HowToStep, ChargePublicCopy;
+    show ConditionSection, HowToStep, GuidedStep, ChargePublicCopy;
 
 /// Arabic copywriting for Aji Tfarraj app
 /// Starter pack - not final marketing copy
@@ -110,6 +110,7 @@ class CopyAr {
   // How it works / كيفاش كيخدم
   // ============================================
   static const howItWorks = HowItWorksCopyAr();
+  static const guidedTour = GuidedTourCopyAr();
 
   // ============================================
   // Charge public ("Mode Chargé Public")
@@ -823,6 +824,65 @@ class ReferralCopyAr {
 // ─────────────────────────────────────────────────────────────────────────────
 // How it works / كيفاش كتخدم
 // ─────────────────────────────────────────────────────────────────────────────
+/// Contextual guided tour — Arabic (Moroccan Darija)
+class GuidedTourCopyAr {
+  const GuidedTourCopyAr();
+
+  // Actions
+  String get gotIt => 'فهمت';
+  String get next => 'التالي';
+  String get skip => 'تخطى';
+  String get replay => 'عاود شوف الدليل';
+  String stepCounter(int current, int total) => '$current / $total';
+
+  // Accessibility / controls
+  String get muteVideo => 'طفي الصوت';
+  String get unmuteVideo => 'شعل الصوت';
+
+  // ── Home tour ──
+  List<GuidedStep> get homeSteps => const [
+        GuidedStep(
+          title: 'مرحبا بيك فأجي تفرج',
+          body:
+              'حضر بالمجان لتصوير البرامج اللي كتعجبك. غادي نوريوك كيفاش ف 30 ثانية.',
+        ),
+        GuidedStep(
+          title: 'لقا البرنامج ديالك',
+          body:
+              'تصفح التصويرات المتاحة وفلتري حسب المدينة ولا القناة باش تلقا اللي كيعجبك.',
+        ),
+        GuidedStep(
+          title: 'حجز بلاصتك',
+          body:
+              'حل شي برنامج وحجز حتى 4 بلايص، بالمجان وف بعض ثواني.',
+        ),
+        GuidedStep(
+          title: 'التذكرة ديالك كتسناك هنا',
+          body:
+              'ملي تتأكد بلاصتك، غادي يبان QR ديالك ف تبويب التذكرة. وريه ف الباب نهار التصوير.',
+        ),
+      ];
+
+  // ── Reservation tour ──
+  List<GuidedStep> get reserveSteps => const [
+        GuidedStep(
+          title: 'ختار البلايص ديالك',
+          body:
+              'ختار عدد البلايص، حتى 4 ف كل حجز. كلشي بالمجان.',
+        ),
+        GuidedStep(
+          title: 'عندك كود ديال التزكية؟',
+          body:
+              'إلا عرضك شي مكلف بالجمهور، الكود ديالو راه معمر. ولا تقدر تكتبو بيدك.',
+        ),
+        GuidedStep(
+          title: 'غادي نأكدو ليك البلاصة',
+          body:
+              'الفريق ديالنا غادي يتواصل معاك باش يأكد حضورك. غادي توصلك إشعار ف كل مرحلة.',
+        ),
+      ];
+}
+
 class HowItWorksCopyAr {
   const HowItWorksCopyAr();
 

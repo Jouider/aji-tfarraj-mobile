@@ -107,6 +107,7 @@ class CopyFr {
   // How it works / Comment ça marche
   // ============================================
   static const howItWorks = HowItWorksCopyFr();
+  static const guidedTour = GuidedTourCopyFr();
 
   // ============================================
   // Charge public ("Mode Chargé Public")
@@ -683,6 +684,20 @@ class HowToStep {
   const HowToStep({required this.title, required this.body});
 }
 
+/// A single step of a contextual guided tour (the coach-mark overlay shown on
+/// top of a real screen, not the full-screen "Comment ça marche" guide).
+class GuidedStep {
+  final String title;
+  final String body;
+
+  /// Short clip played inside the card. Null until the clips are produced and
+  /// hosted — the card then falls back to an illustrated placeholder, so the
+  /// tour stays usable and never shows an empty player.
+  final String? videoUrl;
+
+  const GuidedStep({required this.title, required this.body, this.videoUrl});
+}
+
 /// Conditions de participation du public — French
 class ConditionsCopyFr {
   const ConditionsCopyFr();
@@ -939,6 +954,65 @@ class HowItWorksCopyFr {
   /// When set, a "Regarder la vidéo" button appears at the top of the track.
   String? get clientVideoUrl => null;
   String? get parrainVideoUrl => null;
+}
+
+/// Contextual guided tour ("Comment ça marche" en surimpression) — French
+class GuidedTourCopyFr {
+  const GuidedTourCopyFr();
+
+  // Actions
+  String get gotIt => 'J\'ai compris';
+  String get next => 'Suivant';
+  String get skip => 'Passer';
+  String get replay => 'Revoir le guide';
+  String stepCounter(int current, int total) => '$current / $total';
+
+  // Accessibility / controls
+  String get muteVideo => 'Couper le son';
+  String get unmuteVideo => 'Activer le son';
+
+  // ── Home tour — shown once, on first arrival at the home screen ──
+  List<GuidedStep> get homeSteps => const [
+        GuidedStep(
+          title: 'Bienvenue sur Aji Tfarraj',
+          body:
+              'Assiste gratuitement à l\'enregistrement de tes émissions TV préférées. On te montre comment en 30 secondes.',
+        ),
+        GuidedStep(
+          title: 'Trouve ton émission',
+          body:
+              'Parcours les tournages disponibles et filtre par ville ou par chaîne pour trouver celui qui te plaît.',
+        ),
+        GuidedStep(
+          title: 'Réserve ta place',
+          body:
+              'Ouvre une émission et réserve jusqu\'à 4 places, gratuitement et en quelques secondes.',
+        ),
+        GuidedStep(
+          title: 'Ton billet t\'attend ici',
+          body:
+              'Une fois ta place validée, ton QR code apparaît dans l\'onglet Billet. Montre-le à l\'entrée le jour du tournage.',
+        ),
+      ];
+
+  // ── Reservation tour — shown once, on the seat-selection screen ──
+  List<GuidedStep> get reserveSteps => const [
+        GuidedStep(
+          title: 'Choisis tes places',
+          body:
+              'Sélectionne le nombre de places, jusqu\'à 4 par réservation. C\'est entièrement gratuit.',
+        ),
+        GuidedStep(
+          title: 'Un code de parrainage ?',
+          body:
+              'Si un chargé public t\'a invité, son code est déjà rempli. Sinon tu peux le saisir à la main.',
+        ),
+        GuidedStep(
+          title: 'On te confirme ta place',
+          body:
+              'Notre équipe te contacte pour valider ta présence. Tu reçois une notification à chaque étape.',
+        ),
+      ];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
