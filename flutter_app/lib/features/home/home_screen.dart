@@ -17,6 +17,7 @@ import 'package:aji_tfarraj/features/notifications/presentation/providers/notifi
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart'
     show pendingNavigationProvider;
 import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
+import 'package:aji_tfarraj/features/guided_tour/data/guided_tour_controller.dart';
 
 /// Home Screen — Cinematic discovery layout inspired by premium streaming apps
 class HomeScreen extends ConsumerStatefulWidget {
@@ -43,7 +44,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (pending != null) {
         ref.read(pendingNavigationProvider.notifier).state = null;
         context.go(pending);
+        return; // Leaving home — don't open the tour over the next screen.
       }
+      // First visit only: introduce the app. No-ops once seen.
+      ref
+          .read(guidedTourControllerProvider.notifier)
+          .startIfUnseen(GuidedTourId.home);
     });
   }
 

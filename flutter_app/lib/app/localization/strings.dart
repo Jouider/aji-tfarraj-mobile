@@ -1380,6 +1380,43 @@ class AppStrings {
       : CopyAr.howItWorks.parrainVideoUrl;
 
   // ============================================
+  // Guided tour (contextual coach-mark overlay)
+  // ============================================
+  String get tourGotIt => locale == AppLocale.fr
+      ? CopyFr.guidedTour.gotIt
+      : CopyAr.guidedTour.gotIt;
+
+  String get tourNext =>
+      locale == AppLocale.fr ? CopyFr.guidedTour.next : CopyAr.guidedTour.next;
+
+  String get tourSkip =>
+      locale == AppLocale.fr ? CopyFr.guidedTour.skip : CopyAr.guidedTour.skip;
+
+  String get tourReplay => locale == AppLocale.fr
+      ? CopyFr.guidedTour.replay
+      : CopyAr.guidedTour.replay;
+
+  String tourStepCounter(int current, int total) => locale == AppLocale.fr
+      ? CopyFr.guidedTour.stepCounter(current, total)
+      : CopyAr.guidedTour.stepCounter(current, total);
+
+  String get tourMuteVideo => locale == AppLocale.fr
+      ? CopyFr.guidedTour.muteVideo
+      : CopyAr.guidedTour.muteVideo;
+
+  String get tourUnmuteVideo => locale == AppLocale.fr
+      ? CopyFr.guidedTour.unmuteVideo
+      : CopyAr.guidedTour.unmuteVideo;
+
+  List<GuidedStep> get tourHomeSteps => locale == AppLocale.fr
+      ? CopyFr.guidedTour.homeSteps
+      : CopyAr.guidedTour.homeSteps;
+
+  List<GuidedStep> get tourReserveSteps => locale == AppLocale.fr
+      ? CopyFr.guidedTour.reserveSteps
+      : CopyAr.guidedTour.reserveSteps;
+
+  // ============================================
   // Referral / Parrainage
   // ============================================
   String get referralTitle => locale == AppLocale.fr

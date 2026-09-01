@@ -24,6 +24,7 @@ import 'package:aji_tfarraj/features/reservation/booking_info_card_widget.dart';
 import 'package:aji_tfarraj/features/reservation/referral_code_input_widget.dart';
 import 'package:aji_tfarraj/features/reservation/terms_checkbox_widget.dart';
 import 'package:aji_tfarraj/features/reservation/booking_bottom_bar_widget.dart';
+import 'package:aji_tfarraj/features/guided_tour/data/guided_tour_controller.dart';
 
 /// Reserve Seats Screen — "Réserver des places" booking flow.
 class ReserveSeatsScreen extends ConsumerStatefulWidget {
@@ -38,6 +39,7 @@ class ReserveSeatsScreen extends ConsumerStatefulWidget {
 }
 
 class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
+  GuidedTourController? _tour;
   bool _isLoading = false;
   bool _agreedToTerms = false;
   String? _errorMessage;
@@ -52,10 +54,22 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
       _referralCodeController.text = pending;
       _referralInitiallyExpanded = true;
     }
+    // First time reserving: walk the user through this screen. No-ops after.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Held so dispose can clean up without touching ref after unmount.
+      final tour = ref.read(guidedTourControllerProvider.notifier);
+      _tour = tour;
+      tour.startIfUnseen(GuidedTourId.reserve);
+    });
   }
 
   @override
   void dispose() {
+    // Popped (e.g. Android back) while the tour was up: take the overlay with
+    // us instead of leaving it stranded over the previous screen. Not marked
+    // as seen, so the user still gets it next time.
+    _tour?.cancelIfActive(GuidedTourId.reserve);
     _referralCodeController.dispose();
     super.dispose();
   }

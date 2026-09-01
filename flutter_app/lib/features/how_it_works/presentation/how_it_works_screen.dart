@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart' show HowToStep;
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
+import 'package:aji_tfarraj/features/guided_tour/data/guided_tour_controller.dart';
 
 /// "Comment ça marche" — illustrated, swipeable step-by-step guide.
 ///
@@ -97,6 +100,21 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
         title: Text(s.howItWorksTitle, style: AppTypography.h3),
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
+        actions: [
+          // Replay the in-app guided tour (the overlay shown on first visit).
+          IconButton(
+            tooltip: s.tourReplay,
+            icon: const Icon(Icons.slideshow_outlined),
+            onPressed: () {
+              ref
+                  .read(guidedTourControllerProvider.notifier)
+                  .replay(GuidedTourId.home);
+              // Leave this screen so the tour plays over the real home screen,
+              // which is what it describes.
+              context.go(Routes.home);
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
