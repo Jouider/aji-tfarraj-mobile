@@ -77,6 +77,26 @@ class StaffRepository {
     }
   }
 
+  /// Record where the shuttle should drop this attendee, or clear the choice.
+  ///
+  /// [pointId] null means "no shuttle needed" — plenty of people drive
+  /// themselves, and the door must be able to say so.
+  Future<void> setReturnPoint({
+    required int reservationId,
+    required int? pointId,
+  }) async {
+    try {
+      await _apiClient.patch<Map<String, dynamic>>(
+        '/api/staff/reservations/$reservationId/return-point',
+        data: {'return_point_id': pointId},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
   /// Replace the attendee's photo from the door. Returns the new avatar URL.
   Future<String?> replaceAttendeePhoto({
     required int attendeeId,
@@ -199,6 +219,21 @@ class StaffCheckInNotifier extends StateNotifier<StaffCheckInState> {
     if (preview == null || !preview.canAdmit) return;
 
     await checkIn(ticketCode: preview.ticketCode);
+  }
+
+  /// Record the drop-off choice and reflect it in the preview immediately, so
+  /// the scanner sees it land without re-scanning.
+  Future<void> setReturnPoint(int? pointId) async {
+    final preview = state.preview;
+    final reservationId = preview?.reservationId;
+    if (preview == null || reservationId == null) return;
+
+    await _repository.setReturnPoint(
+      reservationId: reservationId,
+      pointId: pointId,
+    );
+
+    state = state.copyWith(preview: preview.withReturnPoint(pointId));
   }
 
   /// Replace the attendee's photo without leaving the preview, so the scanner

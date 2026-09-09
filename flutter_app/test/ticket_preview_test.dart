@@ -140,4 +140,78 @@ void main() {
       expect(p.canAdmit, isTrue);
     });
   });
+
+  group('retour en navette', () {
+    Map<String, dynamic> withShuttle({
+      List<Map<String, dynamic>>? points,
+      Map<String, dynamic>? chosen,
+    }) {
+      final p = payload();
+      p['return_points'] = points ??
+          [
+            {'id': 3, 'name': 'Ain Sebaa', 'name_ar': null, 'landmark': 'devant la gare'},
+            {'id': 4, 'name': 'Maarif', 'name_ar': null, 'landmark': null},
+          ];
+      (p['reservation'] as Map<String, dynamic>)['return_point'] = chosen;
+      return p;
+    }
+
+    test('parses the stops served tonight', () {
+      final p = TicketPreview.fromJson(withShuttle());
+
+      expect(p.returnPoints, hasLength(2));
+      expect(p.returnPoints.first.name, 'Ain Sebaa');
+      expect(p.returnPoints.first.landmark, 'devant la gare');
+      expect(p.asksReturnPoint, isTrue);
+    });
+
+    /// No served stop means no vehicle, so the door must not ask at all.
+    test('no stops means the question is not asked', () {
+      final p = TicketPreview.fromJson(withShuttle(points: []));
+
+      expect(p.asksReturnPoint, isFalse);
+      expect(p.chosenReturnPointId, isNull);
+    });
+
+    test('a payload without the field at all does not ask', () {
+      expect(TicketPreview.fromJson(payload()).asksReturnPoint, isFalse);
+    });
+
+    test('an earlier answer comes back, so the scanner does not ask twice', () {
+      final p = TicketPreview.fromJson(
+          withShuttle(chosen: {'id': 4, 'name': 'Maarif'}));
+
+      expect(p.chosenReturnPointId, 4);
+    });
+
+    test('recording a choice keeps everything else intact', () {
+      final p = TicketPreview.fromJson(withShuttle());
+      final updated = p.withReturnPoint(3);
+
+      expect(updated.chosenReturnPointId, 3);
+      expect(updated.returnPoints, hasLength(2));
+      expect(updated.ticketCode, p.ticketCode);
+      expect(updated.attendeeName, p.attendeeName);
+      expect(updated.canAdmit, isTrue);
+    });
+
+    /// "I drive myself" is a real answer and must be as easy to record.
+    test('the choice can be cleared', () {
+      final p = TicketPreview.fromJson(
+          withShuttle(chosen: {'id': 4, 'name': 'Maarif'}));
+
+      expect(p.withReturnPoint(null).chosenReturnPointId, isNull);
+    });
+
+    test('the Arabic label falls back to French when absent', () {
+      final p = TicketPreview.fromJson(withShuttle(points: [
+        {'id': 3, 'name': 'Ain Sebaa', 'name_ar': 'عين السبع'},
+        {'id': 4, 'name': 'Maarif'},
+      ]));
+
+      expect(p.returnPoints[0].localizedName(true), 'عين السبع');
+      expect(p.returnPoints[1].localizedName(true), 'Maarif');
+      expect(p.returnPoints[0].localizedName(false), 'Ain Sebaa');
+    });
+  });
 }
