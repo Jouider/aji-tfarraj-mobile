@@ -676,6 +676,8 @@ class StaffCopyAr {
   String get sessionExpired => 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.';
   String get networkError => 'تعذّر التحقق من البطاقة في الوقت الحالي.';
   String get scanAnother => 'مسح بطاقة أخرى';
+
+  String get validateEntry => 'أكّد الدخول';
   String get cameraPermissionDenied => 'تم رفض الوصول إلى الكاميرا';
   String get cameraPermissionSubtitle =>
       'السماح بالوصول إلى الكاميرا لمسح رموز QR.';

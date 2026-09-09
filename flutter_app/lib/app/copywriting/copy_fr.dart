@@ -867,6 +867,9 @@ class StaffCopyFr {
   String get networkError =>
       'Impossible de vérifier le billet pour le moment.';
   String get scanAnother => 'Scanner un autre billet';
+
+  /// Second step of the door flow: the scanner has looked, now admits.
+  String get validateEntry => "Valider l'entrée";
   String get cameraPermissionDenied => 'Accès caméra refusé';
   String get cameraPermissionSubtitle =>
       'Autorisez l\'accès à la caméra pour scanner les QR codes.';

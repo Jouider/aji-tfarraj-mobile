@@ -1200,6 +1200,10 @@ class AppStrings {
       ? CopyFr.staff.scanAnother
       : CopyAr.staff.scanAnother;
 
+  String get staffValidateEntry => locale == AppLocale.fr
+      ? CopyFr.staff.validateEntry
+      : CopyAr.staff.validateEntry;
+
   String get staffCameraPermissionDenied => locale == AppLocale.fr
       ? CopyFr.staff.cameraPermissionDenied
       : CopyAr.staff.cameraPermissionDenied;

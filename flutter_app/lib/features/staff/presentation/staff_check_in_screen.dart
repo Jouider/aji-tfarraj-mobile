@@ -10,6 +10,7 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/staff/data/staff_repository.dart';
 import 'package:aji_tfarraj/features/staff/domain/staff_check_in_result.dart';
+import 'package:aji_tfarraj/features/staff/presentation/ticket_preview_view.dart';
 
 class StaffCheckInScreen extends ConsumerStatefulWidget {
   const StaffCheckInScreen({super.key});
@@ -139,6 +140,13 @@ class _QrScanTabState extends ConsumerState<_QrScanTab> {
     final checkInState = ref.watch(staffCheckInProvider);
 
     // Show result/error overlay when not idle
+    if (checkInState.status == StaffCheckInStatus.preview) {
+      return TicketPreviewView(
+        preview: checkInState.preview!,
+        onCancel: () => ref.read(staffCheckInProvider.notifier).reset(),
+      );
+    }
+
     if (checkInState.status == StaffCheckInStatus.success) {
       return _CheckInResultCard(
         result: checkInState.result!,
@@ -164,7 +172,7 @@ class _QrScanTabState extends ConsumerState<_QrScanTab> {
             final barcode = capture.barcodes.firstOrNull;
             final value = barcode?.rawValue;
             if (value == null || value.isEmpty) return;
-            ref.read(staffCheckInProvider.notifier).checkIn(qrToken: value);
+            ref.read(staffCheckInProvider.notifier).lookup(qrToken: value);
           },
         ),
 
@@ -266,6 +274,13 @@ class _ManualCodeTab extends ConsumerWidget {
     final checkInState = ref.watch(staffCheckInProvider);
     final notifier = ref.read(staffCheckInProvider.notifier);
 
+    if (checkInState.status == StaffCheckInStatus.preview) {
+      return TicketPreviewView(
+        preview: checkInState.preview!,
+        onCancel: () => ref.read(staffCheckInProvider.notifier).reset(),
+      );
+    }
+
     if (checkInState.status == StaffCheckInStatus.success) {
       return _CheckInResultCard(
         result: checkInState.result!,
@@ -350,7 +365,7 @@ class _ManualCodeTab extends ConsumerWidget {
   void _submit(WidgetRef ref, dynamic s) {
     final code = codeController.text.trim();
     if (code.isEmpty) return;
-    ref.read(staffCheckInProvider.notifier).checkIn(ticketCode: code);
+    ref.read(staffCheckInProvider.notifier).lookup(ticketCode: code);
   }
 }
 
