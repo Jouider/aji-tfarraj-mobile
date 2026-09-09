@@ -18,6 +18,7 @@ import 'package:aji_tfarraj/features/loyalty/data/loyalty_repository.dart';
 import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_mode_provider.dart';
 import 'package:aji_tfarraj/features/badges/presentation/level_badge_card.dart';
+import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
 
 // ─────────────────────────────────────────────
 // Profile Screen
@@ -659,9 +660,20 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Avatar with gradient ring
+        // Avatar with gradient ring.
+        // Tapping the PHOTO enlarges it — that is what someone wants when they
+        // tap their own picture. Changing it stays on the pencil badge below,
+        // which is the explicit affordance for it.
         GestureDetector(
-          onTap: onEditTap,
+          onTap: () {
+            final url = user?.avatarUrl;
+            if (url == null || url.isEmpty) {
+              // Nothing to enlarge yet — send them where they can add one.
+              onEditTap();
+              return;
+            }
+            showFullScreenImage(context, imageUrl: url, heroTag: avatarHeroTag(url));
+          },
           child: Stack(
             alignment: Alignment.bottomRight,
             children: [
@@ -695,7 +707,9 @@ class _ProfileHeader extends StatelessWidget {
                     ),
                     child: ClipOval(
                       child: user?.avatarUrl != null
-                          ? Image.network(
+                          ? Hero(
+                              tag: avatarHeroTag(user!.avatarUrl!),
+                              child: Image.network(
                               user!.avatarUrl!,
                               width: 86,
                               height: 86,
@@ -708,6 +722,7 @@ class _ProfileHeader extends StatelessWidget {
                                   progress == null ? child : _AvatarPlaceholder(),
                               errorBuilder: (_, __, ___) =>
                                   _AvatarPlaceholder(),
+                            ),
                             )
                           : _AvatarPlaceholder(),
                     ),
@@ -731,7 +746,10 @@ class _ProfileHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.edit, size: 13, color: Colors.white),
+                child: GestureDetector(
+                  onTap: onEditTap,
+                  child: const Icon(Icons.edit, size: 13, color: Colors.white),
+                ),
               ),
             ],
           ),
