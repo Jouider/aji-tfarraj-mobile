@@ -52,6 +52,33 @@ enum WrongDateReason {
       };
 }
 
+/// A drop-off point the shuttle serves for this recording.
+class ReturnPointOption {
+  final int id;
+  final String name;
+  final String? nameAr;
+  final String? landmark;
+
+  const ReturnPointOption({
+    required this.id,
+    required this.name,
+    this.nameAr,
+    this.landmark,
+  });
+
+  /// Localised label — falls back to French when no Arabic name is set.
+  String localizedName(bool isAr) =>
+      (isAr && nameAr != null && nameAr!.isNotEmpty) ? nameAr! : name;
+
+  factory ReturnPointOption.fromJson(Map<String, dynamic> json) =>
+      ReturnPointOption(
+        id: json['id'] as int,
+        name: json['name'] as String? ?? '',
+        nameAr: json['name_ar'] as String?,
+        landmark: json['landmark'] as String?,
+      );
+}
+
 class TicketPreview {
   final TicketPreviewStatus status;
   final WrongDateReason? reason;
@@ -71,6 +98,14 @@ class TicketPreview {
   // Reservation
   final int? reservationId;
   final int seats;
+
+  /// Stops the shuttle actually serves tonight. **Empty means there is no
+  /// shuttle for this recording**, and the door must not ask the question.
+  final List<ReturnPointOption> returnPoints;
+
+  /// What this person already answered, if the question was put on an earlier
+  /// scan — so the scanner does not ask twice.
+  final int? chosenReturnPointId;
 
   // Episode / show
   final int? episodeId;
@@ -92,6 +127,8 @@ class TicketPreview {
     this.isMinor = false,
     this.reservationId,
     this.seats = 1,
+    this.returnPoints = const [],
+    this.chosenReturnPointId,
     this.episodeId,
     this.episodeTitle,
     this.episodeStartsAt,
@@ -101,6 +138,33 @@ class TicketPreview {
 
   /// Whether the scanner may validate this entry.
   bool get canAdmit => status == TicketPreviewStatus.canCheckIn;
+
+  /// Whether to ask where they want to be dropped. No served stops means no
+  /// shuttle tonight, so the question would be meaningless.
+  bool get asksReturnPoint => returnPoints.isNotEmpty;
+
+  /// A copy carrying a freshly recorded drop-off choice.
+  TicketPreview withReturnPoint(int? pointId) => TicketPreview(
+        status: status,
+        reason: reason,
+        ticketCode: ticketCode,
+        checkedInAt: checkedInAt,
+        attendeeId: attendeeId,
+        attendeeName: attendeeName,
+        attendeeAvatarUrl: attendeeAvatarUrl,
+        avatarLocked: avatarLocked,
+        attendeePhone: attendeePhone,
+        isMinor: isMinor,
+        reservationId: reservationId,
+        seats: seats,
+        returnPoints: returnPoints,
+        chosenReturnPointId: pointId,
+        episodeId: episodeId,
+        episodeTitle: episodeTitle,
+        episodeStartsAt: episodeStartsAt,
+        studio: studio,
+        showTitle: showTitle,
+      );
 
   /// Whether the door may replace this person's photo. A locked avatar or a
   /// missing account leaves nothing to change.
@@ -121,6 +185,8 @@ class TicketPreview {
         isMinor: isMinor,
         reservationId: reservationId,
         seats: seats,
+        returnPoints: returnPoints,
+        chosenReturnPointId: chosenReturnPointId,
         episodeId: episodeId,
         episodeTitle: episodeTitle,
         episodeStartsAt: episodeStartsAt,
@@ -152,6 +218,11 @@ class TicketPreview {
       isMinor: attendee['is_minor'] as bool? ?? false,
       reservationId: reservation['id'] as int?,
       seats: reservation['seats'] as int? ?? 1,
+      returnPoints: (json['return_points'] as List<dynamic>? ?? [])
+          .map((e) => ReturnPointOption.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      chosenReturnPointId:
+          (reservation['return_point'] as Map<String, dynamic>?)?['id'] as int?,
       episodeId: episode['id'] as int?,
       episodeTitle: episode['title'] as String?,
       episodeStartsAt: parse(episode['starts_at']),

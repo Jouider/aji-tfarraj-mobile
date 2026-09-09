@@ -34,6 +34,27 @@ class TicketPreviewView extends ConsumerStatefulWidget {
 class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
   bool _uploadingPhoto = false;
   String? _photoError;
+  bool _savingReturnPoint = false;
+  String? _returnPointError;
+
+  Future<void> _chooseReturnPoint(int? pointId) async {
+    setState(() {
+      _savingReturnPoint = true;
+      _returnPointError = null;
+    });
+
+    try {
+      await ref.read(staffCheckInProvider.notifier).setReturnPoint(pointId);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _returnPointError = e is ApiException
+            ? e.message
+            : ref.read(stringsProvider).staffReturnPointSaveError);
+      }
+    } finally {
+      if (mounted) setState(() => _savingReturnPoint = false);
+    }
+  }
 
   Future<void> _replacePhoto() async {
     final path = await Navigator.of(context).push<String>(
@@ -109,6 +130,17 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
                   ],
                   const SizedBox(height: AppSpacing.lg),
                   _DetailsCard(preview: preview),
+                  // Only when a shuttle actually runs tonight: an empty list
+                  // means no vehicle, so the question would be meaningless.
+                  if (preview.asksReturnPoint) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    _ReturnPointPicker(
+                      preview: preview,
+                      saving: _savingReturnPoint,
+                      error: _returnPointError,
+                      onChoose: _chooseReturnPoint,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -425,6 +457,146 @@ class _Actions extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+/// Where the shuttle drops this person after the recording.
+///
+/// Optional on purpose: "repart par ses propres moyens" is a real answer, and
+/// forcing a stop would fill the transport figures with noise.
+class _ReturnPointPicker extends ConsumerWidget {
+  const _ReturnPointPicker({
+    required this.preview,
+    required this.saving,
+    required this.error,
+    required this.onChoose,
+  });
+
+  final TicketPreview preview;
+  final bool saving;
+  final String? error;
+  final ValueChanged<int?> onChoose;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    final isAr = ref.watch(isRtlProvider);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundWhite,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.directions_bus_outlined,
+                  size: 18, color: AppColors.secondary),
+              const SizedBox(width: AppSpacing.xs),
+              Text(s.staffReturnPointTitle, style: AppTypography.labelMedium),
+              if (saving) ...[
+                const SizedBox(width: AppSpacing.sm),
+                const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2)),
+              ],
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(s.staffReturnPointQuestion,
+              style:
+                  AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
+          const SizedBox(height: AppSpacing.sm),
+          for (final point in preview.returnPoints)
+            _PointTile(
+              label: point.localizedName(isAr),
+              sublabel: point.landmark,
+              selected: preview.chosenReturnPointId == point.id,
+              enabled: !saving,
+              onTap: () => onChoose(point.id),
+            ),
+          // Clearing must be as easy as choosing.
+          _PointTile(
+            label: s.staffReturnPointNone,
+            selected: preview.chosenReturnPointId == null,
+            enabled: !saving,
+            onTap: () => onChoose(null),
+          ),
+          if (error != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(error!,
+                style: AppTypography.bodySmall
+                    .copyWith(color: AppColors.errorDark)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PointTile extends StatelessWidget {
+  const _PointTile({
+    required this.label,
+    this.sublabel,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final String? sublabel;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.secondary.withValues(alpha: 0.12)
+                : AppColors.backgroundGrey,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            border: Border.all(
+              color: selected ? AppColors.secondary : AppColors.border,
+              width: selected ? 1.5 : 0.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: AppTypography.bodyMedium),
+                    if (sublabel != null)
+                      Text(sublabel!,
+                          style: AppTypography.bodySmall
+                              .copyWith(color: AppColors.textMuted)),
+                  ],
+                ),
+              ),
+              if (selected)
+                Icon(Icons.check_circle, color: AppColors.secondary, size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }

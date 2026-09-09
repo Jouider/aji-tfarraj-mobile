@@ -870,6 +870,12 @@ class StaffCopyFr {
 
   /// Second step of the door flow: the scanner has looked, now admits.
   String get validateEntry => "Valider l'entrée";
+
+  // ── Retour en navette après le tournage ──
+  String get returnPointTitle => 'Retour après le tournage';
+  String get returnPointQuestion => 'Où déposer cette personne ?';
+  String get returnPointNone => 'Repart par ses propres moyens';
+  String get returnPointSaveError => "Impossible d'enregistrer le point.";
   String get cameraPermissionDenied => 'Accès caméra refusé';
   String get cameraPermissionSubtitle =>
       'Autorisez l\'accès à la caméra pour scanner les QR codes.';

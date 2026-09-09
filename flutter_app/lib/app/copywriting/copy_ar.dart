@@ -678,6 +678,12 @@ class StaffCopyAr {
   String get scanAnother => 'مسح بطاقة أخرى';
 
   String get validateEntry => 'أكّد الدخول';
+
+  // ── الرجوع بالنقل بعد التصوير ──
+  String get returnPointTitle => 'الرجوع بعد التصوير';
+  String get returnPointQuestion => 'فين غادي نهبطو هاد الشخص؟';
+  String get returnPointNone => 'غادي يرجع بوحدو';
+  String get returnPointSaveError => 'ما تقدرش نسجلو النقطة.';
   String get cameraPermissionDenied => 'تم رفض الوصول إلى الكاميرا';
   String get cameraPermissionSubtitle =>
       'السماح بالوصول إلى الكاميرا لمسح رموز QR.';

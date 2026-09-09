@@ -1204,6 +1204,23 @@ class AppStrings {
       ? CopyFr.staff.validateEntry
       : CopyAr.staff.validateEntry;
 
+  String get staffReturnPointTitle => locale == AppLocale.fr
+      ? CopyFr.staff.returnPointTitle
+      : CopyAr.staff.returnPointTitle;
+
+  String get staffReturnPointQuestion => locale == AppLocale.fr
+      ? CopyFr.staff.returnPointQuestion
+      : CopyAr.staff.returnPointQuestion;
+
+  String get staffReturnPointNone => locale == AppLocale.fr
+      ? CopyFr.staff.returnPointNone
+      : CopyAr.staff.returnPointNone;
+
+  String get staffReturnPointSaveError => locale == AppLocale.fr
+      ? CopyFr.staff.returnPointSaveError
+      : CopyAr.staff.returnPointSaveError;
+
+
   String get staffCameraPermissionDenied => locale == AppLocale.fr
       ? CopyFr.staff.cameraPermissionDenied
       : CopyAr.staff.cameraPermissionDenied;
