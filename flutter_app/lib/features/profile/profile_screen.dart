@@ -443,6 +443,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   title: s.staffCheckInLabel,
                   onTap: () => context.push(Routes.staffCheckIn),
                 ),
+              // Scanners get this too: they are the ones at the door when
+              // someone turns up without a booking.
+              if (user != null && user.canRegisterOnSite)
+                _SettingsRow(
+                  icon: Icons.person_add_alt_1_outlined,
+                  iconColor: AppColors.primary,
+                  title: s.onSiteTitle,
+                  subtitle: s.onSiteProfileTileSubtitle,
+                  onTap: () => context.push(Routes.onSiteRegistration),
+                ),
               // FIX: Added support entry point
               _SettingsRow(
                 icon: Icons.headset_mic_outlined,

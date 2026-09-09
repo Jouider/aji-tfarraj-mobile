@@ -11,7 +11,11 @@ import 'package:aji_tfarraj/features/profile/data/image_normalize.dart';
 /// Full-screen camera capture with an oval face-guide frame. Front camera,
 /// validates a face is present, and pops the captured file path (or null).
 class FaceCaptureScreen extends ConsumerStatefulWidget {
-  const FaceCaptureScreen({super.key});
+  const FaceCaptureScreen({super.key, this.preferFrontCamera = true});
+
+  /// Selfie mode by default (the user photographing themselves). Door staff
+  /// photographing somebody else in front of them want the back camera.
+  final bool preferFrontCamera;
 
   @override
   ConsumerState<FaceCaptureScreen> createState() => _FaceCaptureScreenState();
@@ -35,12 +39,15 @@ class _FaceCaptureScreenState extends ConsumerState<FaceCaptureScreen>
   Future<void> _initCamera() async {
     try {
       final cameras = await availableCameras();
-      final front = cameras.firstWhere(
-        (c) => c.lensDirection == CameraLensDirection.front,
+      final wanted = widget.preferFrontCamera
+          ? CameraLensDirection.front
+          : CameraLensDirection.back;
+      final camera = cameras.firstWhere(
+        (c) => c.lensDirection == wanted,
         orElse: () => cameras.first,
       );
       final controller = CameraController(
-        front,
+        camera,
         ResolutionPreset.medium,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,

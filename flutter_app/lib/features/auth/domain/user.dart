@@ -177,6 +177,14 @@ class User {
   bool get isAdmin => role == 'admin';
   bool get isStaffOrAdmin => role == 'staff' || role == 'admin';
 
+  /// Check-in-only account used at the door.
+  bool get isScanner => role == 'scanner';
+
+  /// Who may open an account for someone at the door (on-site registration).
+  /// Mirrors the API's `role:staff,admin,scanner` guard — scanners are the
+  /// people physically at the entrance, so they need it most.
+  bool get canRegisterOnSite => isStaffOrAdmin || isScanner;
+
   /// Chargé public by role only.
   bool get isChargePublic => role == 'charge_public';
 

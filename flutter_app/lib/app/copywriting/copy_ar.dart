@@ -110,6 +110,7 @@ class CopyAr {
   // How it works / كيفاش كيخدم
   // ============================================
   static const howItWorks = HowItWorksCopyAr();
+  static const onSite = OnSiteCopyAr();
 
   // ============================================
   // Charge public ("Mode Chargé Public")
@@ -823,6 +824,68 @@ class ReferralCopyAr {
 // ─────────────────────────────────────────────────────────────────────────────
 // How it works / كيفاش كتخدم
 // ─────────────────────────────────────────────────────────────────────────────
+/// Inscription sur place — Arabic (Moroccan Darija)
+class OnSiteCopyAr {
+  const OnSiteCopyAr();
+
+  String get title => 'تسجيل ف عين المكان';
+  String get subtitle => 'حل حساب وسجّل حضور اللي جا بلا حجز.';
+  String get profileTileSubtitle => 'سجّل شي واحد ف الباب';
+
+  String get sessionTitle => 'الجلسة';
+  String get chooseShow => 'ختار البرنامج';
+  String get chooseEpisode => 'ختار الحلقة';
+  String get chooseChargePublic => 'المكلف بالجمهور (اختياري)';
+  String get noChargePublic => 'حتى واحد / جا بوحدو';
+  String get searchChargePublic => 'قلّب على مكلف بالجمهور';
+  String get changeSession => 'بدّل';
+  String get startSession => 'بدا';
+  String get noEpisodes => 'ما كاين حتى حلقة محلولة للتسجيل دابا.';
+  String registeredCount(int n) => '$n مسجّل';
+
+  String get stepPhoto => 'التصويرة';
+  String get stepIdentity => 'الهوية';
+  String get stepLocation => 'المكان';
+  String stepCounter(int current, int total) => 'المرحلة $current / $total';
+
+  String get takePhoto => 'صوّر';
+  String get retakePhoto => 'عاود صوّر';
+  String get photoHint =>
+      'تصويرة الوجه، متاخدة ف الباب. كتخدم باش نعرفو الشخص المرات الجاية.';
+  String get photoRequired => 'التصويرة إجبارية.';
+
+  String get firstName => 'الاسم';
+  String get lastName => 'النسب';
+  String get gender => 'الجنس';
+  String get male => 'راجل';
+  String get female => 'مرا';
+  String get birthday => 'تاريخ الازدياد';
+  String get phone => 'الهاتف (اختياري)';
+  String get email => 'الإيميل (اختياري)';
+  String get emailHint => 'خليه خاوي: غادي يتصاوب إيميل أوتوماتيكي.';
+
+  String get city => 'المدينة';
+  String get district => 'الحي';
+
+  String get next => 'التالي';
+  String get back => 'رجوع';
+  String get submit => 'سجّل وأكّد الحضور';
+  String get nextPerson => 'الشخص اللي من بعد';
+  String get close => 'سالي';
+
+  String get doneTitle => 'تسجّل وتأكد الحضور';
+  String doneSubtitle(String name) => '$name تسجّل وحضورو مأكد.';
+  String get credentials => 'المعلومات ديال الدخول';
+  String get credentialsHint =>
+      'كتبهم ولا قولهم ليه دابا: كلمة السر ماغاديش تبان مرة أخرى.';
+  String get copyCredentials => 'نسخ';
+  String get copied => 'تنسخ';
+  String rewardEarned(int amount) => 'عمولة المكلف بالجمهور: $amount درهم';
+
+  String get requiredFields => 'عمّر جميع الخانات الإجبارية.';
+  String get genericError => 'ما تقدرش التسجيل. عاود جرب.';
+}
+
 class HowItWorksCopyAr {
   const HowItWorksCopyAr();
 

@@ -107,6 +107,7 @@ class CopyFr {
   // How it works / Comment ça marche
   // ============================================
   static const howItWorks = HowItWorksCopyFr();
+  static const onSite = OnSiteCopyFr();
 
   // ============================================
   // Charge public ("Mode Chargé Public")
@@ -681,6 +682,79 @@ class HowToStep {
   final String title;
   final String body;
   const HowToStep({required this.title, required this.body});
+}
+
+/// Inscription sur place (porte du studio) — French
+class OnSiteCopyFr {
+  const OnSiteCopyFr();
+
+  String get title => 'Inscription sur place';
+  String get subtitle =>
+      'Ouvre un compte et pointe la personne qui se présente sans réservation.';
+  String get profileTileSubtitle => 'Inscrire quelqu\'un à la porte';
+
+  // Session (choisie une fois, gardée pour les inscriptions suivantes)
+  String get sessionTitle => 'Session';
+  String get chooseShow => 'Choisis l\'émission';
+  String get chooseEpisode => 'Choisis l\'épisode';
+  String get chooseChargePublic => 'Chargé public (optionnel)';
+  String get noChargePublic => 'Personne / venu seul';
+  String get searchChargePublic => 'Rechercher un chargé public';
+  String get changeSession => 'Changer';
+  String get startSession => 'Commencer';
+  String get noEpisodes =>
+      'Aucun épisode ouvert à l\'inscription pour le moment.';
+  String registeredCount(int n) => n <= 1 ? '$n inscrit' : '$n inscrits';
+
+  // Étapes
+  String get stepPhoto => 'Photo';
+  String get stepIdentity => 'Identité';
+  String get stepLocation => 'Localisation';
+  String stepCounter(int current, int total) => 'Étape $current / $total';
+
+  // Photo
+  String get takePhoto => 'Prendre la photo';
+  String get retakePhoto => 'Reprendre';
+  String get photoHint =>
+      'Photo du visage, prise à la porte. Elle sert à reconnaître la personne les prochaines fois.';
+  String get photoRequired => 'La photo est obligatoire.';
+
+  // Identité
+  String get firstName => 'Prénom';
+  String get lastName => 'Nom';
+  String get gender => 'Sexe';
+  String get male => 'Homme';
+  String get female => 'Femme';
+  String get birthday => 'Date de naissance';
+  String get phone => 'Téléphone (optionnel)';
+  String get email => 'E-mail (optionnel)';
+  String get emailHint =>
+      'Laisse vide : un identifiant sera généré automatiquement.';
+
+  // Localisation
+  String get city => 'Ville';
+  String get district => 'Secteur';
+
+  // Actions
+  String get next => 'Suivant';
+  String get back => 'Retour';
+  String get submit => 'Inscrire et pointer';
+  String get nextPerson => 'Personne suivante';
+  String get close => 'Terminer';
+
+  // Résultat
+  String get doneTitle => 'Inscrit et pointé';
+  String doneSubtitle(String name) => '$name est enregistré et déjà pointé.';
+  String get credentials => 'Identifiants à communiquer';
+  String get credentialsHint =>
+      'Note-les ou dicte-les maintenant : le mot de passe ne sera plus affiché.';
+  String get copyCredentials => 'Copier';
+  String get copied => 'Copié';
+  String rewardEarned(int amount) => 'Commission chargé public : $amount DH';
+
+  // Erreurs
+  String get requiredFields => 'Remplis tous les champs obligatoires.';
+  String get genericError => 'Inscription impossible. Réessaye.';
 }
 
 /// Conditions de participation du public — French

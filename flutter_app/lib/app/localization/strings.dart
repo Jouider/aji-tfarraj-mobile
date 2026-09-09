@@ -1380,6 +1380,193 @@ class AppStrings {
       : CopyAr.howItWorks.parrainVideoUrl;
 
   // ============================================
+  // Inscription sur place (on-site registration)
+  // ============================================
+  String get onSiteTitle => locale == AppLocale.fr
+      ? CopyFr.onSite.title
+      : CopyAr.onSite.title;
+
+  String get onSiteSubtitle => locale == AppLocale.fr
+      ? CopyFr.onSite.subtitle
+      : CopyAr.onSite.subtitle;
+
+  String get onSiteProfileTileSubtitle => locale == AppLocale.fr
+      ? CopyFr.onSite.profileTileSubtitle
+      : CopyAr.onSite.profileTileSubtitle;
+
+  String get onSiteSessionTitle => locale == AppLocale.fr
+      ? CopyFr.onSite.sessionTitle
+      : CopyAr.onSite.sessionTitle;
+
+  String get onSiteChooseShow => locale == AppLocale.fr
+      ? CopyFr.onSite.chooseShow
+      : CopyAr.onSite.chooseShow;
+
+  String get onSiteChooseEpisode => locale == AppLocale.fr
+      ? CopyFr.onSite.chooseEpisode
+      : CopyAr.onSite.chooseEpisode;
+
+  String get onSiteChooseChargePublic => locale == AppLocale.fr
+      ? CopyFr.onSite.chooseChargePublic
+      : CopyAr.onSite.chooseChargePublic;
+
+  String get onSiteNoChargePublic => locale == AppLocale.fr
+      ? CopyFr.onSite.noChargePublic
+      : CopyAr.onSite.noChargePublic;
+
+  String get onSiteSearchChargePublic => locale == AppLocale.fr
+      ? CopyFr.onSite.searchChargePublic
+      : CopyAr.onSite.searchChargePublic;
+
+  String get onSiteChangeSession => locale == AppLocale.fr
+      ? CopyFr.onSite.changeSession
+      : CopyAr.onSite.changeSession;
+
+  String get onSiteStartSession => locale == AppLocale.fr
+      ? CopyFr.onSite.startSession
+      : CopyAr.onSite.startSession;
+
+  String get onSiteNoEpisodes => locale == AppLocale.fr
+      ? CopyFr.onSite.noEpisodes
+      : CopyAr.onSite.noEpisodes;
+
+  String get onSiteStepPhoto => locale == AppLocale.fr
+      ? CopyFr.onSite.stepPhoto
+      : CopyAr.onSite.stepPhoto;
+
+  String get onSiteStepIdentity => locale == AppLocale.fr
+      ? CopyFr.onSite.stepIdentity
+      : CopyAr.onSite.stepIdentity;
+
+  String get onSiteStepLocation => locale == AppLocale.fr
+      ? CopyFr.onSite.stepLocation
+      : CopyAr.onSite.stepLocation;
+
+  String get onSiteTakePhoto => locale == AppLocale.fr
+      ? CopyFr.onSite.takePhoto
+      : CopyAr.onSite.takePhoto;
+
+  String get onSiteRetakePhoto => locale == AppLocale.fr
+      ? CopyFr.onSite.retakePhoto
+      : CopyAr.onSite.retakePhoto;
+
+  String get onSitePhotoHint => locale == AppLocale.fr
+      ? CopyFr.onSite.photoHint
+      : CopyAr.onSite.photoHint;
+
+  String get onSitePhotoRequired => locale == AppLocale.fr
+      ? CopyFr.onSite.photoRequired
+      : CopyAr.onSite.photoRequired;
+
+  String get onSiteFirstName => locale == AppLocale.fr
+      ? CopyFr.onSite.firstName
+      : CopyAr.onSite.firstName;
+
+  String get onSiteLastName => locale == AppLocale.fr
+      ? CopyFr.onSite.lastName
+      : CopyAr.onSite.lastName;
+
+  String get onSiteGender => locale == AppLocale.fr
+      ? CopyFr.onSite.gender
+      : CopyAr.onSite.gender;
+
+  String get onSiteMale => locale == AppLocale.fr
+      ? CopyFr.onSite.male
+      : CopyAr.onSite.male;
+
+  String get onSiteFemale => locale == AppLocale.fr
+      ? CopyFr.onSite.female
+      : CopyAr.onSite.female;
+
+  String get onSiteBirthday => locale == AppLocale.fr
+      ? CopyFr.onSite.birthday
+      : CopyAr.onSite.birthday;
+
+  String get onSitePhone => locale == AppLocale.fr
+      ? CopyFr.onSite.phone
+      : CopyAr.onSite.phone;
+
+  String get onSiteEmail => locale == AppLocale.fr
+      ? CopyFr.onSite.email
+      : CopyAr.onSite.email;
+
+  String get onSiteEmailHint => locale == AppLocale.fr
+      ? CopyFr.onSite.emailHint
+      : CopyAr.onSite.emailHint;
+
+  String get onSiteCity => locale == AppLocale.fr
+      ? CopyFr.onSite.city
+      : CopyAr.onSite.city;
+
+  String get onSiteDistrict => locale == AppLocale.fr
+      ? CopyFr.onSite.district
+      : CopyAr.onSite.district;
+
+  String get onSiteNext => locale == AppLocale.fr
+      ? CopyFr.onSite.next
+      : CopyAr.onSite.next;
+
+  String get onSiteBack => locale == AppLocale.fr
+      ? CopyFr.onSite.back
+      : CopyAr.onSite.back;
+
+  String get onSiteSubmit => locale == AppLocale.fr
+      ? CopyFr.onSite.submit
+      : CopyAr.onSite.submit;
+
+  String get onSiteNextPerson => locale == AppLocale.fr
+      ? CopyFr.onSite.nextPerson
+      : CopyAr.onSite.nextPerson;
+
+  String get onSiteClose => locale == AppLocale.fr
+      ? CopyFr.onSite.close
+      : CopyAr.onSite.close;
+
+  String get onSiteDoneTitle => locale == AppLocale.fr
+      ? CopyFr.onSite.doneTitle
+      : CopyAr.onSite.doneTitle;
+
+  String get onSiteCredentials => locale == AppLocale.fr
+      ? CopyFr.onSite.credentials
+      : CopyAr.onSite.credentials;
+
+  String get onSiteCredentialsHint => locale == AppLocale.fr
+      ? CopyFr.onSite.credentialsHint
+      : CopyAr.onSite.credentialsHint;
+
+  String get onSiteCopyCredentials => locale == AppLocale.fr
+      ? CopyFr.onSite.copyCredentials
+      : CopyAr.onSite.copyCredentials;
+
+  String get onSiteCopied => locale == AppLocale.fr
+      ? CopyFr.onSite.copied
+      : CopyAr.onSite.copied;
+
+  String get onSiteRequiredFields => locale == AppLocale.fr
+      ? CopyFr.onSite.requiredFields
+      : CopyAr.onSite.requiredFields;
+
+  String get onSiteGenericError => locale == AppLocale.fr
+      ? CopyFr.onSite.genericError
+      : CopyAr.onSite.genericError;
+
+  String onSiteRegisteredCount(int n) => locale == AppLocale.fr
+      ? CopyFr.onSite.registeredCount(n)
+      : CopyAr.onSite.registeredCount(n);
+
+  String onSiteStepCounter(int current, int total) => locale == AppLocale.fr
+      ? CopyFr.onSite.stepCounter(current, total)
+      : CopyAr.onSite.stepCounter(current, total);
+
+  String onSiteDoneSubtitle(String name) => locale == AppLocale.fr
+      ? CopyFr.onSite.doneSubtitle(name)
+      : CopyAr.onSite.doneSubtitle(name);
+
+  String onSiteRewardEarned(int amount) => locale == AppLocale.fr
+      ? CopyFr.onSite.rewardEarned(amount)
+      : CopyAr.onSite.rewardEarned(amount);
+
+  // ============================================
   // Referral / Parrainage
   // ============================================
   String get referralTitle => locale == AppLocale.fr

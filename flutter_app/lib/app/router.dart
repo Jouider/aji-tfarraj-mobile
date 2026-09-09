@@ -27,6 +27,7 @@ import 'package:aji_tfarraj/features/notifications/presentation/notification_cen
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.dart';
+import 'package:aji_tfarraj/features/on_site/presentation/on_site_registration_screen.dart';
 import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
 import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
 import 'package:aji_tfarraj/features/how_it_works/presentation/how_it_works_screen.dart';
@@ -50,6 +51,7 @@ const _protectedRoutes = [
   Routes.rewards,
   Routes.myRewards,
   Routes.staffCheckIn,
+  Routes.onSiteRegistration,
   Routes.referralStats,
   Routes.referralLinks,
 ];
@@ -124,6 +126,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isAuthenticated && currentPath == Routes.staffCheckIn) {
         final user = ref.read(loginAuthStateProvider).user;
         if (user != null && !user.isStaffOrAdmin) {
+          return Routes.home;
+        }
+      }
+
+      // On-site registration also admits scanners — they are the ones at the
+      // door — matching the API's role:staff,admin,scanner guard.
+      if (isAuthenticated && currentPath == Routes.onSiteRegistration) {
+        final user = ref.read(loginAuthStateProvider).user;
+        if (user != null && !user.canRegisterOnSite) {
           return Routes.home;
         }
       }
@@ -351,6 +362,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.staffCheckIn,
         name: 'staffCheckIn',
         builder: (context, state) => const StaffCheckInScreen(),
+      ),
+      GoRoute(
+        path: Routes.onSiteRegistration,
+        name: 'onSiteRegistration',
+        builder: (context, state) => const OnSiteRegistrationScreen(),
       ),
       GoRoute(
         path: Routes.rules,

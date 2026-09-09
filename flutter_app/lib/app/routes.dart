@@ -55,6 +55,7 @@ class Routes {
 
   // Staff check-in (full screen, outside shell — staff/admin only)
   static const staffCheckIn = '/staff/check-in';
+  static const onSiteRegistration = '/staff/on-site-registration';
 
   // Legal / participation conditions (full screen, outside shell — public)
   static const rules = '/rules';
