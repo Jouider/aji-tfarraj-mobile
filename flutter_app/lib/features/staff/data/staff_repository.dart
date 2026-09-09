@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/staff/domain/staff_check_in_result.dart';
+import 'package:aji_tfarraj/features/staff/domain/ticket_preview.dart';
 
 class StaffRepository {
   final ApiClient _apiClient;
@@ -50,6 +51,53 @@ class StaffRepository {
       throw ApiException.from(e);
     }
   }
+
+  /// Look at a ticket WITHOUT admitting anyone.
+  ///
+  /// Free of side effects on purpose, so the scanner can scan to check the face
+  /// against the photo — and fix a bad one — before validating.
+  Future<TicketPreview> lookup({String? qrToken, String? ticketCode}) async {
+    assert(
+      (qrToken != null) != (ticketCode != null),
+      'Exactly one of qrToken or ticketCode must be provided',
+    );
+
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '/api/staff/ticket/lookup',
+        data: qrToken != null
+            ? {'qr_token': qrToken}
+            : {'ticket_code': ticketCode},
+      );
+      return TicketPreview.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
+  /// Replace the attendee's photo from the door. Returns the new avatar URL.
+  Future<String?> replaceAttendeePhoto({
+    required int attendeeId,
+    required String photoPath,
+  }) async {
+    try {
+      final form = FormData.fromMap({
+        'photo': await MultipartFile.fromFile(photoPath, filename: 'door.jpg'),
+      });
+
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '/api/staff/attendees/$attendeeId/photo',
+        data: form,
+      );
+      return response.data?['avatar_url'] as String?;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
 }
 
 final staffRepositoryProvider = Provider<StaffRepository>((ref) {
@@ -58,11 +106,16 @@ final staffRepositoryProvider = Provider<StaffRepository>((ref) {
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
-enum StaffCheckInStatus { idle, loading, success, error }
+/// [preview] sits between scanning and success: the scanner is looking at who
+/// is in front of them and has not admitted anyone yet.
+enum StaffCheckInStatus { idle, loading, preview, success, error }
 
 class StaffCheckInState {
   final StaffCheckInStatus status;
   final StaffCheckInResult? result;
+
+  /// Who was scanned, before anyone is admitted.
+  final TicketPreview? preview;
   final String? errorMessage;
   /// checked_in_at from a 409 response, if available
   final DateTime? alreadyCheckedInAt;
@@ -72,6 +125,7 @@ class StaffCheckInState {
   const StaffCheckInState({
     this.status = StaffCheckInStatus.idle,
     this.result,
+    this.preview,
     this.errorMessage,
     this.alreadyCheckedInAt,
     this.scannerActive = true,
@@ -80,6 +134,7 @@ class StaffCheckInState {
   StaffCheckInState copyWith({
     StaffCheckInStatus? status,
     StaffCheckInResult? result,
+    TicketPreview? preview,
     String? errorMessage,
     DateTime? alreadyCheckedInAt,
     bool? scannerActive,
@@ -87,6 +142,7 @@ class StaffCheckInState {
     return StaffCheckInState(
       status: status ?? this.status,
       result: result ?? this.result,
+      preview: preview ?? this.preview,
       errorMessage: errorMessage ?? this.errorMessage,
       alreadyCheckedInAt: alreadyCheckedInAt ?? this.alreadyCheckedInAt,
       scannerActive: scannerActive ?? this.scannerActive,
@@ -98,6 +154,71 @@ class StaffCheckInNotifier extends StateNotifier<StaffCheckInState> {
   final StaffRepository _repository;
 
   StaffCheckInNotifier(this._repository) : super(const StaffCheckInState());
+
+  /// Step 1 — look at the ticket. Admits nobody.
+  ///
+  /// Every outcome except a hard failure lands in [StaffCheckInStatus.preview]:
+  /// a refusal is something the scanner must *read*, not a dead end, and the
+  /// refused ticket details still help them explain it to the person.
+  Future<void> lookup({String? qrToken, String? ticketCode}) async {
+    if (state.status == StaffCheckInStatus.loading) return;
+
+    state = state.copyWith(
+      status: StaffCheckInStatus.loading,
+      scannerActive: false,
+    );
+
+    try {
+      final preview = await _repository.lookup(
+        qrToken: qrToken,
+        ticketCode: ticketCode,
+      );
+      state = StaffCheckInState(
+        status: StaffCheckInStatus.preview,
+        preview: preview,
+        scannerActive: false,
+      );
+    } on ApiException catch (e) {
+      state = StaffCheckInState(
+        status: StaffCheckInStatus.error,
+        errorMessage: _mapErrorMessage(e),
+        scannerActive: false,
+      );
+    } catch (_) {
+      state = const StaffCheckInState(
+        status: StaffCheckInStatus.error,
+        errorMessage: 'Impossible de vérifier le billet pour le moment.',
+        scannerActive: false,
+      );
+    }
+  }
+
+  /// Step 2 — admit the person shown in the preview.
+  Future<void> confirmPreview() async {
+    final preview = state.preview;
+    if (preview == null || !preview.canAdmit) return;
+
+    await checkIn(ticketCode: preview.ticketCode);
+  }
+
+  /// Replace the attendee's photo without leaving the preview, so the scanner
+  /// fixes it and validates in one go.
+  Future<String?> replacePhoto(String photoPath) async {
+    final preview = state.preview;
+    final id = preview?.attendeeId;
+    if (preview == null || id == null) return null;
+
+    final url = await _repository.replaceAttendeePhoto(
+      attendeeId: id,
+      photoPath: photoPath,
+    );
+
+    if (url != null) {
+      state = state.copyWith(preview: preview.withAvatarUrl(url));
+    }
+
+    return url;
+  }
 
   Future<void> checkIn({String? qrToken, String? ticketCode}) async {
     if (state.status == StaffCheckInStatus.loading) return;
