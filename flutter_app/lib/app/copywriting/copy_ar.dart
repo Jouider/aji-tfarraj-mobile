@@ -701,7 +701,6 @@ class StaffCopyAr {
   String get manifestWaiting => 'كيتسناو الطوبيس';
   String get manifestOwnMeans => 'غاديين براسهم';
   String get manifestPeople => 'شخص';
-  String get manifestTickets => 'تذاكر';
   String get manifestEmptyStop => 'حتى واحد';
   String get manifestOffList => 'ماشي من لائحة هاد التصوير';
   String get manifestOrphanWarning =>

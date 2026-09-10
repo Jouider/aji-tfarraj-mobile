@@ -412,8 +412,7 @@ class _PointCardState extends State<_PointCard> {
                                 .copyWith(color: AppColors.textPrimary),
                       ),
                       if (!empty)
-                        Text(
-                            '${point.tickets} ${s.staffManifestTickets}',
+                        Text(s.staffManifestPeople,
                             style: AppTypography.caption
                                 .copyWith(color: AppColors.textMuted)),
                     ],

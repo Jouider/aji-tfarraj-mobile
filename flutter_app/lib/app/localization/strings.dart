@@ -1252,10 +1252,6 @@ class AppStrings {
       ? CopyFr.staff.manifestPeople
       : CopyAr.staff.manifestPeople;
 
-  String get staffManifestTickets => locale == AppLocale.fr
-      ? CopyFr.staff.manifestTickets
-      : CopyAr.staff.manifestTickets;
-
   String get staffManifestEmptyStop => locale == AppLocale.fr
       ? CopyFr.staff.manifestEmptyStop
       : CopyAr.staff.manifestEmptyStop;

@@ -36,6 +36,8 @@ void main() {
             'people': 14,
             'tickets': 9,
             'passengers': [
+              // A booking is one seat now; an older multi-seat row must still
+              // render rather than silently under-report the driver's load.
               {'name': 'Ahmed Bennani', 'seats': 3},
               // A name in Arabic script must not blow the builder up: the
               // built-in PDF fonts have no Arabic glyphs, which is exactly why

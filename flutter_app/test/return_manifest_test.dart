@@ -59,6 +59,9 @@ void main() {
       };
 
   group('reading the sheet', () {
+    /// A booking is capped at one seat by the API, so `people` and `tickets`
+    /// normally match. The two are still read apart: older multi-seat rows
+    /// exist, and under-reporting one would leave someone at the kerb.
     test('parses the headcount the dispatcher sizes vehicles from', () {
       final m = ReturnManifest.fromJson(payload());
 
@@ -72,7 +75,7 @@ void main() {
       expect(m.episode.studio, 'Studio 2M Ain Sebaa');
     });
 
-    test('names the passengers, with group sizes', () {
+    test('names the passengers, and any legacy group size', () {
       final m = ReturnManifest.fromJson(payload());
 
       expect(m.points.single.passengers, hasLength(2));

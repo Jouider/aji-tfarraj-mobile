@@ -894,7 +894,6 @@ class StaffCopyFr {
   String get manifestWaiting => 'attendent la navette';
   String get manifestOwnMeans => 'repartent seules';
   String get manifestPeople => 'pers.';
-  String get manifestTickets => 'billets';
   String get manifestEmptyStop => 'personne';
   String get manifestOffList => 'hors liste de ce tournage';
   String get manifestOrphanWarning =>

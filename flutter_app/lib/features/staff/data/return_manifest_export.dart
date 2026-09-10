@@ -220,11 +220,12 @@ class ReturnManifestExport {
       border: pw.TableBorder.symmetric(
         inside: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
       ),
+      // No ticket-count column: a booking is capped at one seat, so it would
+      // repeat the headcount in a narrower font.
       columnWidths: const {
         0: pw.FlexColumnWidth(3),
         1: pw.FlexColumnWidth(3),
-        2: pw.FixedColumnWidth(55),
-        3: pw.FixedColumnWidth(70),
+        2: pw.FixedColumnWidth(75),
       },
       children: [
         pw.TableRow(
@@ -232,7 +233,6 @@ class ReturnManifestExport {
           children: [
             head('Arrêt'),
             head('Repère'),
-            head('Billets', align: pw.Alignment.centerRight),
             head('Personnes', align: pw.Alignment.centerRight),
           ],
         ),
@@ -255,8 +255,6 @@ class ReturnManifestExport {
             )),
             cell(_text(point.landmark ?? '—',
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
-            cell(pw.Text('${point.tickets}', style: const pw.TextStyle(fontSize: 10)),
-                align: pw.Alignment.centerRight),
             cell(
               pw.Text('${point.people}',
                   style: pw.TextStyle(
@@ -272,7 +270,6 @@ class ReturnManifestExport {
             cell(pw.Text('Total navette',
                 style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
             cell(pw.SizedBox()),
-            cell(pw.SizedBox()),
             cell(
               pw.Text('${manifest.riders}',
                   style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
@@ -285,6 +282,9 @@ class ReturnManifestExport {
   }
 
   /// Names per stop, so the driver can call them at the door of the vehicle.
+  ///
+  /// Two columns: a busy stop runs to twenty-odd people, and one name per line
+  /// down an A4 page would have the driver flipping pages at the kerb.
   static List<pw.Widget> _passengerLists(ReturnManifest manifest) {
     final withPeople = manifest.servedTonight;
     if (withPeople.isEmpty) return [];
@@ -293,50 +293,92 @@ class ReturnManifestExport {
       pw.Text('Passagers par arrêt',
           style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
       pw.SizedBox(height: 10),
-      for (final point in withPeople)
-        pw.Container(
-          margin: const pw.EdgeInsets.only(bottom: 14),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Row(children: [
-                pw.Expanded(
-                  child: _text(point.name,
-                      style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                ),
-                pw.Text('${point.people} pers.',
-                    style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
-              ]),
-              pw.Divider(height: 8, color: PdfColors.grey300),
-              for (final passenger in point.passengers)
-                pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(vertical: 2),
-                  child: pw.Row(children: [
-                    // An empty box in front of each name: the driver ticks
-                    // people off on paper as they board.
-                    pw.Container(
-                      width: 8,
-                      height: 8,
-                      margin: const pw.EdgeInsets.only(right: 8),
-                      decoration: pw.BoxDecoration(
-                        border: pw.Border.all(color: PdfColors.grey500, width: 0.6),
-                      ),
-                    ),
-                    pw.Expanded(
-                      child: _text(passenger.name,
-                          style: const pw.TextStyle(fontSize: 9)),
-                    ),
-                    if (passenger.seats > 1)
-                      pw.Text('×${passenger.seats}',
-                          style: pw.TextStyle(
-                              fontSize: 9, fontWeight: pw.FontWeight.bold)),
-                  ]),
-                ),
-            ],
-          ),
-        ),
+      for (final point in withPeople) _pointBlock(point),
     ];
   }
+
+  /// A stop's heading stays with its names.
+  ///
+  /// Only up to [_keepTogetherLimit] though: MultiPage *throws* on an
+  /// inseparable block taller than a page, and crashing in the scanner's hands
+  /// at the end of a recording is far worse than a heading left at a page
+  /// bottom. Beyond that the block spans, as it did before.
+  static const _keepTogetherLimit = 24;
+
+  static pw.Widget _pointBlock(ManifestPoint point) {
+    final block = pw.Container(
+      margin: const pw.EdgeInsets.only(bottom: 16),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(children: [
+            pw.Expanded(
+              child: _text(point.name,
+                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+            ),
+            pw.Text('${point.people} pers.',
+                style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+          ]),
+          pw.Divider(height: 8, color: PdfColors.grey300),
+          _passengerGrid(point.passengers),
+        ],
+      ),
+    );
+
+    return point.passengers.length <= _keepTogetherLimit
+        ? pw.Inseparable(child: block)
+        : block;
+  }
+
+  /// Two per row, filled left to right. A Table rather than a Wrap so the two
+  /// columns line up and the rows break cleanly across pages.
+  static pw.Widget _passengerGrid(List<ManifestPassenger> passengers) {
+    const columns = 2;
+    final rows = <pw.TableRow>[];
+
+    for (var i = 0; i < passengers.length; i += columns) {
+      rows.add(pw.TableRow(
+        children: [
+          for (var column = 0; column < columns; column++)
+            i + column < passengers.length
+                ? _passengerCell(passengers[i + column])
+                : pw.SizedBox(),
+        ],
+      ));
+    }
+
+    return pw.Table(
+      columnWidths: const {
+        0: pw.FlexColumnWidth(),
+        1: pw.FlexColumnWidth(),
+      },
+      children: rows,
+    );
+  }
+
+  static pw.Widget _passengerCell(ManifestPassenger passenger) => pw.Padding(
+        padding: const pw.EdgeInsets.only(right: 12, top: 3, bottom: 3),
+        child: pw.Row(children: [
+          // An empty box in front of each name: the driver ticks people off on
+          // paper as they board.
+          pw.Container(
+            width: 8,
+            height: 8,
+            margin: const pw.EdgeInsets.only(right: 8),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.grey500, width: 0.6),
+            ),
+          ),
+          pw.Expanded(
+            child: _text(passenger.name, style: const pw.TextStyle(fontSize: 9)),
+          ),
+          // Never happens while a booking is capped at one seat, but a legacy
+          // multi-seat row must not be under-reported to the driver.
+          if (passenger.seats > 1)
+            pw.Text('×${passenger.seats}',
+                style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+        ]),
+      );
 
   // ── Plain text ────────────────────────────────────────────────────────────
 

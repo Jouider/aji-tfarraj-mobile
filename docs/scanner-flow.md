@@ -109,16 +109,19 @@ seul tournage** : confirmer la seule réponse possible ne sert à rien.
    26 attendent · 16 repartent seules · 42 entrees
               |
               v
-   Ain Sebaa      14   9 billets   > (deplier -> les noms)
-   Maarif         12   7 billets   >
-   Zenata      personne
+   Ain Sebaa       7 pers.   > (deplier -> les noms)
+   Maarif          6 pers.   >
+   Zenata       personne
               |
               v
         << Envoyer au transport >>
 ```
 
-Le **nombre de personnes** est en gros, pas le nombre de billets : c'est ce qui
-dimensionne le véhicule. Un billet de 4 places occupe 4 sièges.
+Le **nombre de personnes** est en gros. Une réservation est plafonnée à
+**une place** par l'API (`seats: min:1|max:1`), donc afficher en plus un nombre
+de billets répéterait le même chiffre en plus petit — la colonne a été retirée.
+Le modèle lit quand même les deux : d'anciennes réservations multi-places
+existent, et en sous-déclarer une laisserait quelqu'un sur le trottoir.
 
 Les **noms sont repliés**. On les ouvre au pied du véhicule pour faire l'appel,
 pas pendant qu'on lit les totaux.
@@ -139,6 +142,14 @@ Deux formats, parce qu'ils sont lus par des gens différents :
 |---|---|
 | **PDF** | Le dossier, et le chauffeur qui coche les noms au pied du véhicule (une case vide devant chaque nom) |
 | **Message** | Le responsable transport, qui veut juste les chiffres sur WhatsApp à 23 h |
+
+Le PDF tient en trois colonnes — **arrêt, repère, personnes** — puis liste les
+**noms par arrêt sur deux colonnes**, avec une case à cocher : un arrêt chargé
+fait vingt et quelques personnes, et un nom par ligne ferait tourner les pages
+au chauffeur sur le trottoir. Le titre d'un arrêt reste collé à ses noms
+(`pw.Inseparable`), sauf au-delà de 24 passagers — `MultiPage` **lève une
+exception** sur un bloc insécable plus haut qu'une page, et planter dans les
+mains du scanneur serait pire qu'un titre en bas de page.
 
 Le PDF embarque **Cairo** (sous-ensemble latin + arabe, OFL, ~73 Ko × 2). Les
 polices intégrées d'un PDF n'ont **aucun glyphe arabe** : sans ça un nom en
