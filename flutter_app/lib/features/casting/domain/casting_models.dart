@@ -122,7 +122,12 @@ class CastingCall {
   final String? titleAr;
   final String? description;
   final String? descriptionAr;
+  /// The cover — first in the sequence an admin arranged.
   final String? imageUrl;
+
+  /// Every picture, cover first. Empty for a call with no visual.
+  final List<String> imageUrls;
+
   final String? city;
   final String? gender;
   final int? minAge;
@@ -140,6 +145,7 @@ class CastingCall {
     this.description,
     this.descriptionAr,
     this.imageUrl,
+    this.imageUrls = const [],
     this.city,
     this.gender,
     this.minAge,
@@ -166,6 +172,9 @@ class CastingCall {
         description: json['description'] as String?,
         descriptionAr: json['description_ar'] as String?,
         imageUrl: json['image_url'] as String?,
+        imageUrls: (json['image_urls'] as List<dynamic>? ?? const [])
+            .whereType<String>()
+            .toList(),
         city: json['city'] as String?,
         gender: json['gender'] as String?,
         minAge: json['min_age'] as int?,
