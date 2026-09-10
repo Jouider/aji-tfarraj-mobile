@@ -1196,6 +1196,106 @@ class AppStrings {
       ? CopyFr.staff.networkError
       : CopyAr.staff.networkError;
 
+
+  // ============================================
+  // Shuttle manifest (staff)
+  // ============================================
+  String get staffManifestTitle => locale == AppLocale.fr
+      ? CopyFr.staff.manifestTitle
+      : CopyAr.staff.manifestTitle;
+
+  String get staffManifestSubtitle => locale == AppLocale.fr
+      ? CopyFr.staff.manifestSubtitle
+      : CopyAr.staff.manifestSubtitle;
+
+  String get staffManifestPickEpisode => locale == AppLocale.fr
+      ? CopyFr.staff.manifestPickEpisode
+      : CopyAr.staff.manifestPickEpisode;
+
+  String get staffManifestNoEpisodes => locale == AppLocale.fr
+      ? CopyFr.staff.manifestNoEpisodes
+      : CopyAr.staff.manifestNoEpisodes;
+
+  String get staffManifestNoEpisodesSubtitle => locale == AppLocale.fr
+      ? CopyFr.staff.manifestNoEpisodesSubtitle
+      : CopyAr.staff.manifestNoEpisodesSubtitle;
+
+  String get staffManifestNoShuttle => locale == AppLocale.fr
+      ? CopyFr.staff.manifestNoShuttle
+      : CopyAr.staff.manifestNoShuttle;
+
+  String get staffManifestNoShuttleSubtitle => locale == AppLocale.fr
+      ? CopyFr.staff.manifestNoShuttleSubtitle
+      : CopyAr.staff.manifestNoShuttleSubtitle;
+
+  String get staffManifestNobody => locale == AppLocale.fr
+      ? CopyFr.staff.manifestNobody
+      : CopyAr.staff.manifestNobody;
+
+  String get staffManifestNobodySubtitle => locale == AppLocale.fr
+      ? CopyFr.staff.manifestNobodySubtitle
+      : CopyAr.staff.manifestNobodySubtitle;
+
+  String get staffManifestPeopleIn => locale == AppLocale.fr
+      ? CopyFr.staff.manifestPeopleIn
+      : CopyAr.staff.manifestPeopleIn;
+
+  String get staffManifestWaiting => locale == AppLocale.fr
+      ? CopyFr.staff.manifestWaiting
+      : CopyAr.staff.manifestWaiting;
+
+  String get staffManifestOwnMeans => locale == AppLocale.fr
+      ? CopyFr.staff.manifestOwnMeans
+      : CopyAr.staff.manifestOwnMeans;
+
+  String get staffManifestPeople => locale == AppLocale.fr
+      ? CopyFr.staff.manifestPeople
+      : CopyAr.staff.manifestPeople;
+
+  String get staffManifestEmptyStop => locale == AppLocale.fr
+      ? CopyFr.staff.manifestEmptyStop
+      : CopyAr.staff.manifestEmptyStop;
+
+  String get staffManifestOffList => locale == AppLocale.fr
+      ? CopyFr.staff.manifestOffList
+      : CopyAr.staff.manifestOffList;
+
+  String get staffManifestOrphanWarning => locale == AppLocale.fr
+      ? CopyFr.staff.manifestOrphanWarning
+      : CopyAr.staff.manifestOrphanWarning;
+
+  String get staffManifestShare => locale == AppLocale.fr
+      ? CopyFr.staff.manifestShare
+      : CopyAr.staff.manifestShare;
+
+  String get staffManifestSharePdf => locale == AppLocale.fr
+      ? CopyFr.staff.manifestSharePdf
+      : CopyAr.staff.manifestSharePdf;
+
+  String get staffManifestShareText => locale == AppLocale.fr
+      ? CopyFr.staff.manifestShareText
+      : CopyAr.staff.manifestShareText;
+
+  String get staffManifestShareError => locale == AppLocale.fr
+      ? CopyFr.staff.manifestShareError
+      : CopyAr.staff.manifestShareError;
+
+  String get staffManifestRefresh => locale == AppLocale.fr
+      ? CopyFr.staff.manifestRefresh
+      : CopyAr.staff.manifestRefresh;
+
+  String get staffManifestLoadError => locale == AppLocale.fr
+      ? CopyFr.staff.manifestLoadError
+      : CopyAr.staff.manifestLoadError;
+
+  String get staffManifestGeneratedAt => locale == AppLocale.fr
+      ? CopyFr.staff.manifestGeneratedAt
+      : CopyAr.staff.manifestGeneratedAt;
+
+  String get staffProfileManifestTile => locale == AppLocale.fr
+      ? CopyFr.staff.profileManifestTile
+      : CopyAr.staff.profileManifestTile;
+
   String get staffScanAnother => locale == AppLocale.fr
       ? CopyFr.staff.scanAnother
       : CopyAr.staff.scanAnother;

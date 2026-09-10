@@ -876,6 +876,36 @@ class StaffCopyFr {
   String get returnPointQuestion => 'Où déposer cette personne ?';
   String get returnPointNone => 'Repart par ses propres moyens';
   String get returnPointSaveError => "Impossible d'enregistrer le point.";
+
+  // ── Feuille de retour : combien de monde à chaque arrêt ──
+  String get manifestTitle => 'Feuille de retour';
+  String get manifestSubtitle => 'Qui attend la navette, et où';
+  String get manifestPickEpisode => 'Quel tournage ?';
+  String get manifestNoEpisodes => 'Aucun tournage ce soir';
+  String get manifestNoEpisodesSubtitle =>
+      'La feuille se remplit pendant le pointage à la porte.';
+  String get manifestNoShuttle => 'Pas de navette ce soir';
+  String get manifestNoShuttleSubtitle =>
+      'Aucun point de retour n\'est activé pour ce tournage.';
+  String get manifestNobody => 'Personne n\'attend la navette';
+  String get manifestNobodySubtitle =>
+      'Les arrêts se remplissent au fur et à mesure des entrées.';
+  String get manifestPeopleIn => 'personnes entrées';
+  String get manifestWaiting => 'attendent la navette';
+  String get manifestOwnMeans => 'repartent seules';
+  String get manifestPeople => 'pers.';
+  String get manifestEmptyStop => 'personne';
+  String get manifestOffList => 'hors liste de ce tournage';
+  String get manifestOrphanWarning =>
+      'Un arrêt a été retiré après que des personnes l\'aient choisi. Elles attendent quand même.';
+  String get manifestShare => 'Envoyer au transport';
+  String get manifestSharePdf => 'Envoyer le PDF';
+  String get manifestShareText => 'Envoyer en message';
+  String get manifestShareError => 'Impossible de préparer la feuille.';
+  String get manifestRefresh => 'Actualiser';
+  String get manifestLoadError => 'Impossible de charger la feuille.';
+  String get manifestGeneratedAt => 'Établie le';
+  String get profileManifestTile => 'Feuille de retour';
   String get cameraPermissionDenied => 'Accès caméra refusé';
   String get cameraPermissionSubtitle =>
       'Autorisez l\'accès à la caméra pour scanner les QR codes.';

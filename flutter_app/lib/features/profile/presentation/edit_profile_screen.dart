@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -273,6 +274,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } finally {
       if (mounted) setState(() => _isAvatarLoading = false);
     }
+  }
+
+  /// Opens the current photo full screen. With no photo there is nothing to
+  /// look at, so it falls through to the picker instead of doing nothing.
+  void _enlargeAvatar() {
+    final url = ref.read(loginAuthStateProvider).user?.avatarUrl;
+    if (url == null || url.isEmpty) {
+      _showAvatarSheet();
+      return;
+    }
+    showFullScreenImage(context, imageUrl: url, heroTag: avatarHeroTag(url));
   }
 
   void _showAvatarSheet() {
@@ -588,7 +600,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               _AvatarHero(
                 user: user,
                 isLoading: _isAvatarLoading,
-                onTap: _isAvatarLoading ? null : _showAvatarSheet,
+                // Tapping the PHOTO enlarges it — 104px is not enough to see
+                // whether your own face is usable. Changing it stays on the
+                // camera badge, as on the profile screen.
+                onTapPhoto: _isAvatarLoading ? null : _enlargeAvatar,
+                onTapBadge: _isAvatarLoading ? null : _showAvatarSheet,
               ),
               const SizedBox(height: AppSpacing.sm),
 
@@ -863,19 +879,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 class _AvatarHero extends ConsumerWidget {
   final dynamic user;
   final bool isLoading;
-  final VoidCallback? onTap;
+
+  /// Look at the photo.
+  final VoidCallback? onTapPhoto;
+
+  /// Change the photo.
+  final VoidCallback? onTapBadge;
 
   const _AvatarHero({
     required this.user,
     required this.isLoading,
-    required this.onTap,
+    required this.onTapPhoto,
+    required this.onTapBadge,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: onTapPhoto,
         child: Stack(
           alignment: Alignment.bottomRight,
           children: [
@@ -917,7 +939,9 @@ class _AvatarHero extends ConsumerWidget {
                             ),
                           )
                         : (user?.avatarUrl != null
-                            ? Image.network(
+                            ? Hero(
+                                tag: avatarHeroTag(user!.avatarUrl!),
+                                child: Image.network(
                                 user!.avatarUrl!,
                                 width: 104,
                                 height: 104,
@@ -930,6 +954,7 @@ class _AvatarHero extends ConsumerWidget {
                                     progress == null ? child : _AvatarPlaceholder(),
                                 errorBuilder: (_, __, ___) =>
                                     _AvatarPlaceholder(),
+                              ),
                               )
                             : _AvatarPlaceholder()),
                   ),
@@ -952,8 +977,11 @@ class _AvatarHero extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: const Icon(Icons.camera_alt,
-                  size: 15, color: Colors.white),
+              child: GestureDetector(
+                onTap: onTapBadge,
+                child: const Icon(Icons.camera_alt,
+                    size: 15, color: Colors.white),
+              ),
             ),
           ],
         ),

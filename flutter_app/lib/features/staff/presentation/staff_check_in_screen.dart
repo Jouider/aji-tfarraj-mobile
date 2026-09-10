@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:go_router/go_router.dart';
+import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -53,9 +55,26 @@ class _StaffCheckInScreenState extends ConsumerState<StaffCheckInScreen>
     final s = ref.watch(stringsProvider);
     final user = ref.watch(loginAuthStateProvider).user;
 
+    // The recording currently being scanned, so the shuttle sheet opens on the
+    // right one instead of asking a question the app can already answer.
+    final scannedEpisodeId =
+        ref.watch(staffCheckInProvider).preview?.episodeId;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(s.staffCheckInTitle, style: AppTypography.h3),
+        actions: [
+          if (user != null && user.canRegisterOnSite)
+            IconButton(
+              tooltip: s.staffProfileManifestTile,
+              icon: const Icon(Icons.directions_bus_outlined),
+              onPressed: () => context.push(
+                scannedEpisodeId != null
+                    ? '${Routes.returnManifest}?episode=$scannedEpisodeId'
+                    : Routes.returnManifest,
+              ),
+            ),
+        ],
         bottom: user != null && user.isStaffOrAdmin
             ? TabBar(
                 controller: _tabController,

@@ -73,6 +73,10 @@ dependencies:
   # a permission was previously denied). Lightweight, no iOS Podfile macros.
   app_settings: ^5.1.1
 
+  # Shuttle manifest export. Pure Dart (no native plugin): it writes the bytes,
+  # share_plus hands the file off.
+  pdf: ^3.11.0
+
 # Force the pre-Credential-Manager google_sign_in_android.
 # 6.2.x migrated to androidx.credentials.CredentialManager, which hangs
 # forever on many devices (Xiaomi/Redmi/Samsung) when the Play Services
@@ -106,3 +110,6 @@ flutter:
   assets:
     - assets/images/
     - assets/images/ajitfarraj_logo/
+    # Latin + Arabic subset of Cairo (OFL), embedded in the shuttle manifest
+    # PDF — the built-in PDF fonts have no Arabic glyphs at all.
+    - assets/fonts/
