@@ -76,10 +76,24 @@ venue, et les plans changent le soir même.
 La section n'apparaît **que si une navette roule ce soir** — `return_points`
 vide veut dire aucun véhicule, et la question serait alors sans objet.
 
-La réponse est **facultative** : « Repart par ses propres moyens » est un choix
-à part entière, aussi accessible que les autres. Beaucoup de gens viennent en
-voiture, et un champ obligatoire remplirait les chiffres de transport de
-réponses au hasard.
+La **réponse** est libre — « Repart par ses propres moyens » est un choix à part
+entière, aussi accessible que les autres — mais **la question, elle, est
+obligatoire** : tant que rien n'a été enregistré, « Valider l'entrée » reste
+désactivé, avec la raison écrite juste au-dessus.
+
+Cette distinction est tout l'intérêt. En base, `return_point_id = null` veut
+dire deux choses : « rentre par ses propres moyens » **et** « personne n'a
+demandé ». Si la porte peut valider sans répondre, les deux se confondent, la
+feuille de retour sous-compte, et quelqu'un reste devant le studio. Avec deux ou
+trois scanneurs un soir de rush, ce n'est pas une hypothèse.
+
+Pour la même raison, **rien n'est pré-sélectionné** tant que la question n'a pas
+été posée. Une case « repart seul » déjà cochée se lit comme une réponse
+enregistrée, et le scanneur passe à la suite sans demander.
+
+> Un billet refusé n'a **pas** de bouton — un bouton mort invite à insister.
+> Une **étape en attente**, c'est différent : il y a quelque chose à faire, donc
+> le bouton reste et dit quoi.
 
 Un choix déjà exprimé lors d'un scan précédent est **pré-sélectionné**, pour ne
 pas reposer la question.
@@ -189,6 +203,12 @@ Le contrat serveur est dans le repo backend : `docs/return-points.md`
 | `features/staff/data/return_manifest_export.dart` | Génération du PDF et du message |
 
 ## Tests
+
+`test/return_point_required_test.dart` (6) monte l'écran réel de la porte et
+vérifie qu'on ne peut pas valider sans avoir posé la question : bouton bloqué,
+aucune option pré-cochée, débloqué en choisissant un arrêt **comme** en
+choisissant « repart seul », rien qui bloque quand aucune navette ne roule, et
+une réponse donnée à un scan précédent qui n'est pas redemandée.
 
 `test/ticket_preview_test.dart` couvre la logique dont dépend la décision
 d'admettre quelqu'un : refus non admissibles, **statut inconnu bloquant**,

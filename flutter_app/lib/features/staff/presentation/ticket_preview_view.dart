@@ -37,6 +37,21 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
   bool _savingReturnPoint = false;
   String? _returnPointError;
 
+  /// Whether the drop-off question has actually been put to this person.
+  ///
+  /// `chosenReturnPointId == null` cannot answer this on its own: it means both
+  /// "said they would make their own way" and "nobody asked yet". Conflating
+  /// the two is how somebody ends up counted as needing no lift, and left
+  /// standing at the studio.
+  late bool _returnPointAnswered;
+
+  @override
+  void initState() {
+    super.initState();
+    // An answer given on an earlier scan still counts as asked.
+    _returnPointAnswered = widget.preview.chosenReturnPointId != null;
+  }
+
   Future<void> _chooseReturnPoint(int? pointId) async {
     setState(() {
       _savingReturnPoint = true;
@@ -45,6 +60,8 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
 
     try {
       await ref.read(staffCheckInProvider.notifier).setReturnPoint(pointId);
+      // Including "makes their own way": the point is that it was asked.
+      if (mounted) setState(() => _returnPointAnswered = true);
     } catch (e) {
       if (mounted) {
         setState(() => _returnPointError = e is ApiException
@@ -137,6 +154,7 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
                     _ReturnPointPicker(
                       preview: preview,
                       saving: _savingReturnPoint,
+                      answered: _returnPointAnswered,
                       error: _returnPointError,
                       onChoose: _chooseReturnPoint,
                     ),
@@ -148,6 +166,12 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
           _Actions(
             preview: preview,
             loading: loading,
+            // A shuttle runs tonight and nobody has asked this person where
+            // they are going: validating now would file them under "makes
+            // their own way" and take their seat off the bus.
+            blockedReason: preview.asksReturnPoint && !_returnPointAnswered
+                ? s.staffReturnPointRequired
+                : null,
             onCancel: widget.onCancel,
             onConfirm: () =>
                 ref.read(staffCheckInProvider.notifier).confirmPreview(),
@@ -400,6 +424,7 @@ class _Actions extends StatelessWidget {
     required this.onConfirm,
     required this.confirmLabel,
     required this.cancelLabel,
+    this.blockedReason,
   });
 
   final TicketPreview preview;
@@ -408,6 +433,10 @@ class _Actions extends StatelessWidget {
   final VoidCallback onConfirm;
   final String confirmLabel;
   final String cancelLabel;
+
+  /// Why validating is not available yet, when a step is still outstanding.
+  /// Null means nothing is in the way.
+  final String? blockedReason;
 
   @override
   Widget build(BuildContext context) {
@@ -425,14 +454,31 @@ class _Actions extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // The validate button only exists when validating is possible: a
-          // disabled button on a refused ticket invites tapping it anyway.
+          // A refused ticket gets no button at all — a dead button invites
+          // tapping it anyway. An outstanding STEP is different: there is
+          // something to do, so the button stays and says what.
+          if (preview.canAdmit && blockedReason != null) ...[
+            Row(
+              children: [
+                Icon(Icons.arrow_upward,
+                    size: 15, color: AppColors.secondary),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: Text(blockedReason!,
+                      style: AppTypography.bodySmall
+                          .copyWith(color: AppColors.secondary)),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
           if (preview.canAdmit)
             SizedBox(
               width: double.infinity,
               height: AppSpacing.buttonHeight,
               child: FilledButton.icon(
-                onPressed: loading ? null : onConfirm,
+                onPressed:
+                    loading || blockedReason != null ? null : onConfirm,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.success,
                   foregroundColor: Colors.white,
@@ -471,12 +517,18 @@ class _ReturnPointPicker extends ConsumerWidget {
   const _ReturnPointPicker({
     required this.preview,
     required this.saving,
+    required this.answered,
     required this.error,
     required this.onChoose,
   });
 
   final TicketPreview preview;
   final bool saving;
+
+  /// Whether the question has been put. Until it has, **nothing** is shown as
+  /// selected: a pre-ticked "makes their own way" reads as an answer already
+  /// given, and the scanner moves on without asking.
+  final bool answered;
   final String? error;
   final ValueChanged<int?> onChoose;
 
@@ -491,7 +543,12 @@ class _ReturnPointPicker extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.backgroundWhite,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.border),
+        // Still unanswered: make it look like the thing standing in the way,
+        // because it is.
+        border: Border.all(
+          color: answered ? AppColors.border : AppColors.secondary,
+          width: answered ? 1 : 1.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -501,7 +558,11 @@ class _ReturnPointPicker extends ConsumerWidget {
               Icon(Icons.directions_bus_outlined,
                   size: 18, color: AppColors.secondary),
               const SizedBox(width: AppSpacing.xs),
-              Text(s.staffReturnPointTitle, style: AppTypography.labelMedium),
+              // Expanded: an Arabic title on a 360px phone overflowed the row.
+              Expanded(
+                child: Text(s.staffReturnPointTitle,
+                    style: AppTypography.labelMedium),
+              ),
               if (saving) ...[
                 const SizedBox(width: AppSpacing.sm),
                 const SizedBox(
@@ -520,14 +581,15 @@ class _ReturnPointPicker extends ConsumerWidget {
             _PointTile(
               label: point.localizedName(isAr),
               sublabel: point.landmark,
-              selected: preview.chosenReturnPointId == point.id,
+              selected: answered && preview.chosenReturnPointId == point.id,
               enabled: !saving,
               onTap: () => onChoose(point.id),
             ),
-          // Clearing must be as easy as choosing.
+          // "I make my own way" is a real answer and must be as easy to record
+          // as any stop — but it has to be *chosen*, never assumed.
           _PointTile(
             label: s.staffReturnPointNone,
-            selected: preview.chosenReturnPointId == null,
+            selected: answered && preview.chosenReturnPointId == null,
             enabled: !saving,
             onTap: () => onChoose(null),
           ),

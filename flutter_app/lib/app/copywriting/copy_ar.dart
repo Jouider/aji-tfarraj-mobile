@@ -684,6 +684,8 @@ class StaffCopyAr {
   String get returnPointQuestion => 'فين غادي نهبطو هاد الشخص؟';
   String get returnPointNone => 'غادي يرجع بوحدو';
   String get returnPointSaveError => 'ما تقدرش نسجلو النقطة.';
+  String get returnPointRequired =>
+      'سول الشخص فين غادي يرجع قبل ما تأكد.';
 
   // ── ورقة الرجوع: شحال من واحد كيتسنى فكل نقطة ──
   String get manifestTitle => 'ورقة الرجوع';

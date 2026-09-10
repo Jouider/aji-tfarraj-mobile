@@ -876,6 +876,8 @@ class StaffCopyFr {
   String get returnPointQuestion => 'Où déposer cette personne ?';
   String get returnPointNone => 'Repart par ses propres moyens';
   String get returnPointSaveError => "Impossible d'enregistrer le point.";
+  String get returnPointRequired =>
+      'Demandez où la personne rentre avant de valider.';
 
   // ── Feuille de retour : combien de monde à chaque arrêt ──
   String get manifestTitle => 'Feuille de retour';

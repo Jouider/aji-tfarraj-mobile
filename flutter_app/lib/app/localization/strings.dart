@@ -1316,6 +1316,10 @@ class AppStrings {
       ? CopyFr.staff.returnPointNone
       : CopyAr.staff.returnPointNone;
 
+  String get staffReturnPointRequired => locale == AppLocale.fr
+      ? CopyFr.staff.returnPointRequired
+      : CopyAr.staff.returnPointRequired;
+
   String get staffReturnPointSaveError => locale == AppLocale.fr
       ? CopyFr.staff.returnPointSaveError
       : CopyAr.staff.returnPointSaveError;
