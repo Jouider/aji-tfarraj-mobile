@@ -26,6 +26,7 @@ import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart'
 import 'package:aji_tfarraj/features/notifications/presentation/notification_center_screen.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
+import 'package:aji_tfarraj/features/casting/presentation/casting_home_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/return_manifest_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.dart';
 import 'package:aji_tfarraj/features/on_site/presentation/on_site_registration_screen.dart';
@@ -54,6 +55,7 @@ const _protectedRoutes = [
   Routes.staffCheckIn,
   Routes.onSiteRegistration,
   Routes.returnManifest,
+  Routes.casting,
   Routes.referralStats,
   Routes.referralLinks,
 ];
@@ -378,6 +380,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.onSiteRegistration,
         name: 'onSiteRegistration',
         builder: (context, state) => const OnSiteRegistrationScreen(),
+      ),
+      GoRoute(
+        path: Routes.casting,
+        name: 'casting',
+        builder: (context, state) => const CastingHomeScreen(),
       ),
       GoRoute(
         path: Routes.returnManifest,

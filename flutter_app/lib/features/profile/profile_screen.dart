@@ -464,6 +464,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   subtitle: s.staffManifestSubtitle,
                   onTap: () => context.push(Routes.returnManifest),
                 ),
+              // Casting — open to every member; the section itself explains
+              // when someone is not eligible, rather than hiding without a word.
+              _SettingsRow(
+                icon: Icons.movie_filter_outlined,
+                iconColor: AppColors.secondary,
+                title: s.casting.profileTile,
+                subtitle: s.casting.profileTileSubtitle,
+                onTap: () => context.push(Routes.casting),
+              ),
               // FIX: Added support entry point
               _SettingsRow(
                 icon: Icons.headset_mic_outlined,

@@ -1,3 +1,5 @@
+import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
+
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart'
     show ConditionSection, HowToStep, ChargePublicCopy;
 
@@ -90,6 +92,7 @@ class CopyAr {
   // Staff Check-in
   // ============================================
   static const staff = StaffCopyAr();
+  static const casting = CastingCopyAr();
 
   // ============================================
   // Conditions de participation
@@ -656,6 +659,133 @@ class NavTabsCopyAr {
   String get reservations => 'حجوزاتي';
   String get ticket => 'بطاقتي';
   String get profile => 'حسابي';
+}
+
+
+/// Casting strings in Moroccan Arabic.
+class CastingCopyAr implements CastingCopy {
+  const CastingCopyAr();
+
+  String get title => 'كاستينغ';
+  String get subtitle => 'الصور ديالك والإعلانات المفتوحة';
+
+  String get bookTitle => 'الصور ديالي';
+  String get bookIntro =>
+      'خمس صور، دائماً نفس الوضعيات. هاكذا كتقدر تتقارن بإنصاف: بلا وضعيات موحدة، كيتختار أحسن مصور ماشي أحسن شخص.';
+  String get bookHelper => 'خلي شي واحد آخر يصورك.';
+  String get bookRequired => 'إجباري';
+  String get bookOptional => 'اختياري';
+  String get bookComplete => 'الصور كاملة';
+  String get bookMissing => 'ناقصة %d صورة';
+  String get bookRetake => 'عاود';
+  String get bookDelete => 'حيّد';
+  String get bookTake => 'صوّر';
+
+  String get rulesTitle => 'قبل ما تبدا';
+  List<String> get rules => const [
+        'حيط أملس وفاتح من وراك، بلا حتى حاجة.',
+        'فضوء النهار، قبالة الشرجم — ماشي والضو من وراك.',
+        'حوايج ضيقة وبلا نقوش: خاص تبان القامة ديالك.',
+        'بلا نضاضر الشمس، بلا كاسكيطة، الشعر بعيد على الوجه.',
+        'بلا فلتر وبلا تعديل.',
+        'اللي كيصور كيهز التيليفون فمستوى الصدر ديالك.',
+      ];
+
+  CastingPoseCopy get fullFront => const CastingPoseCopy(
+        label: 'واقف — من قدام',
+        hint: 'واقف، من قدام، اليدين حدا الجسد',
+        steps: [
+          'رجّع للور حتى تدخل كامل فالصورة، من الراس حتى الرجلين.',
+          'واقف مزيان، الرجلين شوية مفتوحين.',
+          'اليدين مرتاحين حدا الجسد، وباينين.',
+          'شوف الكاميرا، وجه عادي — ما تضحكش.',
+        ],
+      );
+
+  CastingPoseCopy get fullProfile => const CastingPoseCopy(
+        label: 'واقف — من الجنب',
+        hint: 'دور بحالك كاملة على الجنب',
+        steps: [
+          'دور ربع دورة: كتف واحد قبالة الكاميرا.',
+          'بقا واقف مزيان، اليدين حدا الجسد.',
+          'شوف قدامك نيشان، ماشي للكاميرا.',
+          'ديما من الراس حتى الرجلين فالصورة.',
+        ],
+      );
+
+  CastingPoseCopy get portrait => const CastingPoseCopy(
+        label: 'صورة الوجه',
+        hint: 'الوجه والكتاف، تعبير عادي',
+        steps: [
+          'من الراس حتى فوق الصدر.',
+          'قبالة الكاميرا، الكتاف نيشان.',
+          'وجه عادي، الفم مسدود، شوف الكاميرا.',
+          'بعّد الشعر على الوجه.',
+        ],
+      );
+
+  CastingPoseCopy get fullBack => const CastingPoseCopy(
+        label: 'واقف — من اللور',
+        hint: 'عطي ضهرك للكاميرا',
+        steps: [
+          'عطي ضهرك كامل للكاميرا.',
+          'واقف مزيان، اليدين حدا الجسد.',
+          'من الراس حتى الرجلين فالصورة.',
+        ],
+      );
+
+  CastingPoseCopy get portraitSmile => const CastingPoseCopy(
+        label: 'صورة بالضحكة',
+        hint: 'نفس الإطار، ضحكة طبيعية',
+        steps: [
+          'نفس الإطار ديال صورة الوجه.',
+          'شوف الكاميرا وضحك بشكل طبيعي.',
+        ],
+      );
+
+  String get measurementsTitle => 'القياسات';
+  String get measurementsIntro =>
+      'ماشي إجباري باش تقدم، ولكن هي اللي كتفلتر بيها الإعلانات.';
+  String get height => 'الطول (سم)';
+  String get weight => 'الوزن (كغ)';
+  String get clothingSize => 'قياس الحوايج';
+  String get shoeSize => 'قياس الصباط';
+  String get save => 'سجّل';
+  String get saved => 'تسجل';
+
+  String get tabCastings => 'كاستينغ';
+  String get tabPublications => 'إعلانات';
+  String get noCastings => 'ما كاين حتى إعلان دابا';
+  String get noCastingsSubtitle =>
+      'الإعلانات الجديدة غاتبان هنا. وجّد الصور ديالك فهاد الوقت.';
+  String get closesAt => 'كيسد ف';
+  String get apply => 'قدّم';
+  String get applied => 'تصيفط الطلب';
+  String get applyBlocked => 'كمّل الصور ديالك باش تقدر تقدم';
+  String get applyNote => 'رسالة (اختياري)';
+  String get applyNoteHint => 'تجربة، وقت خاص لي كنقدر فيه…';
+  String get applySent => 'تصيفط الطلب ديالك.';
+  String get applyError => 'ما تقدرش نصيفطو الطلب.';
+
+  String get myApplications => 'الطلبات ديالي';
+  String get noApplications => 'ما كاين حتى طلب';
+  String get noApplicationsSubtitle => 'قدّم لشي إعلان وغادي تلقاه هنا.';
+  String get withdraw => 'سحب';
+  String get withdrawConfirm => 'تسحب هاد الطلب؟';
+  String get withdrawn => 'تسحب الطلب.';
+  String get statusPending => 'فالانتظار';
+  String get statusShortlisted => 'مختار أولياً';
+  String get statusAccepted => 'مقبول';
+  String get statusRejected => 'ماشي مقبول';
+  String get statusUnknown => 'كيتعالج';
+
+  String get adultsOnly => 'الكاستينغ غير للكبار (18 عام وفوق).';
+  String get birthdayRequired => 'دخّل تاريخ الازدياد ديالك باش تدخل للكاستينغ.';
+  String get completeProfile => 'كمّل البروفايل';
+  String get loadError => 'ما تقدرش نجيبو الكاستينغ.';
+  String get photoError => 'ما تقدرش نصيفطو الصورة.';
+  String get profileTile => 'كاستينغ';
+  String get profileTileSubtitle => 'الصور ديالك والإعلانات';
 }
 
 /// Staff check-in strings in Arabic
