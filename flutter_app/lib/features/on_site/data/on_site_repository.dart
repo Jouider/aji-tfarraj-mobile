@@ -66,6 +66,7 @@ class OnSiteRepository {
     int? chargePublicId,
     String? phoneNumber,
     String? email,
+    int? returnPointId,
   }) async {
     try {
       final form = FormData.fromMap({
@@ -78,6 +79,9 @@ class OnSiteRepository {
         'city_name': cityName,
         'district': district,
         if (chargePublicId != null) 'charge_public_id': chargePublicId,
+        // Only sent when they picked a stop: null means they make their own
+        // way, which is the column's default anyway.
+        if (returnPointId != null) 'return_point_id': returnPointId,
         if (phoneNumber != null && phoneNumber.isNotEmpty)
           'phone_number': phoneNumber,
         if (email != null && email.isNotEmpty) 'email': email,

@@ -1,3 +1,8 @@
+import 'package:aji_tfarraj/features/staff/domain/return_point_option.dart';
+
+// Re-exported: every existing import of this file still sees ReturnPointOption.
+export 'package:aji_tfarraj/features/staff/domain/return_point_option.dart';
+
 /// What the scanner sees after scanning, *before* admitting anyone.
 ///
 /// Comes from `POST /api/staff/ticket/lookup`, which has no side effects — so
@@ -50,33 +55,6 @@ enum WrongDateReason {
         'undated' => WrongDateReason.undated,
         _ => WrongDateReason.unknown,
       };
-}
-
-/// A drop-off point the shuttle serves for this recording.
-class ReturnPointOption {
-  final int id;
-  final String name;
-  final String? nameAr;
-  final String? landmark;
-
-  const ReturnPointOption({
-    required this.id,
-    required this.name,
-    this.nameAr,
-    this.landmark,
-  });
-
-  /// Localised label — falls back to French when no Arabic name is set.
-  String localizedName(bool isAr) =>
-      (isAr && nameAr != null && nameAr!.isNotEmpty) ? nameAr! : name;
-
-  factory ReturnPointOption.fromJson(Map<String, dynamic> json) =>
-      ReturnPointOption(
-        id: json['id'] as int,
-        name: json['name'] as String? ?? '',
-        nameAr: json['name_ar'] as String?,
-        landmark: json['landmark'] as String?,
-      );
 }
 
 class TicketPreview {

@@ -102,6 +102,24 @@ pas reposer la question.
 > (Contenu › Points de retour), puis activés **par épisode**. Le staff à la
 > porte ne crée jamais d'arrêt.
 
+### Aussi à l'inscription sur place
+
+Quelqu'un qui arrive sans réservation est créé **et pointé** d'un coup. Il a
+besoin d'un retour comme les autres, donc la question est posée là aussi — à la
+dernière étape, à côté de « où habitez-vous », et **obligatoire** avant d'envoyer
+l'inscription.
+
+C'est le **même widget** (`ReturnPointPicker`) que la porte : ce contrôle décide
+si quelqu'un rentre chez lui, deux copies finiraient par diverger.
+
+La réponse est remise à zéro entre deux personnes **et** quand on change de
+tournage — un arrêt desservi par un tournage ne l'est pas forcément par le
+suivant, et le serveur refuserait (`return_point_id` non desservi → 422).
+
+> **Reste ouvert** : une validation faite depuis le dashboard crée un
+> `checked_in` sans poser la question. Ces personnes apparaissent toujours en
+> « repartent seules ».
+
 ## La feuille de retour
 
 Quand le tournage est fini, quelqu'un doit dire au responsable transport combien
@@ -203,6 +221,10 @@ Le contrat serveur est dans le repo backend : `docs/return-points.md`
 | `features/staff/data/return_manifest_export.dart` | Génération du PDF et du message |
 
 ## Tests
+
+`test/on_site_models_test.dart` couvre aussi le côté inscription sur place : les
+arrêts desservis lus depuis l'épisode, et `onSiteLocationStepComplete` — la
+règle qui empêche d'enregistrer un walk-in sans avoir posé la question.
 
 `test/return_point_required_test.dart` (6) monte l'écran réel de la porte et
 vérifie qu'on ne peut pas valider sans avoir posé la question : bouton bloqué,

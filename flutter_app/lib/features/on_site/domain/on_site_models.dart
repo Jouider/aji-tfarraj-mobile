@@ -1,3 +1,7 @@
+import 'package:aji_tfarraj/features/staff/domain/return_point_option.dart';
+
+export 'package:aji_tfarraj/features/staff/domain/return_point_option.dart';
+
 // Models for on-site registration — the door flow where staff open a real
 // account for someone who turned up without booking.
 
@@ -10,6 +14,10 @@ class OnSiteEpisode {
   final int? capacity;
   final int? reservedSeats;
 
+  /// Stops the shuttle serves that night. **Empty means no shuttle**, and the
+  /// door must not put the question at all.
+  final List<ReturnPointOption> returnPoints;
+
   const OnSiteEpisode({
     required this.id,
     this.title,
@@ -17,7 +25,11 @@ class OnSiteEpisode {
     this.studio,
     this.capacity,
     this.reservedSeats,
+    this.returnPoints = const [],
   });
+
+  /// Whether to ask a walk-in where they are heading afterwards.
+  bool get asksReturnPoint => returnPoints.isNotEmpty;
 
   /// Seats still free, when the backend gave us both numbers.
   int? get availableSeats => (capacity != null && reservedSeats != null)
@@ -33,6 +45,9 @@ class OnSiteEpisode {
         studio: json['studio'] as String?,
         capacity: json['capacity'] as int?,
         reservedSeats: json['reserved_seats'] as int?,
+        returnPoints: (json['return_points'] as List<dynamic>? ?? const [])
+            .map((e) => ReturnPointOption.fromJson(e as Map<String, dynamic>))
+            .toList(),
       );
 }
 
@@ -116,4 +131,22 @@ class OnSiteRegistrationResult {
       rewardAmount: json['reward_amount'] as int?,
     );
   }
+}
+
+/// Whether the last step of the walk-in form is complete.
+///
+/// Named and pulled out of the screen because of the last clause: when a
+/// shuttle runs, the drop-off question has to have been **put**, not merely
+/// offered. A null stop means both "makes their own way" and "nobody asked",
+/// so if the form can be submitted without an answer the two collapse into
+/// one — the shuttle sheet under-counts and somebody is left at the studio.
+bool onSiteLocationStepComplete({
+  required String? cityName,
+  required String? district,
+  required bool asksReturnPoint,
+  required bool returnPointAnswered,
+}) {
+  return cityName != null &&
+      district != null &&
+      (!asksReturnPoint || returnPointAnswered);
 }

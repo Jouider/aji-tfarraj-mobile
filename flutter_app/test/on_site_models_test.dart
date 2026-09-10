@@ -111,4 +111,73 @@ void main() {
       expect(cp.referralCode, isNull);
     });
   });
+
+  group('le retour en navette', () {
+    /// A walk-in needs a lift home as much as anyone who booked. Before this,
+    /// on-site registration checked people in without ever putting the
+    /// question, and they were silently counted as making their own way.
+    test('an episode carries the stops served that night', () {
+      final e = OnSiteEpisode.fromJson({
+        'id': 10,
+        'return_points': [
+          {'id': 3, 'name': 'Ain Sebaa', 'landmark': 'devant la gare'},
+          {'id': 4, 'name': 'Maarif', 'name_ar': 'المعاريف'},
+        ],
+      });
+
+      expect(e.returnPoints, hasLength(2));
+      expect(e.returnPoints.first.name, 'Ain Sebaa');
+      expect(e.returnPoints[1].localizedName(true), 'المعاريف');
+      expect(e.asksReturnPoint, isTrue);
+    });
+
+    /// No stop served means no vehicle, so the door must not ask at all.
+    test('no stops means the question is not put', () {
+      expect(
+        OnSiteEpisode.fromJson({'id': 10, 'return_points': []}).asksReturnPoint,
+        isFalse,
+      );
+    });
+
+    test('an older payload without the field does not ask', () {
+      expect(OnSiteEpisode.fromJson({'id': 10}).asksReturnPoint, isFalse);
+      expect(OnSiteEpisode.fromJson({'id': 10}).returnPoints, isEmpty);
+    });
+  });
+
+  group('finishing the walk-in form', () {
+    bool complete({
+      String? city = 'Casablanca',
+      String? district = 'Anfa',
+      bool asks = true,
+      bool answered = false,
+    }) =>
+        onSiteLocationStepComplete(
+          cityName: city,
+          district: district,
+          asksReturnPoint: asks,
+          returnPointAnswered: answered,
+        );
+
+    /// The whole point: a walk-in must not be registered and checked in
+    /// without anyone asking where they are going home.
+    test('a shuttle runs and nobody asked: not complete', () {
+      expect(complete(), isFalse);
+    });
+
+    test('once asked, complete — whatever the answer was', () {
+      expect(complete(answered: true), isTrue);
+    });
+
+    /// No shuttle tonight means no question, so nothing should stand in the way.
+    test('no shuttle: complete without any answer', () {
+      expect(complete(asks: false), isTrue);
+    });
+
+    test('the address is still required either way', () {
+      expect(complete(city: null, answered: true), isFalse);
+      expect(complete(district: null, answered: true), isFalse);
+      expect(complete(district: null, asks: false), isFalse);
+    });
+  });
 }

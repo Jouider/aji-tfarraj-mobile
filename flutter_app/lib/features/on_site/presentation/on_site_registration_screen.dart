@@ -15,6 +15,7 @@ import 'package:aji_tfarraj/features/on_site/domain/on_site_models.dart';
 import 'package:aji_tfarraj/features/profile/data/profile_repository.dart'
     show citiesProvider;
 import 'package:aji_tfarraj/features/profile/presentation/face_capture_screen.dart';
+import 'package:aji_tfarraj/features/staff/presentation/return_point_picker.dart';
 
 /// Inscription sur place — door staff open a real account for someone who
 /// turned up without booking, and check them in on the spot.
@@ -52,6 +53,14 @@ class _OnSiteRegistrationScreenState
   String? _cityName;
   String? _district;
 
+  /// Where the shuttle drops this walk-in, and whether they were asked at all.
+  ///
+  /// The two are separate on purpose: a null point means both "makes their own
+  /// way" and "nobody asked", and letting the second pass as the first is how
+  /// somebody ends up left at the studio.
+  int? _returnPointId;
+  bool _returnPointAnswered = false;
+
   bool _submitting = false;
   String? _error;
 
@@ -82,6 +91,8 @@ class _OnSiteRegistrationScreenState
       _birthday = null;
       _cityName = null;
       _district = null;
+      _returnPointId = null;
+      _returnPointAnswered = false;
       _error = null;
     });
   }
@@ -96,7 +107,13 @@ class _OnSiteRegistrationScreenState
             _gender != null &&
             _birthday != null;
       default:
-        return _cityName != null && _district != null;
+        return onSiteLocationStepComplete(
+          cityName: _cityName,
+          district: _district,
+          // No shuttle tonight means no question, so nothing to wait for.
+          asksReturnPoint: _episode?.asksReturnPoint ?? false,
+          returnPointAnswered: _returnPointAnswered,
+        );
     }
   }
 
@@ -150,6 +167,7 @@ class _OnSiteRegistrationScreenState
             district: _district!,
             photoPath: _photoPath!,
             chargePublicId: _chargePublic?.id,
+            returnPointId: _returnPointId,
             phoneNumber: _phone.text.trim(),
             email: _email.text.trim(),
           );
@@ -262,6 +280,10 @@ class _OnSiteRegistrationScreenState
                   onTap: () => setState(() {
                     _show = show;
                     _episode = ep;
+                    // A stop served by one recording may not be served by the
+                    // next, and the server would refuse it.
+                    _returnPointId = null;
+                    _returnPointAnswered = false;
                   }),
                 ),
             ],
@@ -307,6 +329,8 @@ class _OnSiteRegistrationScreenState
           onChange: () => setState(() {
             _episode = null;
             _show = null;
+            _returnPointId = null;
+            _returnPointAnswered = false;
           }),
         ),
         Padding(
@@ -490,6 +514,26 @@ class _OnSiteRegistrationScreenState
                   ? null
                   : (v) => setState(() => _district = v),
             ),
+            // A walk-in needs a lift home as much as anyone who booked. Asked
+            // here, next to "where do you live", and required before the
+            // registration can be sent.
+            if (_episode?.asksReturnPoint ?? false) ...[
+              const SizedBox(height: AppSpacing.lg),
+              ReturnPointPicker(
+                points: _episode!.returnPoints,
+                chosenId: _returnPointId,
+                saving: false,
+                answered: _returnPointAnswered,
+                error: null,
+                onChoose: (id) => setState(() {
+                  _returnPointId = id;
+                  // Including "makes their own way": the point is that it was
+                  // asked, not which way it was answered.
+                  _returnPointAnswered = true;
+                  _error = null;
+                }),
+              ),
+            ],
             const SizedBox(height: AppSpacing.lg),
           ],
         );
