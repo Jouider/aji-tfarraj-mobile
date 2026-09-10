@@ -1,3 +1,7 @@
+import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
+
+export 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
+
 /// French copywriting for Aji Tfarraj app
 /// Starter pack - not final marketing copy
 class CopyFr {
@@ -87,6 +91,7 @@ class CopyFr {
   // Staff Check-in
   // ============================================
   static const staff = StaffCopyFr();
+  static const casting = CastingCopyFr();
 
   // ============================================
   // Conditions de participation
@@ -845,6 +850,142 @@ class ConditionsCopyFr {
               'Toute inscription via l\'application implique l\'acceptation complète du présent règlement.',
         ),
       ];
+}
+
+
+/// Casting strings in French.
+class CastingCopyFr implements CastingCopy {
+  const CastingCopyFr();
+
+  String get title => 'Casting';
+  String get subtitle => 'Votre book et les annonces ouvertes';
+
+  // ── Le book ──
+  String get bookTitle => 'Mon book';
+  String get bookIntro =>
+      'Cinq photos, toujours les mêmes poses. C\'est ce qui permet de vous comparer équitablement : sans poses communes, on choisit le meilleur photographe, pas la bonne personne.';
+  String get bookHelper => 'Faites-vous photographier par quelqu\'un d\'autre.';
+  String get bookRequired => 'Obligatoire';
+  String get bookOptional => 'Facultatif';
+  String get bookComplete => 'Book complet';
+  String get bookMissing => 'Il manque %d photo(s)';
+  String get bookRetake => 'Reprendre';
+  String get bookDelete => 'Supprimer';
+  String get bookTake => 'Prendre la photo';
+
+  // ── Avant de photographier ──
+  String get rulesTitle => 'Avant de commencer';
+  List<String> get rules => const [
+        'Un mur uni et clair derrière vous, rien qui traîne.',
+        'À la lumière du jour, face à une fenêtre — jamais à contre-jour.',
+        'Vêtements ajustés et unis : on doit voir votre silhouette.',
+        'Pas de lunettes de soleil, pas de casquette, cheveux dégagés du visage.',
+        'Aucun filtre, aucune retouche.',
+        'La personne qui photographie tient le téléphone à hauteur de votre poitrine.',
+      ];
+
+  // ── Les poses ──
+  CastingPoseCopy get fullFront => const CastingPoseCopy(
+        label: 'Plein pied — de face',
+        hint: 'Debout, de face, bras le long du corps',
+        steps: [
+          'Reculez jusqu\'à ce que vous teniez entièrement dans le cadre, de la tête aux pieds.',
+          'Debout bien droit, pieds légèrement écartés.',
+          'Bras détendus le long du corps, mains visibles.',
+          'Regardez l\'objectif, visage neutre — ne souriez pas.',
+        ],
+      );
+
+  CastingPoseCopy get fullProfile => const CastingPoseCopy(
+        label: 'Plein pied — de profil',
+        hint: 'Tournez-vous complètement sur le côté',
+        steps: [
+          'Tournez-vous d\'un quart de tour : une épaule vers l\'objectif.',
+          'Restez droit, bras le long du corps.',
+          'Regardez droit devant vous, pas vers l\'objectif.',
+          'Toujours de la tête aux pieds dans le cadre.',
+        ],
+      );
+
+  CastingPoseCopy get portrait => const CastingPoseCopy(
+        label: 'Portrait',
+        hint: 'Visage et épaules, expression neutre',
+        steps: [
+          'Cadrez de la tête au haut de la poitrine.',
+          'Face à l\'objectif, épaules droites.',
+          'Visage neutre, bouche fermée, regard vers l\'objectif.',
+          'Dégagez les cheveux du visage.',
+        ],
+      );
+
+  CastingPoseCopy get fullBack => const CastingPoseCopy(
+        label: 'Plein pied — de dos',
+        hint: 'Tournez le dos à l\'objectif',
+        steps: [
+          'Tournez complètement le dos à l\'objectif.',
+          'Debout droit, bras le long du corps.',
+          'De la tête aux pieds dans le cadre.',
+        ],
+      );
+
+  CastingPoseCopy get portraitSmile => const CastingPoseCopy(
+        label: 'Portrait souriant',
+        hint: 'Même cadrage, sourire naturel',
+        steps: [
+          'Même cadrage que le portrait : tête et haut de la poitrine.',
+          'Regardez l\'objectif et souriez naturellement.',
+        ],
+      );
+
+  // ── Mensurations ──
+  String get measurementsTitle => 'Mensurations';
+  String get measurementsIntro =>
+      'Facultatif pour postuler, mais c\'est ce sur quoi les annonces filtrent.';
+  String get height => 'Taille (cm)';
+  String get weight => 'Poids (kg)';
+  String get clothingSize => 'Taille de vêtement';
+  String get shoeSize => 'Pointure';
+  String get save => 'Enregistrer';
+  String get saved => 'Enregistré';
+
+  // ── Annonces ──
+  String get tabCastings => 'Castings';
+  String get tabPublications => 'Publications';
+  String get noCastings => 'Aucune annonce pour le moment';
+  String get noCastingsSubtitle =>
+      'Les nouvelles annonces apparaîtront ici. Préparez votre book en attendant.';
+  String get closesAt => 'Clôture le';
+  String get apply => 'Postuler';
+  String get applied => 'Candidature envoyée';
+  String get applyBlocked => 'Complétez votre book pour postuler';
+  String get applyNote => 'Message (facultatif)';
+  String get applyNoteHint => 'Une expérience, une disponibilité particulière…';
+  String get applySent => 'Votre candidature a été envoyée.';
+  String get applyError => 'Impossible d\'envoyer la candidature.';
+
+  // ── Candidatures ──
+  String get myApplications => 'Mes candidatures';
+  String get noApplications => 'Aucune candidature';
+  String get noApplicationsSubtitle =>
+      'Postulez à une annonce et vous la retrouverez ici.';
+  String get withdraw => 'Retirer';
+  String get withdrawConfirm => 'Retirer cette candidature ?';
+  String get withdrawn => 'Candidature retirée.';
+  String get statusPending => 'En attente';
+  String get statusShortlisted => 'Présélectionné';
+  String get statusAccepted => 'Retenu';
+  String get statusRejected => 'Non retenu';
+  String get statusUnknown => 'En cours';
+
+  // ── Accès ──
+  String get adultsOnly => 'Le casting est réservé aux personnes majeures.';
+  String get birthdayRequired =>
+      'Renseignez votre date de naissance pour accéder au casting.';
+  String get completeProfile => 'Compléter mon profil';
+  String get loadError => 'Impossible de charger le casting.';
+  String get photoError => 'Impossible d\'envoyer la photo.';
+  String get profileTile => 'Casting';
+  String get profileTileSubtitle => 'Votre book et les annonces';
 }
 
 /// Staff check-in strings in French

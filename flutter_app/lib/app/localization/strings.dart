@@ -2,6 +2,7 @@
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_ar.dart';
+import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
 
 /// Localized strings accessor
 /// Maps keys to FR/AR strings using existing copywriting
@@ -1140,6 +1141,17 @@ class AppStrings {
   String get navTabProfile => locale == AppLocale.fr
       ? CopyFr.navTabs.profile
       : CopyAr.navTabs.profile;
+
+  // ============================================
+  // Casting
+  // ============================================
+
+  /// The whole section in one object rather than fifty getters: the copy is
+  /// structured — each pose carries its own instructions — and flattening it
+  /// would lose that shape. Both languages implement [CastingCopy], so the
+  /// analyser refuses a build where one of them is missing a string.
+  CastingCopy get casting =>
+      locale == AppLocale.fr ? CopyFr.casting : CopyAr.casting;
 
   // ============================================
   // Staff Check-in
