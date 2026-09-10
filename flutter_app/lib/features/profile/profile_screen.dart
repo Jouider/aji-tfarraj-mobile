@@ -454,6 +454,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   subtitle: s.onSiteProfileTileSubtitle,
                   onTap: () => context.push(Routes.onSiteRegistration),
                 ),
+              // The shuttle sheet, for the end of the evening. Same door roles:
+              // whoever pointed people in is who reports where they go.
+              if (user != null && user.canRegisterOnSite)
+                _SettingsRow(
+                  icon: Icons.directions_bus_outlined,
+                  iconColor: AppColors.secondary,
+                  title: s.staffProfileManifestTile,
+                  subtitle: s.staffManifestSubtitle,
+                  onTap: () => context.push(Routes.returnManifest),
+                ),
               // FIX: Added support entry point
               _SettingsRow(
                 icon: Icons.headset_mic_outlined,

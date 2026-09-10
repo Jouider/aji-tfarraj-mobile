@@ -88,6 +88,70 @@ pas reposer la question.
 > (Contenu › Points de retour), puis activés **par épisode**. Le staff à la
 > porte ne crée jamais d'arrêt.
 
+## La feuille de retour
+
+Quand le tournage est fini, quelqu'un doit dire au responsable transport combien
+de personnes attendent à chaque arrêt. La porte a enregistré les réponses une
+par une ; cet écran les additionne.
+
+**Où** : l'icône navette en haut de l'écran de check-in, ou
+`Profil › Feuille de retour`. Mêmes rôles que la porte (staff, admin,
+**scanner**).
+
+L'icône passe l'épisode du billet qui vient d'être scanné, donc l'écran s'ouvre
+directement sur le bon tournage. Sans contexte — quelqu'un qui ouvre l'app en
+fin de soirée — il demande lequel, et **ne pose pas la question s'il n'y a qu'un
+seul tournage** : confirmer la seule réponse possible ne sert à rien.
+
+### Ce qu'on lit
+
+```
+   26 attendent · 16 repartent seules · 42 entrees
+              |
+              v
+   Ain Sebaa      14   9 billets   > (deplier -> les noms)
+   Maarif         12   7 billets   >
+   Zenata      personne
+              |
+              v
+        << Envoyer au transport >>
+```
+
+Le **nombre de personnes** est en gros, pas le nombre de billets : c'est ce qui
+dimensionne le véhicule. Un billet de 4 places occupe 4 sièges.
+
+Les **noms sont repliés**. On les ouvre au pied du véhicule pour faire l'appel,
+pas pendant qu'on lit les totaux.
+
+Un arrêt **à zéro reste affiché**, en gris. C'est ainsi que le dispatcher sait
+qu'il n'a pas à y envoyer de véhicule — le masquer forcerait à deviner entre
+« personne » et « oublié ».
+
+Un arrêt marqué **« hors liste de ce tournage »** (encadré rouge + bandeau
+d'alerte) veut dire qu'un admin l'a retiré *après* que des gens l'aient choisi.
+Ces gens attendent quand même : l'anomalie se voit au lieu de se taire.
+
+### L'envoyer
+
+Deux formats, parce qu'ils sont lus par des gens différents :
+
+| Format | Pour qui |
+|---|---|
+| **PDF** | Le dossier, et le chauffeur qui coche les noms au pied du véhicule (une case vide devant chaque nom) |
+| **Message** | Le responsable transport, qui veut juste les chiffres sur WhatsApp à 23 h |
+
+Le PDF embarque **Cairo** (sous-ensemble latin + arabe, OFL, ~73 Ko × 2). Les
+polices intégrées d'un PDF n'ont **aucun glyphe arabe** : sans ça un nom en
+arabe sortirait en blancs. Chaque chaîne reçoit la direction de son propre
+script — l'arabe a besoin du RTL pour se lier et se réordonner — mais tout reste
+**aligné à gauche**, pour que le chauffeur lise les noms dans une seule colonne.
+
+**Aucun numéro de téléphone n'y figure.** Cette feuille est faite pour être
+transmise, et le scanneur peut de toute façon retrouver un numéro à la porte.
+
+Le contrat serveur est dans le repo backend : `docs/return-points.md`
+§ « La feuille de route de la navette ».
+
 ## Fichiers
 
 | Fichier | Rôle |
@@ -96,6 +160,9 @@ pas reposer la question.
 | `features/staff/presentation/ticket_preview_view.dart` | L'écran d'aperçu |
 | `features/staff/presentation/staff_check_in_screen.dart` | Scan QR + saisie manuelle |
 | `features/staff/data/staff_repository.dart` | Appels API et machine à états |
+| `features/staff/domain/return_manifest.dart` | La feuille et ses règles de lecture (`servedTonight`, `hasOrphanedPassengers`) |
+| `features/staff/presentation/return_manifest_screen.dart` | L'écran de la feuille |
+| `features/staff/data/return_manifest_export.dart` | Génération du PDF et du message |
 
 ## Tests
 
@@ -104,5 +171,16 @@ d'admettre quelqu'un : refus non admissibles, **statut inconnu bloquant**,
 photo remplaçable ou non, arrêts desservis, absence de navette, effacement du
 choix, repli du libellé arabe, et champs optionnels absents.
 
-Le rendu réel (caméra, upload, agrandissement) n'est pas couvert : il demande un
-compte scanneur et un billet du jour sur un appareil.
+`test/return_manifest_test.dart` (13) couvre la lecture de la feuille : on
+compte des personnes et pas des billets, un arrêt vide reste affiché, un
+passager sur un arrêt retiré lève une alerte, le repli du libellé arabe, le nom
+de repli d'un épisode sans titre, et le message envoyé au transport (chiffres,
+alerte « hors liste », aucun numéro de téléphone).
+
+`test/return_manifest_pdf_test.dart` (3) construit un vrai PDF, avec des noms en
+arabe. La police est un **asset** : si elle cessait d'être embarquée, rien
+n'échouerait à la compilation et l'export planterait dans les mains du scanneur
+en fin de tournage — le pire moment pour l'apprendre.
+
+Le rendu réel (caméra, upload, agrandissement, partage) n'est pas couvert : il
+demande un compte scanneur et un billet du jour sur un appareil.

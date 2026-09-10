@@ -26,6 +26,7 @@ import 'package:aji_tfarraj/features/reservation/reservation_result_screen.dart'
 import 'package:aji_tfarraj/features/notifications/presentation/notification_center_screen.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
+import 'package:aji_tfarraj/features/staff/presentation/return_manifest_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.dart';
 import 'package:aji_tfarraj/features/on_site/presentation/on_site_registration_screen.dart';
 import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
@@ -52,6 +53,7 @@ const _protectedRoutes = [
   Routes.myRewards,
   Routes.staffCheckIn,
   Routes.onSiteRegistration,
+  Routes.returnManifest,
   Routes.referralStats,
   Routes.referralLinks,
 ];
@@ -133,6 +135,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       // On-site registration also admits scanners — they are the ones at the
       // door — matching the API's role:staff,admin,scanner guard.
       if (isAuthenticated && currentPath == Routes.onSiteRegistration) {
+        final user = ref.read(loginAuthStateProvider).user;
+        if (user != null && !user.canRegisterOnSite) {
+          return Routes.home;
+        }
+      }
+
+      // The shuttle sheet is door work too, so scanners get in alongside
+      // staff and admins — same role set as the API route.
+      if (isAuthenticated && currentPath == Routes.returnManifest) {
         final user = ref.read(loginAuthStateProvider).user;
         if (user != null && !user.canRegisterOnSite) {
           return Routes.home;
@@ -367,6 +378,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.onSiteRegistration,
         name: 'onSiteRegistration',
         builder: (context, state) => const OnSiteRegistrationScreen(),
+      ),
+      GoRoute(
+        path: Routes.returnManifest,
+        name: 'returnManifest',
+        builder: (context, state) {
+          // The episode usually comes from the ticket just scanned; without it
+          // the screen asks which recording.
+          final episodeId = int.tryParse(
+              state.uri.queryParameters['episode'] ?? '');
+          return ReturnManifestScreen(episodeId: episodeId);
+        },
       ),
       GoRoute(
         path: Routes.rules,

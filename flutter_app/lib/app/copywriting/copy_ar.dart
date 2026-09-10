@@ -684,6 +684,36 @@ class StaffCopyAr {
   String get returnPointQuestion => 'فين غادي نهبطو هاد الشخص؟';
   String get returnPointNone => 'غادي يرجع بوحدو';
   String get returnPointSaveError => 'ما تقدرش نسجلو النقطة.';
+
+  // ── ورقة الرجوع: شحال من واحد كيتسنى فكل نقطة ──
+  String get manifestTitle => 'ورقة الرجوع';
+  String get manifestSubtitle => 'شكون كيتسنى الطوبيس، وفين';
+  String get manifestPickEpisode => 'أشمن تصوير؟';
+  String get manifestNoEpisodes => 'ما كاين حتى تصوير هاد الليلة';
+  String get manifestNoEpisodesSubtitle =>
+      'الورقة كتعمر منين كتبدا تسجل الناس فالباب.';
+  String get manifestNoShuttle => 'ما كاين لا طوبيس هاد الليلة';
+  String get manifestNoShuttleSubtitle =>
+      'ما كاينة حتى نقطة رجوع مفعلة لهاد التصوير.';
+  String get manifestNobody => 'حتى واحد ما كيتسنى الطوبيس';
+  String get manifestNobodySubtitle => 'النقط كتعمر مع دخول الناس.';
+  String get manifestPeopleIn => 'دخلو';
+  String get manifestWaiting => 'كيتسناو الطوبيس';
+  String get manifestOwnMeans => 'غاديين براسهم';
+  String get manifestPeople => 'شخص';
+  String get manifestTickets => 'تذاكر';
+  String get manifestEmptyStop => 'حتى واحد';
+  String get manifestOffList => 'ماشي من لائحة هاد التصوير';
+  String get manifestOrphanWarning =>
+      'شي نقطة تحيدات من بعد ما ختاروها ناس. مازال كيتسناو.';
+  String get manifestShare => 'صيفط للنقل';
+  String get manifestSharePdf => 'صيفط PDF';
+  String get manifestShareText => 'صيفط رسالة';
+  String get manifestShareError => 'ما تقدرش نوجدو الورقة.';
+  String get manifestRefresh => 'حدّث';
+  String get manifestLoadError => 'ما تقدرش نجيبو الورقة.';
+  String get manifestGeneratedAt => 'تدارت ف';
+  String get profileManifestTile => 'ورقة الرجوع';
   String get cameraPermissionDenied => 'تم رفض الوصول إلى الكاميرا';
   String get cameraPermissionSubtitle =>
       'السماح بالوصول إلى الكاميرا لمسح رموز QR.';

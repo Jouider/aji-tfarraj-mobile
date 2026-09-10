@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/staff/domain/staff_check_in_result.dart';
+import 'package:aji_tfarraj/features/staff/domain/return_manifest.dart';
 import 'package:aji_tfarraj/features/staff/domain/ticket_preview.dart';
 
 class StaffRepository {
@@ -112,6 +113,38 @@ class StaffRepository {
         data: form,
       );
       return response.data?['avatar_url'] as String?;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
+  /// The shuttle sheet for one recording: how many people at each stop.
+  Future<ReturnManifest> returnManifest(int episodeId) async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/api/staff/return-manifest',
+        queryParameters: {'episode_id': episodeId},
+      );
+      return ReturnManifest.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
+  /// Recordings a manifest can be drawn up for right now. Only needed when the
+  /// app has no scanned ticket to tell it which recording is meant.
+  Future<List<ManifestEpisode>> manifestEpisodes() async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/api/staff/return-manifest',
+      );
+      return (response.data?['episodes'] as List<dynamic>? ?? const [])
+          .map((e) => ManifestEpisode.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     } catch (e) {
@@ -323,3 +356,19 @@ final staffCheckInProvider =
     StateNotifierProvider.autoDispose<StaffCheckInNotifier, StaffCheckInState>(
   (ref) => StaffCheckInNotifier(ref.watch(staffRepositoryProvider)),
 );
+
+
+// ─── Shuttle manifest ────────────────────────────────────────────────────────
+
+/// The sheet for one recording. autoDispose so reopening it re-reads the
+/// numbers: people are still being scanned while the list is being consulted.
+final returnManifestProvider =
+    FutureProvider.autoDispose.family<ReturnManifest, int>((ref, episodeId) {
+  return ref.watch(staffRepositoryProvider).returnManifest(episodeId);
+});
+
+/// Recordings to pick from, when the app has no episode in hand.
+final manifestEpisodesProvider =
+    FutureProvider.autoDispose<List<ManifestEpisode>>((ref) {
+  return ref.watch(staffRepositoryProvider).manifestEpisodes();
+});
