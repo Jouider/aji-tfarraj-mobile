@@ -191,7 +191,9 @@ class _ManifestView extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl),
         children: [
-          _EpisodeHeader(manifest: manifest),
+          _EpisodeHeader(
+              manifest: manifest,
+              generatedLabel: s.staffManifestGeneratedAt),
           const SizedBox(height: AppSpacing.lg),
           _Totals(manifest: manifest, s: s),
           if (manifest.hasOrphanedPassengers) ...[
@@ -217,9 +219,10 @@ class _ManifestView extends ConsumerWidget {
 }
 
 class _EpisodeHeader extends StatelessWidget {
-  const _EpisodeHeader({required this.manifest});
+  const _EpisodeHeader({required this.manifest, required this.generatedLabel});
 
   final ReturnManifest manifest;
+  final String generatedLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -247,6 +250,18 @@ class _EpisodeHeader extends StatelessWidget {
               style:
                   AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
         ],
+        // People are still being scanned while this is being read, and with
+        // several scanners at the door the count moves under you. Saying when
+        // it was taken is the difference between a stale sheet and a wrong one.
+        const SizedBox(height: 6),
+        Row(children: [
+          Icon(Icons.schedule, size: 13, color: AppColors.textLight),
+          const SizedBox(width: 4),
+          Text(
+            '$generatedLabel ${DateFormat('HH:mm').format(manifest.generatedAt)}',
+            style: AppTypography.caption.copyWith(color: AppColors.textLight),
+          ),
+        ]),
       ],
     );
   }

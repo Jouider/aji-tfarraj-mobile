@@ -85,12 +85,13 @@ void main() {
     expect(String.fromCharCodes(bytes.take(5)), '%PDF-');
   });
 
-  /// The file lands in a share sheet and then in someone's downloads, so the
-  /// name has to say which recording it belongs to.
-  test('the file name carries the recording date', () {
+  /// Several scanners each send their own copy. Two attachments with the same
+  /// name and different numbers is how the wrong one gets acted on, so the name
+  /// carries the recording *and* the moment the sheet was taken.
+  test('the file name separates two scanners\' copies', () {
     expect(
       ReturnManifestExport.fileName(sample()),
-      'retour-navette_2026-09-09_1900.pdf',
+      'retour-navette_2026-09-09_23h10.pdf',
     );
   });
 }

@@ -192,6 +192,16 @@ void main() {
       expect(text, contains('Personne n\'attend la navette.'));
     });
 
+    /// Several scanners each send their own message. Without a time the
+    /// transport lead cannot tell which one is the later count.
+    test('says when it was taken', () {
+      final text = ReturnManifestExport.buildText(
+        ReturnManifest.fromJson(payload()),
+      );
+
+      expect(text, contains('Arrêté à 23:10'));
+    });
+
     /// This message gets forwarded on, so it must not carry phone numbers.
     test('never carries a phone number', () {
       final text = ReturnManifestExport.buildText(

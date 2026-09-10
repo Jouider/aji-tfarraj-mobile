@@ -19,7 +19,9 @@ class ReturnManifestExport {
 
   static final _dateTime = DateFormat('dd/MM/yyyy · HH:mm');
   static final _date = DateFormat('dd/MM/yyyy');
-  static final _fileStamp = DateFormat('yyyy-MM-dd_HHmm');
+  static final _time = DateFormat('HH:mm');
+  static final _fileStamp = DateFormat('yyyy-MM-dd');
+  static final _fileTime = DateFormat("HH'h'mm");
 
   /// Arabic only joins its letters and reorders when the run is marked RTL, so
   /// every string gets the direction its own script needs. Stop names and
@@ -106,9 +108,12 @@ class ReturnManifestExport {
     return file;
   }
 
+  /// Named for the recording, then for the moment it was drawn up. Several
+  /// scanners each send their own copy, and two attachments with the same name
+  /// and different numbers is how the wrong one gets acted on.
   static String fileName(ReturnManifest manifest) {
-    final stamp = _fileStamp.format(manifest.episode.startsAt ?? manifest.generatedAt);
-    return 'retour-navette_$stamp.pdf';
+    final day = _fileStamp.format(manifest.episode.startsAt ?? manifest.generatedAt);
+    return 'retour-navette_${day}_${_fileTime.format(manifest.generatedAt)}.pdf';
   }
 
   static pw.Widget _header(ReturnManifest manifest) {
@@ -396,6 +401,10 @@ class ReturnManifestExport {
       if (episode.startsAt != null)
         '${_date.format(episode.startsAt!)}'
             '${episode.studio != null && episode.studio!.isNotEmpty ? ' · ${episode.studio}' : ''}',
+      // With several scanners at the door, more than one of these messages
+      // reaches the transport lead. Without a time they cannot tell which one
+      // is the later count.
+      'Arrêté à ${_time.format(manifest.generatedAt)}',
       '',
     ];
 

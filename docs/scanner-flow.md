@@ -134,6 +134,19 @@ Un arrêt marqué **« hors liste de ce tournage »** (encadré rouge + bandeau
 d'alerte) veut dire qu'un admin l'a retiré *après* que des gens l'aient choisi.
 Ces gens attendent quand même : l'anomalie se voit au lieu de se taire.
 
+### Plusieurs scanneurs
+
+Les chiffres sont ceux du **tournage**, pas du scanneur : la feuille additionne
+tout le monde, quel que soit le téléphone qui a pointé. Le sélecteur liste aussi
+tous les tournages de la fenêtre, donc un scanneur qui n'a rien pointé voit
+quand même la feuille.
+
+Ce qui change avec deux ou trois scanneurs, c'est que **plusieurs copies
+circulent**. La feuille porte donc l'heure à laquelle elle a été arrêtée — à
+l'écran, dans le PDF, dans le message, et jusque dans le **nom du fichier**
+(`retour-navette_2026-09-09_23h10.pdf`). Deux pièces jointes au même nom avec
+des chiffres différents, c'est la mauvaise qu'on applique.
+
 ### L'envoyer
 
 Deux formats, parce qu'ils sont lus par des gens différents :
