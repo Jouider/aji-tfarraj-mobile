@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
@@ -78,14 +79,7 @@ class _CastingDetailScreenState extends ConsumerState<CastingDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
         children: [
-          if (call.imageUrl != null)
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Image.network(call.imageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      Container(color: AppColors.backgroundGrey)),
-            ),
+          if (call.imageUrls.isNotEmpty) _Gallery(urls: call.imageUrls),
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
@@ -282,6 +276,84 @@ class _BlockedCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The call's pictures, swipeable, tappable to open full screen.
+///
+/// One picture gets no dots and no swipe affordance — a lone dot under a single
+/// image reads like something failed to load.
+class _Gallery extends StatefulWidget {
+  const _Gallery({required this.urls});
+
+  final List<String> urls;
+
+  @override
+  State<_Gallery> createState() => _GalleryState();
+}
+
+class _GalleryState extends State<_Gallery> {
+  final _controller = PageController();
+  int _index = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final urls = widget.urls;
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: PageView.builder(
+            controller: _controller,
+            itemCount: urls.length,
+            onPageChanged: (i) => setState(() => _index = i),
+            itemBuilder: (_, i) => GestureDetector(
+              onTap: () => showFullScreenImage(context,
+                  imageUrl: urls[i], heroTag: avatarHeroTag(urls[i])),
+              child: Hero(
+                tag: avatarHeroTag(urls[i]),
+                child: Image.network(
+                  urls[i],
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      Container(color: AppColors.backgroundGrey),
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (urls.length > 1)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var i = 0; i < urls.length; i++)
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: i == _index ? 18 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: i == _index
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

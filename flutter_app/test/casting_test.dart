@@ -142,7 +142,8 @@ void main() {
           'title': 'Figuration série ramadan',
           'title_ar': titleAr,
           'description': 'On cherche des figurants.',
-          'image_url': 'https://x/c.jpg',
+          'image_url': 'https://x/a.jpg',
+          'image_urls': ['https://x/a.jpg', 'https://x/b.jpg'],
           'city': 'Casablanca',
           'min_age': 18,
           'max_age': 35,
@@ -173,6 +174,25 @@ void main() {
           'كاستينغ');
       expect(CastingCall.fromJson(call()).localizedTitle(true),
           'Figuration série ramadan');
+    });
+
+    /// The cover is what the list shows; the whole series is what the detail
+    /// screen swipes through.
+    test('carries the cover and the whole series', () {
+      final c = CastingCall.fromJson(call());
+
+      expect(c.imageUrl, 'https://x/a.jpg');
+      expect(c.imageUrls, ['https://x/a.jpg', 'https://x/b.jpg']);
+      expect(c.imageUrls.first, c.imageUrl,
+          reason: 'the cover is the first picture');
+    });
+
+    /// An older server, or a call with no visual, must not crash the gallery.
+    test('a call with no pictures parses to an empty series', () {
+      final c = CastingCall.fromJson({'id': 1, 'title': 'Sans visuel'});
+
+      expect(c.imageUrl, isNull);
+      expect(c.imageUrls, isEmpty);
     });
 
     test('an application status is carried through', () {

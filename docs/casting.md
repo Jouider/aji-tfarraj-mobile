@@ -87,6 +87,21 @@ est déjà devant l'objectif.
 Jamais bloquantes. Un directeur de casting convoque quelqu'un sur ses photos ;
 il ne fait rien de chiffres sans visage.
 
+## Les photos de l'annonce
+
+Une annonce porte **plusieurs photos**, dans l'ordre où l'admin les a rangées.
+
+La liste n'affiche que la **couverture** (`image_url`, la première de la série) —
+charger six images par carte pour n'en montrer qu'une serait du gaspillage sur
+un réseau marocain. Le détail affiche toute la série (`image_urls`) dans un
+carrousel : glisser pour passer d'une photo à l'autre, toucher pour l'ouvrir en
+plein écran.
+
+Une photo seule n'a **ni points ni indication de glissement** : un point unique
+sous une image se lit comme un chargement qui a échoué.
+
+Une annonce sans photo n'affiche rien plutôt qu'un cadre vide.
+
 ## Postuler
 
 Le bouton n'existe **pas** tant que le book est incomplet : à la place, la
@@ -127,7 +142,7 @@ perdrait cette forme.
 
 ## Tests
 
-`test/casting_test.dart` (19) : les clés de pose qui doivent correspondre au
+`test/casting_test.dart` (21) : les clés de pose qui doivent correspondre au
 contrat serveur, obligatoire contre facultatif, plein pied contre portrait, une
 pose inconnue ignorée, la complétude qui vient du serveur, le repli du titre
 arabe, un statut inconnu qui compte quand même comme « déjà postulé », et les
