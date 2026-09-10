@@ -126,7 +126,7 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
                       : () => context.push(Routes.login),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.secondary,
-                    foregroundColor: AppColors.backgroundWhite, // #0C0C0C — dark text on gold, intentional
+                    foregroundColor: AppColors.onSecondary,
 
                     shape: RoundedRectangleBorder(
                       borderRadius:

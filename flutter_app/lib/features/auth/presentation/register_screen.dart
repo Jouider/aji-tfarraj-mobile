@@ -193,7 +193,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     onPressed: authState.isLoading ? null : _submit,
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.secondary,
-                      foregroundColor: AppColors.backgroundWhite,
+                      foregroundColor: AppColors.onSecondary,
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusMd),

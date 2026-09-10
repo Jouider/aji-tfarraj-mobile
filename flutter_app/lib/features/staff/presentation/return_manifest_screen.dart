@@ -566,12 +566,15 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white),
+                    strokeWidth: 2, color: AppColors.onSecondary),
               )
             : const Icon(Icons.ios_share),
         label: Text(s.staffManifestShare),
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.secondary,
+          // FilledButton defaults its ink to onPrimary (white), which is
+          // 2.1:1 on this gold.
+          foregroundColor: AppColors.onSecondary,
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         ),
       ),

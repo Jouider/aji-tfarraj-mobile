@@ -91,7 +91,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 : context.go(Routes.login),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.secondary,
-              foregroundColor: AppColors.backgroundWhite,
+              foregroundColor: AppColors.onSecondary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
@@ -188,7 +188,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               onPressed: _isLoading ? null : _submit,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.secondary,
-                foregroundColor: AppColors.backgroundWhite,
+                foregroundColor: AppColors.onSecondary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),

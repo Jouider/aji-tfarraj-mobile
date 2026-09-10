@@ -33,6 +33,18 @@ class AppColors {
 
   /// Secondary / Gold - Accents, icons, highlights, selected states
   static const Color secondary = Color(0xFFF4A21E);
+
+  /// Ink drawn ON TOP of [secondary].
+  ///
+  /// Deliberately the same in both themes, because [secondary] is: the gold
+  /// does not change, so the ink that stays readable on it does not change
+  /// either. White on this gold measures **2.1:1** — below the 3:1 WCAG floor
+  /// even for large text — so it is never an option, in either theme.
+  ///
+  /// Use this rather than a background token that happens to be dark right
+  /// now: `backgroundWhite` reads correctly on gold in the dark theme and
+  /// becomes unreadable in the light one.
+  static const Color onSecondary = Color(0xFF0C0C0C);
   static const Color secondaryLight = Color(0xFFFFC04D);
   static const Color secondaryDark = Color(0xFFC77B00);
 

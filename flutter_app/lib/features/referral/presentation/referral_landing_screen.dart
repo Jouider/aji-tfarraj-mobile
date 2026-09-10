@@ -252,7 +252,7 @@ class ReferralLandingScreen extends ConsumerWidget {
                       },
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.secondary,
-                  foregroundColor: AppColors.backgroundWhite,
+                  foregroundColor: AppColors.onSecondary,
                   disabledBackgroundColor:
                       AppColors.secondary.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(
