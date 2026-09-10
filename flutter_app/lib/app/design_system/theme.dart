@@ -26,7 +26,7 @@ class AppTheme {
           primary: AppColors.primary,
           onPrimary: Colors.white,
           secondary: AppColors.secondary,
-          onSecondary: Color(0xFF0C0C0C),
+          onSecondary: AppColors.onSecondary,
           error: AppColors.error,
           onError: Colors.white,
           surface: Color(0xFF1C1C1E),
@@ -301,7 +301,9 @@ class AppTheme {
           primary: AppColors.primary,
           onPrimary: Colors.white,
           secondary: AppColors.secondary,
-          onSecondary: Colors.white,
+          // Not white: white on this gold is 2.1:1. The dark theme already
+          // got this right, the light one did not.
+          onSecondary: AppColors.onSecondary,
           error: AppColors.error,
           onError: Colors.white,
           surface: Color(0xFFF3F4F6),

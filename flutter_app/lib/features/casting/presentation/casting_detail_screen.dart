@@ -159,13 +159,16 @@ class _CastingDetailScreenState extends ConsumerState<CastingDetailScreen> {
                     child: FilledButton(
                       onPressed: _sending ? null : _apply,
                       style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.secondary),
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.onSecondary,
+                      ),
                       child: _sending
                           ? const SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
+                                  strokeWidth: 2,
+                                  color: AppColors.onSecondary))
                           : Text(s.casting.apply),
                     ),
                   ),
@@ -275,8 +278,10 @@ class _BlockedCard extends StatelessWidget {
             width: double.infinity,
             child: FilledButton(
               onPressed: onAction,
-              style:
-                  FilledButton.styleFrom(backgroundColor: AppColors.secondary),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.secondary,
+                foregroundColor: AppColors.onSecondary,
+              ),
               child: Text(actionLabel),
             ),
           ),

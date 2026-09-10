@@ -214,7 +214,8 @@ class _SecondaryButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.secondary,
-        foregroundColor: AppColors.textPrimary,
+        // textPrimary is white in the dark theme — 2.1:1 on gold.
+        foregroundColor: AppColors.onSecondary,
         disabledBackgroundColor: AppColors.disabled,
         disabledForegroundColor: AppColors.textLight,
         elevation: 0,

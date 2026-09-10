@@ -126,6 +126,7 @@ Future<String?> showPoseGuide(
                   label: Text(s.casting.bookTake),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.onSecondary,
                   ),
                 ),
               ),

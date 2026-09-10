@@ -186,7 +186,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: isAnyLoading ? null : _submit,
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.secondary,
-                      foregroundColor: AppColors.backgroundWhite,
+                      foregroundColor: AppColors.onSecondary,
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusMd),

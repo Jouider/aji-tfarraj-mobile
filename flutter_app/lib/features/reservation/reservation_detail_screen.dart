@@ -684,6 +684,20 @@ class _ActionButton extends StatelessWidget {
     this.color,
   });
 
+  /// Dark or light ink, whichever is actually more readable on [background].
+  ///
+  /// Measured rather than guessed at. The usual "luminance > 0.5" shortcut gets
+  /// this very button wrong: the gold sits at **0.45**, just under the line, yet
+  /// dark ink reads at 10:1 on it and white at 2.1:1. The real crossover is
+  /// near 0.18, so the two contrast ratios are compared directly.
+  static Color _inkOn(Color background) {
+    final luminance = background.computeLuminance();
+    final onWhite = 1.05 / (luminance + 0.05);
+    final onBlack = (luminance + 0.05) / 0.05;
+
+    return onBlack >= onWhite ? AppColors.onSecondary : Colors.white;
+  }
+
   @override
   Widget build(BuildContext context) {
     final resolvedColor = color ?? AppColors.secondary;
@@ -698,7 +712,11 @@ class _ActionButton extends StatelessWidget {
           label: Text('  $label', style: AppTypography.buttonLarge),
           style: FilledButton.styleFrom(
             backgroundColor: resolvedColor,
-            foregroundColor: AppColors.backgroundWhite,
+            // Picked from the fill, not from the theme. This button takes a
+            // colour, and the previous value was a *background* token that only
+            // happened to be dark in the dark theme — the same button was white
+            // on gold, 2.1:1, in the light one.
+            foregroundColor: _inkOn(resolvedColor),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
@@ -914,7 +932,7 @@ class _ErrorView extends StatelessWidget {
               label: Text(retryLabel, style: AppTypography.buttonLarge),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.secondary,
-                foregroundColor: AppColors.backgroundWhite,
+                foregroundColor: AppColors.onSecondary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
