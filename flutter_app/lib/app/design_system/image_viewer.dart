@@ -112,7 +112,13 @@ class _FullScreenImage extends StatelessWidget {
 /// Tag shared between an avatar thumbnail and its full-screen view, so the
 /// hero animation matches them up. Keyed by the image itself: two thumbnails of
 /// the same person on one screen would otherwise fight over the same tag.
-Object avatarHeroTag(String imageUrl) => 'avatar::$imageUrl';
+///
+/// [scope] separates screens that show the SAME photo and sit on top of each
+/// other — the profile and its edit screen. With one shared tag the framework
+/// flies the picture between them on every push and pop, and it flies without
+/// its round clip: a square block crossing the screen.
+Object avatarHeroTag(String imageUrl, {String scope = 'avatar'}) =>
+    '$scope::$imageUrl';
 
 /// Placeholder shown while an avatar has no picture at all.
 class AvatarFallbackIcon extends StatelessWidget {

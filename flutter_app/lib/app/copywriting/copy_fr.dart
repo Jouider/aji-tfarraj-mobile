@@ -849,6 +849,11 @@ class ConditionsCopyFr {
           body:
               'Toute inscription via l\'application implique l\'acceptation complète du présent règlement.',
         ),
+        ConditionSection(
+          title: 'Réseaux sociaux (facultatif)',
+          body:
+              'Vous pouvez indiquer vos comptes Instagram, TikTok et Facebook dans votre profil. Ils servent uniquement à vous proposer des collaborations et des castings. Notre équipe peut consulter ces profils publics pour estimer votre audience ; cette estimation reste interne et n\'est jamais publiée. Ces informations sont facultatives, n\'ont aucun effet sur vos réservations, et vous pouvez les modifier ou les supprimer à tout moment depuis votre profil.',
+        ),
       ];
 }
 

@@ -307,7 +307,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _showAvatarSheet();
       return;
     }
-    showFullScreenImage(context, imageUrl: url, heroTag: avatarHeroTag(url));
+    showFullScreenImage(context, imageUrl: url, heroTag: avatarHeroTag(url, scope: 'edit-profile'));
   }
 
   void _showAvatarSheet() {
@@ -982,7 +982,7 @@ class _AvatarHero extends ConsumerWidget {
                           )
                         : (user?.avatarUrl != null
                             ? Hero(
-                                tag: avatarHeroTag(user!.avatarUrl!),
+                                tag: avatarHeroTag(user!.avatarUrl!, scope: 'edit-profile'),
                                 child: Image.network(
                                 user!.avatarUrl!,
                                 width: 104,
@@ -1003,26 +1003,37 @@ class _AvatarHero extends ConsumerWidget {
                 ),
               ),
             ),
-            // Edit badge
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.backgroundWhite, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.secondary.withValues(alpha: 0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+            // Camera badge — the way to change the photo. The circle is 38px
+            // and the tap area a full 56px corner: with only the 15px icon
+            // tappable, most taps landed on the photo and enlarged it instead.
+            GestureDetector(
+              onTap: onTapBadge,
+              behavior: HitTestBehavior.opaque,
+              child: SizedBox(
+                width: 56,
+                height: 56,
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: AppColors.backgroundWhite, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.secondary.withValues(alpha: 0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.camera_alt,
+                        size: 18, color: Colors.white),
                   ),
-                ],
-              ),
-              child: GestureDetector(
-                onTap: onTapBadge,
-                child: const Icon(Icons.camera_alt,
-                    size: 15, color: Colors.white),
+                ),
               ),
             ),
           ],
