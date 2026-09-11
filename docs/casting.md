@@ -182,6 +182,17 @@ traduites : un lecteur arabophone ne doit pas perdre des règles qui existent.
 La date du casting s'affiche en `dd/MM/yyyy · HH:mm`, comme les autres dates de
 la section.
 
+## L'étoile du studio
+
+Quand le staff a photographié le membre au studio, son book affiche en haut
+**« Book vérifié en studio ⭐ — Photographié par notre équipe le … »**, et le
+bandeau de la section casting passe de « Book complet » à l'étoile.
+
+Seul ce **résultat** arrive dans l'app. Être présélectionné pour le studio reste
+côté staff : le modèle n'a même pas de champ pour ça, pour qu'aucun écran ne
+puisse l'afficher par erreur. Un serveur plus ancien qui n'envoie pas le bloc
+`studio` se lit comme « pas d'étoile », jamais l'inverse.
+
 ## Postuler
 
 Le bouton n'existe **pas** tant que le book est incomplet : à la place, la

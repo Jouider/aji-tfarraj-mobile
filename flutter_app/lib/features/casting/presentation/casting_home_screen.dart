@@ -107,13 +107,21 @@ class _BookBanner extends ConsumerWidget {
 
     final complete = book.valueOrNull?.isComplete ?? false;
     final missing = book.valueOrNull?.missingPoses.length ?? 0;
+    // The star outranks "complete": it is the better news.
+    final verified = book.valueOrNull?.studioVerified ?? false;
 
     return _Banner(
-      icon: complete ? Icons.check_circle : Icons.photo_camera_outlined,
-      text: complete
-          ? s.casting.bookComplete
-          : s.casting.bookMissing.replaceFirst('%d', '$missing'),
-      tone: complete ? AppColors.success : AppColors.secondary,
+      icon: verified
+          ? Icons.star_rounded
+          : (complete ? Icons.check_circle : Icons.photo_camera_outlined),
+      text: verified
+          ? s.casting.studioVerifiedTitle
+          : complete
+              ? s.casting.bookComplete
+              : s.casting.bookMissing.replaceFirst('%d', '$missing'),
+      tone: verified
+          ? AppColors.secondary
+          : (complete ? AppColors.success : AppColors.secondary),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const CastingBookScreen()),
       ),

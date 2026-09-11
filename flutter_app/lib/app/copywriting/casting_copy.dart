@@ -99,4 +99,8 @@ abstract class CastingCopy {
   String get portraitNotSmiling;
   String get adviceTitle;
   String get adviceKeep;
+
+  // The studio star
+  String get studioVerifiedTitle;
+  String studioVerifiedOn(String date);
 }

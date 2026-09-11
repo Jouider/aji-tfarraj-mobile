@@ -34,6 +34,13 @@ class CastingBook {
   /// Whether this book can be put forward.
   final bool isComplete;
 
+  /// Photographed by the team at the studio — the star. Only this final state
+  /// reaches the app: being shortlisted is staff's business.
+  final bool studioVerified;
+
+  /// The day of that shoot.
+  final DateTime? studioShotOn;
+
   const CastingBook({
     this.id,
     this.heightCm,
@@ -43,6 +50,8 @@ class CastingBook {
     this.photos = const [],
     this.missingPoses = const [],
     this.isComplete = false,
+    this.studioVerified = false,
+    this.studioShotOn,
   });
 
   /// The shot in a given slot, if it has been taken.
@@ -74,6 +83,14 @@ class CastingBook {
           .whereType<CastingPose>()
           .toList(),
       isComplete: json['is_complete'] as bool? ?? false,
+      studioVerified:
+          (json['studio'] as Map<String, dynamic>?)?['verified'] as bool? ??
+              false,
+      studioShotOn: (json['studio'] as Map<String, dynamic>?)?['shot_on']
+              is String
+          ? DateTime.tryParse(
+              (json['studio'] as Map<String, dynamic>)['shot_on'] as String)
+          : null,
     );
   }
 }

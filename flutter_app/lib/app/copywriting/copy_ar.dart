@@ -805,6 +805,10 @@ class CastingCopyAr implements CastingCopy {
   String get portraitNotSmiling => 'ضحك مزيان فهاد الصورة.';
   String get adviceTitle => 'يمكن هاد الصورة ماشي كيفما طلبنا';
   String get adviceKeep => 'خليها';
+
+  // ── متحقق منه فالاستوديو ──
+  String get studioVerifiedTitle => 'الصور متحقق منها فالاستوديو';
+  String studioVerifiedOn(String date) => 'صوّرك الفريق ديالنا نهار $date';
 }
 
 /// Staff check-in strings in Arabic

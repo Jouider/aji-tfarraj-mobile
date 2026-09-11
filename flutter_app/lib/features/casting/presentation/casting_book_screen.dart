@@ -80,6 +80,11 @@ class _CastingBookScreenState extends ConsumerState<CastingBookScreen> {
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg,
                 AppSpacing.lg, AppSpacing.xxl),
             children: [
+              // First thing on the page: it is what the member is proudest of.
+              if (data.studioVerified) ...[
+                _StudioBadge(book: data),
+                const SizedBox(height: AppSpacing.md),
+              ],
               _Intro(text: s.casting.bookIntro),
               const SizedBox(height: AppSpacing.md),
               _RulesCard(title: s.casting.rulesTitle, rules: s.casting.rules),
@@ -498,5 +503,52 @@ class _BookError extends ConsumerWidget {
           onRetry: () => ref.invalidate(castingBookProvider),
         ),
     };
+  }
+}
+
+/// "Book vérifié en studio ⭐" — the member was photographed by the team.
+class _StudioBadge extends ConsumerWidget {
+  const _StudioBadge({required this.book});
+
+  final CastingBook book;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = ref.watch(stringsProvider).casting;
+    final shotOn = book.studioShotOn;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.secondary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.secondary.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.star_rounded, color: AppColors.secondary, size: 30),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(c.studioVerifiedTitle,
+                    style: AppTypography.bodyMedium
+                        .copyWith(fontWeight: FontWeight.w700)),
+                if (shotOn != null)
+                  Text(
+                    c.studioVerifiedOn(
+                        '${shotOn.day.toString().padLeft(2, '0')}/'
+                        '${shotOn.month.toString().padLeft(2, '0')}/'
+                        '${shotOn.year}'),
+                    style: AppTypography.bodySmall
+                        .copyWith(color: AppColors.textMuted),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
