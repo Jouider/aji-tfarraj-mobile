@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
+import 'package:aji_tfarraj/features/staff/domain/attendee.dart';
 import 'package:aji_tfarraj/features/staff/domain/staff_check_in_result.dart';
 import 'package:aji_tfarraj/features/staff/domain/return_manifest.dart';
 import 'package:aji_tfarraj/features/staff/domain/ticket_preview.dart';
@@ -128,6 +129,63 @@ class StaffRepository {
         queryParameters: {'episode_id': episodeId},
       );
       return ReturnManifest.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
+  /// Everyone the door let in for one recording, and whether they left.
+  Future<AttendeeList> attendees(int episodeId) async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '/api/staff/attendees',
+        queryParameters: {'episode_id': episodeId},
+      );
+      return AttendeeList.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
+  /// Record that [attendee] left before the end. Returns the updated row.
+  Future<Attendee> recordDeparture({
+    required Attendee attendee,
+    required DepartureReason reason,
+    String? note,
+  }) async {
+    final trimmed = note?.trim();
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '/api/staff/departures',
+        data: {
+          'kind': attendee.kind.key,
+          'id': attendee.id,
+          'reason': reason.key,
+          if (trimmed != null && trimmed.isNotEmpty) 'note': trimmed,
+        },
+      );
+      return Attendee.fromJson(
+          response.data!['attendee'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
+  /// Take back a departure recorded on the wrong person.
+  Future<Attendee> undoDeparture(Attendee attendee) async {
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '/api/staff/departures/undo',
+        data: {'kind': attendee.kind.key, 'id': attendee.id},
+      );
+      return Attendee.fromJson(
+          response.data!['attendee'] as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     } catch (e) {
@@ -371,4 +429,10 @@ final returnManifestProvider =
 final manifestEpisodesProvider =
     FutureProvider.autoDispose<List<ManifestEpisode>>((ref) {
   return ref.watch(staffRepositoryProvider).manifestEpisodes();
+});
+
+/// "Présents" for one recording.
+final attendeesProvider =
+    FutureProvider.autoDispose.family<AttendeeList, int>((ref, episodeId) {
+  return ref.watch(staffRepositoryProvider).attendees(episodeId);
 });

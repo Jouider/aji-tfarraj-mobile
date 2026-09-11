@@ -61,7 +61,7 @@ class _ReturnManifestScreenState extends ConsumerState<ReturnManifestScreen> {
         ],
       ),
       body: _episodeId == null
-          ? _EpisodePicker(onPick: (id) => setState(() => _episodeId = id))
+          ? StaffEpisodePicker(onPick: (id) => setState(() => _episodeId = id))
           : _ManifestBody(episodeId: _episodeId!),
     );
   }
@@ -69,8 +69,10 @@ class _ReturnManifestScreenState extends ConsumerState<ReturnManifestScreen> {
 
 // ─── Choosing a recording ────────────────────────────────────────────────────
 
-class _EpisodePicker extends ConsumerWidget {
-  const _EpisodePicker({required this.onPick});
+/// Which recording — skipped when there is only one. Shared by the shuttle
+/// sheet and "Présents".
+class StaffEpisodePicker extends ConsumerWidget {
+  const StaffEpisodePicker({required this.onPick});
 
   final ValueChanged<int> onPick;
 

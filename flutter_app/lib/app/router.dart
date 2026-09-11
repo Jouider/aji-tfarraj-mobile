@@ -27,6 +27,7 @@ import 'package:aji_tfarraj/features/notifications/presentation/notification_cen
 import 'package:aji_tfarraj/features/loyalty/presentation/loyalty_screen.dart';
 import 'package:aji_tfarraj/features/shows/presentation/shows_browse_screen.dart';
 import 'package:aji_tfarraj/features/casting/presentation/casting_home_screen.dart';
+import 'package:aji_tfarraj/features/staff/presentation/attendees_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/return_manifest_screen.dart';
 import 'package:aji_tfarraj/features/staff/presentation/staff_check_in_screen.dart';
 import 'package:aji_tfarraj/features/on_site/presentation/on_site_registration_screen.dart';
@@ -55,6 +56,7 @@ const _protectedRoutes = [
   Routes.staffCheckIn,
   Routes.onSiteRegistration,
   Routes.returnManifest,
+  Routes.staffAttendees,
   Routes.casting,
   Routes.referralStats,
   Routes.referralLinks,
@@ -145,7 +147,10 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // The shuttle sheet is door work too, so scanners get in alongside
       // staff and admins — same role set as the API route.
-      if (isAuthenticated && currentPath == Routes.returnManifest) {
+      // "Présents" too: scanners watch people leave at the exit.
+      if (isAuthenticated &&
+          (currentPath == Routes.returnManifest ||
+              currentPath == Routes.staffAttendees)) {
         final user = ref.read(loginAuthStateProvider).user;
         if (user != null && !user.canRegisterOnSite) {
           return Routes.home;
@@ -396,6 +401,15 @@ final routerProvider = Provider<GoRouter>((ref) {
               state.uri.queryParameters['episode'] ?? '');
           return ReturnManifestScreen(episodeId: episodeId);
         },
+      ),
+      GoRoute(
+        path: Routes.staffAttendees,
+        name: 'staffAttendees',
+        // Like the shuttle sheet: the recording usually comes from the ticket
+        // just scanned, otherwise the screen asks.
+        builder: (context, state) => AttendeesScreen(
+          episodeId: int.tryParse(state.uri.queryParameters['episode'] ?? ''),
+        ),
       ),
       GoRoute(
         path: Routes.rules,

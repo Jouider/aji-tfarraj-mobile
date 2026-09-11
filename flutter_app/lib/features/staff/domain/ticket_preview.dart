@@ -1,3 +1,5 @@
+import 'package:aji_tfarraj/features/staff/domain/attendee.dart';
+
 /// What the scanner sees after scanning, *before* admitting anyone.
 ///
 /// Comes from `POST /api/staff/ticket/lookup`, which has no side effects — so
@@ -95,6 +97,15 @@ class TicketPreview {
   final String? attendeePhone;
   final bool isMinor;
 
+  /// Shown out of earlier recordings — the door should know before letting
+  /// them in again. Only exclusions count: leaving unwell is held against no one.
+  final int pastExclusions;
+  final DateTime? lastExclusionAt;
+  final String? lastExclusionShow;
+
+  /// Set when this very ticket's holder already left tonight.
+  final Departure? departure;
+
   // Reservation
   final int? reservationId;
   final int seats;
@@ -125,6 +136,10 @@ class TicketPreview {
     this.avatarLocked = false,
     this.attendeePhone,
     this.isMinor = false,
+    this.pastExclusions = 0,
+    this.lastExclusionAt,
+    this.lastExclusionShow,
+    this.departure,
     this.reservationId,
     this.seats = 1,
     this.returnPoints = const [],
@@ -138,6 +153,8 @@ class TicketPreview {
 
   /// Whether the scanner may validate this entry.
   bool get canAdmit => status == TicketPreviewStatus.canCheckIn;
+
+  bool get wasExcludedBefore => pastExclusions > 0;
 
   /// Whether to ask where they want to be dropped. No served stops means no
   /// shuttle tonight, so the question would be meaningless.
@@ -155,6 +172,10 @@ class TicketPreview {
         avatarLocked: avatarLocked,
         attendeePhone: attendeePhone,
         isMinor: isMinor,
+        pastExclusions: pastExclusions,
+        lastExclusionAt: lastExclusionAt,
+        lastExclusionShow: lastExclusionShow,
+        departure: departure,
         reservationId: reservationId,
         seats: seats,
         returnPoints: returnPoints,
@@ -183,6 +204,10 @@ class TicketPreview {
         avatarLocked: avatarLocked,
         attendeePhone: attendeePhone,
         isMinor: isMinor,
+        pastExclusions: pastExclusions,
+        lastExclusionAt: lastExclusionAt,
+        lastExclusionShow: lastExclusionShow,
+        departure: departure,
         reservationId: reservationId,
         seats: seats,
         returnPoints: returnPoints,
@@ -199,6 +224,8 @@ class TicketPreview {
     final reservation = json['reservation'] as Map<String, dynamic>? ?? const {};
     final episode = json['episode'] as Map<String, dynamic>? ?? const {};
     final show = json['show'] as Map<String, dynamic>? ?? const {};
+    final exclusions =
+        attendee['exclusions'] as Map<String, dynamic>? ?? const {};
 
     DateTime? parse(Object? v) =>
         v is String ? DateTime.parse(v).toLocal() : null;
@@ -216,6 +243,10 @@ class TicketPreview {
       avatarLocked: attendee['avatar_locked'] as bool? ?? false,
       attendeePhone: attendee['phone'] as String?,
       isMinor: attendee['is_minor'] as bool? ?? false,
+      pastExclusions: exclusions['count'] as int? ?? 0,
+      lastExclusionAt: parse(exclusions['last_at']),
+      lastExclusionShow: exclusions['last_show'] as String?,
+      departure: Departure.fromJson(reservation['departure']),
       reservationId: reservation['id'] as int?,
       seats: reservation['seats'] as int? ?? 1,
       returnPoints: (json['return_points'] as List<dynamic>? ?? [])

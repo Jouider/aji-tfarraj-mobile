@@ -464,6 +464,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   subtitle: s.staffManifestSubtitle,
                   onTap: () => context.push(Routes.returnManifest),
                 ),
+              // Who is in the room — and the place to note who left before the
+              // end. Same door roles: scanners see people leave at the exit.
+              if (user != null && user.canRegisterOnSite)
+                _SettingsRow(
+                  icon: Icons.groups_outlined,
+                  iconColor: AppColors.primary,
+                  title: s.departures.tile,
+                  subtitle: s.departures.tileSubtitle,
+                  onTap: () => context.push(Routes.staffAttendees),
+                ),
               // Casting — open to every member; the section itself explains
               // when someone is not eligible, rather than hiding without a word.
               _SettingsRow(

@@ -74,6 +74,17 @@ class _StaffCheckInScreenState extends ConsumerState<StaffCheckInScreen>
                     : Routes.returnManifest,
               ),
             ),
+          // Who is in the room, and the place to note who left before the end.
+          if (user != null && user.canRegisterOnSite)
+            IconButton(
+              tooltip: s.departures.title,
+              icon: const Icon(Icons.groups_outlined),
+              onPressed: () => context.push(
+                scannedEpisodeId != null
+                    ? '${Routes.staffAttendees}?episode=$scannedEpisodeId'
+                    : Routes.staffAttendees,
+              ),
+            ),
         ],
         bottom: user != null && user.isStaffOrAdmin
             ? TabBar(

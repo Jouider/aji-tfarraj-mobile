@@ -3,6 +3,7 @@ import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_ar.dart';
 import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/departure_copy.dart';
 
 /// Localized strings accessor
 /// Maps keys to FR/AR strings using existing copywriting
@@ -1192,6 +1193,10 @@ class AppStrings {
   /// analyser refuses a build where one of them is missing a string.
   CastingCopy get casting =>
       locale == AppLocale.fr ? CopyFr.casting : CopyAr.casting;
+
+  /// "Présents" and departures (staff, admin, scanner).
+  DepartureCopy get departures =>
+      locale == AppLocale.fr ? CopyFr.departures : CopyAr.departures;
 
   // ============================================
   // Staff Check-in
