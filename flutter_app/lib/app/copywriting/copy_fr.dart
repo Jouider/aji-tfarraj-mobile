@@ -1243,6 +1243,11 @@ abstract class ChargePublicCopy {
   String get kpiPoints;
 
   String get earningsByShow;
+
+  /// The per-episode sheet opened by tapping a show in "Gains par émission".
+  String get episodeTotal;
+  String get episodeUndated;
+  String episodeCount(int n);
   String get recentGuests;
   String get myReferred;
   String get seeAll;
@@ -1336,6 +1341,12 @@ class ChargePublicCopyFr extends ChargePublicCopy {
 
   @override
   String get earningsByShow => 'Gains par émission';
+  @override
+  String get episodeTotal => 'Total';
+  @override
+  String get episodeUndated => 'Date non précisée';
+  @override
+  String episodeCount(int n) => n == 1 ? '1 épisode' : '$n épisodes';
   @override
   String get recentGuests => 'Invités récents';
   @override

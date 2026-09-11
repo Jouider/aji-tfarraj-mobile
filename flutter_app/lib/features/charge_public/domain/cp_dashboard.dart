@@ -28,7 +28,43 @@ class CpStats {
   });
 }
 
+/// One recording of a show, and what it brought in.
+class CpEpisodeRow {
+  /// Null for guests recorded before episodes were tracked — kept as their own
+  /// row so the episodes always add up to the show.
+  final int? episodeId;
+  final String? title;
+  final DateTime? startsAt;
+  final int invited;
+  final int attended;
+  final int notAttended;
+  final int earnings;
+
+  const CpEpisodeRow({
+    this.episodeId,
+    this.title,
+    this.startsAt,
+    this.invited = 0,
+    this.attended = 0,
+    this.notAttended = 0,
+    this.earnings = 0,
+  });
+
+  factory CpEpisodeRow.fromJson(Map<String, dynamic> j) => CpEpisodeRow(
+        episodeId: (j['episode_id'] as num?)?.toInt(),
+        title: j['title'] as String?,
+        startsAt: j['starts_at'] is String
+            ? DateTime.tryParse(j['starts_at'] as String)?.toLocal()
+            : null,
+        invited: (j['invited'] as num?)?.toInt() ?? 0,
+        attended: (j['attended'] as num?)?.toInt() ?? 0,
+        notAttended: (j['not_attended'] as num?)?.toInt() ?? 0,
+        earnings: (j['earnings'] as num?)?.toInt() ?? 0,
+      );
+}
+
 class CpShowRow {
+  final int? showId;
   final String showTitle;
   final String? showDate;
   final int invited;
@@ -36,22 +72,35 @@ class CpShowRow {
   final int notAttended;
   final int earnings;
 
+  /// Most recent recording first. Empty on an older server, in which case the
+  /// row is not tappable rather than opening an empty sheet.
+  final List<CpEpisodeRow> episodes;
+
   const CpShowRow({
+    this.showId,
     required this.showTitle,
     this.showDate,
     this.invited = 0,
     this.attended = 0,
     this.notAttended = 0,
     this.earnings = 0,
+    this.episodes = const [],
   });
 
+  bool get hasEpisodes => episodes.isNotEmpty;
+
   factory CpShowRow.fromJson(Map<String, dynamic> j) => CpShowRow(
+        showId: (j['show_id'] as num?)?.toInt(),
         showTitle: j['show_title'] as String? ?? '—',
         showDate: j['show_date'] as String?,
         invited: (j['invited'] as num?)?.toInt() ?? 0,
         attended: (j['attended'] as num?)?.toInt() ?? 0,
         notAttended: (j['not_attended'] as num?)?.toInt() ?? 0,
         earnings: (j['earnings'] as num?)?.toInt() ?? 0,
+        episodes: ((j['episodes'] as List<dynamic>?) ?? const [])
+            .whereType<Map<String, dynamic>>()
+            .map(CpEpisodeRow.fromJson)
+            .toList(),
       );
 }
 

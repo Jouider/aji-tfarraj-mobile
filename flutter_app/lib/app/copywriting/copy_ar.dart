@@ -1391,6 +1391,12 @@ class ChargePublicCopyAr extends ChargePublicCopy {
   @override
   String get earningsByShow => 'الأرباح حسب البرنامج';
   @override
+  String get episodeTotal => 'المجموع';
+  @override
+  String get episodeUndated => 'تاريخ غير محدد';
+  @override
+  String episodeCount(int n) => n == 1 ? 'حلقة واحدة' : '$n حلقات';
+  @override
   String get recentGuests => 'مدعوّون حديثاً';
   @override
   String get myReferred => 'مُحالوني';
