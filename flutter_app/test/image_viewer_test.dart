@@ -114,4 +114,18 @@ void main() {
       expect(find.byIcon(Icons.close), findsOneWidget);
     });
   });
+
+  /// The profile and its edit screen show the same photo, stacked. A shared
+  /// tag made the framework fly it between them — unclipped, as a square block.
+  test('two stacked screens showing the same photo get different tags', () {
+    const url = 'https://x/me.jpg';
+
+    expect(avatarHeroTag(url, scope: 'profile'),
+        isNot(avatarHeroTag(url, scope: 'edit-profile')));
+    expect(avatarHeroTag(url, scope: 'profile'),
+        avatarHeroTag(url, scope: 'profile'),
+        reason: 'a screen and its full-screen view must still match');
+    expect(avatarHeroTag(url), 'avatar::$url',
+        reason: 'screens that never stack keep the default');
+  });
 }

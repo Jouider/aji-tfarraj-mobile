@@ -691,7 +691,7 @@ class _ProfileHeader extends StatelessWidget {
               onEditTap();
               return;
             }
-            showFullScreenImage(context, imageUrl: url, heroTag: avatarHeroTag(url));
+            showFullScreenImage(context, imageUrl: url, heroTag: avatarHeroTag(url, scope: 'profile'));
           },
           child: Stack(
             alignment: Alignment.bottomRight,
@@ -727,7 +727,7 @@ class _ProfileHeader extends StatelessWidget {
                     child: ClipOval(
                       child: user?.avatarUrl != null
                           ? Hero(
-                              tag: avatarHeroTag(user!.avatarUrl!),
+                              tag: avatarHeroTag(user!.avatarUrl!, scope: 'profile'),
                               child: Image.network(
                               user!.avatarUrl!,
                               width: 86,
@@ -748,26 +748,37 @@ class _ProfileHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              // Edit badge
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                      color: AppColors.backgroundWhite, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.secondary.withValues(alpha: 0.3),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+              // Edit badge. The circle you see is 32px, but the tap area is a
+              // full 48px corner: at 28px with only the 13px pencil tappable,
+              // most taps missed it, landed on the photo and enlarged it.
+              GestureDetector(
+                onTap: onEditTap,
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: AppColors.backgroundWhite, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.secondary.withValues(alpha: 0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.edit,
+                          size: 16, color: Colors.white),
                     ),
-                  ],
-                ),
-                child: GestureDetector(
-                  onTap: onEditTap,
-                  child: const Icon(Icons.edit, size: 13, color: Colors.white),
+                  ),
                 ),
               ),
             ],
