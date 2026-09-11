@@ -89,4 +89,14 @@ abstract class CastingCopy {
   String get aboutTitle;
   String get callRulesTitle;
   String get detailsLoadError;
+
+  // Checking a casting shot after it is taken
+  String get poseNoPerson;
+  String get poseHeadCut;
+  String get poseFeetCut;
+  String get poseNotFacing;
+  String get poseNotSideways;
+  String get portraitNotSmiling;
+  String get adviceTitle;
+  String get adviceKeep;
 }

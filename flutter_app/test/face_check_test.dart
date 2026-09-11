@@ -113,4 +113,56 @@ void main() {
     expect(check([face(width: 100, yaw: 40, left: 0.0, right: 0.0)]),
         FaceCheck.tooSmall);
   });
+
+  /// The casting "portrait souriant". A smile is asked for there and nowhere
+  /// else — a profile photo is never refused for not smiling.
+  group('smile, when asked for', () {
+    FaceObservation smiling(double? smile) => FaceObservation(
+          box: const Rect.fromLTWH(300, 200, 400, 480),
+          yaw: 0,
+          roll: 0,
+          leftEyeOpen: 0.9,
+          rightEyeOpen: 0.9,
+          smile: smile,
+        );
+
+    test('no smile is refused when one is asked for', () {
+      expect(
+          evaluateFaces([smiling(0.1)],
+              imageWidth: imageWidth, requireSmile: true),
+          FaceCheck.notSmiling);
+    });
+
+    /// A closed-mouth smile reads well under 0.5 and is still a smile.
+    test('a modest smile passes', () {
+      expect(
+          evaluateFaces([smiling(0.4)],
+              imageWidth: imageWidth, requireSmile: true),
+          FaceCheck.ok);
+    });
+
+    test('a missing smile reading is not held against it', () {
+      expect(
+          evaluateFaces([smiling(null)],
+              imageWidth: imageWidth, requireSmile: true),
+          FaceCheck.ok);
+    });
+
+    test('a profile photo is never refused for not smiling', () {
+      expect(evaluateFaces([smiling(0.0)], imageWidth: imageWidth),
+          FaceCheck.ok);
+    });
+
+    test('a real problem is reported before the smile', () {
+      final shut = FaceObservation(
+        box: const Rect.fromLTWH(300, 200, 400, 480),
+        leftEyeOpen: 0.05,
+        rightEyeOpen: 0.05,
+        smile: 0.0,
+      );
+      expect(
+          evaluateFaces([shut], imageWidth: imageWidth, requireSmile: true),
+          FaceCheck.eyesClosed);
+    });
+  });
 }

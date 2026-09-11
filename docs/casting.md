@@ -87,6 +87,59 @@ est déjà devant l'objectif.
 Jamais bloquantes. Un directeur de casting convoque quelqu'un sur ses photos ;
 il ne fait rien de chiffres sans visage.
 
+## Vérifier une photo casting juste après la prise
+
+Chaque photo du book est vérifiée **sur le téléphone**, par Google ML Kit, avant
+l'envoi. Rien ne quitte l'appareil, aucune empreinte n'est calculée.
+
+**Deux sévérités, parce que les deux lectures n'ont pas la même fiabilité :**
+
+| Pose | Outil | Si ça ne va pas |
+|---|---|---|
+| Portrait, portrait souriant | Détection de visage | **Refusée**, avec la raison — comme la photo de profil |
+| Plein pied face / profil / dos | Détection du corps | **Conseil** : « Reprendre » ou « Garder quand même » |
+
+La lecture d'un visage est fiable ; celle d'un corps entier l'est beaucoup
+moins, surtout avec des vêtements amples (djellaba, abaya) que portent beaucoup
+de membres. Refuser à tort bloquerait quelqu'un hors de son book, donc hors des
+annonces. Le détecteur de corps **conseille et ne décide jamais** — sauf quand
+il n'y a manifestement personne sur la photo.
+
+Dans la fenêtre de conseil, « Reprendre » est le bouton mis en avant, parce que
+c'est la bonne sortie la plupart du temps ; « Garder quand même » reste à un
+toucher, parce que le détecteur peut se tromper.
+
+### Portraits
+
+Mêmes règles que la photo de profil (un seul visage, assez proche, de face,
+yeux ouverts). Pour le **portrait souriant**, un sourire est demandé en plus,
+avec un seuil bas : un sourire bouche fermée lit bien en dessous de 0,5 et reste
+un sourire. Une photo de profil, elle, n'est jamais refusée faute de sourire.
+
+### Plein pied
+
+| Conseil | Quand |
+|---|---|
+| Tête coupée | Le nez a moins de 50 % de chances d'être dans l'image |
+| Pieds coupés | **Aucune** des deux chevilles dans l'image — de profil, l'une cache souvent l'autre |
+| Pas de face | Pose « face » dont les épaules sont trop resserrées (rapport largeur d'épaules / longueur du torse < 0,45) |
+| Pas de profil | Pose « profil » dont les épaules sont trop écartées (> 0,4) |
+
+- La probabilité utilisée est celle **d'être dans le cadre**, pas d'être
+  visible : un point caché par une manche n'est pas « coupé ».
+- Un trois-quarts (rapport vers 0,5) est laissé tranquille : un conseil là
+  serait le plus souvent faux.
+- L'orientation n'est jugée que si les deux épaules et les deux hanches sont
+  nettement placées — sinon le rapport n'est que du bruit.
+- **De dos, seul le cadrage compte** : gauche et droite y sont de la
+  devinette pour le détecteur.
+- Une erreur du détecteur laisse passer la photo.
+
+Règles : `features/casting/domain/pose_check.dart` (`evaluatePose`), séparées de
+ML Kit ; `data/body_pose_service.dart` fait le lien. Tests :
+`test/pose_check_test.dart` — la plupart vérifient ce qui ne doit **pas**
+déclencher de conseil.
+
 ## Les photos de l'annonce
 
 Une annonce porte **plusieurs photos**, dans l'ordre où l'admin les a rangées.

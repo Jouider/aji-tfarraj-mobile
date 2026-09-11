@@ -44,6 +44,12 @@ fichier garde une étiquette d'orientation, largeur et hauteur peuvent être
 inversées par rapport à ce que voit le détecteur. Pour une photo en portrait
 c'est la largeur ; sinon, la règle ne peut devenir que plus souple.
 
+### Le sourire, seulement pour le casting
+
+`evaluateFaces(requireSmile: true)` ajoute le verdict `notSmiling` — utilisé
+**uniquement** pour le « portrait souriant » du book casting. Une photo de
+profil n'est jamais refusée faute de sourire. Voir `docs/casting.md`.
+
 ### Ce que la vérification ne fait pas
 
 Elle ne distingue pas une personne réelle d'une photo tenue devant l'objectif

@@ -18,12 +18,16 @@ class FaceObservation {
   final double? leftEyeOpen;
   final double? rightEyeOpen;
 
+  /// Smile probability, 0–1. Only consulted when a smile is asked for.
+  final double? smile;
+
   const FaceObservation({
     required this.box,
     this.yaw,
     this.roll,
     this.leftEyeOpen,
     this.rightEyeOpen,
+    this.smile,
   });
 }
 
@@ -45,6 +49,10 @@ enum FaceCheck {
 
   /// Both eyes clearly shut.
   eyesClosed,
+
+  /// Asked for a smile, got none. Only ever produced when a smile is
+  /// requested — the casting "portrait souriant" — never for a profile photo.
+  notSmiling,
 }
 
 /// Where the lines are drawn. Every one of them errs towards accepting.
@@ -70,13 +78,21 @@ abstract final class FaceCheckRules {
   /// Below this, an eye counts as shut. Low so that narrow eyes, glasses and
   /// strong light are not mistaken for a blink.
   static const double closedEye = 0.15;
+
+  /// Below this, "smile please". Low, because a closed-mouth smile reads well
+  /// under 0.5 and is still a smile.
+  static const double minSmile = 0.3;
 }
 
 /// Decides on a photo from what the detector saw.
 ///
 /// [imageWidth] is the photo's width in the same pixels as the boxes. When it
 /// is unknown the size rule is skipped rather than guessed at.
-FaceCheck evaluateFaces(List<FaceObservation> faces, {double? imageWidth}) {
+FaceCheck evaluateFaces(
+  List<FaceObservation> faces, {
+  double? imageWidth,
+  bool requireSmile = false,
+}) {
   if (faces.isEmpty) return FaceCheck.noFace;
 
   final byWidth = [...faces]
@@ -108,6 +124,14 @@ FaceCheck evaluateFaces(List<FaceObservation> faces, {double? imageWidth}) {
       left < FaceCheckRules.closedEye &&
       right < FaceCheckRules.closedEye) {
     return FaceCheck.eyesClosed;
+  }
+
+  // Last: a smile is the least important thing wrong with a photo, and a
+  // missing reading is not held against it.
+  if (requireSmile &&
+      main.smile != null &&
+      main.smile! < FaceCheckRules.minSmile) {
+    return FaceCheck.notSmiling;
   }
 
   return FaceCheck.ok;

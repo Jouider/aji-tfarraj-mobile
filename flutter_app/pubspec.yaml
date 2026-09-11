@@ -76,6 +76,7 @@ dependencies:
   # Shuttle manifest export. Pure Dart (no native plugin): it writes the bytes,
   # share_plus hands the file off.
   pdf: ^3.11.0
+  google_mlkit_pose_detection: ^0.14.1
 
 # Force the pre-Credential-Manager google_sign_in_android.
 # 6.2.x migrated to androidx.credentials.CredentialManager, which hangs
