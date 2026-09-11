@@ -260,4 +260,77 @@ void main() {
       expect(a.call, isNull);
     });
   });
+
+  /// What a member reads on opening a call. Before this, the description never
+  /// reached the app at all: the list carried none, and the detail screen was
+  /// built from the list.
+  group('opening a call', () {
+    Map<String, dynamic> detail({
+      List<String>? rules,
+      List<String>? rulesAr,
+      String? eventAt = '2026-09-20T13:00:00.000000Z',
+      String? location = 'Studio 2M, Aïn Sebaâ',
+      String? compensation = '500 DH / jour',
+    }) =>
+        {
+          'id': 3,
+          'type': 'casting',
+          'title': 'Figuration',
+          'description': 'Figuration pour une série.',
+          'rules': rules ?? ['Être à l\'heure', 'Pièce d\'identité'],
+          'rules_ar': rulesAr ?? <String>[],
+          'event_at': eventAt,
+          'location': location,
+          'compensation': compensation,
+        };
+
+    test('parses the description, the rules and the practical details', () {
+      final c = CastingCall.fromJson(detail());
+
+      expect(c.description, 'Figuration pour une série.');
+      expect(c.rules, ['Être à l\'heure', 'Pièce d\'identité']);
+      expect(c.eventAt, isNotNull);
+      expect(c.location, 'Studio 2M, Aïn Sebaâ');
+      expect(c.compensation, '500 DH / jour');
+      expect(c.hasPracticalInfo, isTrue);
+    });
+
+    /// Arabic readers must not lose rules that only exist in French.
+    test('Arabic rules fall back to French when there are none', () {
+      final c = CastingCall.fromJson(detail());
+
+      expect(c.localizedRules(true), c.rules);
+      expect(
+        CastingCall.fromJson(detail(rulesAr: ['كن في الوقت']))
+            .localizedRules(true),
+        ['كن في الوقت'],
+      );
+    });
+
+    test('a call with no practical details has no card to show', () {
+      final c = CastingCall.fromJson(
+          detail(eventAt: null, location: null, compensation: null));
+
+      expect(c.hasPracticalInfo, isFalse);
+    });
+
+    /// An empty string from the admin is not information.
+    test('blank location and pay do not count as details', () {
+      final c = CastingCall.fromJson(
+          detail(eventAt: null, location: '', compensation: ''));
+
+      expect(c.hasPracticalInfo, isFalse);
+    });
+
+    /// A list payload carries none of this; parsing it must not invent any.
+    test('a list card parses with no rules and no details', () {
+      final c = CastingCall.fromJson(
+          {'id': 1, 'type': 'casting', 'title': 'Carte de liste'});
+
+      expect(c.rules, isEmpty);
+      expect(c.rulesAr, isEmpty);
+      expect(c.eventAt, isNull);
+      expect(c.hasPracticalInfo, isFalse);
+    });
+  });
 }

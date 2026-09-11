@@ -786,6 +786,15 @@ class CastingCopyAr implements CastingCopy {
   String get photoError => 'ما تقدرش نصيفطو الصورة.';
   String get profileTile => 'كاستينغ';
   String get profileTileSubtitle => 'الصور ديالك والإعلانات';
+
+  // ── فتح إعلان ──
+  String get infoTitle => 'الكاستينغ';
+  String get infoDate => 'التاريخ';
+  String get infoLocation => 'المكان';
+  String get infoCompensation => 'الأجر';
+  String get aboutTitle => 'التفاصيل';
+  String get callRulesTitle => 'الشروط';
+  String get detailsLoadError => 'ما تقدرش نجيبو التفاصيل.';
 }
 
 /// Staff check-in strings in Arabic

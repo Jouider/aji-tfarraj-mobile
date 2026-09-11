@@ -128,6 +128,16 @@ class CastingCall {
   /// Every picture, cover first. Empty for a call with no visual.
   final List<String> imageUrls;
 
+  /// One rule per item. Only present once the call has been opened: the list
+  /// payload leaves the long fields out.
+  final List<String> rules;
+  final List<String> rulesAr;
+
+  /// When the audition itself happens — not the last day to apply.
+  final DateTime? eventAt;
+  final String? location;
+  final String? compensation;
+
   final String? city;
   final String? gender;
   final int? minAge;
@@ -146,6 +156,11 @@ class CastingCall {
     this.descriptionAr,
     this.imageUrl,
     this.imageUrls = const [],
+    this.rules = const [],
+    this.rulesAr = const [],
+    this.eventAt,
+    this.location,
+    this.compensation,
     this.city,
     this.gender,
     this.minAge,
@@ -164,6 +179,17 @@ class CastingCall {
 
   bool get hasApplied => applicationStatus != null;
 
+  /// Arabic rules when there are some, French otherwise — never an empty list
+  /// in Arabic hiding rules that exist in French.
+  List<String> localizedRules(bool isAr) =>
+      (isAr && rulesAr.isNotEmpty) ? rulesAr : rules;
+
+  /// Whether there is anything for the "when, where, how much" card.
+  bool get hasPracticalInfo =>
+      eventAt != null ||
+      (location?.isNotEmpty ?? false) ||
+      (compensation?.isNotEmpty ?? false);
+
   factory CastingCall.fromJson(Map<String, dynamic> json) => CastingCall(
         id: json['id'] as int,
         type: CastingType.fromKey(json['type'] as String?),
@@ -175,6 +201,17 @@ class CastingCall {
         imageUrls: (json['image_urls'] as List<dynamic>? ?? const [])
             .whereType<String>()
             .toList(),
+        rules: (json['rules'] as List<dynamic>? ?? const [])
+            .whereType<String>()
+            .toList(),
+        rulesAr: (json['rules_ar'] as List<dynamic>? ?? const [])
+            .whereType<String>()
+            .toList(),
+        eventAt: json['event_at'] is String
+            ? DateTime.parse(json['event_at'] as String).toLocal()
+            : null,
+        location: json['location'] as String?,
+        compensation: json['compensation'] as String?,
         city: json['city'] as String?,
         gender: json['gender'] as String?,
         minAge: json['min_age'] as int?,

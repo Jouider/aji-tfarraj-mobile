@@ -80,4 +80,13 @@ abstract class CastingCopy {
   String get photoError;
   String get profileTile;
   String get profileTileSubtitle;
+
+  // Opening a call
+  String get infoTitle;
+  String get infoDate;
+  String get infoLocation;
+  String get infoCompensation;
+  String get aboutTitle;
+  String get callRulesTitle;
+  String get detailsLoadError;
 }

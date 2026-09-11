@@ -106,6 +106,20 @@ class CastingRepository {
     }
   }
 
+  /// Everything about one call. The list only carries a cover and a title;
+  /// description, rules and practical details come from here when it is opened.
+  Future<CastingCall> detail(int castingId) async {
+    try {
+      final response =
+          await _api.get<Map<String, dynamic>>('/api/castings/$castingId');
+      return CastingCall.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
   Future<void> apply({required int castingId, String? note}) async {
     try {
       await _api.post<Map<String, dynamic>>(
@@ -160,6 +174,12 @@ final castingBookProvider = FutureProvider.autoDispose<CastingBook>((ref) {
 final castingFeedProvider =
     FutureProvider.autoDispose.family<CastingFeed, CastingType?>((ref, type) {
   return ref.watch(castingRepositoryProvider).feed(type: type);
+});
+
+/// One call, fully loaded.
+final castingDetailProvider =
+    FutureProvider.autoDispose.family<CastingCall, int>((ref, id) {
+  return ref.watch(castingRepositoryProvider).detail(id);
 });
 
 final myApplicationsProvider =
