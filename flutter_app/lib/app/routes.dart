@@ -57,6 +57,7 @@ class Routes {
   static const staffCheckIn = '/staff/check-in';
   static const onSiteRegistration = '/staff/on-site-registration';
   static const returnManifest = '/staff/return-manifest';
+  static const staffAttendees = '/staff/attendees';
   static const casting = '/casting';
 
   // Legal / participation conditions (full screen, outside shell — public)

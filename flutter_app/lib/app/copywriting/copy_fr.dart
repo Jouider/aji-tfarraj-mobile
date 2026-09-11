@@ -1,4 +1,5 @@
 import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/departure_copy.dart';
 
 export 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
 
@@ -91,6 +92,7 @@ class CopyFr {
   // Staff Check-in
   // ============================================
   static const staff = StaffCopyFr();
+  static const departures = DepartureCopyFr();
   static const casting = CastingCopyFr();
 
   // ============================================
@@ -1619,4 +1621,65 @@ class SupportCopyFr {
   // Profile entry point
   String get profileTitle => 'Support / Aide';
   String get profileSubtitle => 'Contactez notre équipe';
+}
+
+/// "Présents" and departures, in French.
+class DepartureCopyFr implements DepartureCopy {
+  const DepartureCopyFr();
+
+  String get tile => 'Présents';
+  String get tileSubtitle => 'Qui est dans la salle, qui est parti';
+
+  String get title => 'Présents';
+  String get refresh => 'Actualiser';
+  String get loadError => 'Impossible de charger la liste des présents.';
+  String get searchHint => 'Nom ou code billet';
+  String counts(int present, int left) =>
+      '$present présent${present > 1 ? 's' : ''} · $left sortie${left > 1 ? 's' : ''}';
+  String get empty => "Personne n'a encore été pointé";
+  String get emptySubtitle => "Les personnes scannées à l'entrée apparaîtront ici.";
+  String get noMatch => 'Personne ne correspond à cette recherche.';
+  String get walkIn => 'Sans compte';
+  String broughtBy(String name) => 'Chargé public : $name';
+  String checkedInAt(String time) => 'Entrée $time';
+  String leftAt(String time) => 'Sortie $time';
+  String excludedBefore(int count) =>
+      count > 1 ? '$count exclusions précédentes' : 'Exclusion précédente';
+
+  String reason(String key) => switch (key) {
+        'left' => 'Départ volontaire',
+        'unwell' => 'Malaise / santé',
+        'excluded' => 'Exclusion : comportement',
+        'other' => 'Autre',
+        _ => 'Raison inconnue',
+      };
+
+  String get sheetTitle => 'Signaler une sortie';
+  String get reasonQuestion => 'Raison de la sortie';
+  String get noteLabel => 'Note';
+  String get noteHintOptional => "Facultatif : ce qui s'est passé";
+  String get noteRequired => 'Obligatoire : précisez la raison';
+  String get consequence =>
+      'Les points de cette émission lui seront retirés, et son chargé public ne sera pas payé pour cette venue.';
+  String get consequenceWalkIn =>
+      'Son chargé public ne sera pas payé pour cette venue.';
+  String get exclusionNote =>
+      "Une exclusion reste visible par l'équipe à ses prochaines venues.";
+  String get confirm => 'Confirmer la sortie';
+  String get cancel => 'Annuler';
+  String get recorded => 'Sortie enregistrée';
+  String get saveError => "La sortie n'a pas pu être enregistrée. Réessayez.";
+
+  String recordedBy(String name) => 'Notée par $name';
+  String get undo => 'Annuler la sortie';
+  String get undoConfirmTitle => 'Annuler cette sortie ?';
+  String get undoConfirmBody =>
+      'À utiliser si la sortie a été notée sur la mauvaise personne : ses points et la part de son chargé public lui sont rendus.';
+  String get undone => 'Sortie annulée';
+
+  String doorExcludedBefore(int count, String? date, String? show) =>
+      '${count > 1 ? '$count exclusions précédentes' : 'Exclusion précédente'}'
+      '${date != null ? ' — le $date' : ''}'
+      '${show != null && show.isNotEmpty ? ' ($show)' : ''}';
+  String doorAlreadyLeft(String time, String reason) => 'Sortie à $time · $reason';
 }

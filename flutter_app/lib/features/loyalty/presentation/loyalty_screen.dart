@@ -132,6 +132,17 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
         return locale == AppLocale.fr ? 'Parrainage' : 'إحالة';
       case 'bonus':
         return locale == AppLocale.fr ? 'Bonus' : 'مكافأة';
+      case 'charge_public_bonus':
+        return locale == AppLocale.fr ? 'Bonus première venue' : 'مكافأة أول حضور';
+      case 'redemption':
+        return locale == AppLocale.fr ? 'Cadeau échangé' : 'هدية مستبدلة';
+      // Left before the end of the recording: that evening's points go back.
+      case 'attendance_revoked':
+        return locale == AppLocale.fr
+            ? 'Retrait — parti avant la fin'
+            : 'سحب النقاط — خرج قبل النهاية';
+      case 'referral_revoked':
+        return locale == AppLocale.fr ? 'Parrainage retiré' : 'إحالة ملغاة';
       default:
         return type;
     }

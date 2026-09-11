@@ -1,4 +1,5 @@
 import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/departure_copy.dart';
 
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart'
     show ConditionSection, HowToStep, ChargePublicCopy;
@@ -92,6 +93,7 @@ class CopyAr {
   // Staff Check-in
   // ============================================
   static const staff = StaffCopyAr();
+  static const departures = DepartureCopyAr();
   static const casting = CastingCopyAr();
 
   // ============================================
@@ -1479,4 +1481,62 @@ class ChargePublicCopyAr extends ChargePublicCopy {
   String seatsCount(int n) => '$n مقاعد';
   @override
   String get shareBtn => 'مشاركة';
+}
+
+/// "Présents" and departures, in Arabic.
+class DepartureCopyAr implements DepartureCopy {
+  const DepartureCopyAr();
+
+  String get tile => 'الحاضرين';
+  String get tileSubtitle => 'شكون فالقاعة وشكون خرج';
+
+  String get title => 'الحاضرين';
+  String get refresh => 'تحديث';
+  String get loadError => 'ما قدرناش نجيبو لائحة الحاضرين.';
+  String get searchHint => 'السمية ولا رقم التذكرة';
+  String counts(int present, int left) => '$present حاضر · $left خروج';
+  String get empty => 'حتى واحد ما تسجل فالدخول';
+  String get emptySubtitle => 'اللي تسكانا فالدخول غادي يبانو هنا.';
+  String get noMatch => 'حتى واحد ما كيطابق هاد البحث.';
+  String get walkIn => 'بلا حساب';
+  String broughtBy(String name) => 'عن طريق $name';
+  String checkedInAt(String time) => 'الدخول $time';
+  String leftAt(String time) => 'الخروج $time';
+  String excludedBefore(int count) =>
+      count > 1 ? 'طرد سابق ×$count' : 'طرد سابق';
+
+  String reason(String key) => switch (key) {
+        'left' => 'خروج إرادي',
+        'unwell' => 'وعكة / صحة',
+        'excluded' => 'طرد: السلوك',
+        'other' => 'سبب آخر',
+        _ => 'سبب غير معروف',
+      };
+
+  String get sheetTitle => 'تسجيل خروج';
+  String get reasonQuestion => 'سبب الخروج';
+  String get noteLabel => 'ملاحظة';
+  String get noteHintOptional => 'اختياري: شنو وقع';
+  String get noteRequired => 'ضروري: وضح السبب';
+  String get consequence =>
+      'غادي تتحيد نقاط هاد الحلقة، وما غاديش يتخلص حتى حد على هاد الحضور.';
+  String get consequenceWalkIn => 'ما غاديش يتخلص حتى حد على هاد الحضور.';
+  String get exclusionNote => 'الطرد كيبقى باين للفريق فالمرات الجاية.';
+  String get confirm => 'أكد الخروج';
+  String get cancel => 'إلغاء';
+  String get recorded => 'تسجل الخروج';
+  String get saveError => 'ما تسجلش الخروج. عاود جرب.';
+
+  String recordedBy(String name) => 'تسجل من طرف $name';
+  String get undo => 'إلغاء الخروج';
+  String get undoConfirmTitle => 'نلغيو هاد الخروج؟';
+  String get undoConfirmBody =>
+      'استعملها غير إلا تسجل الخروج على شي حد آخر بالغلط: كترجع النقاط والمستحقات كيف كانو.';
+  String get undone => 'تلغى الخروج';
+
+  String doorExcludedBefore(int count, String? date, String? show) =>
+      '${count > 1 ? 'طرد سابق ×$count' : 'طرد سابق'}'
+      '${date != null ? ' — نهار $date' : ''}'
+      '${show != null && show.isNotEmpty ? ' ($show)' : ''}';
+  String doorAlreadyLeft(String time, String reason) => 'الخروج: $time · $reason';
 }

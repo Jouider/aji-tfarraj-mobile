@@ -121,6 +121,34 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
                       icon: Icons.warning_amber_rounded,
                     ),
                   ],
+                  // Shown out of an earlier recording: the door decides, knowing.
+                  if (preview.wasExcludedBefore) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    _Pill(
+                      label: s.departures.doorExcludedBefore(
+                        preview.pastExclusions,
+                        preview.lastExclusionAt != null
+                            ? DateFormat('dd/MM/yyyy')
+                                .format(preview.lastExclusionAt!)
+                            : null,
+                        preview.lastExclusionShow,
+                      ),
+                      color: AppColors.error,
+                      icon: Icons.report_gmailerrorred_outlined,
+                    ),
+                  ],
+                  // This ticket's holder already left tonight.
+                  if (preview.departure != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    _Pill(
+                      label: s.departures.doorAlreadyLeft(
+                        DateFormat('HH:mm').format(preview.departure!.at),
+                        s.departures.reason(preview.departure!.reason.key),
+                      ),
+                      color: AppColors.warning,
+                      icon: Icons.logout,
+                    ),
+                  ],
                   if (_photoError != null) ...[
                     const SizedBox(height: AppSpacing.sm),
                     Text(_photoError!,
