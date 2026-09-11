@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -896,6 +897,184 @@ class _ShowRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Tappable only when there is something to open. On an older server the
+    // row has no breakdown, and a tap that opens an empty sheet is worse than
+    // no tap.
+    final canOpen = row.hasEpisodes;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Material(
+        color: AppColors.backgroundWhite,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: canOpen ? () => _showEpisodeBreakdown(context, row, cp) : null,
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(row.showTitle,
+                          style: AppTypography.bodyMedium
+                              .copyWith(fontWeight: FontWeight.w500)),
+                      Text(cp.invitedAttended(row.invited, row.attended),
+                          style: AppTypography.labelSmall
+                              .copyWith(color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+                Text(cp.money(row.earnings),
+                    style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.successDark,
+                        fontWeight: FontWeight.w600)),
+                // The only visual cue that the row opens. Flips in Arabic.
+                if (canOpen) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  Icon(Icons.chevron_right,
+                      size: 20, color: AppColors.textMuted),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void _showEpisodeBreakdown(
+  BuildContext context,
+  CpShowRow row,
+  ChargePublicCopy cp,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.surfaceOverlay,
+    shape: const RoundedRectangleBorder(
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
+    ),
+    builder: (_) => _EpisodeBreakdownSheet(row: row, cp: cp),
+  );
+}
+
+/// What each recording of one show brought in.
+///
+/// The show total sits on top and matches the row that was tapped — the
+/// episodes below are built with the same rule on the server, so they always
+/// add up to it.
+class _EpisodeBreakdownSheet extends StatelessWidget {
+  const _EpisodeBreakdownSheet({required this.row, required this.cp});
+
+  final CpShowRow row;
+  final ChargePublicCopy cp;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxHeight = MediaQuery.of(context).size.height * 0.8;
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppSpacing.md),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(row.showTitle,
+                            style: AppTypography.h3
+                                .copyWith(color: AppColors.textPrimary)),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${cp.episodeCount(row.episodes.length)} · '
+                          '${cp.invitedAttended(row.invited, row.attended)}',
+                          style: AppTypography.bodySmall
+                              .copyWith(color: AppColors.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(cp.money(row.earnings),
+                          style: AppTypography.h3
+                              .copyWith(color: AppColors.successDark)),
+                      Text(cp.episodeTotal,
+                          style: AppTypography.labelSmall
+                              .copyWith(color: AppColors.textMuted)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
+                itemCount: row.episodes.length,
+                itemBuilder: (_, i) =>
+                    _EpisodeRow(episode: row.episodes[i], showTitle: row.showTitle, cp: cp),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EpisodeRow extends StatelessWidget {
+  const _EpisodeRow({
+    required this.episode,
+    required this.showTitle,
+    required this.cp,
+  });
+
+  final CpEpisodeRow episode;
+  final String showTitle;
+  final ChargePublicCopy cp;
+
+  @override
+  Widget build(BuildContext context) {
+    final date = episode.startsAt;
+    // An episode title only helps when it says something the show title and
+    // the date do not.
+    final title = episode.title;
+    final showsTitle =
+        title != null && title.isNotEmpty && title != showTitle;
+    final earned = episode.earnings > 0;
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -906,22 +1085,44 @@ class _ShowRow extends StatelessWidget {
       ),
       child: Row(
         children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.event_outlined,
+                size: 18, color: AppColors.secondary),
+          ),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(row.showTitle,
-                    style: AppTypography.bodyMedium
-                        .copyWith(fontWeight: FontWeight.w500)),
-                Text(cp.invitedAttended(row.invited, row.attended),
+                Text(
+                  date != null
+                      ? DateFormat('dd/MM/yyyy · HH:mm').format(date)
+                      : cp.episodeUndated,
+                  style: AppTypography.bodyMedium
+                      .copyWith(fontWeight: FontWeight.w500),
+                ),
+                if (showsTitle)
+                  Text(title,
+                      style: AppTypography.labelSmall
+                          .copyWith(color: AppColors.textMuted)),
+                Text(cp.invitedAttended(episode.invited, episode.attended),
                     style: AppTypography.labelSmall
                         .copyWith(color: AppColors.textMuted)),
               ],
             ),
           ),
-          Text(cp.money(row.earnings),
+          // A night that paid nothing is shown muted rather than hidden: the
+          // charge public brought people, and should see that it was counted.
+          Text(cp.money(episode.earnings),
               style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.successDark, fontWeight: FontWeight.w600)),
+                  color: earned ? AppColors.successDark : AppColors.textMuted,
+                  fontWeight: FontWeight.w600)),
         ],
       ),
     );
