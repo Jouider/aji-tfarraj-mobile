@@ -21,6 +21,10 @@ class ProfileRepository {
     String? phoneNumber,
     DateTime? dateOfBirth,
     String? gender,
+    // Social accounts: '' clears one, null leaves it untouched.
+    String? instagram,
+    String? tiktok,
+    String? facebook,
   }) async {
     try {
       final response = await _client.patch<Map<String, dynamic>>(
@@ -34,6 +38,9 @@ class ProfileRepository {
           if (phoneNumber != null) 'phone_number': phoneNumber,
           if (dateOfBirth != null) 'birthday': dateOfBirth.toIso8601String().split('T').first,
           if (gender != null) 'gender': gender,
+          if (instagram != null) 'instagram': instagram,
+          if (tiktok != null) 'tiktok': tiktok,
+          if (facebook != null) 'facebook': facebook,
         },
       );
       final data = response.data!;

@@ -1014,6 +1014,27 @@ class AppStrings {
       ? 'Les yeux doivent être ouverts.'
       : 'يجب أن تكون العينان مفتوحتين.';
 
+  // Social accounts on the profile — optional, for collaborations and castings.
+  String get editSectionSocial =>
+      locale == AppLocale.fr ? 'Réseaux sociaux' : 'مواقع التواصل';
+
+  String get socialPurpose => locale == AppLocale.fr
+      ? 'Facultatif — pour vous proposer des collaborations et des castings.'
+      : 'اختياري — لنقترح عليك تعاونات وفرص كاستينغ.';
+
+  String get socialUsernameHint =>
+      locale == AppLocale.fr ? "nom d'utilisateur" : 'اسم المستخدم';
+
+  String get socialCheck => locale == AppLocale.fr ? 'Vérifier' : 'تحقق';
+
+  String get socialInvalid => locale == AppLocale.fr
+      ? "Tapez votre nom d'utilisateur, ou collez le lien de votre profil."
+      : 'اكتب اسم المستخدم أو الصق رابط حسابك.';
+
+  String get socialOpenError => locale == AppLocale.fr
+      ? "Impossible d'ouvrir ce profil."
+      : 'تعذّر فتح هذا الحساب.';
+
   String get avatarFrameHint => locale == AppLocale.fr
       ? 'Placez votre visage dans le cadre'
       : 'ضع وجهك داخل الإطار';
