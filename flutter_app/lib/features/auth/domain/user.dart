@@ -29,6 +29,11 @@ class User {
   final bool chargePublicEnabled;
   /// Gamification badges (attendance always present; charge_public/staff optional).
   final UserBadges? badges;
+  /// Optional social accounts, for collaborations and castings. Stored as the
+  /// bare username (or a Facebook numeric id), never as a link.
+  final String? instagram;
+  final String? tiktok;
+  final String? facebook;
 
   User({
     required this.id,
@@ -52,6 +57,9 @@ class User {
     this.referralCode,
     this.chargePublicEnabled = false,
     this.badges,
+    this.instagram,
+    this.tiktok,
+    this.facebook,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -88,6 +96,9 @@ class User {
       role: json['role'] as String?,
       referralCode: json['referral_code'] as String?,
       chargePublicEnabled: json['is_charge_public'] as bool? ?? false,
+      instagram: json['instagram'] as String?,
+      tiktok: json['tiktok'] as String?,
+      facebook: json['facebook'] as String?,
       badges: json['badges'] is Map<String, dynamic>
           ? UserBadges.fromJson(json['badges'] as Map<String, dynamic>)
           : null,
@@ -108,6 +119,9 @@ class User {
       'missing_profile_fields': missingProfileFields,
       'phone_country_code': phoneCountryCode,
       'phone_number': phoneNumber,
+      'instagram': instagram,
+      'tiktok': tiktok,
+      'facebook': facebook,
       'phone_verified_at': phoneVerifiedAt?.toIso8601String(),
       'birthday': dateOfBirth?.toIso8601String().split('T').first,
       'gender': gender,
@@ -121,6 +135,9 @@ class User {
   }
 
   User copyWith({
+    String? instagram,
+    String? tiktok,
+    String? facebook,
     int? id,
     String? name,
     String? email,
@@ -167,6 +184,9 @@ class User {
       referralCode: referralCode ?? this.referralCode,
       chargePublicEnabled: chargePublicEnabled ?? this.chargePublicEnabled,
       badges: badges ?? this.badges,
+      instagram: instagram ?? this.instagram,
+      tiktok: tiktok ?? this.tiktok,
+      facebook: facebook ?? this.facebook,
     );
   }
 

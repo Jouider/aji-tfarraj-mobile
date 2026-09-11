@@ -16,6 +16,8 @@ import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/profile/data/profile_repository.dart';
 import 'package:aji_tfarraj/features/profile/presentation/face_capture_screen.dart';
 import 'package:aji_tfarraj/features/profile/domain/city.dart';
+import 'package:aji_tfarraj/features/profile/domain/social_handles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Session-scoped flag set when the user taps "Skip for now" on the forced
 /// profile-completion screen. While true, the router stops force-redirecting
@@ -35,6 +37,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  /// Optional social accounts, one field per network.
+  final _socialControllers = {
+    for (final platform in SocialPlatform.values)
+      platform: TextEditingController(),
+  };
 
   String? _selectedCity;
   String? _selectedDistrict;
@@ -58,6 +66,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _phoneController.text = user.phoneNumber ?? '';
       _dateOfBirth = user.dateOfBirth;
       _gender = user.gender;
+      _socialControllers[SocialPlatform.instagram]!.text = user.instagram ?? '';
+      _socialControllers[SocialPlatform.tiktok]!.text = user.tiktok ?? '';
+      _socialControllers[SocialPlatform.facebook]!.text = user.facebook ?? '';
     }
   }
 
@@ -66,8 +77,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
+    for (final controller in _socialControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
+
+  /// The account as it will be stored: the bare username, or '' to clear it.
+  /// The field validators have already refused anything unsavable.
+  String _socialValue(SocialPlatform platform) =>
+      SocialHandles.normalize(platform, _socialControllers[platform]!.text) ?? '';
 
   Future<void> _save() async {
     // Hard guard — cities must be loaded and city/district must be selected
@@ -116,6 +135,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             phoneNumber: phone.isNotEmpty ? phone : null,
             dateOfBirth: _dateOfBirth,
             gender: _gender,
+            // Always sent, so emptying a field removes the account.
+            instagram: _socialValue(SocialPlatform.instagram),
+            tiktok: _socialValue(SocialPlatform.tiktok),
+            facebook: _socialValue(SocialPlatform.facebook),
           );
       debugPrint('[EditProfile] PATCH user: profileComplete=${updatedUser.profileComplete}, missing=${updatedUser.missingProfileFields}');
       ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
@@ -822,6 +845,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 fieldDecoration: _fieldDecoration,
               ),
 
+              // ── Réseaux sociaux ───────────────────────────────
+              // Optional, and says why — for collaborations and castings.
+              const SizedBox(height: AppSpacing.xl),
+              _SectionLabel(s.editSectionSocial),
+              const SizedBox(height: AppSpacing.xs),
+              Text(s.socialPurpose,
+                  style: AppTypography.bodySmall
+                      .copyWith(color: AppColors.textMuted)),
+              const SizedBox(height: AppSpacing.md),
+              for (final platform in SocialPlatform.values) ...[
+                _SocialField(
+                  platform: platform,
+                  controller: _socialControllers[platform]!,
+                  enabled: !_isLoading,
+                  fieldDecoration: _fieldDecoration,
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+
               const SizedBox(height: AppSpacing.xxl),
 
               // ── Save CTA ──────────────────────────────────────
@@ -1266,5 +1308,155 @@ class _CitiesRetryWidget extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// One social account — typed as a username, or pasted as a link
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// A username field that does the tidying itself.
+///
+/// Most people know their Instagram or TikTok name by heart, so they just type
+/// it after the "@". Anyone who pastes a profile link sees it turn into the
+/// username on the spot. "Vérifier" opens the profile in the network's app, so
+/// a typo is caught before it is saved.
+class _SocialField extends ConsumerWidget {
+  const _SocialField({
+    required this.platform,
+    required this.controller,
+    required this.enabled,
+    required this.fieldDecoration,
+  });
+
+  final SocialPlatform platform;
+  final TextEditingController controller;
+  final bool enabled;
+  final InputDecoration Function(String label, IconData icon) fieldDecoration;
+
+  String get _label => switch (platform) {
+        SocialPlatform.instagram => 'Instagram',
+        SocialPlatform.tiktok => 'TikTok',
+        SocialPlatform.facebook => 'Facebook',
+      };
+
+  /// Turns a pasted link into the username straight away, and drops a typed
+  /// "@" — one is already shown in front of the field.
+  void _tidy(String typed) {
+    final looksLikeLink = typed.contains('/') || typed.contains('.com');
+    if (looksLikeLink) {
+      final handle = SocialHandles.normalize(platform, typed);
+      if (handle != null &&
+          SocialHandles.isValid(platform, handle) &&
+          handle != typed) {
+        _replace(handle);
+      }
+      return;
+    }
+    if (typed.startsWith('@')) _replace(typed.replaceFirst(RegExp(r'^@+'), ''));
+  }
+
+  void _replace(String text) => controller.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+
+  Future<void> _open(BuildContext context, WidgetRef ref, String handle) async {
+    var opened = false;
+    try {
+      opened = await launchUrl(
+        SocialHandles.profileUri(platform, handle),
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (_) {
+      opened = false;
+    }
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ref.read(stringsProvider).socialOpenError)),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) {
+        final handle = SocialHandles.normalize(platform, value.text);
+        final canOpen = handle != null && SocialHandles.isValid(platform, handle);
+
+        return TextFormField(
+          controller: controller,
+          enabled: enabled,
+          autocorrect: false,
+          enableSuggestions: false,
+          textCapitalization: TextCapitalization.none,
+          textInputAction: TextInputAction.next,
+          onChanged: _tidy,
+          // Empty is fine — every account is optional.
+          validator: (text) {
+            final h = SocialHandles.normalize(platform, text);
+            if (h == null) return null;
+            return SocialHandles.isValid(platform, h) ? null : s.socialInvalid;
+          },
+          decoration: fieldDecoration(_label, Icons.link).copyWith(
+            prefixIcon: _BrandBadge(platform),
+            // Facebook profiles are often a plain id, not an @name.
+            prefixText: platform == SocialPlatform.facebook ? null : '@',
+            hintText: s.socialUsernameHint,
+            errorMaxLines: 2,
+            suffixIcon: canOpen
+                ? TextButton(
+                    onPressed: () => _open(context, ref, handle),
+                    child: Text(s.socialCheck),
+                  )
+                : null,
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// The network's own mark, so the field is recognised before it is read.
+/// Material has TikTok and Facebook glyphs; Instagram's badge is drawn.
+class _BrandBadge extends StatelessWidget {
+  const _BrandBadge(this.platform);
+
+  final SocialPlatform platform;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget glyph = switch (platform) {
+      SocialPlatform.instagram => Container(
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            gradient: const LinearGradient(
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
+              colors: [
+                Color(0xFFFEDA75),
+                Color(0xFFFA7E1E),
+                Color(0xFFD62976),
+                Color(0xFF962FBF),
+                Color(0xFF4F5BD5),
+              ],
+            ),
+          ),
+          child: const Icon(Icons.camera_alt_outlined,
+              size: 14, color: Colors.white),
+        ),
+      SocialPlatform.tiktok =>
+        Icon(Icons.tiktok, size: 22, color: AppColors.textPrimary),
+      SocialPlatform.facebook =>
+        const Icon(Icons.facebook, size: 22, color: Color(0xFF1877F2)),
+    };
+
+    return SizedBox(width: 48, child: Center(child: glyph));
   }
 }
