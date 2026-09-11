@@ -986,6 +986,15 @@ class CastingCopyFr implements CastingCopy {
   String get photoError => 'Impossible d\'envoyer la photo.';
   String get profileTile => 'Casting';
   String get profileTileSubtitle => 'Votre book et les annonces';
+
+  // ── Ouvrir une annonce ──
+  String get infoTitle => 'Le casting';
+  String get infoDate => 'Date';
+  String get infoLocation => 'Lieu';
+  String get infoCompensation => 'Rémunération';
+  String get aboutTitle => 'À propos';
+  String get callRulesTitle => 'Règles';
+  String get detailsLoadError => 'Impossible de charger les détails.';
 }
 
 /// Staff check-in strings in French

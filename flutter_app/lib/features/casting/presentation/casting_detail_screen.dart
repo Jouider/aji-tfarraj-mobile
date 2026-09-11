@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -45,6 +46,7 @@ class _CastingDetailScreenState extends ConsumerState<CastingDetailScreen> {
             note: _note.text.trim(),
           );
       ref.invalidate(castingFeedProvider(widget.call.type));
+      ref.invalidate(castingDetailProvider(widget.call.id));
       ref.invalidate(myApplicationsProvider);
       if (!mounted) return;
       setState(() => _justApplied = ApplicationStatus.pending);
@@ -67,7 +69,11 @@ class _CastingDetailScreenState extends ConsumerState<CastingDetailScreen> {
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
     final isAr = ref.watch(localeProvider) == AppLocale.ar;
-    final call = widget.call;
+    // The list only carries a cover and a title. The rest — description,
+    // rules, when and where — is fetched on opening; until it arrives the
+    // screen shows what the list already had rather than a blank page.
+    final detail = ref.watch(castingDetailProvider(widget.call.id));
+    final call = detail.valueOrNull ?? widget.call;
 
     final book = ref.watch(castingBookProvider);
     final bookReady = book.valueOrNull?.isComplete ?? false;
@@ -117,10 +123,39 @@ class _CastingDetailScreenState extends ConsumerState<CastingDetailScreen> {
                   ApplicationBadge(status: status),
                 ],
 
-                if (call.localizedDescription(isAr)?.isNotEmpty ?? false) ...[
+                if (detail.isLoading && !detail.hasValue) ...[
                   const SizedBox(height: AppSpacing.lg),
+                  const LinearProgressIndicator(minHeight: 2),
+                ] else if (detail.hasError && !detail.hasValue) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  _DetailsError(
+                    message: s.casting.detailsLoadError,
+                    retryLabel: s.retry,
+                    onRetry: () =>
+                        ref.invalidate(castingDetailProvider(widget.call.id)),
+                  ),
+                ],
+
+                // When, where, how much — the first things people look for,
+                // so they sit above the prose rather than inside it.
+                if (call.hasPracticalInfo) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  _PracticalInfo(call: call, copy: s.casting),
+                ],
+
+                if (call.localizedDescription(isAr)?.isNotEmpty ?? false) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  _SectionTitle(s.casting.aboutTitle),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(call.localizedDescription(isAr)!,
                       style: AppTypography.bodyMedium),
+                ],
+
+                if (call.localizedRules(isAr).isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  _SectionTitle(s.casting.callRulesTitle),
+                  const SizedBox(height: AppSpacing.sm),
+                  _RulesList(rules: call.localizedRules(isAr)),
                 ],
 
                 const SizedBox(height: AppSpacing.xl),
@@ -358,6 +393,161 @@ class _GalleryState extends State<_Gallery> {
               ],
             ),
           ),
+      ],
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text,
+        style: AppTypography.h4.copyWith(color: AppColors.textPrimary));
+  }
+}
+
+/// When, where and how much, as a card of labelled rows. Only the rows that
+/// were filled in are shown — an empty "Rémunération" line reads as "unpaid".
+class _PracticalInfo extends StatelessWidget {
+  const _PracticalInfo({required this.call, required this.copy});
+
+  final CastingCall call;
+  final CastingCopy copy;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <(IconData, String, String)>[
+      if (call.eventAt != null)
+        (
+          Icons.event_outlined,
+          copy.infoDate,
+          DateFormat('dd/MM/yyyy · HH:mm').format(call.eventAt!),
+        ),
+      if (call.location?.isNotEmpty ?? false)
+        (Icons.place_outlined, copy.infoLocation, call.location!),
+      if (call.compensation?.isNotEmpty ?? false)
+        (Icons.payments_outlined, copy.infoCompensation, call.compensation!),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundWhite,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(copy.infoTitle, style: AppTypography.labelMedium),
+          const SizedBox(height: AppSpacing.sm),
+          for (final (icon, label, value) in rows)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, size: 17, color: AppColors.secondary),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(label,
+                            style: AppTypography.caption
+                                .copyWith(color: AppColors.textMuted)),
+                        const SizedBox(height: 1),
+                        Text(value, style: AppTypography.bodyMedium),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The rules as a numbered list: numbers let people refer to "rule 3" when
+/// they ask a question, and make it obvious how many there are.
+class _RulesList extends StatelessWidget {
+  const _RulesList({required this.rules});
+
+  final List<String> rules;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < rules.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text('${i + 1}',
+                      style: AppTypography.caption
+                          .copyWith(color: AppColors.secondary)),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(rules[i], style: AppTypography.bodyMedium),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DetailsError extends StatelessWidget {
+  const _DetailsError({
+    required this.message,
+    required this.retryLabel,
+    required this.onRetry,
+  });
+
+  final String message;
+  final String retryLabel;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(Icons.error_outline, size: 18, color: AppColors.textMuted),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(message,
+              style: AppTypography.bodySmall
+                  .copyWith(color: AppColors.textMuted)),
+        ),
+        TextButton(onPressed: onRetry, child: Text(retryLabel)),
       ],
     );
   }

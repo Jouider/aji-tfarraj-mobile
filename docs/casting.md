@@ -102,6 +102,33 @@ sous une image se lit comme un chargement qui a échoué.
 
 Une annonce sans photo n'affiche rien plutôt qu'un cadre vide.
 
+## Ouvrir une annonce
+
+**Avant ce changement, la description n'apparaissait jamais.** La liste ne la
+transporte pas, et l'écran de détail était construit à partir de la liste. Il
+lit maintenant `GET /api/castings/{id}` (`castingDetailProvider`).
+
+Pendant le chargement, l'écran affiche **ce que la liste avait déjà** — photos,
+titre, étiquettes — avec une fine barre de progression, plutôt qu'une page
+blanche. En cas d'échec, une ligne discrète propose de réessayer sans masquer le
+reste.
+
+Dans l'ordre :
+
+1. **Le casting** — date et heure, lieu, rémunération, dans une carte. Seules
+   les lignes remplies s'affichent : une ligne « Rémunération » vide se lirait
+   comme « non payé ».
+2. **À propos** — la description.
+3. **Règles** — une liste **numérotée**. Les numéros permettent de parler de
+   « la règle 3 » quand on pose une question, et montrent d'un coup d'œil
+   combien il y en a.
+
+Les règles arabes retombent sur les françaises quand l'admin ne les a pas
+traduites : un lecteur arabophone ne doit pas perdre des règles qui existent.
+
+La date du casting s'affiche en `dd/MM/yyyy · HH:mm`, comme les autres dates de
+la section.
+
 ## Postuler
 
 Le bouton n'existe **pas** tant que le book est incomplet : à la place, la
@@ -142,7 +169,7 @@ perdrait cette forme.
 
 ## Tests
 
-`test/casting_test.dart` (21) : les clés de pose qui doivent correspondre au
+`test/casting_test.dart` (26) : les clés de pose qui doivent correspondre au
 contrat serveur, obligatoire contre facultatif, plein pied contre portrait, une
 pose inconnue ignorée, la complétude qui vient du serveur, le repli du titre
 arabe, un statut inconnu qui compte quand même comme « déjà postulé », et les
