@@ -1010,6 +1010,10 @@ class CastingCopyFr implements CastingCopy {
   String get portraitNotSmiling => 'Souriez franchement pour cette photo.';
   String get adviceTitle => 'Cette photo n\'est peut-être pas conforme';
   String get adviceKeep => 'Garder quand même';
+
+  // ── Vérifié en studio ──
+  String get studioVerifiedTitle => 'Book vérifié en studio';
+  String studioVerifiedOn(String date) => 'Photographié par notre équipe le $date';
 }
 
 /// Staff check-in strings in French

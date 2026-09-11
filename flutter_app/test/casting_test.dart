@@ -333,4 +333,41 @@ void main() {
       expect(c.hasPracticalInfo, isFalse);
     });
   });
+
+  /// The studio star. Only the final state is ever sent to the app; being
+  /// shortlisted is staff's business, so the model has no field for it.
+  group('the studio star', () {
+    Map<String, dynamic> book({Map<String, dynamic>? studio}) => {
+          'profile': {'id': 7},
+          'photos': [],
+          'missing_poses': [],
+          'is_complete': true,
+          if (studio != null) 'studio': studio,
+        };
+
+    test('a book photographed at the studio carries its star and date', () {
+      final b = CastingBook.fromJson(
+          book(studio: {'verified': true, 'shot_on': '2026-09-10'}));
+
+      expect(b.studioVerified, isTrue);
+      expect(b.studioShotOn, DateTime(2026, 9, 10));
+    });
+
+    test('a book not photographed has no star', () {
+      final b = CastingBook.fromJson(
+          book(studio: {'verified': false, 'shot_on': null}));
+
+      expect(b.studioVerified, isFalse);
+      expect(b.studioShotOn, isNull);
+    });
+
+    /// An older server sends no studio block; that must read as "no star",
+    /// never as a star.
+    test('no studio block reads as no star', () {
+      final b = CastingBook.fromJson(book());
+
+      expect(b.studioVerified, isFalse);
+      expect(b.studioShotOn, isNull);
+    });
+  });
 }
