@@ -7,6 +7,7 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/profile/data/face_detection_service.dart';
 import 'package:aji_tfarraj/features/profile/data/image_normalize.dart';
+import 'package:aji_tfarraj/features/profile/domain/face_check.dart';
 
 /// Full-screen camera capture with an oval face-guide frame. Front camera,
 /// validates a face is present, and pops the captured file path (or null).
@@ -110,18 +111,34 @@ class _FaceCaptureScreenState extends ConsumerState<FaceCaptureScreen>
       // Bake EXIF orientation (front-camera photos are rotated) so ML Kit can
       // detect the face and the uploaded avatar isn't stored sideways.
       final path = await normalizeCapturedImage(file.path);
-      final hasFace =
-          await ref.read(faceDetectionServiceProvider).hasFace(path);
+      final verdict =
+          await ref.read(faceDetectionServiceProvider).check(path);
       if (!mounted) return;
-      if (!hasFace) {
+
+      // Exhaustive on purpose: a verdict added later will not compile until
+      // it has a message, so nobody is ever refused without being told why.
+      final problem = switch (verdict) {
+        FaceCheck.ok => null,
+        FaceCheck.noFace => s.avatarNoFace,
+        FaceCheck.tooSmall => s.avatarFaceTooSmall,
+        FaceCheck.multipleFaces => s.avatarMultipleFaces,
+        FaceCheck.notFacing => s.avatarNotFacing,
+        FaceCheck.eyesClosed => s.avatarEyesClosed,
+      };
+
+      if (problem != null) {
         setState(() => _busy = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(s.avatarNoFace),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        // Replace rather than queue: after three quick retries the person
+        // should read the latest reason, not the first.
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(problem),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         return;
       }
       Navigator.of(context).pop(path);

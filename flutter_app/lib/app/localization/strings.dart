@@ -995,6 +995,25 @@ class AppStrings {
       ? 'Aucun visage détecté. Prends une photo de ton visage.'
       : 'لم يتم اكتشاف وجه. التقط صورة لوجهك.';
 
+  // Why a profile photo was refused. Neutral wording on purpose: the same
+  // camera serves the member's own selfie, door staff photographing someone,
+  // and on-site registration.
+  String get avatarFaceTooSmall => locale == AppLocale.fr
+      ? 'Rapprochez-vous : le visage doit remplir le cadre.'
+      : 'اقترب أكثر: يجب أن يملأ الوجه الإطار.';
+
+  String get avatarMultipleFaces => locale == AppLocale.fr
+      ? 'Une seule personne sur la photo.'
+      : 'شخص واحد فقط في الصورة.';
+
+  String get avatarNotFacing => locale == AppLocale.fr
+      ? 'Le visage doit être tourné vers l\'objectif.'
+      : 'يجب أن يكون الوجه مقابلاً للكاميرا.';
+
+  String get avatarEyesClosed => locale == AppLocale.fr
+      ? 'Les yeux doivent être ouverts.'
+      : 'يجب أن تكون العينان مفتوحتين.';
+
   String get avatarFrameHint => locale == AppLocale.fr
       ? 'Placez votre visage dans le cadre'
       : 'ضع وجهك داخل الإطار';
