@@ -124,6 +124,8 @@ class _FaceCaptureScreenState extends ConsumerState<FaceCaptureScreen>
         FaceCheck.multipleFaces => s.avatarMultipleFaces,
         FaceCheck.notFacing => s.avatarNotFacing,
         FaceCheck.eyesClosed => s.avatarEyesClosed,
+        // Only produced when a smile is asked for, which this screen never does.
+        FaceCheck.notSmiling => null,
       };
 
       if (problem != null) {

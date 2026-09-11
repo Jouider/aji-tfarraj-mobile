@@ -23,7 +23,9 @@ class FaceDetectionService {
   /// Fails OPEN: a detector error returns [FaceCheck.ok], so a transient ML Kit
   /// failure never blocks someone with a valid photo. The check only refuses
   /// when detection worked and found a real problem.
-  Future<FaceCheck> check(String imagePath) async {
+  ///
+  /// [requireSmile] is for the casting "portrait souriant" only.
+  Future<FaceCheck> check(String imagePath, {bool requireSmile = false}) async {
     final detector = FaceDetector(
       options: FaceDetectorOptions(
         // Accurate rather than fast: this runs once, after the shutter, and a
@@ -50,9 +52,11 @@ class FaceDetectionService {
                   roll: f.headEulerAngleZ,
                   leftEyeOpen: f.leftEyeOpenProbability,
                   rightEyeOpen: f.rightEyeOpenProbability,
+                  smile: f.smilingProbability,
                 ))
             .toList(),
         imageWidth: await _referenceWidth(imagePath),
+        requireSmile: requireSmile,
       );
     } catch (e) {
       debugPrint('[FaceDetection] error: $e');

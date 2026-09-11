@@ -9,7 +9,11 @@ import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/casting/domain/casting_pose.dart';
+import 'package:aji_tfarraj/features/casting/data/body_pose_service.dart';
+import 'package:aji_tfarraj/features/casting/domain/pose_check.dart';
+import 'package:aji_tfarraj/features/profile/data/face_detection_service.dart';
 import 'package:aji_tfarraj/features/profile/data/image_normalize.dart';
+import 'package:aji_tfarraj/features/profile/domain/face_check.dart';
 
 /// Camera for one prescribed casting shot, with the frame drawn on screen.
 ///
@@ -119,6 +123,19 @@ class _PoseCaptureScreenState extends ConsumerState<PoseCaptureScreen>
       // Bake EXIF orientation in, so the shot is not stored sideways.
       final path = await normalizeCapturedImage(file.path);
       if (!mounted) return;
+
+      // Two different strictnesses on purpose: faces are read reliably, so a
+      // portrait can be refused; full-length pose reading is not, so a body
+      // shot is only ever advised on.
+      final accepted = widget.pose.isFullLength
+          ? await _checkBody(path)
+          : await _checkFace(path);
+      if (!mounted) return;
+
+      if (!accepted) {
+        setState(() => _busy = false);
+        return;
+      }
       Navigator.of(context).pop(path);
     } catch (e) {
       debugPrint('[PoseCapture] $e');
@@ -132,6 +149,95 @@ class _PoseCaptureScreenState extends ConsumerState<PoseCaptureScreen>
         ),
       );
     }
+  }
+
+  /// Portraits: the same face check as the profile photo, reliable enough to
+  /// refuse — plus a smile for the smiling portrait.
+  Future<bool> _checkFace(String path) async {
+    final s = ref.read(stringsProvider);
+    final verdict = await ref.read(faceDetectionServiceProvider).check(
+          path,
+          requireSmile: widget.pose == CastingPose.portraitSmile,
+        );
+
+    final problem = switch (verdict) {
+      FaceCheck.ok => null,
+      FaceCheck.noFace => s.avatarNoFace,
+      FaceCheck.tooSmall => s.avatarFaceTooSmall,
+      FaceCheck.multipleFaces => s.avatarMultipleFaces,
+      FaceCheck.notFacing => s.avatarNotFacing,
+      FaceCheck.eyesClosed => s.avatarEyesClosed,
+      FaceCheck.notSmiling => s.casting.portraitNotSmiling,
+    };
+
+    if (problem == null) return true;
+    _refuse(problem);
+    return false;
+  }
+
+  /// Full length: advice the member can override, never a decision — body-pose
+  /// reading is unreliable on loose clothing. The one exception is a photo
+  /// with nobody in it.
+  Future<bool> _checkBody(String path) async {
+    final c = ref.read(stringsProvider).casting;
+    final verdict =
+        await ref.read(bodyPoseServiceProvider).check(path, widget.pose);
+
+    if (verdict == PoseCheck.ok) return true;
+
+    final message = switch (verdict) {
+      PoseCheck.ok => '',
+      PoseCheck.noPerson => c.poseNoPerson,
+      PoseCheck.headCut => c.poseHeadCut,
+      PoseCheck.feetCut => c.poseFeetCut,
+      PoseCheck.notFacing => c.poseNotFacing,
+      PoseCheck.notSideways => c.poseNotSideways,
+    };
+
+    if (verdict.blocks) {
+      _refuse(message);
+      return false;
+    }
+
+    if (!mounted) return false;
+
+    // Retaking is the suggested way out, so it is the prominent button; keeping
+    // the photo stays one tap away, because the detector can be wrong.
+    final keep = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(c.adviceTitle),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(c.adviceKeep),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.onSecondary,
+            ),
+            child: Text(c.bookRetake),
+          ),
+        ],
+      ),
+    );
+
+    return keep == true;
+  }
+
+  void _refuse(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
   }
 
   @override

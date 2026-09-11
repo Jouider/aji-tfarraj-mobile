@@ -995,6 +995,16 @@ class CastingCopyFr implements CastingCopy {
   String get aboutTitle => 'À propos';
   String get callRulesTitle => 'Règles';
   String get detailsLoadError => 'Impossible de charger les détails.';
+
+  // ── Vérifier une photo casting ──
+  String get poseNoPerson => 'Personne n\'est visible sur la photo.';
+  String get poseHeadCut => 'La tête semble coupée : reculez un peu.';
+  String get poseFeetCut => 'On ne voit pas les pieds : reculez jusqu\'à ce qu\'ils soient dans le cadre.';
+  String get poseNotFacing => 'Vous ne semblez pas de face : mettez-vous bien face à l\'objectif.';
+  String get poseNotSideways => 'Vous ne semblez pas de profil : tournez-vous complètement sur le côté.';
+  String get portraitNotSmiling => 'Souriez franchement pour cette photo.';
+  String get adviceTitle => 'Cette photo n\'est peut-être pas conforme';
+  String get adviceKeep => 'Garder quand même';
 }
 
 /// Staff check-in strings in French

@@ -795,6 +795,16 @@ class CastingCopyAr implements CastingCopy {
   String get aboutTitle => 'التفاصيل';
   String get callRulesTitle => 'الشروط';
   String get detailsLoadError => 'ما تقدرش نجيبو التفاصيل.';
+
+  // ── التحقق من صورة الكاستينغ ──
+  String get poseNoPerson => 'ما كيبان حتى شخص فالصورة.';
+  String get poseHeadCut => 'كيبان الراس مقطوع: رجع شوية للور.';
+  String get poseFeetCut => 'ما كيبانوش الرجلين: رجع حتى يدخلو فالإطار.';
+  String get poseNotFacing => 'كيبان ماشي من قدام: وقف قبالة الكاميرا مزيان.';
+  String get poseNotSideways => 'كيبان ماشي من الجنب: دور على الجنب كامل.';
+  String get portraitNotSmiling => 'ضحك مزيان فهاد الصورة.';
+  String get adviceTitle => 'يمكن هاد الصورة ماشي كيفما طلبنا';
+  String get adviceKeep => 'خليها';
 }
 
 /// Staff check-in strings in Arabic
