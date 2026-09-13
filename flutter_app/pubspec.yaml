@@ -30,6 +30,8 @@ dependencies:
   # Typography - Inter (FR) & Cairo (AR)
   google_fonts: ^6.1.0
   url_launcher: ^6.3.2
+  # Native rating prompt (App Store / Play), quota-limited by the stores themselves
+  in_app_review: ^2.0.12
   # Local caching
   shared_preferences: ^2.2.2
   # Firebase & Push Notifications

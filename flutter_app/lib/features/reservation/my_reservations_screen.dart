@@ -14,19 +14,25 @@ import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
 import 'package:aji_tfarraj/features/reservations/domain/reservation.dart';
 import 'package:aji_tfarraj/features/reservations/presentation/reservation_status.dart';
+import 'package:aji_tfarraj/features/review/data/review_prompter.dart';
 
 /// My Reservations Screen with 3 tabs: Pending, Approved, Past
 class MyReservationsScreen extends ConsumerStatefulWidget {
   const MyReservationsScreen({super.key});
 
   @override
-  ConsumerState<MyReservationsScreen> createState() => _MyReservationsScreenState();
+  ConsumerState<MyReservationsScreen> createState() =>
+      _MyReservationsScreenState();
 }
 
 class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   Timer? _autoRefreshTimer;
+
+  /// Asked at most once per visit to this screen; the prompter decides whether
+  /// anything actually happens.
+  bool _reviewConsidered = false;
 
   /// Poll interval — refresh reservations every 30s while screen is visible
   static const _pollInterval = Duration(seconds: 30);
@@ -56,6 +62,8 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
   @override
   Widget build(BuildContext context) {
     final reservationsAsync = ref.watch(myReservationsProvider);
+
+    _considerAskingForReview(reservationsAsync.valueOrNull);
 
     final s = ref.watch(stringsProvider);
 
@@ -114,8 +122,10 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
         controller: _tabController,
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textMuted,
-        labelStyle: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700),
-        unselectedLabelStyle: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w400),
+        labelStyle:
+            AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700),
+        unselectedLabelStyle:
+            AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w400),
         dividerColor: Colors.transparent,
         indicator: UnderlineTabIndicator(
           borderSide: const BorderSide(color: AppColors.primary, width: 3),
@@ -123,7 +133,9 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
         ),
         tabs: [
           Tab(text: '${s.myResTabPending}${pending > 0 ? ' ($pending)' : ''}'),
-          Tab(text: '${s.myResTabApproved}${approved > 0 ? ' ($approved)' : ''}'),
+          Tab(
+              text:
+                  '${s.myResTabApproved}${approved > 0 ? ' ($approved)' : ''}'),
           Tab(text: '${s.myResTabPast}${past > 0 ? ' ($past)' : ''}'),
         ],
       ),
@@ -159,6 +171,31 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
         ),
       ],
     );
+  }
+
+  /// Someone who attended a recording is the one person worth asking for a
+  /// rating — they have seen what the app is for. Every attended recording
+  /// counts once, however often the list refreshes, and the prompter holds the
+  /// rules about how many moments earn the question and how rarely it is asked.
+  void _considerAskingForReview(List<Reservation>? reservations) {
+    if (_reviewConsidered || reservations == null) return;
+
+    final attended = reservations
+        .where((r) => ReservationStatusHelper(r.status).isCheckedIn)
+        .toList();
+    if (attended.isEmpty) return;
+
+    _reviewConsidered = true;
+
+    // After the frame: this runs from build(), and the store dialog must not
+    // land in the middle of laying the screen out.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final prompter = ref.read(reviewPrompterProvider);
+      for (final r in attended) {
+        await prompter.recordGoodMomentOnce('reservation-${r.id}');
+      }
+      await prompter.askIfEarned();
+    });
   }
 
   // ============================================
@@ -200,7 +237,8 @@ class _TabCounts {
   final int approved;
   final int past;
 
-  _TabCounts({required this.pending, required this.approved, required this.past});
+  _TabCounts(
+      {required this.pending, required this.approved, required this.past});
 }
 
 /// Reservations list with pull-to-refresh and empty state
@@ -229,55 +267,61 @@ class _ReservationsList extends ConsumerWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 56,
-                  color: AppColors.textMuted,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  emptyMessage,
-                  style: AppTypography.labelLarge.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 48),
-                  child: Text(
-                    emptySubMessage,
-                    style: AppTypography.bodyMedium.copyWith(
-                      fontSize: 14,
+              // The scroll view hands down a loose width here, so without Center
+              // the column shrink-wraps to its text and sticks to the start
+              // edge — left in French, right in Arabic.
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 56,
                       color: AppColors.textMuted,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                GestureDetector(
-                  onTap: () => context.go(Routes.home),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      ref.read(stringsProvider).browseShows,
-                      style: AppTypography.labelMedium.copyWith(
-                        color: Colors.white,
+                    const SizedBox(height: 16),
+                    Text(
+                      emptyMessage,
+                      style: AppTypography.labelLarge.copyWith(
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 48),
+                      child: Text(
+                        emptySubMessage,
+                        style: AppTypography.bodyMedium.copyWith(
+                          fontSize: 14,
+                          color: AppColors.textMuted,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 24),
+                    GestureDetector(
+                      onTap: () => context.go(Routes.home),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          ref.read(stringsProvider).browseShows,
+                          style: AppTypography.labelMedium.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                ],
               ),
             ),
           ),
@@ -339,7 +383,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.go(Routes.reservationDetail(reservation.id.toString())),
+        onTap: () =>
+            context.go(Routes.reservationDetail(reservation.id.toString())),
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -361,7 +406,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                       children: [
                         // FIX: Title — 15px w600 textPrimary
                         Text(
-                          reservation.show?.localizedTitle(isAr) ?? 'Émission #${reservation.showId}',
+                          reservation.show?.localizedTitle(isAr) ??
+                              'Émission #${reservation.showId}',
                           style: AppTypography.labelLarge.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -382,7 +428,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                               Expanded(
                                 child: Text(
                                   reservation.show!.startsAt != null
-                                      ? dateFormat.format(reservation.show!.startsAt!.toLocal())
+                                      ? dateFormat.format(
+                                          reservation.show!.startsAt!.toLocal())
                                       : '—',
                                   style: AppTypography.bodySmall.copyWith(
                                     fontSize: 12,
@@ -440,7 +487,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.event_seat, size: 13, color: AppColors.primary),
+                        Icon(Icons.event_seat,
+                            size: 13, color: AppColors.primary),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
                           s.myResSeatCount(reservation.seats),
@@ -509,7 +557,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
             if (reservation.rejectionReason != null && statusHelper.isRejected)
               Container(
                 margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.errorLight,
                   borderRadius: BorderRadius.circular(12),
@@ -520,7 +569,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, size: 18, color: AppColors.errorDark),
+                    Icon(Icons.info_outline,
+                        size: 18, color: AppColors.errorDark),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
@@ -540,7 +590,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
             if (statusHelper.isExpired)
               Container(
                 margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.warningLight,
                   borderRadius: BorderRadius.circular(12),
@@ -550,7 +601,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.timer_off, size: 18, color: AppColors.warningDark),
+                    Icon(Icons.timer_off,
+                        size: 18, color: AppColors.warningDark),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
@@ -570,7 +622,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
             if (statusHelper.isCheckedIn)
               Container(
                 margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.successLight,
                   borderRadius: BorderRadius.circular(12),
@@ -580,7 +633,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.verified, size: 18, color: AppColors.successDark),
+                    Icon(Icons.verified,
+                        size: 18, color: AppColors.successDark),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
@@ -606,7 +660,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(s.myResCancelDialogTitle, style: AppTypography.h3),
-        content: Text(s.myResCancelDialogContent, style: AppTypography.bodyMedium),
+        content:
+            Text(s.myResCancelDialogContent, style: AppTypography.bodyMedium),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
@@ -615,7 +670,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
               s.myResCancelDialogKeep,
-              style: AppTypography.labelMedium.copyWith(color: AppColors.textMuted),
+              style: AppTypography.labelMedium
+                  .copyWith(color: AppColors.textMuted),
             ),
           ),
           TextButton(
@@ -685,7 +741,8 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(s.myResCancelErrorGeneric, style: AppTypography.bodyMedium),
+          content:
+              Text(s.myResCancelErrorGeneric, style: AppTypography.bodyMedium),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

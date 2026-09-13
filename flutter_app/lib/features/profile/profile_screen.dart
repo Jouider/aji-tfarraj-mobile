@@ -19,6 +19,7 @@ import 'package:aji_tfarraj/features/support/presentation/screens/support_ticket
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_mode_provider.dart';
 import 'package:aji_tfarraj/features/badges/presentation/level_badge_card.dart';
 import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
+import 'package:aji_tfarraj/features/review/data/review_prompter.dart';
 
 // ─────────────────────────────────────────────
 // Profile Screen
@@ -40,8 +41,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: AppColors.surfaceOverlay,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Text('Se déconnecter ?', style: AppTypography.h3),
             content: Text(
               'Vous serez redirigé vers l\'écran de connexion.',
@@ -49,8 +50,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   .copyWith(color: AppColors.textSecondary),
             ),
             actionsAlignment: MainAxisAlignment.end,
-            actionsPadding:
-                const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
@@ -59,8 +59,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   foregroundColor: AppColors.textPrimary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: Text('Annuler', style: AppTypography.labelMedium),
               ),
@@ -72,13 +72,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: Text(
                   'Confirmer',
-                  style: AppTypography.labelMedium
-                      .copyWith(color: Colors.white),
+                  style:
+                      AppTypography.labelMedium.copyWith(color: Colors.white),
                 ),
               ),
             ],
@@ -102,8 +102,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// (handled in the controller); show a hint if it couldn't be enabled.
   Future<void> _toggleBiometricLock(bool enable) async {
     final s = ref.read(stringsProvider);
-    final result =
-        await ref.read(appLockProvider.notifier).setEnabled(enable);
+    final result = await ref.read(appLockProvider.notifier).setEnabled(enable);
     if (enable && !result && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -124,8 +123,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: AppColors.surfaceOverlay,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Row(
               children: [
                 const Icon(Icons.warning_rounded,
@@ -142,8 +141,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   .copyWith(color: AppColors.textSecondary),
             ),
             actionsAlignment: MainAxisAlignment.end,
-            actionsPadding:
-                const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
@@ -152,8 +150,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   foregroundColor: AppColors.textPrimary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: Text('Annuler', style: AppTypography.labelMedium),
               ),
@@ -165,13 +163,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: Text(
                   'Continuer',
-                  style: AppTypography.labelMedium
-                      .copyWith(color: Colors.white),
+                  style:
+                      AppTypography.labelMedium.copyWith(color: Colors.white),
                 ),
               ),
             ],
@@ -186,19 +184,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: AppColors.surfaceOverlay,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Text('Confirmer la suppression',
-                style: AppTypography.h3
-                    .copyWith(color: AppColors.error)),
+                style: AppTypography.h3.copyWith(color: AppColors.error)),
             content: Text(
               'Voulez-vous vraiment supprimer définitivement votre compte ?',
               style: AppTypography.bodyMedium
                   .copyWith(color: AppColors.textSecondary),
             ),
             actionsAlignment: MainAxisAlignment.end,
-            actionsPadding:
-                const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
@@ -207,8 +203,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   foregroundColor: AppColors.textPrimary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: Text('Annuler', style: AppTypography.labelMedium),
               ),
@@ -220,13 +216,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: Text(
                   'Supprimer définitivement',
-                  style: AppTypography.labelMedium
-                      .copyWith(color: Colors.white),
+                  style:
+                      AppTypography.labelMedium.copyWith(color: Colors.white),
                 ),
               ),
             ],
@@ -351,8 +347,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 trailing: Icon(Icons.swap_horiz,
                     size: 18, color: AppColors.textMuted),
                 showChevron: false,
-                onTap: () =>
-                    ref.read(localeProvider.notifier).toggleLocale(),
+                onTap: () => ref.read(localeProvider.notifier).toggleLocale(),
               ),
               _SettingsRow(
                 icon: themeIcon,
@@ -362,8 +357,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 trailing: Icon(Icons.swap_horiz,
                     size: 18, color: AppColors.textMuted),
                 showChevron: false,
-                onTap: () =>
-                    ref.read(themeModeProvider.notifier).toggleTheme(),
+                onTap: () => ref.read(themeModeProvider.notifier).toggleTheme(),
               ),
               // Biometric lock — only when the device supports it
               if (ref.watch(biometricAvailableProvider).valueOrNull == true)
@@ -429,12 +423,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 icon: Icons.notifications_outlined,
                 iconColor: AppColors.primary,
                 title: s.profileNotificationsLabel,
-                subtitle: unreadCount > 0
-                    ? s.profileUnreadCount(unreadCount)
-                    : null,
-                trailing: unreadCount > 0
-                    ? _UnreadBadge(count: unreadCount)
-                    : null,
+                subtitle:
+                    unreadCount > 0 ? s.profileUnreadCount(unreadCount) : null,
+                trailing:
+                    unreadCount > 0 ? _UnreadBadge(count: unreadCount) : null,
                 onTap: () => context.push(Routes.notifications),
               ),
               if (user != null && user.isStaffOrAdmin)
@@ -506,6 +498,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 iconColor: AppColors.textMuted,
                 title: s.conditionsProfileTileLabel,
                 onTap: () => context.push(Routes.rules),
+              ),
+              // Opens the store page, not the native dialog: the dialog is
+              // quota-limited and may show nothing at all, which behind a
+              // button would just look broken. The automatic ask uses the
+              // dialog, after someone has actually attended a recording.
+              _SettingsRow(
+                icon: Icons.star_outline,
+                iconColor: AppColors.secondary,
+                title: s.rateAppTitle,
+                subtitle: s.rateAppSubtitle,
+                onTap: () =>
+                    ref.read(reviewPrompterProvider).openStoreListing(),
               ),
             ],
           ),
@@ -632,8 +636,7 @@ class _IncompleteProfileBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.warningLight,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(
-            color: AppColors.warning.withValues(alpha: 0.4)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
@@ -643,16 +646,14 @@ class _IncompleteProfileBanner extends StatelessWidget {
           Expanded(
             child: Text(
               s.profileIncompleteWarning,
-              style: AppTypography.bodySmall
-                  .copyWith(color: AppColors.warning),
+              style: AppTypography.bodySmall.copyWith(color: AppColors.warning),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
           TextButton(
             onPressed: onTap,
             style: TextButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
@@ -701,7 +702,8 @@ class _ProfileHeader extends StatelessWidget {
               onEditTap();
               return;
             }
-            showFullScreenImage(context, imageUrl: url, heroTag: avatarHeroTag(url, scope: 'profile'));
+            showFullScreenImage(context,
+                imageUrl: url, heroTag: avatarHeroTag(url, scope: 'profile'));
           },
           child: Stack(
             alignment: Alignment.bottomRight,
@@ -737,21 +739,24 @@ class _ProfileHeader extends StatelessWidget {
                     child: ClipOval(
                       child: user?.avatarUrl != null
                           ? Hero(
-                              tag: avatarHeroTag(user!.avatarUrl!, scope: 'profile'),
+                              tag: avatarHeroTag(user!.avatarUrl!,
+                                  scope: 'profile'),
                               child: Image.network(
-                              user!.avatarUrl!,
-                              width: 86,
-                              height: 86,
-                              fit: BoxFit.cover,
-                              // Bound decoded bitmap so a large avatar can't OOM.
-                              // Only cap width — capping both distorts non-square
-                              // photos (the decode ignores aspect ratio).
-                              cacheWidth: 258,
-                              loadingBuilder: (_, child, progress) =>
-                                  progress == null ? child : _AvatarPlaceholder(),
-                              errorBuilder: (_, __, ___) =>
-                                  _AvatarPlaceholder(),
-                            ),
+                                user!.avatarUrl!,
+                                width: 86,
+                                height: 86,
+                                fit: BoxFit.cover,
+                                // Bound decoded bitmap so a large avatar can't OOM.
+                                // Only cap width — capping both distorts non-square
+                                // photos (the decode ignores aspect ratio).
+                                cacheWidth: 258,
+                                loadingBuilder: (_, child, progress) =>
+                                    progress == null
+                                        ? child
+                                        : _AvatarPlaceholder(),
+                                errorBuilder: (_, __, ___) =>
+                                    _AvatarPlaceholder(),
+                              ),
                             )
                           : _AvatarPlaceholder(),
                     ),
@@ -785,8 +790,8 @@ class _ProfileHeader extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.edit,
-                          size: 16, color: Colors.white),
+                      child:
+                          const Icon(Icons.edit, size: 16, color: Colors.white),
                     ),
                   ),
                 ),
@@ -966,8 +971,7 @@ class _SettingsRow extends StatelessWidget {
             ],
             if (showChevron) ...[
               const SizedBox(width: AppSpacing.xs),
-              Icon(Icons.chevron_right,
-                  size: 18, color: AppColors.textMuted),
+              Icon(Icons.chevron_right, size: 18, color: AppColors.textMuted),
             ],
           ],
         ),
@@ -992,8 +996,7 @@ class _LoyaltyBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.secondary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: AppColors.secondary.withValues(alpha: 0.30)),
+        border: Border.all(color: AppColors.secondary.withValues(alpha: 0.30)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
