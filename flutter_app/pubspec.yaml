@@ -88,6 +88,12 @@ dependencies:
 # which is far more reliable in production.
 dependency_overrides:
   google_sign_in_android: 6.1.36
+  # 2.4.23 ships a newer-style Gradle module (its own settings.gradle.kts, AGP
+  # 8.13.1, Kotlin 2.3.0) that this project's AGP 8.11.1 never configures: the
+  # module is not compiled and SharedPreferencesPlugin is missing at javac time.
+  # 2.4.21 is the first version carrying the datastore 1.1.7 revert — the 16 ko
+  # fix — and still builds here. Remove when the project moves to AGP 9.
+  shared_preferences_android: 2.4.21
 
 dev_dependencies:
   flutter_test:
