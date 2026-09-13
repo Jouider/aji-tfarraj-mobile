@@ -1504,6 +1504,11 @@ class AppStrings {
   bool get _fr => locale == AppLocale.fr;
 
   String get badgeProfileTitle => _fr ? 'Mon badge' : 'شارتي';
+
+  // ── Noter l'application ──
+  String get rateAppTitle => _fr ? "Noter l'application" : 'قيّم التطبيق';
+  String get rateAppSubtitle =>
+      _fr ? 'Votre avis nous aide à faire mieux' : 'رأيك كيعاوننا نتحسنو';
   String get badgeCpTitle => _fr ? 'Mon niveau' : 'مستواي';
   String badgeLevelShort(int level) => _fr ? 'Niv. $level' : 'مستوى $level';
   String get badgeMaxReached =>
