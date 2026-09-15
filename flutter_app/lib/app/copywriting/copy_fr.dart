@@ -854,7 +854,7 @@ class ConditionsCopyFr {
         ConditionSection(
           title: 'Réseaux sociaux (facultatif)',
           body:
-              'Vous pouvez indiquer vos comptes Instagram, TikTok et Facebook dans votre profil. Ils servent uniquement à vous proposer des collaborations et des castings. Notre équipe peut consulter ces profils publics pour estimer votre audience ; cette estimation reste interne et n\'est jamais publiée. Ces informations sont facultatives, n\'ont aucun effet sur vos réservations, et vous pouvez les modifier ou les supprimer à tout moment depuis votre profil.',
+              'Vous pouvez indiquer vos comptes Instagram, TikTok, Snapchat et Facebook dans votre profil. Ils servent uniquement à vous proposer des collaborations et des castings. Notre équipe peut consulter ces profils publics pour estimer votre audience ; cette estimation reste interne et n\'est jamais publiée. Ces informations sont facultatives, n\'ont aucun effet sur vos réservations, et vous pouvez les modifier ou les supprimer à tout moment depuis votre profil.',
         ),
       ];
 }
@@ -1269,6 +1269,9 @@ abstract class ChargePublicCopy {
   String get episodeTotal;
   String get episodeUndated;
   String episodeCount(int n);
+
+  /// Under the sheet header: episodes open to show who came.
+  String get episodeTapHint;
   String get recentGuests;
   String get myReferred;
   String get seeAll;
@@ -1289,6 +1292,9 @@ abstract class ChargePublicCopy {
   String get statusCancelled;
   String get statusExpired;
   String get statusPending;
+
+  /// A guest who did not come to a recording that has already happened.
+  String get statusAbsent;
 
   String visitsCount(int n);
   String gain(int v);
@@ -1369,6 +1375,8 @@ class ChargePublicCopyFr extends ChargePublicCopy {
   @override
   String episodeCount(int n) => n == 1 ? '1 épisode' : '$n épisodes';
   @override
+  String get episodeTapHint => 'Touchez un épisode pour voir qui est venu.';
+  @override
   String get recentGuests => 'Invités récents';
   @override
   String get myReferred => 'Mes filleuls';
@@ -1406,6 +1414,8 @@ class ChargePublicCopyFr extends ChargePublicCopy {
   String get statusExpired => 'Expirée';
   @override
   String get statusPending => 'En attente';
+  @override
+  String get statusAbsent => 'Absent';
 
   @override
   String visitsCount(int n) => '$n présence${n > 1 ? 's' : ''}';

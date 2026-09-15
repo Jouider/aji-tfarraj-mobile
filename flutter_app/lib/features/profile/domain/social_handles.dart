@@ -1,7 +1,9 @@
-/// The social networks a member can add. Kept to three on purpose.
+/// The social networks a member can add. A short list on purpose: the ones our
+/// members actually use. Same list, same order as the server's.
 enum SocialPlatform {
   instagram('instagram'),
   tiktok('tiktok'),
+  snapchat('snapchat'),
   facebook('facebook');
 
   const SocialPlatform(this.key);
@@ -30,7 +32,7 @@ abstract final class SocialHandles {
   };
 
   static final _link = RegExp(
-      r'(^|\.)(instagram\.com|tiktok\.com|facebook\.com|fb\.com)(/|$)');
+      r'(^|\.)(instagram\.com|tiktok\.com|facebook\.com|fb\.com|snapchat\.com)(/|$)');
 
   /// The cleaned value, or null when the field is empty (which clears it).
   ///
@@ -69,6 +71,13 @@ abstract final class SocialHandles {
             break;
           }
         }
+      case SocialPlatform.snapchat:
+        // snapchat.com/add/nom (the classic link) or snapchat.com/@nom.
+        if (first == 'add') {
+          handle = segments.length > 1 ? segments[1] : null;
+        } else if (first.startsWith('@')) {
+          handle = first;
+        }
       case SocialPlatform.facebook:
         if (first == 'profile.php') {
           handle = uri.queryParameters['id'];
@@ -87,6 +96,9 @@ abstract final class SocialHandles {
         SocialPlatform.instagram =>
           RegExp(r'^[a-z0-9._]{1,30}$').hasMatch(handle),
         SocialPlatform.tiktok => RegExp(r'^[a-z0-9._]{2,24}$').hasMatch(handle),
+        // 3 to 15, starts with a letter, ends with a letter or a digit.
+        SocialPlatform.snapchat =>
+          RegExp(r'^[a-z][a-z0-9._-]{1,13}[a-z0-9]$').hasMatch(handle),
         // A username, or the numeric id of a profile without one.
         SocialPlatform.facebook =>
           RegExp(r'^([a-z0-9.]{5,50}|\d{5,20})$').hasMatch(handle),
@@ -99,6 +111,8 @@ abstract final class SocialHandles {
         SocialPlatform.instagram =>
           Uri.parse('https://www.instagram.com/$handle/'),
         SocialPlatform.tiktok => Uri.parse('https://www.tiktok.com/@$handle'),
+        SocialPlatform.snapchat =>
+          Uri.parse('https://www.snapchat.com/add/$handle'),
         SocialPlatform.facebook => RegExp(r'^\d+$').hasMatch(handle)
             ? Uri.parse('https://www.facebook.com/profile.php?id=$handle')
             : Uri.parse('https://www.facebook.com/$handle'),
