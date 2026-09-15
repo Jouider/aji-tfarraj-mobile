@@ -24,5 +24,24 @@ Gains (toutes).
 - Le titre de l'épisode n'est affiché que s'il dit autre chose que le titre de
   l'émission.
 
+## Épisode → qui est venu, et combien chacun rapporte
+
+Toucher un épisode dans la feuille **le déplie** : la liste des invités de ce
+tournage, chacun avec ce qu'il a rapporté (`+25 DH`).
+
+- **Présents d'abord, montant le plus élevé d'abord**, puis ceux qui ne sont pas
+  venus, en gris. L'ordre vient du serveur ; l'app ne le refait pas.
+- Un invité approuvé qui n'est pas venu à un tournage **passé** est marqué
+  **« Absent »**. Pour un tournage à venir, on garde son statut (Approuvée, En
+  attente…) ; une réservation annulée ou rejetée garde le sien dans tous les cas.
+- **Les montants s'additionnent au total de l'épisode** — même règle côté serveur.
+- Déplié sur place plutôt qu'une deuxième feuille par-dessus la première : le
+  total de l'émission reste visible.
+- Une phrase sous l'en-tête (« Touchez un épisode pour voir qui est venu ») et un
+  chevron qui pivote. **Sur un serveur plus ancien sans noms**, ni l'une ni
+  l'autre : la ligne reste une simple ligne.
+
 Données : `CpShowRow.episodes` (`CpEpisodeRow`), lues depuis
-`by_show[].episodes`. Tests : `test/cp_dashboard_test.dart`.
+`by_show[].episodes` ; les invités dans `CpEpisodeRow.guests`
+(`CpEpisodeGuest`), lus depuis `episodes[].guests`. Tests :
+`test/cp_dashboard_test.dart`.

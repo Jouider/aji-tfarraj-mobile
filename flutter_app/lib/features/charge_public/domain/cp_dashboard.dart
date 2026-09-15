@@ -28,6 +28,36 @@ class CpStats {
   });
 }
 
+/// One guest of one recording, and what they brought in.
+class CpEpisodeGuest {
+  final String name;
+  final String? avatarUrl;
+  final bool attended;
+
+  /// Null when the guest did not come: nothing was earned.
+  final int? amount;
+  final int? visit;
+  final String? resStatus;
+
+  const CpEpisodeGuest({
+    required this.name,
+    this.avatarUrl,
+    this.attended = false,
+    this.amount,
+    this.visit,
+    this.resStatus,
+  });
+
+  factory CpEpisodeGuest.fromJson(Map<String, dynamic> j) => CpEpisodeGuest(
+        name: j['name'] as String? ?? '—',
+        avatarUrl: j['avatar_url'] as String?,
+        attended: j['attended'] as bool? ?? false,
+        amount: (j['amount'] as num?)?.toInt(),
+        visit: (j['visit'] as num?)?.toInt(),
+        resStatus: j['res_status'] as String?,
+      );
+}
+
 /// One recording of a show, and what it brought in.
 class CpEpisodeRow {
   /// Null for guests recorded before episodes were tracked — kept as their own
@@ -40,6 +70,10 @@ class CpEpisodeRow {
   final int notAttended;
   final int earnings;
 
+  /// Who that recording's money came from — present guests first, highest
+  /// amount first. Empty on an older server, and the row then does not open.
+  final List<CpEpisodeGuest> guests;
+
   const CpEpisodeRow({
     this.episodeId,
     this.title,
@@ -48,7 +82,10 @@ class CpEpisodeRow {
     this.attended = 0,
     this.notAttended = 0,
     this.earnings = 0,
+    this.guests = const [],
   });
+
+  bool get hasGuests => guests.isNotEmpty;
 
   factory CpEpisodeRow.fromJson(Map<String, dynamic> j) => CpEpisodeRow(
         episodeId: (j['episode_id'] as num?)?.toInt(),
@@ -60,6 +97,10 @@ class CpEpisodeRow {
         attended: (j['attended'] as num?)?.toInt() ?? 0,
         notAttended: (j['not_attended'] as num?)?.toInt() ?? 0,
         earnings: (j['earnings'] as num?)?.toInt() ?? 0,
+        guests: ((j['guests'] as List<dynamic>?) ?? const [])
+            .whereType<Map<String, dynamic>>()
+            .map(CpEpisodeGuest.fromJson)
+            .toList(),
       );
 }
 
