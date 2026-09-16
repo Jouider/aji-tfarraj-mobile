@@ -20,9 +20,10 @@ nouvelle version** sur les stores.
 
 ## Où elles apparaissent
 
-| Endroit | Vidéo | Quand |
+| Endroit | Vidéo sélectionnée | Quand |
 |---|---|---|
-| **« ? »** dans la barre du haut — Modifier le profil | Profil | Toujours |
+| **« ? »** dans la barre du haut de l'accueil (à côté de la cloche) | Profil | Toujours |
+| **« ? »** — Modifier le profil | Profil | Toujours |
 | **« ? »** — Réserver des places, et l'écran d'invitation (`/r/…`) | Réservation | Toujours |
 | **Bandeau « Première fois ? »** en haut de Modifier le profil | Profil | Profil incomplet, jusqu'à ce que le membre regarde ou masque |
 | **Bandeau « Comment réserver avec cette invitation ? »** sur l'écran d'invitation | Réservation | Jusqu'à ce que le membre regarde ou masque |
@@ -34,9 +35,17 @@ nouvelle version** sur les stores.
   préférences). Le « ? » reste.
 - La **durée** est affichée avant de lancer (« 0:49 ») : on accepte plus
   volontiers une vidéo dont on connaît la longueur.
-- Le lecteur (`TutorialVideoScreen`) démarre seul, se met en pause au toucher,
-  propose **Revoir** à la fin, et affiche l'image du clip pendant le chargement.
-  Il s'ouvre en plein écran, au-dessus de la barre de navigation.
+- **La vidéo s'ouvre dans une feuille** (`showTutorialSheet`) : les trois quarts
+  de l'écran, **l'écran derrière flouté**, **« J'ai compris »** en bas. Le membre
+  reste sur l'écran où il avait besoin d'aide ; toucher en dehors ferme aussi.
+- **Les deux vidéos sont proposées en pilules** (« Profil », « Réservation ») ;
+  celle de l'écran en cours est sélectionnée. Le titre complet et la durée sont
+  au-dessus.
+- La vidéo démarre seule, se met en pause au toucher, propose **Revoir** à la
+  fin, et affiche l'image du clip pendant le chargement.
+- **Le « ? » est toujours visible**, même sans vidéo : il ouvre alors le guide
+  illustré « Comment ça marche ». Le bandeau et le lien, eux, n'apparaissent
+  qu'avec une vidéo — ils en promettent une.
 
 Le parcours « parrains » de Comment ça marche n'a pas encore de vidéo : il garde
 son emplacement `parrainVideoUrl` dans les textes.
@@ -46,6 +55,8 @@ son emplacement `parrainVideoUrl` dans les textes.
 - `test/tutorials_test.dart` — langue choisie, repli sur l'autre langue, serveur
   sans vidéos, `[]` venant de PHP, entrées illisibles ou non web ignorées, durée,
   bandeau proposé une seule fois et séparément par sujet.
-- `test/tutorial_widgets_test.dart` — sans clip, aucun point d'entrée ; avec un
-  clip, « ? », bandeau et lien minuté ; un bandeau masqué le reste après un
-  redémarrage, le « ? » reste.
+- `test/tutorial_widgets_test.dart` — sans clip, le « ? » reste mais ni bandeau
+  ni lien ; avec un clip, bandeau et lien minuté ; un bandeau masqué le reste
+  après un redémarrage ; la feuille s'ouvre sur la vidéo de l'écran, propose
+  l'autre en pilule, et « J'ai compris » la ferme ; regarder depuis le bandeau
+  le retire.

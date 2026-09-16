@@ -1051,6 +1051,13 @@ class AppStrings {
       ? 'Réserver avec une invitation'
       : 'الحجز برابط الدعوة';
 
+  // Short names, for the switch between the two videos.
+  String get tutorialProfileShort =>
+      locale == AppLocale.fr ? 'Profil' : 'الملف الشخصي';
+
+  String get tutorialReservationShort =>
+      locale == AppLocale.fr ? 'Réservation' : 'الحجز';
+
   String get tutorialProfileOffer => locale == AppLocale.fr
       ? 'Première fois ? Regarde comment compléter ton profil.'
       : 'أول مرة؟ شوف كيفاش تكمل الملف الشخصي ديالك.';

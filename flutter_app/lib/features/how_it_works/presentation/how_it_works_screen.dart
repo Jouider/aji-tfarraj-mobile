@@ -10,7 +10,7 @@ import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
 import 'package:aji_tfarraj/features/tutorials/data/tutorials_repository.dart';
 import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
 import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
-import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_video_screen.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_sheet.dart';
 
 /// "Comment ça marche" — illustrated, swipeable step-by-step guide.
 ///
@@ -156,14 +156,12 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
                 child: _WatchVideoButton(
                   label: s.howItWorksWatchVideo,
                   accent: accent,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => TutorialVideoScreen(
-                        clip: TutorialClip(video: Uri.parse(parrainVideoUrl)),
-                        title: headline,
-                      ),
+                  onTap: () => showTutorialSheet(context, items: [
+                    TutorialSheetItem(
+                      title: headline,
+                      clip: TutorialClip(video: Uri.parse(parrainVideoUrl)),
                     ),
-                  ),
+                  ]),
                 ),
               ),
             ],

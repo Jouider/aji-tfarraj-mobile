@@ -61,14 +61,16 @@ Future<void> _pump(
 void main() {
   const s = AppStrings(AppLocale.fr);
 
-  testWidgets('no clip from the server: no "?", no banner, no link',
+  /// The "?" is help that is always there; the banner and the link promise a
+  /// video, so they wait for one.
+  testWidgets('no clip from the server: the "?" stays, no banner, no link',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
 
     await _pump(tester, tutorials: Tutorials.none, prefs: prefs);
 
-    expect(find.byIcon(Icons.help_outline), findsNothing);
+    expect(find.byIcon(Icons.help_outline), findsOneWidget);
     expect(find.text(s.tutorialProfileOffer), findsNothing);
     expect(find.textContaining(s.tutorialHowTo), findsNothing);
     expect(tester.takeException(), isNull);
@@ -103,4 +105,73 @@ void main() {
     expect(find.byIcon(Icons.help_outline), findsOneWidget,
         reason: 'the clip is still one tap away');
   });
+
+  group('the sheet', () {
+    // The player cannot load under flutter_test (no platform plugin): the sheet
+    // then shows its "unavailable" message, which is exactly the failure path.
+    // pumpAndSettle is avoided — a loading spinner never settles.
+    Future<void> settle(WidgetTester tester) async {
+      for (var i = 0; i < 6; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    testWidgets(
+        "opens on the screen's own video, offers the other as a pill, "
+        "and « J'ai compris » closes it", (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+
+      await _pump(tester, tutorials: _bothClips, prefs: prefs);
+      await tester.tap(find.byIcon(Icons.help_outline));
+      await settle(tester);
+
+      expect(find.text(s.tutorialProfileTitle), findsOneWidget,
+          reason: 'opened from the profile screen');
+      expect(find.text(s.tutorialProfileShort), findsOneWidget);
+      expect(find.text(s.tutorialReservationShort), findsOneWidget);
+      expect(find.text(s.howItWorksGotIt), findsOneWidget);
+
+      await tester.tap(find.text(s.tutorialReservationShort));
+      await settle(tester);
+      expect(find.text(s.tutorialReservationTitle), findsOneWidget);
+      expect(find.text('0:43'), findsOneWidget);
+
+      await tester.tap(find.text(s.howItWorksGotIt));
+      await settle(tester);
+      expect(find.text(s.howItWorksGotIt), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('watching from the banner retires the banner', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+
+      await _pump(tester, tutorials: _bothClips, prefs: prefs);
+      await tester.tap(find.text(s.tutorialProfileOffer));
+      await settle(tester);
+      await tester.tap(find.text(s.howItWorksGotIt));
+      await settle(tester);
+
+      expect(find.text(s.tutorialProfileOffer), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  });
 }
+
+final _bothClips = Tutorials.fromAppConfig({
+  'tutorials': {
+    'profile': {
+      'fr': {
+        'video_url': 'https://api.test/tutorials/tuto_profil_fr.mp4',
+        'duration': 49,
+      },
+    },
+    'reservation_referral': {
+      'fr': {
+        'video_url': 'https://api.test/tutorials/tuto_reservation_parrainage_fr.mp4',
+        'duration': 43,
+      },
+    },
+  },
+});

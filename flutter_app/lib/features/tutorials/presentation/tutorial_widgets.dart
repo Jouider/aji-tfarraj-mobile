@@ -1,63 +1,101 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
+import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/tutorials/data/tutorials_repository.dart';
 import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
-import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_video_screen.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_sheet.dart';
 
-// The three ways a clip is offered. Each one disappears when the server has no
-// clip for its topic: a help button that plays nothing is worse than none.
+// The ways a clip is offered:
 //
-//  • TutorialHelpAction   — the "?" in the app bar, always available.
-//  • TutorialOfferBanner  — the first time on the screen, until watched or hidden.
+//  • TutorialHelpAction   — the "?" in the top bar. Always there.
+//  • TutorialOfferBanner  — the first time on a screen, until watched or hidden.
 //  • TutorialHowToLink    — under an error, when the member just got stuck.
+//
+// The banner and the link vanish when the server has no clip: they promise a
+// video. The "?" stays and falls back to the illustrated guide.
 
 String tutorialTitle(AppStrings s, TutorialTopic topic) => switch (topic) {
       TutorialTopic.profile => s.tutorialProfileTitle,
       TutorialTopic.reservationReferral => s.tutorialReservationTitle,
     };
 
-/// Plays the clip for [topic]. Watching it also retires its first-time banner.
+String tutorialShortTitle(AppStrings s, TutorialTopic topic) => switch (topic) {
+      TutorialTopic.profile => s.tutorialProfileShort,
+      TutorialTopic.reservationReferral => s.tutorialReservationShort,
+    };
+
+/// Opens the tutorial sheet.
+///
+/// Every clip is offered, as pills; a [topic] (the screen the member is on)
+/// starts selected, otherwise the first. No clip at all — an older server, no network — and
+/// the member gets the illustrated "Comment ça marche" instead of nothing.
 Future<void> openTutorial(
   BuildContext context,
-  WidgetRef ref,
-  TutorialTopic topic,
-) async {
-  final clip = ref.read(tutorialClipProvider(topic));
-  if (clip == null) return;
+  WidgetRef ref, [
+  TutorialTopic? topic,
+]) async {
+  final Tutorials tutorials;
+  try {
+    tutorials = await ref.read(tutorialsProvider.future);
+  } catch (_) {
+    if (context.mounted) context.push(Routes.howItWorks);
+    return;
+  }
+  if (!context.mounted) return;
 
-  ref.read(tutorialOfferProvider(topic).notifier).dismiss();
+  final locale = ref.read(localeProvider);
+  final s = ref.read(stringsProvider);
+  final all = [
+    for (final t in TutorialTopic.values)
+      if (tutorials.clipFor(t, locale) case final clip?)
+        TutorialSheetItem(
+          topic: t,
+          title: tutorialTitle(s, t),
+          shortTitle: tutorialShortTitle(s, t),
+          clip: clip,
+        ),
+  ];
 
-  await Navigator.of(context, rootNavigator: true).push(
-    MaterialPageRoute<void>(
-      fullscreenDialog: true,
-      builder: (_) => TutorialVideoScreen(
-        clip: clip,
-        title: tutorialTitle(ref.read(stringsProvider), topic),
-      ),
-    ),
+  if (all.isEmpty) {
+    context.push(Routes.howItWorks);
+    return;
+  }
+
+  // Watching retires the first-time banner for that topic.
+  if (topic != null) {
+    ref.read(tutorialOfferProvider(topic).notifier).dismiss();
+  }
+
+  // Every clip is offered as a pill; the screen's own topic starts selected.
+  final selected = all.indexWhere((item) => item.topic == topic);
+  await showTutorialSheet(
+    context,
+    items: all,
+    initialIndex: selected < 0 ? 0 : selected,
   );
 }
 
-/// The "?" in an app bar.
+/// The "?" in a top bar. Always visible, so help is never hidden.
 class TutorialHelpAction extends ConsumerWidget {
-  const TutorialHelpAction({super.key, required this.topic});
+  const TutorialHelpAction({super.key, this.topic, this.color});
 
-  final TutorialTopic topic;
+  /// Null for the general "?" (home), which offers every clip.
+  final TutorialTopic? topic;
+
+  /// The icon colour; defaults to the text colour.
+  final Color? color;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (ref.watch(tutorialClipProvider(topic)) == null) {
-      return const SizedBox.shrink();
-    }
-
     return IconButton(
-      icon: Icon(Icons.help_outline, color: AppColors.textPrimary),
+      icon: Icon(Icons.help_outline, color: color ?? AppColors.textPrimary),
       tooltip: ref.watch(stringsProvider).tutorialWatch,
       onPressed: () => openTutorial(context, ref, topic),
     );
