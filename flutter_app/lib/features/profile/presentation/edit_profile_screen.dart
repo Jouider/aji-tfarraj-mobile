@@ -17,6 +17,8 @@ import 'package:aji_tfarraj/features/profile/data/profile_repository.dart';
 import 'package:aji_tfarraj/features/profile/presentation/face_capture_screen.dart';
 import 'package:aji_tfarraj/features/profile/domain/city.dart';
 import 'package:aji_tfarraj/features/profile/domain/social_handles.dart';
+import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Session-scoped flag set when the user taps "Skip for now" on the forced
@@ -591,6 +593,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               )
             : null,
         actions: [
+          const TutorialHelpAction(topic: TutorialTopic.profile),
           if (!canGoBack)
             TextButton(
               onPressed: () {
@@ -618,6 +621,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.md),
+
+              // Profile still incomplete — usually the first visit: offer the
+              // walkthrough once.
+              if (!(user?.profileComplete ?? true))
+                const TutorialOfferBanner(topic: TutorialTopic.profile),
 
               // ── Avatar hero ──────────────────────────────────
               _AvatarHero(
@@ -675,18 +683,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     border: Border.all(
                         color: AppColors.error.withValues(alpha: 0.30)),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.error_outline,
-                          color: AppColors.error, size: 18),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: AppTypography.bodySmall
-                              .copyWith(color: AppColors.error),
-                        ),
+                      Row(
+                        children: [
+                          const Icon(Icons.error_outline,
+                              color: AppColors.error, size: 18),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: AppTypography.bodySmall
+                                  .copyWith(color: AppColors.error),
+                            ),
+                          ),
+                        ],
                       ),
+                      const TutorialHowToLink(topic: TutorialTopic.profile),
                     ],
                   ),
                 ),

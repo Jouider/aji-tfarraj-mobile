@@ -1221,7 +1221,6 @@ class HowItWorksCopyFr {
 
   /// Video URLs — null until the tutorial clips are produced/hosted.
   /// When set, a "Regarder la vidéo" button appears at the top of the track.
-  String? get clientVideoUrl => null;
   String? get parrainVideoUrl => null;
 }
 
