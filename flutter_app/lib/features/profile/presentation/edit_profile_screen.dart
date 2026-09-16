@@ -70,6 +70,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _gender = user.gender;
       _socialControllers[SocialPlatform.instagram]!.text = user.instagram ?? '';
       _socialControllers[SocialPlatform.tiktok]!.text = user.tiktok ?? '';
+      _socialControllers[SocialPlatform.snapchat]!.text = user.snapchat ?? '';
       _socialControllers[SocialPlatform.facebook]!.text = user.facebook ?? '';
     }
   }
@@ -140,6 +141,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             // Always sent, so emptying a field removes the account.
             instagram: _socialValue(SocialPlatform.instagram),
             tiktok: _socialValue(SocialPlatform.tiktok),
+            snapchat: _socialValue(SocialPlatform.snapchat),
             facebook: _socialValue(SocialPlatform.facebook),
           );
       debugPrint('[EditProfile] PATCH user: profileComplete=${updatedUser.profileComplete}, missing=${updatedUser.missingProfileFields}');
@@ -1362,6 +1364,7 @@ class _SocialField extends ConsumerWidget {
   String get _label => switch (platform) {
         SocialPlatform.instagram => 'Instagram',
         SocialPlatform.tiktok => 'TikTok',
+        SocialPlatform.snapchat => 'Snapchat',
         SocialPlatform.facebook => 'Facebook',
       };
 
@@ -1447,7 +1450,8 @@ class _SocialField extends ConsumerWidget {
 }
 
 /// The network's own mark, so the field is recognised before it is read.
-/// Material has TikTok and Facebook glyphs; Instagram's badge is drawn.
+/// Material has TikTok, Snapchat and Facebook glyphs; Instagram's badge is
+/// drawn, and Snapchat's ghost sits on its yellow.
 class _BrandBadge extends StatelessWidget {
   const _BrandBadge(this.platform);
 
@@ -1478,6 +1482,15 @@ class _BrandBadge extends StatelessWidget {
         ),
       SocialPlatform.tiktok =>
         Icon(Icons.tiktok, size: 22, color: AppColors.textPrimary),
+      SocialPlatform.snapchat => Container(
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFC00),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Icon(Icons.snapchat, size: 16, color: Colors.black),
+        ),
       SocialPlatform.facebook =>
         const Icon(Icons.facebook, size: 22, color: Color(0xFF1877F2)),
     };

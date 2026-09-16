@@ -20,6 +20,7 @@ void main() {
     int? id = 11,
     String? startsAt = '2026-09-12T18:00:00.000000Z',
     int earnings = 900,
+    List<dynamic>? guests,
   }) =>
       {
         'episode_id': id,
@@ -29,6 +30,16 @@ void main() {
         'attended': 60,
         'not_attended': 60,
         'earnings': earnings,
+        if (guests != null) 'guests': guests,
+      };
+
+  Map<String, dynamic> guest(String name, {int? amount, bool? attended}) => {
+        'name': name,
+        'avatar_url': null,
+        'attended': attended ?? amount != null,
+        'amount': amount,
+        'visit': 2,
+        'res_status': 'approved',
       };
 
   group('a show row', () {
@@ -84,6 +95,36 @@ void main() {
     test('an unparseable date reads as undated instead of crashing', () {
       expect(CpEpisodeRow.fromJson(episode(startsAt: 'not a date')).startsAt,
           isNull);
+    });
+  });
+
+  /// Tapping a recording opens who came and what each one paid.
+  group("an episode's guests", () {
+    test('keep the order the server sent: present, highest amount first', () {
+      final e = CpEpisodeRow.fromJson(episode(guests: [
+        guest('Salma', amount: 25),
+        guest('Youssef', amount: 10),
+        guest('Karim'),
+      ]));
+
+      expect(e.hasGuests, isTrue);
+      expect(e.guests.map((g) => g.name), ['Salma', 'Youssef', 'Karim']);
+      expect(e.guests.map((g) => g.amount), [25, 10, null]);
+      expect(e.guests.last.attended, isFalse);
+      expect(e.guests.first.visit, 2);
+      expect(e.guests.first.resStatus, 'approved');
+    });
+
+    /// An older server sends no guests: the episode row stays a plain line.
+    test('without guests there is nothing to open', () {
+      expect(CpEpisodeRow.fromJson(episode()).hasGuests, isFalse);
+    });
+
+    test('a malformed guest is skipped rather than breaking the sheet', () {
+      final e = CpEpisodeRow.fromJson(
+          episode(guests: [guest('Salma', amount: 25), 'oops', null]));
+
+      expect(e.guests, hasLength(1));
     });
   });
 }

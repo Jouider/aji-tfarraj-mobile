@@ -8,6 +8,7 @@ void main() {
   const ig = SocialPlatform.instagram;
   const tt = SocialPlatform.tiktok;
   const fb = SocialPlatform.facebook;
+  const sc = SocialPlatform.snapchat;
 
   String? n(SocialPlatform p, String? raw) => SocialHandles.normalize(p, raw);
   bool ok(SocialPlatform p, String raw) {
@@ -19,6 +20,7 @@ void main() {
     test('"@", capitals and stray spaces are cleaned away', () {
       expect(n(ig, ' @Nom.Test_1 '), 'nom.test_1');
       expect(n(tt, '@@MonCompte'), 'moncompte');
+      expect(n(sc, '@Nom_Test'), 'nom_test');
     });
 
     test('an empty field means "no account", which clears it', () {
@@ -44,6 +46,12 @@ void main() {
       expect(n(tt, 'tiktok.com/@nom.test/video/7123'), 'nom.test');
     });
 
+    test('a Snapchat profile link, classic or @ style', () {
+      expect(n(sc, 'https://www.snapchat.com/add/Nom.Test?share_id=abc'),
+          'nom.test');
+      expect(n(sc, 'snapchat.com/@nom-test'), 'nom-test');
+    });
+
     test('a Facebook username link, and a numeric profile link', () {
       expect(n(fb, 'https://www.facebook.com/nom.prenom'), 'nom.prenom');
       expect(n(fb, 'https://m.facebook.com/profile.php?id=100012345678'),
@@ -55,6 +63,7 @@ void main() {
     test('a link that is not a profile is refused rather than guessed', () {
       expect(ok(ig, 'https://www.instagram.com/p/Cx12AbC/'), isFalse);
       expect(ok(tt, 'https://vm.tiktok.com/ZMabc123/'), isFalse);
+      expect(ok(sc, 'https://t.snapchat.com/AbCd1234'), isFalse);
       expect(ok(fb, 'https://www.facebook.com/share/abc123/'), isFalse);
     });
   });
@@ -73,6 +82,16 @@ void main() {
       expect(ok(tt, 'n'), isFalse);
       expect(ok(fb, 'abc'), isFalse);
     });
+
+    test("Snapchat's own rules: 3 to 15, a letter first, a letter or digit last",
+        () {
+      expect(ok(sc, 'nom-test'), isTrue);
+      expect(ok(sc, 'abc'), isTrue);
+      expect(ok(sc, '1nom'), isFalse);
+      expect(ok(sc, 'nom_'), isFalse);
+      expect(ok(sc, 'ab'), isFalse);
+      expect(ok(sc, 'a' * 16), isFalse);
+    });
   });
 
   group('opening the profile', () {
@@ -81,6 +100,8 @@ void main() {
           'https://www.instagram.com/nom/');
       expect(SocialHandles.profileUri(tt, 'nom').toString(),
           'https://www.tiktok.com/@nom');
+      expect(SocialHandles.profileUri(sc, 'nom').toString(),
+          'https://www.snapchat.com/add/nom');
       expect(SocialHandles.profileUri(fb, 'nom.prenom').toString(),
           'https://www.facebook.com/nom.prenom');
       expect(SocialHandles.profileUri(fb, '100012345678').toString(),

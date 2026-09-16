@@ -24,6 +24,7 @@ class ProfileRepository {
     // Social accounts: '' clears one, null leaves it untouched.
     String? instagram,
     String? tiktok,
+    String? snapchat,
     String? facebook,
   }) async {
     try {
@@ -40,6 +41,7 @@ class ProfileRepository {
           if (gender != null) 'gender': gender,
           if (instagram != null) 'instagram': instagram,
           if (tiktok != null) 'tiktok': tiktok,
+          if (snapchat != null) 'snapchat': snapchat,
           if (facebook != null) 'facebook': facebook,
         },
       );

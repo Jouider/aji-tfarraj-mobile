@@ -971,7 +971,7 @@ class ConditionsCopyAr {
         ConditionSection(
           title: 'مواقع التواصل الاجتماعي (اختياري)',
           body:
-              'يمكنك إضافة حساباتك على إنستغرام وتيك توك وفيسبوك في ملفك الشخصي. تُستعمل فقط لنقترح عليك تعاونات وفرص كاستينغ. قد يطّلع فريقنا على هذه الحسابات العامة لتقدير جمهورك، ويبقى هذا التقدير داخلياً ولا يُنشر أبداً. هذه المعلومات اختيارية، ولا تؤثر على حجوزاتك، ويمكنك تعديلها أو حذفها في أي وقت من ملفك الشخصي.',
+              'يمكنك إضافة حساباتك على إنستغرام وتيك توك وسناب شات وفيسبوك في ملفك الشخصي. تُستعمل فقط لنقترح عليك تعاونات وفرص كاستينغ. قد يطّلع فريقنا على هذه الحسابات العامة لتقدير جمهورك، ويبقى هذا التقدير داخلياً ولا يُنشر أبداً. هذه المعلومات اختيارية، ولا تؤثر على حجوزاتك، ويمكنك تعديلها أو حذفها في أي وقت من ملفك الشخصي.',
         ),
       ];
 }
@@ -1417,6 +1417,8 @@ class ChargePublicCopyAr extends ChargePublicCopy {
   @override
   String episodeCount(int n) => n == 1 ? 'حلقة واحدة' : '$n حلقات';
   @override
+  String get episodeTapHint => 'اضغط على حلقة لترى من حضر.';
+  @override
   String get recentGuests => 'مدعوّون حديثاً';
   @override
   String get myReferred => 'مُحالوني';
@@ -1454,6 +1456,8 @@ class ChargePublicCopyAr extends ChargePublicCopy {
   String get statusExpired => 'منتهية';
   @override
   String get statusPending => 'قيد الانتظار';
+  @override
+  String get statusAbsent => 'غائب';
 
   @override
   String visitsCount(int n) => '$n حضور';
