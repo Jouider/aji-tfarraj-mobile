@@ -33,6 +33,7 @@ class User {
   /// bare username (or a Facebook numeric id), never as a link.
   final String? instagram;
   final String? tiktok;
+  final String? snapchat;
   final String? facebook;
 
   User({
@@ -59,6 +60,7 @@ class User {
     this.badges,
     this.instagram,
     this.tiktok,
+    this.snapchat,
     this.facebook,
   });
 
@@ -98,6 +100,7 @@ class User {
       chargePublicEnabled: json['is_charge_public'] as bool? ?? false,
       instagram: json['instagram'] as String?,
       tiktok: json['tiktok'] as String?,
+      snapchat: json['snapchat'] as String?,
       facebook: json['facebook'] as String?,
       badges: json['badges'] is Map<String, dynamic>
           ? UserBadges.fromJson(json['badges'] as Map<String, dynamic>)
@@ -121,6 +124,7 @@ class User {
       'phone_number': phoneNumber,
       'instagram': instagram,
       'tiktok': tiktok,
+      'snapchat': snapchat,
       'facebook': facebook,
       'phone_verified_at': phoneVerifiedAt?.toIso8601String(),
       'birthday': dateOfBirth?.toIso8601String().split('T').first,
@@ -137,6 +141,7 @@ class User {
   User copyWith({
     String? instagram,
     String? tiktok,
+    String? snapchat,
     String? facebook,
     int? id,
     String? name,
@@ -186,6 +191,7 @@ class User {
       badges: badges ?? this.badges,
       instagram: instagram ?? this.instagram,
       tiktok: tiktok ?? this.tiktok,
+      snapchat: snapchat ?? this.snapchat,
       facebook: facebook ?? this.facebook,
     );
   }

@@ -963,7 +963,7 @@ void _showEpisodeBreakdown(
       borderRadius:
           BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
     ),
-    builder: (_) => _EpisodeBreakdownSheet(row: row, cp: cp),
+    builder: (_) => CpEpisodeBreakdownSheet(row: row, cp: cp),
   );
 }
 
@@ -972,8 +972,9 @@ void _showEpisodeBreakdown(
 /// The show total sits on top and matches the row that was tapped — the
 /// episodes below are built with the same rule on the server, so they always
 /// add up to it.
-class _EpisodeBreakdownSheet extends StatelessWidget {
-  const _EpisodeBreakdownSheet({required this.row, required this.cp});
+@visibleForTesting // public only so a widget test can open it without a charge public login
+class CpEpisodeBreakdownSheet extends StatelessWidget {
+  const CpEpisodeBreakdownSheet({super.key, required this.row, required this.cp});
 
   final CpShowRow row;
   final ChargePublicCopy cp;
@@ -1037,6 +1038,15 @@ class _EpisodeBreakdownSheet extends StatelessWidget {
                 ],
               ),
             ),
+            // Only when there is something to open: an older server sends no
+            // names, and a hint that leads nowhere is worse than none.
+            if (row.episodes.any((e) => e.hasGuests))
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: Text(cp.episodeTapHint,
+                    style: AppTypography.labelSmall
+                        .copyWith(color: AppColors.textMuted)),
+              ),
             Flexible(
               child: ListView.builder(
                 shrinkWrap: true,
@@ -1054,7 +1064,9 @@ class _EpisodeBreakdownSheet extends StatelessWidget {
   }
 }
 
-class _EpisodeRow extends StatelessWidget {
+/// One recording: its date and figures and, once tapped, the guests behind the
+/// money — each with what they brought in.
+class _EpisodeRow extends StatefulWidget {
   const _EpisodeRow({
     required this.episode,
     required this.showTitle,
@@ -1066,63 +1078,199 @@ class _EpisodeRow extends StatelessWidget {
   final ChargePublicCopy cp;
 
   @override
+  State<_EpisodeRow> createState() => _EpisodeRowState();
+}
+
+class _EpisodeRowState extends State<_EpisodeRow> {
+  bool _open = false;
+
+  @override
   Widget build(BuildContext context) {
+    final episode = widget.episode;
+    final cp = widget.cp;
     final date = episode.startsAt;
     // An episode title only helps when it says something the show title and
     // the date do not.
     final title = episode.title;
     final showsTitle =
-        title != null && title.isNotEmpty && title != showTitle;
+        title != null && title.isNotEmpty && title != widget.showTitle;
     final earned = episode.earnings > 0;
+    // Opens only when the server sent the names; an older one does not.
+    final canOpen = episode.hasGuests;
+    final isPast = date != null && date.isBefore(DateTime.now());
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.backgroundWhite,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+            color: _open
+                ? AppColors.secondary.withValues(alpha: 0.4)
+                : AppColors.border),
       ),
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          children: [
+            InkWell(
+              onTap: canOpen ? () => setState(() => _open = !_open) : null,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.event_outlined,
+                          size: 18, color: AppColors.secondary),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            date != null
+                                ? DateFormat('dd/MM/yyyy · HH:mm').format(date)
+                                : cp.episodeUndated,
+                            style: AppTypography.bodyMedium
+                                .copyWith(fontWeight: FontWeight.w500),
+                          ),
+                          if (showsTitle)
+                            Text(title,
+                                style: AppTypography.labelSmall
+                                    .copyWith(color: AppColors.textMuted)),
+                          Text(
+                              cp.invitedAttended(
+                                  episode.invited, episode.attended),
+                              style: AppTypography.labelSmall
+                                  .copyWith(color: AppColors.textMuted)),
+                        ],
+                      ),
+                    ),
+                    // A night that paid nothing is shown muted rather than
+                    // hidden: the charge public brought people, and should see
+                    // that it was counted.
+                    Text(cp.money(episode.earnings),
+                        style: AppTypography.bodyMedium.copyWith(
+                            color: earned
+                                ? AppColors.successDark
+                                : AppColors.textMuted,
+                            fontWeight: FontWeight.w600)),
+                    if (canOpen) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      AnimatedRotation(
+                        turns: _open ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(Icons.expand_more,
+                            size: 20, color: AppColors.textMuted),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              alignment: Alignment.topCenter,
+              child: _open
+                  ? Column(
+                      children: [
+                        Divider(height: 1, thickness: 1, color: AppColors.border),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.xs),
+                          child: Column(
+                            children: [
+                              for (final guest in episode.guests)
+                                _EpisodeGuestLine(
+                                    guest: guest, cp: cp, isPast: isPast),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A name, and what that person brought in that night.
+class _EpisodeGuestLine extends StatelessWidget {
+  const _EpisodeGuestLine({
+    required this.guest,
+    required this.cp,
+    required this.isPast,
+  });
+
+  final CpEpisodeGuest guest;
+  final ChargePublicCopy cp;
+
+  /// The recording is over: someone approved who did not come is absent, not
+  /// "approved".
+  final bool isPast;
+
+  static const _closedStatuses = {'cancelled', 'rejected', 'expired'};
+
+  @override
+  Widget build(BuildContext context) {
+    final name = guest.name.trim();
+    final initial = name.isEmpty ? '?' : name.characters.first.toUpperCase();
+    final avatar = guest.avatarUrl;
+    final trailing = guest.attended
+        ? cp.gain(guest.amount ?? 0)
+        : (isPast && !_closedStatuses.contains(guest.resStatus)
+            ? cp.statusAbsent
+            : _statusLabel(cp, false, guest.resStatus));
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.event_outlined,
-                size: 18, color: AppColors.secondary),
+          CircleAvatar(
+            radius: 14,
+            backgroundColor: AppColors.secondary.withValues(alpha: 0.12),
+            foregroundImage: avatar != null ? NetworkImage(avatar) : null,
+            onForegroundImageError: avatar != null ? (_, __) {} : null,
+            child: Text(initial,
+                style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.secondary, fontWeight: FontWeight.w600)),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  date != null
-                      ? DateFormat('dd/MM/yyyy · HH:mm').format(date)
-                      : cp.episodeUndated,
-                  style: AppTypography.bodyMedium
-                      .copyWith(fontWeight: FontWeight.w500),
-                ),
-                if (showsTitle)
-                  Text(title,
-                      style: AppTypography.labelSmall
-                          .copyWith(color: AppColors.textMuted)),
-                Text(cp.invitedAttended(episode.invited, episode.attended),
-                    style: AppTypography.labelSmall
-                        .copyWith(color: AppColors.textMuted)),
-              ],
+            child: Text(
+              name.isEmpty ? '—' : name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.bodySmall.copyWith(
+                  color: guest.attended
+                      ? AppColors.textPrimary
+                      : AppColors.textMuted,
+                  fontWeight: FontWeight.w500),
             ),
           ),
-          // A night that paid nothing is shown muted rather than hidden: the
-          // charge public brought people, and should see that it was counted.
-          Text(cp.money(episode.earnings),
-              style: AppTypography.bodyMedium.copyWith(
-                  color: earned ? AppColors.successDark : AppColors.textMuted,
-                  fontWeight: FontWeight.w600)),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            trailing,
+            style: AppTypography.bodySmall.copyWith(
+                color: guest.attended
+                    ? AppColors.successDark
+                    : AppColors.textMuted,
+                fontWeight:
+                    guest.attended ? FontWeight.w600 : FontWeight.w400),
+          ),
         ],
       ),
     );

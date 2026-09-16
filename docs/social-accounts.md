@@ -1,6 +1,6 @@
 # Réseaux sociaux (app)
 
-`Profil › Modifier › Réseaux sociaux` : **Instagram, TikTok, Facebook**, tous
+`Profil › Modifier › Réseaux sociaux` : **Instagram, TikTok, Snapchat, Facebook**, tous
 facultatifs, avec la raison écrite juste au-dessus — « pour vous proposer des
 collaborations et des castings ».
 
@@ -16,7 +16,14 @@ collaborations et des castings ».
   numérique, et le lien collé reste le plus simple.
 
 Chaque champ porte la marque du réseau (TikTok et Facebook via Material,
-Instagram dessiné), pour être reconnu avant d'être lu.
+Instagram dessiné, le fantôme Snapchat de Material sur son jaune), pour être
+reconnu avant d'être lu.
+
+**Snapchat** : 3 à 15 caractères (`a-z 0-9 . _ -`), commence par une lettre,
+finit par une lettre ou un chiffre. Les liens `snapchat.com/add/nom` et
+`snapchat.com/@nom` deviennent `nom` ; un lien court (`t.snapchat.com/…`) est
+refusé. « Vérifier » ouvre `snapchat.com/add/nom`, qui bascule dans l'app
+Snapchat. Mentionné dans les conditions (FR + AR).
 
 La connexion « en un toucher » (se connecter avec Instagram…) n'est pas
 utilisée : pour Instagram elle ne marche qu'avec les comptes pro ou créateur, et
