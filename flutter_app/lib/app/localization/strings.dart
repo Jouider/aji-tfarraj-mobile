@@ -1036,6 +1036,42 @@ class AppStrings {
       ? "Impossible d'ouvrir ce profil."
       : 'تعذّر فتح هذا الحساب.';
 
+  // Tutorial clips (GET /api/app-config → tutorials). "tu", like the voice-over.
+  String get tutorialWatch =>
+      locale == AppLocale.fr ? 'Voir la vidéo' : 'شوف الفيديو';
+
+  String get tutorialHowTo =>
+      locale == AppLocale.fr ? 'Voir comment faire' : 'شوف كيفاش';
+
+  String get tutorialProfileTitle => locale == AppLocale.fr
+      ? 'Compléter mon profil'
+      : 'تكميل الملف الشخصي';
+
+  String get tutorialReservationTitle => locale == AppLocale.fr
+      ? 'Réserver avec une invitation'
+      : 'الحجز برابط الدعوة';
+
+  // Short names, for the switch between the two videos.
+  String get tutorialProfileShort =>
+      locale == AppLocale.fr ? 'Profil' : 'الملف الشخصي';
+
+  String get tutorialReservationShort =>
+      locale == AppLocale.fr ? 'Réservation' : 'الحجز';
+
+  String get tutorialProfileOffer => locale == AppLocale.fr
+      ? 'Première fois ? Regarde comment compléter ton profil.'
+      : 'أول مرة؟ شوف كيفاش تكمل الملف الشخصي ديالك.';
+
+  String get tutorialReservationOffer => locale == AppLocale.fr
+      ? 'Comment réserver avec cette invitation ?'
+      : 'كيفاش تحجز بهاد الدعوة؟';
+
+  String get tutorialDismiss => locale == AppLocale.fr ? 'Masquer' : 'خبي';
+
+  String get tutorialUnavailable => locale == AppLocale.fr
+      ? 'Impossible de lire la vidéo pour le moment. Vérifie ta connexion.'
+      : 'ما قدرناش نشغلو الفيديو دابا. تأكد من الاتصال ديالك.';
+
   String get avatarFrameHint => locale == AppLocale.fr
       ? 'Placez votre visage dans le cadre'
       : 'ضع وجهك داخل الإطار';
@@ -1553,10 +1589,6 @@ class AppStrings {
   List<HowToStep> get howItWorksParrainSteps => locale == AppLocale.fr
       ? CopyFr.howItWorks.parrainSteps
       : CopyAr.howItWorks.parrainSteps;
-
-  String? get howItWorksClientVideoUrl => locale == AppLocale.fr
-      ? CopyFr.howItWorks.clientVideoUrl
-      : CopyAr.howItWorks.clientVideoUrl;
 
   String? get howItWorksParrainVideoUrl => locale == AppLocale.fr
       ? CopyFr.howItWorks.parrainVideoUrl

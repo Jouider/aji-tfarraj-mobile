@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:video_player/video_player.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart' show HowToStep;
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -8,6 +7,10 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
+import 'package:aji_tfarraj/features/tutorials/data/tutorials_repository.dart';
+import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_sheet.dart';
 
 /// "Comment ça marche" — illustrated, swipeable step-by-step guide.
 ///
@@ -84,8 +87,14 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
         isParrain ? s.howItWorksParrainHeadline : s.howItWorksClientHeadline;
     final subtitle =
         isParrain ? s.howItWorksParrainSubtitle : s.howItWorksClientSubtitle;
-    final videoUrl =
-        isParrain ? s.howItWorksParrainVideoUrl : s.howItWorksClientVideoUrl;
+    // The client track's clips come from the server; the parrain track has
+    // none yet and keeps its copy placeholder.
+    final parrainVideoUrl = isParrain ? s.howItWorksParrainVideoUrl : null;
+    final profileClip =
+        isParrain ? null : ref.watch(tutorialClipProvider(TutorialTopic.profile));
+    final reservationClip = isParrain
+        ? null
+        : ref.watch(tutorialClipProvider(TutorialTopic.reservationReferral));
     final icons = isParrain ? _parrainIcons : _clientIcons;
     final accent = isParrain ? AppColors.secondary : AppColors.primary;
 
@@ -138,8 +147,8 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
               ),
             ),
 
-            // Optional video button (appears once a clip URL is set in copy).
-            if (videoUrl != null) ...[
+            // Parrain track: a clip only once one is set in copy.
+            if (parrainVideoUrl != null) ...[
               const SizedBox(height: AppSpacing.md),
               Padding(
                 padding:
@@ -147,14 +156,43 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
                 child: _WatchVideoButton(
                   label: s.howItWorksWatchVideo,
                   accent: accent,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => _HowToVideoScreen(
-                        url: videoUrl,
-                        title: headline,
-                      ),
+                  onTap: () => showTutorialSheet(context, items: [
+                    TutorialSheetItem(
+                      title: headline,
+                      clip: TutorialClip(video: Uri.parse(parrainVideoUrl)),
                     ),
-                  ),
+                  ]),
+                ),
+              ),
+            ],
+
+            // Client track: the two walkthroughs people ask for most.
+            if (profileClip != null || reservationClip != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: Column(
+                  children: [
+                    if (profileClip != null)
+                      _WatchVideoButton(
+                        label:
+                            '${s.tutorialProfileTitle} · ${formatClipDuration(profileClip.duration)}',
+                        accent: accent,
+                        onTap: () =>
+                            openTutorial(context, ref, TutorialTopic.profile),
+                      ),
+                    if (profileClip != null && reservationClip != null)
+                      const SizedBox(height: AppSpacing.sm),
+                    if (reservationClip != null)
+                      _WatchVideoButton(
+                        label:
+                            '${s.tutorialReservationTitle} · ${formatClipDuration(reservationClip.duration)}',
+                        accent: accent,
+                        onTap: () => openTutorial(
+                            context, ref, TutorialTopic.reservationReferral),
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -492,105 +530,6 @@ class _WatchVideoButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-// In-app tutorial video player
-// ─────────────────────────────────────────────
-
-class _HowToVideoScreen extends ConsumerStatefulWidget {
-  final String url;
-  final String title;
-
-  const _HowToVideoScreen({required this.url, required this.title});
-
-  @override
-  ConsumerState<_HowToVideoScreen> createState() => _HowToVideoScreenState();
-}
-
-class _HowToVideoScreenState extends ConsumerState<_HowToVideoScreen> {
-  VideoPlayerController? _controller;
-  bool _initFailed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final controller =
-        VideoPlayerController.networkUrl(Uri.parse(widget.url));
-    _controller = controller;
-    controller.initialize().then((_) {
-      if (!mounted) return;
-      setState(() {});
-      controller.play();
-    }).catchError((_) {
-      if (!mounted) return;
-      setState(() => _initFailed = true);
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final s = ref.watch(stringsProvider);
-    final controller = _controller;
-    final ready = controller != null && controller.value.isInitialized;
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: Text(widget.title,
-            style: AppTypography.h4.copyWith(color: Colors.white)),
-      ),
-      body: Center(
-        child: _initFailed
-            ? Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Text(
-                  s.genericError,
-                  style: AppTypography.bodyMedium
-                      .copyWith(color: Colors.white70),
-                  textAlign: TextAlign.center,
-                ),
-              )
-            : ready
-                ? AspectRatio(
-                    aspectRatio: controller.value.aspectRatio,
-                    child: Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        GestureDetector(
-                          onTap: () => setState(() {
-                            controller.value.isPlaying
-                                ? controller.pause()
-                                : controller.play();
-                          }),
-                          child: VideoPlayer(controller),
-                        ),
-                        VideoProgressIndicator(
-                          controller,
-                          allowScrubbing: true,
-                          colors: const VideoProgressColors(
-                            playedColor: AppColors.secondary,
-                          ),
-                        ),
-                        if (!controller.value.isPlaying)
-                          const Icon(Icons.play_circle_fill,
-                              size: 64, color: Colors.white70),
-                      ],
-                    ),
-                  )
-                : const CircularProgressIndicator(
-                    color: AppColors.secondary),
       ),
     );
   }

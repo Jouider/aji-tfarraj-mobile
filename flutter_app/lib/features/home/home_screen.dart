@@ -17,6 +17,7 @@ import 'package:aji_tfarraj/features/notifications/presentation/providers/notifi
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart'
     show pendingNavigationProvider;
 import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 /// Home Screen — Cinematic discovery layout inspired by premium streaming apps
 class HomeScreen extends ConsumerStatefulWidget {
@@ -111,6 +112,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
       actions: [
+        // Help, always in reach: both walkthrough videos.
+        const TutorialHelpAction(color: Colors.white),
         _NotificationBellButton(unreadCount: unreadCount, s: s),
         const SizedBox(width: AppSpacing.xs),
       ],

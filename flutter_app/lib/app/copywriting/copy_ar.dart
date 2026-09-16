@@ -1163,7 +1163,6 @@ class HowItWorksCopyAr {
       ];
 
   /// Video URLs — null until the tutorial clips are produced/hosted.
-  String? get clientVideoUrl => null;
   String? get parrainVideoUrl => null;
 }
 

@@ -12,6 +12,8 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_attribution_service.dart';
 import 'package:aji_tfarraj/features/referral/domain/resolved_referral.dart';
+import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 /// Provider that resolves a referral token
 final _resolvedReferralProvider =
@@ -39,6 +41,9 @@ class ReferralLandingScreen extends ConsumerWidget {
         title: Text(s.referralTitle, style: AppTypography.h3),
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
+        actions: const [
+          TutorialHelpAction(topic: TutorialTopic.reservationReferral),
+        ],
       ),
       body: resolvedAsync.when(
         loading: () => _buildSkeleton(),
@@ -61,6 +66,9 @@ class ReferralLandingScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Arrived from a WhatsApp link, often for the first time.
+                const TutorialOfferBanner(
+                    topic: TutorialTopic.reservationReferral),
                 // Referrer invitation banner
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.lg),

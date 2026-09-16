@@ -24,6 +24,8 @@ import 'package:aji_tfarraj/features/reservation/booking_info_card_widget.dart';
 import 'package:aji_tfarraj/features/reservation/referral_code_input_widget.dart';
 import 'package:aji_tfarraj/features/reservation/terms_checkbox_widget.dart';
 import 'package:aji_tfarraj/features/reservation/booking_bottom_bar_widget.dart';
+import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 /// Reserve Seats Screen — "Réserver des places" booking flow.
 class ReserveSeatsScreen extends ConsumerStatefulWidget {
@@ -86,6 +88,9 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
               color: AppColors.textPrimary, size: 22),
           onPressed: () => context.go(Routes.showDetail(widget.showId)),
         ),
+        actions: const [
+          TutorialHelpAction(topic: TutorialTopic.reservationReferral),
+        ],
         // FIX: Bottom border — border token
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -332,18 +337,24 @@ class _ErrorBanner extends StatelessWidget {
         border:
             Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.error_outline,
-              color: AppColors.error, size: 20),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              style:
-                  AppTypography.bodySmall.copyWith(color: AppColors.error),
-            ),
+          Row(
+            children: [
+              const Icon(Icons.error_outline,
+                  color: AppColors.error, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  message,
+                  style: AppTypography.bodySmall
+                      .copyWith(color: AppColors.error),
+                ),
+              ),
+            ],
           ),
+          const TutorialHowToLink(topic: TutorialTopic.reservationReferral),
         ],
       ),
     );
