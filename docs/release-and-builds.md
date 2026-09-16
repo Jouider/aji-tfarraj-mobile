@@ -18,6 +18,7 @@ rencontrés entre 1.1.8 et 1.1.11, qui ont tous coûté du temps.
 | 1.1.9 (42) | book vérifié en studio ⭐ |
 | 1.1.10 (43) | « Présents » et sorties avant la fin (staff) |
 | 1.1.11 (44) | correctif 16 ko Android, état vide centré, demande d'avis |
+| 1.1.12 (45) | vidéos tutoriels (feuille + « ? »), Snapchat, invités et gains par épisode (chargé public) |
 
 ## Après une mise en production
 
