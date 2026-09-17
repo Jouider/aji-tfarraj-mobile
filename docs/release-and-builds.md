@@ -112,9 +112,39 @@ xcodebuild archive -workspace ios/Runner.xcworkspace -scheme Runner -configurati
 
 (90 secondes au lieu d'une attente sans fin.)
 
+**Mais `xcodebuild archive` seul ne construit pas les « native assets » Flutter**
+(`objective_c.framework`, requis par `path_provider_foundation`) : il embarque ce
+qu'il trouve dans `build/native_assets/ios/`. Toujours les construire avant :
+
+```bash
+rm -rf build/ios build/native_assets
+flutter build ios --release --no-codesign   # construit objective_c.framework pour iPhone
+# puis xcodebuild archive, puis -exportArchive, comme ci-dessus
+```
+
+### 409 « unsupported platform in the arm64 slice » (`objective_c.framework`)
+
+Rencontré en 1.1.12. Transporter refuse l'IPA :
+`Runner.app/Frameworks/objective_c.framework/objective_c … Simulator platforms
+aren't permitted`.
+
+Cause : une build **simulateur** (`flutter run` sur un simulateur) laisse
+`build/native_assets/ios/objective_c.framework` compilé pour le simulateur, et
+l'archive le recopie tel quel. En supprimant ce dossier sans le reconstruire,
+c'est pire : l'IPA part **sans** le framework, passe la validation, et plante au
+lancement sur iPhone (`path_provider_foundation` ne trouve pas sa bibliothèque).
+
+Procédure : celle ci-dessus (supprimer, `flutter build ios --release
+--no-codesign`, archiver, exporter), puis vérifier l'IPA.
+
 Vérifier l'IPA avant de la livrer :
 - version et build dans `Payload/Runner.app/Info.plist` ;
-- `codesign -dv Payload/Runner.app` doit afficher `Authority=Apple Distribution`.
+- `codesign -dv Payload/Runner.app` doit afficher `Authority=Apple Distribution` ;
+- `Payload/Runner.app/Frameworks` contient **exactement** `App`, `Flutter` et
+  `objective_c`, tous compilés pour iOS (plateforme **2** ; 7 = simulateur) :
+  ```bash
+  otool -l Payload/Runner.app/Frameworks/objective_c.framework/objective_c | grep -A3 LC_BUILD_VERSION
+  ```
 
 ## Pièges
 
