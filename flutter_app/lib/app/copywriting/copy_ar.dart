@@ -756,7 +756,7 @@ class CastingCopyAr implements CastingCopy {
   String get saved => 'تسجل';
 
   String get tabCastings => 'كاستينغ';
-  String get tabPublications => 'إعلانات';
+  String get tabPublications => 'إشهارات';
   String get noCastings => 'ما كاين حتى إعلان دابا';
   String get noCastingsSubtitle =>
       'الإعلانات الجديدة غاتبان هنا. وجّد الصور ديالك فهاد الوقت.';
@@ -786,8 +786,8 @@ class CastingCopyAr implements CastingCopy {
   String get completeProfile => 'كمّل البروفايل';
   String get loadError => 'ما تقدرش نجيبو الكاستينغ.';
   String get photoError => 'ما تقدرش نصيفطو الصورة.';
-  String get profileTile => 'كاستينغ';
-  String get profileTileSubtitle => 'الصور ديالك والإعلانات';
+  String get profileTile => 'فضاء الكاستينغ';
+  String get profileTileSubtitle => 'شوف العروض وقدّم';
 
   // ── فتح إعلان ──
   String get infoTitle => 'الكاستينغ';

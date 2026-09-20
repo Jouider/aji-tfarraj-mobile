@@ -8,6 +8,7 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/tutorials/data/tutorials_repository.dart';
 import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
 import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_sheet.dart';
@@ -24,22 +25,39 @@ import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_sheet.dart'
 String tutorialTitle(AppStrings s, TutorialTopic topic) => switch (topic) {
       TutorialTopic.profile => s.tutorialProfileTitle,
       TutorialTopic.reservationReferral => s.tutorialReservationTitle,
+      TutorialTopic.cpShare => s.tutorialCpShareTitle,
+      TutorialTopic.cpGuests => s.tutorialCpGuestsTitle,
+      TutorialTopic.cpEarnings => s.tutorialCpEarningsTitle,
     };
 
 String tutorialShortTitle(AppStrings s, TutorialTopic topic) => switch (topic) {
       TutorialTopic.profile => s.tutorialProfileShort,
       TutorialTopic.reservationReferral => s.tutorialReservationShort,
+      TutorialTopic.cpShare => s.tutorialCpShareShort,
+      TutorialTopic.cpGuests => s.tutorialCpGuestsShort,
+      TutorialTopic.cpEarnings => s.tutorialCpEarningsShort,
+    };
+
+String tutorialOffer(AppStrings s, TutorialTopic topic) => switch (topic) {
+      TutorialTopic.profile => s.tutorialProfileOffer,
+      TutorialTopic.reservationReferral => s.tutorialReservationOffer,
+      TutorialTopic.cpShare => s.tutorialCpShareOffer,
+      TutorialTopic.cpGuests => s.tutorialCpGuestsOffer,
+      TutorialTopic.cpEarnings => s.tutorialCpEarningsOffer,
     };
 
 /// Opens the tutorial sheet.
 ///
-/// Every clip is offered, as pills; a [topic] (the screen the member is on)
-/// starts selected, otherwise the first. No clip at all — an older server, no network — and
-/// the member gets the illustrated "Comment ça marche" instead of nothing.
+/// Every clip the member is entitled to is offered, as pills; a [topic] (the
+/// screen they are on) starts selected, otherwise the first. [only] narrows the
+/// list — l'espace chargé public n'offre que ses trois clips. No clip at all —
+/// an older server, no network — and the member gets the illustrated
+/// "Comment ça marche" instead of nothing.
 Future<void> openTutorial(
   BuildContext context,
   WidgetRef ref, [
   TutorialTopic? topic,
+  List<TutorialTopic>? only,
 ]) async {
   final Tutorials tutorials;
   try {
@@ -52,8 +70,14 @@ Future<void> openTutorial(
 
   final locale = ref.read(localeProvider);
   final s = ref.read(stringsProvider);
+  // Les clips de l'espace chargé public ne concernent que ceux qui y entrent.
+  final isChargePublic =
+      ref.read(loginAuthStateProvider).user?.canUseChargePublicMode ?? false;
+  final offered =
+      only ?? TutorialTopic.offeredTo(chargePublic: isChargePublic);
+
   final all = [
-    for (final t in TutorialTopic.values)
+    for (final t in offered)
       if (tutorials.clipFor(t, locale) case final clip?)
         TutorialSheetItem(
           topic: t,
@@ -84,10 +108,14 @@ Future<void> openTutorial(
 
 /// The "?" in a top bar. Always visible, so help is never hidden.
 class TutorialHelpAction extends ConsumerWidget {
-  const TutorialHelpAction({super.key, this.topic, this.color});
+  const TutorialHelpAction({super.key, this.topic, this.only, this.color});
 
   /// Null for the general "?" (home), which offers every clip.
   final TutorialTopic? topic;
+
+  /// Restreint les clips proposés : l'espace chargé public n'offre que les
+  /// siens, sans mélanger les tutoriels du mode public.
+  final List<TutorialTopic>? only;
 
   /// The icon colour; defaults to the text colour.
   final Color? color;
@@ -97,16 +125,28 @@ class TutorialHelpAction extends ConsumerWidget {
     return IconButton(
       icon: Icon(Icons.help_outline, color: color ?? AppColors.textPrimary),
       tooltip: ref.watch(stringsProvider).tutorialWatch,
-      onPressed: () => openTutorial(context, ref, topic),
+      onPressed: () => openTutorial(context, ref, topic, only),
     );
   }
 }
 
 /// Offered the first time the member reaches a screen that trips people up.
 class TutorialOfferBanner extends ConsumerWidget {
-  const TutorialOfferBanner({super.key, required this.topic});
+  const TutorialOfferBanner({
+    super.key,
+    required this.topic,
+    this.also = const [],
+    this.message,
+  });
 
   final TutorialTopic topic;
+
+  /// Les autres clips offerts en même temps : l'espace chargé public en
+  /// propose trois d'un coup, et il serait pénible de fermer trois bandeaux.
+  final List<TutorialTopic> also;
+
+  /// Remplace le texte du sujet, quand le bandeau en annonce plusieurs.
+  final String? message;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -115,10 +155,7 @@ class TutorialOfferBanner extends ConsumerWidget {
     if (clip == null || !stillOffered) return const SizedBox.shrink();
 
     final s = ref.watch(stringsProvider);
-    final message = switch (topic) {
-      TutorialTopic.profile => s.tutorialProfileOffer,
-      TutorialTopic.reservationReferral => s.tutorialReservationOffer,
-    };
+    final message = this.message ?? tutorialOffer(s, topic);
     final duration = formatClipDuration(clip.duration);
 
     return Padding(
@@ -128,7 +165,8 @@ class TutorialOfferBanner extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          onTap: () => openTutorial(context, ref, topic),
+          onTap: () => openTutorial(
+              context, ref, topic, also.isEmpty ? null : [topic, ...also]),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
                 AppSpacing.md, AppSpacing.sm, AppSpacing.xs, AppSpacing.sm),
@@ -170,8 +208,11 @@ class TutorialOfferBanner extends ConsumerWidget {
                 IconButton(
                   icon: Icon(Icons.close, size: 18, color: AppColors.textMuted),
                   tooltip: s.tutorialDismiss,
-                  onPressed: () =>
-                      ref.read(tutorialOfferProvider(topic).notifier).dismiss(),
+                  onPressed: () {
+                    for (final t in [topic, ...also]) {
+                      ref.read(tutorialOfferProvider(t).notifier).dismiss();
+                    }
+                  },
                 ),
               ],
             ),

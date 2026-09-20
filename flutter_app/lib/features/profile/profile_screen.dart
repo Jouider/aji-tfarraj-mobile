@@ -318,12 +318,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: AppSpacing.xl),
           ],
 
+          // Casting — ouvert à tous les membres : la section explique elle-même
+          // qui peut postuler, plutôt que de disparaître sans un mot.
+          _SpaceCard(
+            title: s.casting.profileTile,
+            subtitle: s.casting.profileTileSubtitle,
+            icon: Icons.person_search_outlined,
+            color: AppColors.casting,
+            colorDark: AppColors.castingDark,
+            onTap: () => context.push(Routes.casting),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
           // Mode Chargé Public switch — inDrive-style. Offered when the backend
           // is_charge_public capability (role or admin-set) is true.
           if (user != null && user.canUseChargePublicMode) ...[
-            _ChargePublicModeCard(
+            _SpaceCard(
               title: s.cp.modeCardTitle,
               subtitle: s.cp.modeCardSubtitle,
+              icon: Icons.workspace_premium_outlined,
+              color: AppColors.secondary,
+              colorDark: AppColors.secondaryDark,
               onTap: () {
                 ref.read(cpModeProvider.notifier).setEnabled(true);
                 context.go(Routes.chargePublic);
@@ -466,15 +481,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   subtitle: s.departures.tileSubtitle,
                   onTap: () => context.push(Routes.staffAttendees),
                 ),
-              // Casting — open to every member; the section itself explains
-              // when someone is not eligible, rather than hiding without a word.
-              _SettingsRow(
-                icon: Icons.movie_filter_outlined,
-                iconColor: AppColors.secondary,
-                title: s.casting.profileTile,
-                subtitle: s.casting.profileTileSubtitle,
-                onTap: () => context.push(Routes.casting),
-              ),
               // FIX: Added support entry point
               _SettingsRow(
                 icon: Icons.headset_mic_outlined,
@@ -539,14 +545,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 // Charge Public Mode Card (inDrive-style switch)
 // ─────────────────────────────────────────────
 
-class _ChargePublicModeCard extends StatelessWidget {
+/// Une porte vers un espace à part — casting, mode chargé public. Assez
+/// visible pour ne pas se perdre au milieu des réglages, et de la couleur de
+/// l'espace qu'elle ouvre.
+class _SpaceCard extends StatelessWidget {
   final String title;
   final String subtitle;
+  final IconData icon;
+  final Color color;
+  final Color colorDark;
   final VoidCallback onTap;
 
-  const _ChargePublicModeCard({
+  const _SpaceCard({
     required this.title,
     required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.colorDark,
     required this.onTap,
   });
 
@@ -558,15 +573,15 @@ class _ChargePublicModeCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.secondary, AppColors.secondaryDark],
+          gradient: LinearGradient(
+            colors: [color, colorDark],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.secondary.withValues(alpha: 0.3),
+              color: color.withValues(alpha: 0.3),
               blurRadius: 14,
               offset: const Offset(0, 6),
             ),
@@ -581,8 +596,7 @@ class _ChargePublicModeCard extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.workspace_premium_outlined,
-                  color: Colors.white, size: 24),
+              child: Icon(icon, color: Colors.white, size: 24),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(

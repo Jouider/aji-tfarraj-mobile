@@ -18,6 +18,8 @@ import 'package:aji_tfarraj/features/charge_public/data/charge_public_repository
 import 'package:aji_tfarraj/features/charge_public/domain/cp_dashboard.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_mode_provider.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_share_screen.dart';
+import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 /// "Mode Chargé Public" — a dedicated space with its own bottom nav
 /// (Accueil / Partager / Invités / Gains). Entered from Profile; leave via the
@@ -81,6 +83,12 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
           ],
         ),
         actions: [
+          // Le clip de l'onglet ouvert, et les deux autres à côté en pastilles.
+          TutorialHelpAction(
+            topic: _topicFor(_index),
+            only: TutorialTopic.chargePublic,
+            color: AppColors.textSecondary,
+          ),
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.md),
             child: GestureDetector(
@@ -127,6 +135,7 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
                   0 => _AccueilTab(
                       dash: dash,
                       cp: cp,
+                      firstTime: ref.watch(stringsProvider).tutorialCpFirstTime,
                       userName: _firstName(user, cp),
                       cpBadge: user?.badges?.chargePublic,
                       onSeeGuests: () => setState(() => _index = 2)),
@@ -142,6 +151,13 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
       ),
     );
   }
+
+  /// Le clip qui parle de l'onglet ouvert ; l'accueil ouvre sur « Partager ».
+  static TutorialTopic _topicFor(int index) => switch (index) {
+        2 => TutorialTopic.cpGuests,
+        3 => TutorialTopic.cpEarnings,
+        _ => TutorialTopic.cpShare,
+      };
 
   static String _firstName(dynamic user, ChargePublicCopy cp) {
     final first = user?.firstName as String?;
@@ -270,6 +286,7 @@ class _AccueilTab extends StatelessWidget {
   final String userName;
   final LevelBadge? cpBadge;
   final VoidCallback onSeeGuests;
+  final String firstTime;
 
   const _AccueilTab({
     required this.dash,
@@ -277,6 +294,7 @@ class _AccueilTab extends StatelessWidget {
     required this.userName,
     required this.cpBadge,
     required this.onSeeGuests,
+    required this.firstTime,
   });
 
   @override
@@ -299,6 +317,13 @@ class _AccueilTab extends StatelessWidget {
           style: AppTypography.h2.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: AppSpacing.lg),
+        // La première fois seulement : les trois vidéos de l'espace, d'un seul
+        // bandeau — comme les tutoriels du mode public.
+        TutorialOfferBanner(
+          topic: TutorialTopic.cpShare,
+          also: const [TutorialTopic.cpGuests, TutorialTopic.cpEarnings],
+          message: firstTime,
+        ),
         if (cpBadge != null) ...[
           LevelBadgeCard(badge: cpBadge!, isCp: true),
           const SizedBox(height: AppSpacing.lg),

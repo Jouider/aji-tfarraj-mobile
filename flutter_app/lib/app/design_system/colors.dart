@@ -109,6 +109,10 @@ class AppColors {
   // Status Colors (foreground — same in both modes)
   // ============================================
 
+  /// Casting — la seule zone de l'app qui n'est ni la marque ni un statut.
+  static const Color casting = Color(0xFF8B5CF6);
+  static const Color castingDark = Color(0xFF6D28D9);
+
   /// Success (approved / checked_in)
   static const Color success = Color(0xFF4ADE80);
   static const Color successDark = Color(0xFF16A34A);
