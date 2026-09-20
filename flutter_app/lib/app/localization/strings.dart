@@ -1051,12 +1051,33 @@ class AppStrings {
       ? 'Réserver avec une invitation'
       : 'الحجز برابط الدعوة';
 
-  // Short names, for the switch between the two videos.
+  // L'espace chargé public : un clip par onglet.
+  String get tutorialCpShareTitle => locale == AppLocale.fr
+      ? 'Partager et inviter mes contacts'
+      : 'تشارك وتعيّط لصحابك';
+
+  String get tutorialCpGuestsTitle => locale == AppLocale.fr
+      ? 'Suivre mes invités'
+      : 'تتبع المدعوين ديالي';
+
+  String get tutorialCpEarningsTitle =>
+      locale == AppLocale.fr ? 'Comprendre mes gains' : 'تفهم الأرباح ديالك';
+
+  // Short names, for the switch between the videos.
   String get tutorialProfileShort =>
       locale == AppLocale.fr ? 'Profil' : 'الملف الشخصي';
 
   String get tutorialReservationShort =>
       locale == AppLocale.fr ? 'Réservation' : 'الحجز';
+
+  String get tutorialCpShareShort =>
+      locale == AppLocale.fr ? 'Partager' : 'المشاركة';
+
+  String get tutorialCpGuestsShort =>
+      locale == AppLocale.fr ? 'Invités' : 'المدعوين';
+
+  String get tutorialCpEarningsShort =>
+      locale == AppLocale.fr ? 'Gains' : 'الأرباح';
 
   String get tutorialProfileOffer => locale == AppLocale.fr
       ? 'Première fois ? Regarde comment compléter ton profil.'
@@ -1065,6 +1086,24 @@ class AppStrings {
   String get tutorialReservationOffer => locale == AppLocale.fr
       ? 'Comment réserver avec cette invitation ?'
       : 'كيفاش تحجز بهاد الدعوة؟';
+
+  String get tutorialCpShareOffer => locale == AppLocale.fr
+      ? 'Première fois ? Regarde comment partager et inviter.'
+      : 'أول مرة؟ شوف كيفاش تشارك وتعيّط لصحابك.';
+
+  String get tutorialCpGuestsOffer => locale == AppLocale.fr
+      ? 'Comment suivre tes invités ?'
+      : 'كيفاش تتبع المدعوين ديالك؟';
+
+  String get tutorialCpEarningsOffer => locale == AppLocale.fr
+      ? 'Comment tes gains sont calculés ?'
+      : 'كيفاش كيتحسبو الأرباح ديالك؟';
+
+  /// Proposé une seule fois, à l'entrée de l'espace chargé public : les trois
+  /// clips d'un coup, comme pour les tutoriels du mode public.
+  String get tutorialCpFirstTime => locale == AppLocale.fr
+      ? 'Bienvenue dans ton espace : 3 vidéos pour tout comprendre.'
+      : 'مرحبا بك فالفضاء ديالك: 3 فيديوهات باش تفهم كلشي.';
 
   String get tutorialDismiss => locale == AppLocale.fr ? 'Masquer' : 'خبي';
 

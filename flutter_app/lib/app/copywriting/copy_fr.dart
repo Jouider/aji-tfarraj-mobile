@@ -957,7 +957,7 @@ class CastingCopyFr implements CastingCopy {
 
   // ── Annonces ──
   String get tabCastings => 'Castings';
-  String get tabPublications => 'Publications';
+  String get tabPublications => 'Publicités';
   String get noCastings => 'Aucune annonce pour le moment';
   String get noCastingsSubtitle =>
       'Les nouvelles annonces apparaîtront ici. Préparez votre book en attendant.';
@@ -991,8 +991,8 @@ class CastingCopyFr implements CastingCopy {
   String get completeProfile => 'Compléter mon profil';
   String get loadError => 'Impossible de charger le casting.';
   String get photoError => 'Impossible d\'envoyer la photo.';
-  String get profileTile => 'Casting';
-  String get profileTileSubtitle => 'Votre book et les annonces';
+  String get profileTile => 'Espace Casting';
+  String get profileTileSubtitle => 'Découvrez les offres et postulez';
 
   // ── Ouvrir une annonce ──
   String get infoTitle => 'Le casting';

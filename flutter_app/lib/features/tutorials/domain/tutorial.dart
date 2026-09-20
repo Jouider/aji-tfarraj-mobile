@@ -7,11 +7,34 @@ enum TutorialTopic {
   profile('profile'),
 
   /// Booking from a charge public's invitation link, through to the ticket.
-  reservationReferral('reservation_referral');
+  reservationReferral('reservation_referral'),
+
+  /// Sharing a show to invite your contacts (charge public space).
+  cpShare('cp_share'),
+
+  /// Following your guests: approved, present, refused (charge public space).
+  cpGuests('cp_guests'),
+
+  /// Reading your earnings, episode by episode (charge public space).
+  cpEarnings('cp_earnings');
 
   const TutorialTopic(this.key);
 
   final String key;
+
+  /// The clips of the charge public space. Nobody else is offered them: a
+  /// member who cannot open that space has nothing to do with them.
+  static const chargePublic = [cpShare, cpGuests, cpEarnings];
+
+  bool get isChargePublic => chargePublic.contains(this);
+
+  /// Ce qu'on propose à ce membre. Les clips de l'espace chargé public ne
+  /// parlent que de pages qu'il ne peut pas ouvrir : les lui proposer serait
+  /// une promesse en l'air.
+  static List<TutorialTopic> offeredTo({required bool chargePublic}) => [
+        for (final topic in values)
+          if (chargePublic || !topic.isChargePublic) topic,
+      ];
 }
 
 /// One clip, in one language.
