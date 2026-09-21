@@ -1089,7 +1089,6 @@ class HowItWorksCopyAr {
   String get trackParrain => 'للمُحيلين';
 
   // Actions
-  String get watchVideo => 'شاهد الفيديو';
   String get gotIt => 'فهمت';
   String get next => 'التالي';
   String stepCounter(int current, int total) => 'خطوة $current / $total';
@@ -1153,9 +1152,6 @@ class HowItWorksCopyAr {
               'كتخلّص عن كل مدعو حاضر فعليًا في التصوير. كل ما عمّرت أكثر، ربحت أكثر.',
         ),
       ];
-
-  /// Video URLs — null until the tutorial clips are produced/hosted.
-  String? get parrainVideoUrl => null;
 }
 
 // ──────────────────────────────���───────────────────────────���──────────────────

@@ -1142,7 +1142,6 @@ class HowItWorksCopyFr {
   String get trackParrain => 'Pour les parrains';
 
   // Actions
-  String get watchVideo => 'Regarder la vidéo';
   String get gotIt => 'J\'ai compris';
   String get next => 'Suivant';
   String stepCounter(int current, int total) => 'Étape $current / $total';
@@ -1210,10 +1209,6 @@ class HowItWorksCopyFr {
               'Tu es payé pour chaque invité réellement présent au tournage. Plus tu remplis, plus tu gagnes.',
         ),
       ];
-
-  /// Video URLs — null until the tutorial clips are produced/hosted.
-  /// When set, a "Regarder la vidéo" button appears at the top of the track.
-  String? get parrainVideoUrl => null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
