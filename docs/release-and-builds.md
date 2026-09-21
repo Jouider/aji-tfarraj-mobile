@@ -137,6 +137,23 @@ lancement sur iPhone (`path_provider_foundation` ne trouve pas sa bibliothèque)
 Procédure : celle ci-dessus (supprimer, `flutter build ios --release
 --no-codesign`, archiver, exporter), puis vérifier l'IPA.
 
+**Et si `build/native_assets/ios` reste vide** — rencontré en 1.1.13, après
+plusieurs aperçus sur simulateur : supprimer `build/ios` et `build/native_assets`
+n'a pas suffi. L'étape qui installe le framework (`install_code_assets`, dans
+`.dart_tool/flutter_build/`) s'est crue à jour et n'a rien recopié. L'archive a
+réussi, **sans** `objective_c.framework` : l'IPA aurait planté au lancement. Il
+faut alors repartir de zéro :
+
+```bash
+# flutter clean efface aussi build/app : mettre l'AAB à l'abri d'abord.
+flutter clean && flutter pub get
+cd ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install && cd ..
+flutter build ios --release --no-codesign
+ls build/native_assets/ios/objective_c.framework/objective_c   # doit exister
+```
+
+Ne jamais archiver tant que ce fichier n'existe pas.
+
 Vérifier l'IPA avant de la livrer :
 - version et build dans `Payload/Runner.app/Info.plist` ;
 - `codesign -dv Payload/Runner.app` doit afficher `Authority=Apple Distribution` ;
