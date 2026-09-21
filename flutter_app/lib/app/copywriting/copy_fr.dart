@@ -870,7 +870,7 @@ class CastingCopyFr implements CastingCopy {
   // ── Le book ──
   String get bookTitle => 'Mon book';
   String get bookIntro =>
-      'Cinq photos, toujours les mêmes poses. C\'est ce qui permet de vous comparer équitablement : sans poses communes, on choisit le meilleur photographe, pas la bonne personne.';
+      'Quatre photos, toujours les mêmes poses. C\'est ce qui permet de vous comparer équitablement : sans poses communes, on choisit le meilleur photographe, pas la bonne personne.';
   String get bookHelper => 'Faites-vous photographier par quelqu\'un d\'autre.';
   String get bookRequired => 'Obligatoire';
   String get bookOptional => 'Facultatif';

@@ -673,7 +673,7 @@ class CastingCopyAr implements CastingCopy {
 
   String get bookTitle => 'الصور ديالي';
   String get bookIntro =>
-      'خمس صور، دائماً نفس الوضعيات. هاكذا كتقدر تتقارن بإنصاف: بلا وضعيات موحدة، كيتختار أحسن مصور ماشي أحسن شخص.';
+      'ربع صور، دائماً نفس الوضعيات. هاكذا كتقدر تتقارن بإنصاف: بلا وضعيات موحدة، كيتختار أحسن مصور ماشي أحسن شخص.';
   String get bookHelper => 'خلي شي واحد آخر يصورك.';
   String get bookRequired => 'إجباري';
   String get bookOptional => 'اختياري';
