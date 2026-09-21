@@ -339,7 +339,6 @@ CastingPoseCopy poseCopy(CastingCopy copy, CastingPose pose) =>
       CastingPose.fullFront => copy.fullFront,
       CastingPose.fullProfile => copy.fullProfile,
       CastingPose.portrait => copy.portrait,
-      CastingPose.fullBack => copy.fullBack,
       CastingPose.portraitSmile => copy.portraitSmile,
     };
 

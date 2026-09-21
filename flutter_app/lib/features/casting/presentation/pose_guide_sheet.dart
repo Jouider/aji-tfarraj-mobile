@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:video_player/video_player.dart';
 
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/casting/domain/casting_pose.dart';
+import 'package:aji_tfarraj/features/casting/domain/pose_guides.dart';
 import 'package:aji_tfarraj/features/casting/presentation/pose_capture_screen.dart';
 
 /// The instructions for one shot, read *before* the camera opens.
@@ -67,6 +69,7 @@ Future<String?> showPoseGuide(
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
+              _PoseDemo(pose: pose, caption: s.casting.poseDemoCaption),
 
               for (var i = 0; i < copy.steps.length; i++)
                 Padding(
@@ -165,6 +168,126 @@ class _Chip extends StatelessWidget {
         style: AppTypography.caption.copyWith(
           color: highlight ? AppColors.secondary : AppColors.textMuted,
         ),
+      ),
+    );
+  }
+}
+
+/// La démonstration de la pose : en boucle, muette, lancée d'elle-même.
+///
+/// Muette parce qu'elle montre sans raconter — et parce qu'un guide qui se met
+/// à parler dans une salle d'attente est un guide qu'on referme. Un tap la met
+/// en pause pour regarder un détail. Sans clip (serveur plus ancien, pas de
+/// réseau), rien n'est dessiné et le guide reste le texte qu'il était.
+class _PoseDemo extends ConsumerStatefulWidget {
+  const _PoseDemo({required this.pose, required this.caption});
+
+  final CastingPose pose;
+  final String caption;
+
+  @override
+  ConsumerState<_PoseDemo> createState() => _PoseDemoState();
+}
+
+class _PoseDemoState extends ConsumerState<_PoseDemo> {
+  VideoPlayerController? _controller;
+  Uri? _loaded;
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  void _load(Uri video) {
+    if (_loaded == video) return;
+    _loaded = video;
+
+    final controller = VideoPlayerController.networkUrl(video);
+    _controller = controller;
+    controller
+      ..setLooping(true)
+      ..setVolume(0);
+    controller.initialize().then((_) {
+      if (!mounted || _controller != controller) return;
+      controller.play();
+      setState(() {});
+    }).catchError((_) {
+      // Pas de lecteur (pas de réseau, format refusé) : l'aperçu reste affiché.
+    });
+  }
+
+  void _toggle() {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+    controller.value.isPlaying ? controller.pause() : controller.play();
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final clip = ref.watch(poseGuideClipProvider(widget.pose));
+    if (clip == null) return const SizedBox.shrink();
+    _load(clip.video);
+
+    final controller = _controller;
+    final ready = controller != null && controller.value.isInitialized;
+    // Les démonstrations sont filmées en portrait : on borne la hauteur pour
+    // que les consignes et le bouton restent à portée sans défiler.
+    final height = MediaQuery.sizeOf(context).height * 0.42;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Column(
+        children: [
+          Center(
+            child: GestureDetector(
+              onTap: _toggle,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                child: Container(
+                  height: height,
+                  color: Colors.black,
+                  child: AspectRatio(
+                    aspectRatio: ready ? controller.value.aspectRatio : 9 / 19.5,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (ready)
+                          VideoPlayer(controller)
+                        else if (clip.poster != null)
+                          Image.network(clip.poster.toString(),
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const SizedBox.shrink()),
+                        if (!ready)
+                          const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white70),
+                            ),
+                          )
+                        else if (!controller.value.isPlaying)
+                          const Center(
+                            child: Icon(Icons.play_circle_fill,
+                                size: 52, color: Colors.white70),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            widget.caption,
+            textAlign: TextAlign.center,
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+          ),
+        ],
       ),
     );
   }

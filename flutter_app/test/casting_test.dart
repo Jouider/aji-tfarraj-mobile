@@ -12,16 +12,21 @@ void main() {
     test('their keys match the server contract', () {
       expect(
         CastingPose.values.map((p) => p.key).toList(),
-        ['full_front', 'full_profile', 'portrait', 'full_back', 'portrait_smile'],
+        ['full_front', 'full_profile', 'portrait', 'portrait_smile'],
       );
     });
 
-    test('three are required, two are not', () {
+    /// Le plein pied de dos n'est plus demandé. Une ancienne photo qui porte
+    /// encore sa clé ne doit ni planter l'app ni réapparaître dans le book.
+    test('the back shot is no longer a pose', () {
+      expect(CastingPose.fromKey('full_back'), isNull);
+    });
+
+    test('three are required, one is not', () {
       expect(CastingPose.required, hasLength(3));
       expect(CastingPose.fullFront.isRequired, isTrue);
       expect(CastingPose.fullProfile.isRequired, isTrue);
       expect(CastingPose.portrait.isRequired, isTrue);
-      expect(CastingPose.fullBack.isRequired, isFalse);
       expect(CastingPose.portraitSmile.isRequired, isFalse);
     });
 
@@ -30,7 +35,6 @@ void main() {
     test('full-length poses are told apart from portraits', () {
       expect(CastingPose.fullFront.isFullLength, isTrue);
       expect(CastingPose.fullProfile.isFullLength, isTrue);
-      expect(CastingPose.fullBack.isFullLength, isTrue);
       expect(CastingPose.portrait.isFullLength, isFalse);
       expect(CastingPose.portraitSmile.isFullLength, isFalse);
     });

@@ -879,6 +879,7 @@ class CastingCopyFr implements CastingCopy {
   String get bookRetake => 'Reprendre';
   String get bookDelete => 'Supprimer';
   String get bookTake => 'Prendre la photo';
+  String get poseDemoCaption => 'Regardez la démonstration, puis faites pareil.';
 
   // ── Avant de photographier ──
   String get rulesTitle => 'Avant de commencer';
@@ -925,15 +926,6 @@ class CastingCopyFr implements CastingCopy {
         ],
       );
 
-  CastingPoseCopy get fullBack => const CastingPoseCopy(
-        label: 'Plein pied — de dos',
-        hint: 'Tournez le dos à l\'objectif',
-        steps: [
-          'Tournez complètement le dos à l\'objectif.',
-          'Debout droit, bras le long du corps.',
-          'De la tête aux pieds dans le cadre.',
-        ],
-      );
 
   CastingPoseCopy get portraitSmile => const CastingPoseCopy(
         label: 'Portrait souriant',
