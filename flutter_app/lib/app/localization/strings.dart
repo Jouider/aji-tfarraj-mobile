@@ -1040,6 +1040,9 @@ class AppStrings {
   String get tutorialWatch =>
       locale == AppLocale.fr ? 'Voir la vidéo' : 'شوف الفيديو';
 
+  String get tutorialWatchAll =>
+      locale == AppLocale.fr ? 'Voir les vidéos' : 'شوف الفيديوهات';
+
   String get tutorialHowTo =>
       locale == AppLocale.fr ? 'Voir comment faire' : 'شوف كيفاش';
 
@@ -1555,10 +1558,6 @@ class AppStrings {
       ? CopyFr.howItWorks.trackParrain
       : CopyAr.howItWorks.trackParrain;
 
-  String get howItWorksWatchVideo => locale == AppLocale.fr
-      ? CopyFr.howItWorks.watchVideo
-      : CopyAr.howItWorks.watchVideo;
-
   String get howItWorksGotIt => locale == AppLocale.fr
       ? CopyFr.howItWorks.gotIt
       : CopyAr.howItWorks.gotIt;
@@ -1628,10 +1627,6 @@ class AppStrings {
   List<HowToStep> get howItWorksParrainSteps => locale == AppLocale.fr
       ? CopyFr.howItWorks.parrainSteps
       : CopyAr.howItWorks.parrainSteps;
-
-  String? get howItWorksParrainVideoUrl => locale == AppLocale.fr
-      ? CopyFr.howItWorks.parrainVideoUrl
-      : CopyAr.howItWorks.parrainVideoUrl;
 
   // ============================================
   // Inscription sur place (on-site registration)

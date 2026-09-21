@@ -35,12 +35,14 @@ abstract class CastingCopy {
   String get bookRetake;
   String get bookDelete;
   String get bookTake;
+
+  /// Sous la démonstration vidéo d'une pose, dans le guide avant la caméra.
+  String get poseDemoCaption;
   String get rulesTitle;
   List<String> get rules;
   CastingPoseCopy get fullFront;
   CastingPoseCopy get fullProfile;
   CastingPoseCopy get portrait;
-  CastingPoseCopy get fullBack;
   CastingPoseCopy get portraitSmile;
   String get measurementsTitle;
   String get measurementsIntro;

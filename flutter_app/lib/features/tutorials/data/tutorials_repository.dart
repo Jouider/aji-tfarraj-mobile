@@ -17,17 +17,17 @@ class TutorialsRepository {
 
   final ApiClient _client;
 
-  /// Never throws: without the clips the app shows no video buttons, and
-  /// nothing else changes.
-  Future<Tutorials> fetch() async {
+  /// The raw `app-config` body — tutorials and pose demonstrations both read
+  /// from it, so one request serves both. Null on any failure: never throws,
+  /// because without the clips the app shows no video, and nothing else changes.
+  Future<Object?> fetchAppConfig() async {
     try {
       final response = await _client.get<dynamic>(AppConfig.appConfig);
       final data = response.data;
-      final map = (data is Map && data['data'] is Map) ? data['data'] : data;
-      return Tutorials.fromAppConfig(map);
+      return (data is Map && data['data'] is Map) ? data['data'] : data;
     } catch (e) {
       if (kDebugMode) debugPrint('[Tutorials] fetch failed: $e');
-      return Tutorials.none;
+      return null;
     }
   }
 }
@@ -36,9 +36,14 @@ final tutorialsRepositoryProvider = Provider<TutorialsRepository>(
   (ref) => TutorialsRepository(ref.watch(apiClientProvider)),
 );
 
-/// Fetched once per session.
+/// `GET /api/app-config`, fetched once per session.
+final appConfigJsonProvider = FutureProvider<Object?>(
+  (ref) => ref.watch(tutorialsRepositoryProvider).fetchAppConfig(),
+);
+
 final tutorialsProvider = FutureProvider<Tutorials>(
-  (ref) => ref.watch(tutorialsRepositoryProvider).fetch(),
+  (ref) async =>
+      Tutorials.fromAppConfig(await ref.watch(appConfigJsonProvider.future)),
 );
 
 /// The clip for a topic in the current language. Null while loading, after a

@@ -109,23 +109,6 @@ void main() {
     });
   });
 
-  group('from behind', () {
-    /// Left and right are guesswork from behind, so only framing counts.
-    test('orientation is not judged for the back shot', () {
-      expect(evaluatePose(standing(shoulderSpan: 80), CastingPose.fullBack),
-          PoseCheck.ok);
-      expect(evaluatePose(standing(shoulderSpan: 10), CastingPose.fullBack),
-          PoseCheck.ok);
-    });
-
-    test('but its framing still is', () {
-      expect(
-          evaluatePose(standing(leftAnkle: 0.1, rightAnkle: 0.1),
-              CastingPose.fullBack),
-          PoseCheck.feetCut);
-    });
-  });
-
   /// A sleeve or a scarf over the shoulders makes the ratio noise; noise must
   /// not turn into advice.
   test('orientation is skipped when shoulders or hips are unclear', () {

@@ -30,7 +30,7 @@ class CopyAr {
   static const rules = RulesCopyAr();
 
   // ============================================
-  // Loyalty / الولاء
+  // Loyalty / الوفاء
   // ============================================
   static const loyalty = LoyaltyCopyAr();
 
@@ -545,7 +545,7 @@ class ShowDetailCopyAr {
   String get timeLabel => 'الوقت';
   String get locationLabel => 'المكان';
   String get channelLabel => 'القناة';
-  String get loyaltyPointsLabel => 'نقاط الولاء';
+  String get loyaltyPointsLabel => 'نقاط الوفاء';
   String loyaltyPointsValue(int pts) => '+$pts نقطة عند الحضور';
   String get rulesTitle => 'قواعد المشاركة';
   String get reserveNow => 'احجز الآن';
@@ -642,7 +642,7 @@ class NotificationsCopyAr {
 class LoyaltyCopyAr {
   const LoyaltyCopyAr();
 
-  String get loyaltyTitle => 'الولاء';
+  String get loyaltyTitle => 'الوفاء';
   String get pointsTotal => 'النقاط';
   String get pointsSubtitle => 'اكسب نقاطًا بعد كل تسجيل حضور';
   String get history => 'السجل';
@@ -673,7 +673,7 @@ class CastingCopyAr implements CastingCopy {
 
   String get bookTitle => 'الصور ديالي';
   String get bookIntro =>
-      'خمس صور، دائماً نفس الوضعيات. هاكذا كتقدر تتقارن بإنصاف: بلا وضعيات موحدة، كيتختار أحسن مصور ماشي أحسن شخص.';
+      'ربع صور، دائماً نفس الوضعيات. هاكذا كتقدر تتقارن بإنصاف: بلا وضعيات موحدة، كيتختار أحسن مصور ماشي أحسن شخص.';
   String get bookHelper => 'خلي شي واحد آخر يصورك.';
   String get bookRequired => 'إجباري';
   String get bookOptional => 'اختياري';
@@ -682,6 +682,7 @@ class CastingCopyAr implements CastingCopy {
   String get bookRetake => 'عاود';
   String get bookDelete => 'حيّد';
   String get bookTake => 'صوّر';
+  String get poseDemoCaption => 'شوف الفيديو، ومن بعد دير بحالو.';
 
   String get rulesTitle => 'قبل ما تبدا';
   List<String> get rules => const [
@@ -726,15 +727,6 @@ class CastingCopyAr implements CastingCopy {
         ],
       );
 
-  CastingPoseCopy get fullBack => const CastingPoseCopy(
-        label: 'واقف — من اللور',
-        hint: 'عطي ضهرك للكاميرا',
-        steps: [
-          'عطي ضهرك كامل للكاميرا.',
-          'واقف مزيان، اليدين حدا الجسد.',
-          'من الراس حتى الرجلين فالصورة.',
-        ],
-      );
 
   CastingPoseCopy get portraitSmile => const CastingPoseCopy(
         label: 'صورة بالضحكة',
@@ -1097,7 +1089,6 @@ class HowItWorksCopyAr {
   String get trackParrain => 'للمُحيلين';
 
   // Actions
-  String get watchVideo => 'شاهد الفيديو';
   String get gotIt => 'فهمت';
   String get next => 'التالي';
   String stepCounter(int current, int total) => 'خطوة $current / $total';
@@ -1161,9 +1152,6 @@ class HowItWorksCopyAr {
               'كتخلّص عن كل مدعو حاضر فعليًا في التصوير. كل ما عمّرت أكثر، ربحت أكثر.',
         ),
       ];
-
-  /// Video URLs — null until the tutorial clips are produced/hosted.
-  String? get parrainVideoUrl => null;
 }
 
 // ──────────────────────────────���───────────────────────────���──────────────────

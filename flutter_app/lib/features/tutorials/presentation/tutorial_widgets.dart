@@ -156,7 +156,19 @@ class TutorialOfferBanner extends ConsumerWidget {
 
     final s = ref.watch(stringsProvider);
     final message = this.message ?? tutorialOffer(s, topic);
-    final duration = formatClipDuration(clip.duration);
+
+    // Un bandeau qui annonce plusieurs vidéos donne leur durée totale : « 0:30 »
+    // sous « 3 vidéos » laissait croire que tout tenait en trente secondes.
+    final clips = [
+      clip,
+      for (final t in also)
+        if (ref.watch(tutorialClipProvider(t)) case final other?) other,
+    ];
+    final total = clips.every((c) => c.duration != null)
+        ? clips.fold(Duration.zero, (sum, c) => sum + c.duration!)
+        : null;
+    final duration = formatClipDuration(total);
+    final watch = clips.length > 1 ? s.tutorialWatchAll : s.tutorialWatch;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
@@ -195,9 +207,7 @@ class TutorialOfferBanner extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        duration.isEmpty
-                            ? s.tutorialWatch
-                            : '${s.tutorialWatch} · $duration',
+                        duration.isEmpty ? watch : '$watch · $duration',
                         style: AppTypography.labelSmall.copyWith(
                             color: AppColors.secondary,
                             fontWeight: FontWeight.w600),

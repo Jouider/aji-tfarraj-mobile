@@ -870,7 +870,7 @@ class CastingCopyFr implements CastingCopy {
   // ── Le book ──
   String get bookTitle => 'Mon book';
   String get bookIntro =>
-      'Cinq photos, toujours les mêmes poses. C\'est ce qui permet de vous comparer équitablement : sans poses communes, on choisit le meilleur photographe, pas la bonne personne.';
+      'Quatre photos, toujours les mêmes poses. C\'est ce qui permet de vous comparer équitablement : sans poses communes, on choisit le meilleur photographe, pas la bonne personne.';
   String get bookHelper => 'Faites-vous photographier par quelqu\'un d\'autre.';
   String get bookRequired => 'Obligatoire';
   String get bookOptional => 'Facultatif';
@@ -879,6 +879,7 @@ class CastingCopyFr implements CastingCopy {
   String get bookRetake => 'Reprendre';
   String get bookDelete => 'Supprimer';
   String get bookTake => 'Prendre la photo';
+  String get poseDemoCaption => 'Regardez la démonstration, puis faites pareil.';
 
   // ── Avant de photographier ──
   String get rulesTitle => 'Avant de commencer';
@@ -925,15 +926,6 @@ class CastingCopyFr implements CastingCopy {
         ],
       );
 
-  CastingPoseCopy get fullBack => const CastingPoseCopy(
-        label: 'Plein pied — de dos',
-        hint: 'Tournez le dos à l\'objectif',
-        steps: [
-          'Tournez complètement le dos à l\'objectif.',
-          'Debout droit, bras le long du corps.',
-          'De la tête aux pieds dans le cadre.',
-        ],
-      );
 
   CastingPoseCopy get portraitSmile => const CastingPoseCopy(
         label: 'Portrait souriant',
@@ -1150,7 +1142,6 @@ class HowItWorksCopyFr {
   String get trackParrain => 'Pour les parrains';
 
   // Actions
-  String get watchVideo => 'Regarder la vidéo';
   String get gotIt => 'J\'ai compris';
   String get next => 'Suivant';
   String stepCounter(int current, int total) => 'Étape $current / $total';
@@ -1218,10 +1209,6 @@ class HowItWorksCopyFr {
               'Tu es payé pour chaque invité réellement présent au tournage. Plus tu remplis, plus tu gagnes.',
         ),
       ];
-
-  /// Video URLs — null until the tutorial clips are produced/hosted.
-  /// When set, a "Regarder la vidéo" button appears at the top of the track.
-  String? get parrainVideoUrl => null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -9,8 +9,11 @@ enum CastingPose {
   fullFront('full_front'),
   fullProfile('full_profile'),
   portrait('portrait'),
-  fullBack('full_back'),
   portraitSmile('portrait_smile');
+
+  // Le plein pied de dos n'est plus demandé : ce n'est pas une photo qu'on
+  // demande à un membre pour un book. Le serveur le refuse, et [fromKey]
+  // ignore une ancienne photo qui porterait encore cette clé.
 
   const CastingPose(this.key);
 
@@ -36,7 +39,5 @@ enum CastingPose {
   /// Head-and-shoulders shots frame differently from full-length ones, so the
   /// camera guide has to know which it is drawing.
   bool get isFullLength =>
-      this == CastingPose.fullFront ||
-      this == CastingPose.fullProfile ||
-      this == CastingPose.fullBack;
+      this == CastingPose.fullFront || this == CastingPose.fullProfile;
 }

@@ -89,10 +89,6 @@ PoseCheck evaluatePose(PoseObservation? body, CastingPose pose) {
   final ankles = [body.leftAnkle, body.rightAnkle].whereType<BodyPoint>();
   if (ankles.isNotEmpty && !ankles.any(clear)) return PoseCheck.feetCut;
 
-  // From behind, left and right are guesswork for the detector, so the back
-  // shot is judged on framing alone.
-  if (pose == CastingPose.fullBack) return PoseCheck.ok;
-
   final ls = body.leftShoulder;
   final rs = body.rightShoulder;
   final lh = body.leftHip;

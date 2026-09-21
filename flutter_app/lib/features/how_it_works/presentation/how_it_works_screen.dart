@@ -10,7 +10,6 @@ import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
 import 'package:aji_tfarraj/features/tutorials/data/tutorials_repository.dart';
 import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
 import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
-import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_sheet.dart';
 
 /// "Comment ça marche" — illustrated, swipeable step-by-step guide.
 ///
@@ -87,14 +86,16 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
         isParrain ? s.howItWorksParrainHeadline : s.howItWorksClientHeadline;
     final subtitle =
         isParrain ? s.howItWorksParrainSubtitle : s.howItWorksClientSubtitle;
-    // The client track's clips come from the server; the parrain track has
-    // none yet and keeps its copy placeholder.
-    final parrainVideoUrl = isParrain ? s.howItWorksParrainVideoUrl : null;
-    final profileClip =
-        isParrain ? null : ref.watch(tutorialClipProvider(TutorialTopic.profile));
-    final reservationClip = isParrain
-        ? null
-        : ref.watch(tutorialClipProvider(TutorialTopic.reservationReferral));
+    // Les vidéos de chaque piste viennent du serveur : les deux parcours du
+    // membre d'un côté, les trois de l'espace chargé public de l'autre.
+    final topics = isParrain
+        ? TutorialTopic.chargePublic
+        : const [TutorialTopic.profile, TutorialTopic.reservationReferral];
+    final videos = [
+      for (final topic in topics)
+        if (ref.watch(tutorialClipProvider(topic)) case final clip?)
+          (topic: topic, clip: clip),
+    ];
     final icons = isParrain ? _parrainIcons : _clientIcons;
     final accent = isParrain ? AppColors.secondary : AppColors.primary;
 
@@ -147,51 +148,25 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
               ),
             ),
 
-            // Parrain track: a clip only once one is set in copy.
-            if (parrainVideoUrl != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                child: _WatchVideoButton(
-                  label: s.howItWorksWatchVideo,
-                  accent: accent,
-                  onTap: () => showTutorialSheet(context, items: [
-                    TutorialSheetItem(
-                      title: headline,
-                      clip: TutorialClip(video: Uri.parse(parrainVideoUrl)),
-                    ),
-                  ]),
-                ),
-              ),
-            ],
-
-            // Client track: the two walkthroughs people ask for most.
-            if (profileClip != null || reservationClip != null) ...[
+            // Les vidéos de la piste ouverte. Chacune ouvre la feuille sur
+            // elle-même, avec les autres de la même piste en pastilles.
+            if (videos.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Column(
                   children: [
-                    if (profileClip != null)
+                    for (var i = 0; i < videos.length; i++) ...[
+                      if (i > 0) const SizedBox(height: AppSpacing.sm),
                       _WatchVideoButton(
                         label:
-                            '${s.tutorialProfileTitle} · ${formatClipDuration(profileClip.duration)}',
-                        accent: accent,
-                        onTap: () =>
-                            openTutorial(context, ref, TutorialTopic.profile),
-                      ),
-                    if (profileClip != null && reservationClip != null)
-                      const SizedBox(height: AppSpacing.sm),
-                    if (reservationClip != null)
-                      _WatchVideoButton(
-                        label:
-                            '${s.tutorialReservationTitle} · ${formatClipDuration(reservationClip.duration)}',
+                            '${tutorialTitle(s, videos[i].topic)} · ${formatClipDuration(videos[i].clip.duration)}',
                         accent: accent,
                         onTap: () => openTutorial(
-                            context, ref, TutorialTopic.reservationReferral),
+                            context, ref, videos[i].topic, topics),
                       ),
+                    ],
                   ],
                 ),
               ),
