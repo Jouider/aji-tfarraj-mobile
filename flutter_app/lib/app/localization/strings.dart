@@ -1040,6 +1040,9 @@ class AppStrings {
   String get tutorialWatch =>
       locale == AppLocale.fr ? 'Voir la vidéo' : 'شوف الفيديو';
 
+  String get tutorialWatchAll =>
+      locale == AppLocale.fr ? 'Voir les vidéos' : 'شوف الفيديوهات';
+
   String get tutorialHowTo =>
       locale == AppLocale.fr ? 'Voir comment faire' : 'شوف كيفاش';
 

@@ -62,7 +62,7 @@ Future<void> showTutorialSheet(
         children: [
           Positioned.fill(
             child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
+              onTap: () => closeTutorialSheet(context),
               child: AnimatedBuilder(
                 animation: curved,
                 builder: (_, __) => BackdropFilter(
@@ -86,6 +86,20 @@ Future<void> showTutorialSheet(
       );
     },
   );
+}
+
+/// Ferme la feuille — une seule fois.
+///
+/// La fermeture s'anime pendant 280 ms, et pendant ce temps le fond flouté et
+/// « J'ai compris » répondent encore. Un second tap appelait un second pop(),
+/// qui retirait la page de l'app elle-même : écran noir, sans retour possible.
+/// Un double tap pressé suffisait. Une fois la feuille retirée, sa route n'est
+/// plus la route courante, et on ne touche plus à rien.
+@visibleForTesting
+void closeTutorialSheet(BuildContext context) {
+  final route = ModalRoute.of(context);
+  if (route != null && !route.isCurrent) return;
+  Navigator.of(context).pop();
 }
 
 class TutorialSheet extends ConsumerStatefulWidget {
@@ -278,7 +292,7 @@ class _TutorialSheetState extends ConsumerState<TutorialSheet> {
                     width: double.infinity,
                     height: AppSpacing.buttonHeight,
                     child: FilledButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => closeTutorialSheet(context),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,

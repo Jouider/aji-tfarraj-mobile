@@ -143,6 +143,29 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    // Trouvé sur le simulateur : « J'ai compris », puis un tap à côté pendant
+    // les 280 ms de la fermeture — le fond flouté répondait encore, et le
+    // second pop() retirait l'écran de l'app lui-même. Écran noir.
+    testWidgets('a second tap while the sheet closes leaves the screen alone',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+
+      await _pump(tester, tutorials: _bothClips, prefs: prefs);
+      await tester.tap(find.byIcon(Icons.help_outline));
+      await settle(tester);
+
+      await tester.tap(find.text(s.howItWorksGotIt));
+      await tester.pump(const Duration(milliseconds: 60)); // encore en train de se fermer
+      await tester.tapAt(const Offset(200, 40)); // le fond flouté, en haut
+      await settle(tester);
+
+      expect(find.byType(TutorialOfferBanner), findsOneWidget,
+          reason: "l'écran d'où l'aide a été ouverte est toujours là");
+      expect(find.text(s.howItWorksGotIt), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('watching from the banner retires the banner', (tester) async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
