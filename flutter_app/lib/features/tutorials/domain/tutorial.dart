@@ -9,6 +9,9 @@ enum TutorialTopic {
   /// Booking from a charge public's invitation link, through to the ticket.
   reservationReferral('reservation_referral'),
 
+  /// Earning points at each show, then trading them for a reward.
+  rewards('rewards'),
+
   /// Sharing a show to invite your contacts (charge public space).
   cpShare('cp_share'),
 

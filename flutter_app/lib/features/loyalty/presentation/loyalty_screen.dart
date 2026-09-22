@@ -16,6 +16,8 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/widgets/reward_api_card.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
+import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 /// Main loyalty / fidelity screen
 class LoyaltyScreen extends ConsumerStatefulWidget {
@@ -39,6 +41,7 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
         title: Text(strings.loyaltyTitle, style: AppTypography.h3),
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
+        actions: const [TutorialHelpAction(topic: TutorialTopic.rewards)],
       ),
       body: pointsAsync.when(
         loading: () => _buildSkeleton(),
@@ -59,6 +62,9 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
+          // La première fois : comment les points se gagnent et s'échangent.
+          const TutorialOfferBanner(topic: TutorialTopic.rewards),
+
           // ── Points total card ──
           PointsTotalCard(
             balance: summary.balance,

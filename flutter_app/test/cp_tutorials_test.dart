@@ -69,6 +69,22 @@ void main() {
       );
     });
 
+    /// Les points et les récompenses concernent tout le monde : la vidéo ne
+    /// doit pas être prise pour un clip de l'espace chargé public.
+    test('la vidéo des récompenses est proposée à tous les membres', () {
+      expect(TutorialTopic.rewards.isChargePublic, isFalse);
+      expect(TutorialTopic.offeredTo(chargePublic: false),
+          contains(TutorialTopic.rewards));
+
+      final tutorials = Tutorials.fromAppConfig({
+        'tutorials': {
+          'rewards': {'ar': _clip('rewards_ar', 103)},
+        },
+      });
+      expect(tutorials.clipFor(TutorialTopic.rewards, AppLocale.ar)!.duration,
+          const Duration(seconds: 103));
+    });
+
     test('un chargé public les voit tous', () {
       expect(
         TutorialTopic.offeredTo(chargePublic: true),
