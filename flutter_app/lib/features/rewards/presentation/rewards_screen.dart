@@ -10,6 +10,8 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/widgets/reward_api_card.dart';
+import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
+import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 class RewardsScreen extends ConsumerWidget {
   const RewardsScreen({super.key});
@@ -26,6 +28,7 @@ class RewardsScreen extends ConsumerWidget {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         actions: [
+          const TutorialHelpAction(topic: TutorialTopic.rewards),
           TextButton.icon(
             onPressed: () => context.push(Routes.myRewards),
             icon: Icon(Icons.history, size: 18,

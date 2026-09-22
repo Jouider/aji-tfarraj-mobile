@@ -90,7 +90,11 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
     // membre d'un côté, les trois de l'espace chargé public de l'autre.
     final topics = isParrain
         ? TutorialTopic.chargePublic
-        : const [TutorialTopic.profile, TutorialTopic.reservationReferral];
+        : const [
+            TutorialTopic.profile,
+            TutorialTopic.reservationReferral,
+            TutorialTopic.rewards,
+          ];
     final videos = [
       for (final topic in topics)
         if (ref.watch(tutorialClipProvider(topic)) case final clip?)

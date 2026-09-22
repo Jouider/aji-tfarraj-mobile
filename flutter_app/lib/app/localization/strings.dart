@@ -1054,6 +1054,10 @@ class AppStrings {
       ? 'Réserver avec une invitation'
       : 'الحجز برابط الدعوة';
 
+  String get tutorialRewardsTitle => locale == AppLocale.fr
+      ? 'Gagner des points et des cadeaux'
+      : 'تجمع النقاط وتربح الهدايا';
+
   // L'espace chargé public : un clip par onglet.
   String get tutorialCpShareTitle => locale == AppLocale.fr
       ? 'Partager et inviter mes contacts'
@@ -1073,6 +1077,9 @@ class AppStrings {
   String get tutorialReservationShort =>
       locale == AppLocale.fr ? 'Réservation' : 'الحجز';
 
+  String get tutorialRewardsShort =>
+      locale == AppLocale.fr ? 'Cadeaux' : 'الهدايا';
+
   String get tutorialCpShareShort =>
       locale == AppLocale.fr ? 'Partager' : 'المشاركة';
 
@@ -1089,6 +1096,10 @@ class AppStrings {
   String get tutorialReservationOffer => locale == AppLocale.fr
       ? 'Comment réserver avec cette invitation ?'
       : 'كيفاش تحجز بهاد الدعوة؟';
+
+  String get tutorialRewardsOffer => locale == AppLocale.fr
+      ? 'Comment gagner des points et obtenir des cadeaux ?'
+      : 'كيفاش تجمع النقاط وتربح الهدايا؟';
 
   String get tutorialCpShareOffer => locale == AppLocale.fr
       ? 'Première fois ? Regarde comment partager et inviter.'
