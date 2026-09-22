@@ -117,8 +117,9 @@ xcodebuild archive -workspace ios/Runner.xcworkspace -scheme Runner -configurati
 qu'il trouve dans `build/native_assets/ios/`. Toujours les construire avant :
 
 ```bash
-rm -rf build/ios build/native_assets
+rm -rf build/ios build/native_assets .dart_tool/flutter_build   # le 3e aussi, voir plus bas
 flutter build ios --release --no-codesign   # construit objective_c.framework pour iPhone
+ls build/native_assets/ios/objective_c.framework/objective_c   # doit exister avant d'archiver
 # puis xcodebuild archive, puis -exportArchive, comme ci-dessus
 ```
 
@@ -134,25 +135,26 @@ l'archive le recopie tel quel. En supprimant ce dossier sans le reconstruire,
 c'est pire : l'IPA part **sans** le framework, passe la validation, et plante au
 lancement sur iPhone (`path_provider_foundation` ne trouve pas sa bibliothèque).
 
-Procédure : celle ci-dessus (supprimer, `flutter build ios --release
---no-codesign`, archiver, exporter), puis vérifier l'IPA.
+Procédure : celle ci-dessous (supprimer — `.dart_tool/flutter_build` compris —,
+`flutter build ios --release --no-codesign`, archiver, exporter), puis vérifier
+l'IPA.
 
-**Et si `build/native_assets/ios` reste vide** — rencontré en 1.1.13, après
-plusieurs aperçus sur simulateur : supprimer `build/ios` et `build/native_assets`
-n'a pas suffi. L'étape qui installe le framework (`install_code_assets`, dans
-`.dart_tool/flutter_build/`) s'est crue à jour et n'a rien recopié. L'archive a
-réussi, **sans** `objective_c.framework` : l'IPA aurait planté au lancement. Il
-faut alors repartir de zéro :
+**Supprimer `build/native_assets` ne suffit pas : il faut aussi `.dart_tool/flutter_build`.**
+Rencontré en 1.1.13 puis en 1.1.14, simulateur ou pas. L'étape qui installe le
+framework (`install_code_assets`) garde son tampon « à jour » dans
+`.dart_tool/flutter_build/` : le dossier effacé n'est pas recopié,
+`build/native_assets/ios` reste vide, et **l'archive réussit sans
+`objective_c.framework`** — l'IPA passe la validation et plante au lancement.
+La bonne séquence, qui garde le cache des bibliothèques natives :
 
 ```bash
-# flutter clean efface aussi build/app : mettre l'AAB à l'abri d'abord.
-flutter clean && flutter pub get
-cd ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install && cd ..
+rm -rf build/ios build/native_assets .dart_tool/flutter_build
 flutter build ios --release --no-codesign
 ls build/native_assets/ios/objective_c.framework/objective_c   # doit exister
 ```
 
-Ne jamais archiver tant que ce fichier n'existe pas.
+Ne jamais archiver tant que ce fichier n'existe pas. (`flutter clean` marche aussi,
+mais efface `build/app`, donc l'AAB : le mettre à l'abri d'abord.)
 
 Vérifier l'IPA avant de la livrer :
 - version et build dans `Payload/Runner.app/Info.plist` ;
