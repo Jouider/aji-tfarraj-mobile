@@ -14,6 +14,8 @@ import 'package:aji_tfarraj/features/reservation/confirmation_hero_widget.dart';
 import 'package:aji_tfarraj/features/reservation/reservation_summary_card_widget.dart';
 import 'package:aji_tfarraj/features/reservation/next_steps_section_widget.dart';
 import 'package:aji_tfarraj/features/reservation/confirmation_actions_widget.dart';
+import 'package:aji_tfarraj/features/ads/data/ads_service.dart';
+import 'package:aji_tfarraj/features/ads/domain/ads_config.dart';
 
 /// Reservation Result Screen — "Réservation envoyée" confirmation.
 /// FIX: Full-immersive (no app bar), backgroundWhite, SafeArea, entry animations.
@@ -87,6 +89,34 @@ class _ResultContentState extends ConsumerState<_ResultContent>
     _cardSlide = _slideInterval(0.39, 0.78);
     _stepsOpacity = _interval(0.56, 1.00);
     _stepsSlide = _slideInterval(0.56, 1.00);
+
+    _offerAdAfterConfirmation();
+  }
+
+  /// La publicité d'après-réservation.
+  ///
+  /// Ici et pas dans le tunnel : la place est déjà demandée, la confirmation
+  /// est à l'écran, et rien de ce que le membre fera ensuite ne dépend de la
+  /// pub. Une pub avant la confirmation ferait perdre des réservations, ce qui
+  /// coûte plus cher que ce qu'elle rapporte.
+  ///
+  /// Tout échec est silencieux : réseau, inventaire vide, publicité éteinte
+  /// côté serveur — l'écran ne change pas.
+  Future<void> _offerAdAfterConfirmation() async {
+    final AdsConfig config;
+    try {
+      config = await ref.read(adsConfigProvider.future);
+    } catch (_) {
+      return;
+    }
+
+    if (!mounted || !config.reservation.enabled) return;
+
+    // Le temps de lire « réservation envoyée ».
+    await Future<void>.delayed(config.reservation.delay);
+    if (!mounted) return;
+
+    await ref.read(adsServiceProvider).showAfterReservation();
   }
 
   Animation<double> _interval(double begin, double end) =>

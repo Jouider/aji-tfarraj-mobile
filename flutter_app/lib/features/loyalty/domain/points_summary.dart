@@ -58,14 +58,71 @@ class PointsEntry {
   }
 }
 
+/// Ce que la vidéo récompensée rapporte, et ce qu'il en reste pour aujourd'hui.
+///
+/// Servi par `GET /api/me/points → ad_reward`. C'est le serveur qui compte :
+/// le téléphone ne fait qu'afficher, et ne décide jamais du crédit.
+class AdRewardStatus {
+  const AdRewardStatus({
+    required this.enabled,
+    required this.points,
+    required this.dailyCap,
+    required this.remainingToday,
+  });
+
+  /// Rien à proposer : publicité éteinte, ou serveur d'avant la fonction.
+  static const off = AdRewardStatus(
+    enabled: false,
+    points: 0,
+    dailyCap: 0,
+    remainingToday: 0,
+  );
+
+  final bool enabled;
+
+  /// Les points annoncés par vidéo.
+  final int points;
+
+  final int dailyCap;
+
+  /// Ce qu'il reste de vidéos créditables aujourd'hui.
+  final int remainingToday;
+
+  /// Le bouton ne s'affiche que là : éteint, sans points ou quota épuisé, il
+  /// n'y a rien à proposer, et proposer pour refuser ensuite est pire.
+  bool get canWatch => enabled && points > 0 && remainingToday > 0;
+
+  factory AdRewardStatus.fromJson(dynamic json) {
+    if (json is! Map) return off;
+
+    return AdRewardStatus(
+      enabled: json['enabled'] == true,
+      points: PointsEntry._parseInt(json['points']),
+      dailyCap: PointsEntry._parseInt(json['daily_cap']),
+      remainingToday: PointsEntry._parseInt(json['remaining_today']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'enabled': enabled,
+        'points': points,
+        'daily_cap': dailyCap,
+        'remaining_today': remainingToday,
+      };
+}
+
 /// Points summary containing balance and history
 class PointsSummary {
   final int balance;
   final List<PointsEntry> history;
 
+  /// La vidéo récompensée, telle que le serveur l'autorise à cet instant.
+  final AdRewardStatus adReward;
+
   const PointsSummary({
     required this.balance,
     required this.history,
+    this.adReward = AdRewardStatus.off,
   });
 
   /// Empty / default summary
@@ -94,6 +151,7 @@ class PointsSummary {
     return PointsSummary(
       balance: _parseInt(data['balance']),
       history: history,
+      adReward: AdRewardStatus.fromJson(data['ad_reward']),
     );
   }
 
@@ -101,6 +159,7 @@ class PointsSummary {
     return {
       'balance': balance,
       'history': history.map((e) => e.toJson()).toList(),
+      'ad_reward': adReward.toJson(),
     };
   }
 

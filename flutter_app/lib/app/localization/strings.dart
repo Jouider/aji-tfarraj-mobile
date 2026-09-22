@@ -1125,6 +1125,44 @@ class AppStrings {
       ? 'Impossible de lire la vidéo pour le moment. Vérifie ta connexion.'
       : 'ما قدرناش نشغلو الفيديو دابا. تأكد من الاتصال ديالك.';
 
+  // ============================================
+  // Publicité — la vidéo qu'on regarde pour des points
+  // ============================================
+
+  /// Toujours formulé comme une proposition : regarder reste un choix, et le
+  /// règlement AdMob l'exige autant que le bon sens.
+  String get adRewardTitle => locale == AppLocale.fr
+      ? 'Gagne des points en vidéo'
+      : 'ربح النقط بالفيديو';
+
+  String adRewardPoints(int points) => locale == AppLocale.fr
+      ? '+$points points par vidéo'
+      : '+$points نقطة فكل فيديو';
+
+  String adRewardRemaining(int remaining) => locale == AppLocale.fr
+      ? (remaining > 1
+          ? 'Il te reste $remaining vidéos aujourd\'hui'
+          : 'Il te reste 1 vidéo aujourd\'hui')
+      : (remaining > 1
+          ? 'باقي ليك $remaining ديال الفيديوهات اليوم'
+          : 'باقي ليك فيديو وحدة اليوم');
+
+  String get adRewardWatch => locale == AppLocale.fr ? 'Regarder' : 'شوف';
+
+  /// Les points passent par Google puis par le serveur : ils n'apparaissent
+  /// pas à la seconde où la vidéo se termine, et le texte ne le promet pas.
+  String get adRewardEarned => locale == AppLocale.fr
+      ? 'Merci ! Tes points arrivent dans un instant.'
+      : 'شكرا! النقط ديالك غادي تبان من دابا شوية.';
+
+  String get adRewardUnavailable => locale == AppLocale.fr
+      ? 'Aucune vidéo disponible pour le moment. Réessaie plus tard.'
+      : 'ما كاين حتى فيديو دابا. عاود من بعد.';
+
+  /// Dans l'historique des points.
+  String get adRewardHistoryLabel =>
+      locale == AppLocale.fr ? 'Vidéo regardée' : 'فيديو متشاف';
+
   String get avatarFrameHint => locale == AppLocale.fr
       ? 'Placez votre visage dans le cadre'
       : 'ضع وجهك داخل الإطار';

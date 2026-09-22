@@ -54,6 +54,18 @@
             </intent-filter>
         </activity>
 
+        <!-- AdMob : l'identifiant d'APPLICATION (avec un ~), pas une unité
+             (avec un /). Sans lui le SDK fait planter l'app au démarrage.
+
+             ⚠️ C'est aujourd'hui celui de TEST de Google : il affiche des pubs
+             factices et ne rapporte rien. À remplacer par celui du compte
+             AdMob avant la mise en production — et à ne remplacer qu'à ce
+             moment-là : une vraie unité qui reçoit des impressions de test
+             fait suspendre le compte. Voir docs/publicite.md. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
