@@ -33,10 +33,25 @@ class AdsService {
 
   AdsConfig get config => _config;
 
-  /// L'interstitiel d'après-réservation.
+  /// Prépare la pub pendant que la personne remplit sa réservation.
   ///
-  /// L'appelant attend d'abord [ReservationAds.delay] : la confirmation se lit
-  /// avant que l'écran ne parte. Rend true si une pub a bien été montrée.
+  /// Sans ça, elle se chargerait au moment de l'afficher : quelques secondes
+  /// d'écran vide entre « Réserver » et la confirmation, ce qui est pire que
+  /// la publicité elle-même.
+  Future<void> prepareForReservation() async {
+    final unitId = _config.interstitialUnitId;
+
+    if (!_config.reservation.enabled || unitId == null) return;
+    if (!_cooldownElapsed(_config.reservation.cooldown)) return;
+
+    await _gateway.preloadInterstitial(unitId);
+  }
+
+  /// La pub qui s'intercale entre « Réserver » et la confirmation.
+  ///
+  /// La place est déjà demandée quand on arrive ici : la réservation est
+  /// enregistrée, la pub ne peut donc plus la faire perdre. Rend true si une
+  /// pub a bien été montrée.
   Future<bool> showAfterReservation() async {
     final placement = _config.reservation;
     final unitId = _config.interstitialUnitId;
@@ -46,7 +61,12 @@ class AdsService {
 
     _busy = true;
     try {
-      final shown = await _gateway.showInterstitial(unitId);
+      // Le budget d'attente est court : la confirmation attend derrière, et
+      // une pub qui se fait désirer vaut moins que la confirmation à l'heure.
+      final shown = await _gateway.showInterstitial(
+        unitId,
+        wait: const Duration(seconds: 4),
+      );
       // Le délai ne court qu'à partir d'une pub réellement vue : un échec de
       // chargement ne doit pas consommer le créneau suivant.
       if (shown) {

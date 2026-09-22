@@ -46,8 +46,6 @@ class AdsConfig {
           ? const ReservationAds.off()
           : ReservationAds(
               enabled: reservation['enabled'] == true,
-              delay: Duration(
-                  milliseconds: _int(reservation['delay_ms'], fallback: 1800)),
               cooldown: Duration(
                   minutes: _int(reservation['cooldown_minutes'], fallback: 30)),
             ),
@@ -74,25 +72,23 @@ class AdsConfig {
   }
 }
 
-/// L'interstitiel qui suit une réservation — après la confirmation, jamais
-/// avant : la place demandée est ce que l'app vend.
+/// L'interstitiel qui s'intercale entre « Réserver » et la confirmation.
+///
+/// La réservation est enregistrée avant qu'elle ne s'ouvre : la place est
+/// acquise quoi qu'il arrive ensuite, y compris si la personne ferme l'app
+/// pendant la pub.
 @immutable
 class ReservationAds {
   const ReservationAds({
     required this.enabled,
-    required this.delay,
     required this.cooldown,
   });
 
   const ReservationAds.off()
       : enabled = false,
-        delay = Duration.zero,
         cooldown = Duration.zero;
 
   final bool enabled;
-
-  /// Le temps laissé au membre pour lire « réservation envoyée ».
-  final Duration delay;
 
   /// Deux réservations rapprochées ne donnent qu'une pub.
   final Duration cooldown;

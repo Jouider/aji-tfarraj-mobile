@@ -27,6 +27,7 @@ class _FakeGateway implements AdsGateway {
   final bool rewardEarned;
 
   int interstitialCalls = 0;
+  int preloadCalls = 0;
   int rewardedCalls = 0;
   String? lastUserId;
 
@@ -34,7 +35,13 @@ class _FakeGateway implements AdsGateway {
   Future<void> initialize() async {}
 
   @override
-  Future<bool> showInterstitial(String unitId) async {
+  Future<void> preloadInterstitial(String unitId) async {
+    preloadCalls++;
+  }
+
+  @override
+  Future<bool> showInterstitial(String unitId,
+      {Duration wait = const Duration(seconds: 4)}) async {
     interstitialCalls++;
     return interstitialShown;
   }
@@ -60,7 +67,6 @@ Map<String, dynamic> _serverSays({
         'rewarded_unit_id': rewarded,
         'reservation': {
           'enabled': true,
-          'delay_ms': 1800,
           'cooldown_minutes': cooldownMinutes,
         },
         'rewarded': {'enabled': true, 'points': 5, 'daily_cap': 3},
@@ -90,7 +96,6 @@ void main() {
       final config = AdsConfig.fromAppConfig(_serverSays());
 
       expect(config.interstitialUnitId, 'unit/interstitial');
-      expect(config.reservation.delay, const Duration(milliseconds: 1800));
       expect(config.reservation.cooldown, const Duration(minutes: 30));
       expect(config.rewarded.points, 5);
       expect(config.rewarded.dailyCap, 3);
@@ -122,11 +127,42 @@ void main() {
           clock: clock ?? DateTime.now,
         );
 
-    test('s\'ouvre une fois la réservation confirmée', () async {
+    test('s\'ouvre une fois la place enregistrée', () async {
       final gateway = _FakeGateway();
 
       expect(await service(gateway).showAfterReservation(), isTrue);
       expect(gateway.interstitialCalls, 1);
+    });
+
+    /// Préchargée pendant que la personne remplit sa réservation : au moment
+    /// de l'afficher elle est déjà là, sinon la confirmation attendrait
+    /// derrière un écran vide.
+    test('elle se prépare pendant que la personne réserve', () async {
+      final gateway = _FakeGateway();
+
+      await service(gateway).prepareForReservation();
+      expect(gateway.preloadCalls, 1);
+    });
+
+    test('rien ne se précharge pendant le délai entre deux pubs', () async {
+      final gateway = _FakeGateway();
+      var now = DateTime(2026, 9, 22, 20, 0);
+      final ads = service(gateway, clock: () => now);
+
+      await ads.showAfterReservation();
+      now = now.add(const Duration(minutes: 5));
+      await ads.prepareForReservation();
+
+      expect(gateway.preloadCalls, 0,
+          reason: 'charger une pub qu\'on ne montrera pas coûte des données');
+    });
+
+    test('éteinte côté serveur, elle ne précharge rien non plus', () async {
+      final gateway = _FakeGateway();
+
+      await service(gateway, json: _serverSays(enabled: false))
+          .prepareForReservation();
+      expect(gateway.preloadCalls, 0);
     });
 
     test('deux réservations rapprochées ne donnent qu\'une pub', () async {

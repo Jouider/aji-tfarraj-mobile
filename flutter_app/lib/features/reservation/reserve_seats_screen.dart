@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/features/ads/data/ads_service.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -53,6 +54,24 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
     if (pending != null && pending.isNotEmpty) {
       _referralCodeController.text = pending;
       _referralInitiallyExpanded = true;
+    }
+
+    // La pub se prépare pendant que la personne lit et confirme : au moment de
+    // l'afficher, elle est déjà là. C'est ce qui fait la différence entre une
+    // pub et une attente.
+    _prepareAd();
+  }
+
+  /// Précharge la publicité d'après-réservation, si le serveur en propose une.
+  /// Silencieux de bout en bout : sans pub prête, la confirmation s'affiche
+  /// simplement sans rien avant.
+  Future<void> _prepareAd() async {
+    try {
+      await ref.read(adsConfigProvider.future);
+      if (!mounted) return;
+      await ref.read(adsServiceProvider).prepareForReservation();
+    } catch (_) {
+      // Rien à faire : pas de pub, pas de message.
     }
   }
 
@@ -244,6 +263,13 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
         reservationId: reservation.id,
         seats: 1,
       );
+
+      // La place est demandée et enregistrée : c'est seulement maintenant
+      // qu'une pub peut s'ouvrir sans risquer de faire perdre la réservation.
+      // Elle passe avant l'écran de confirmation, et si elle n'est pas prête
+      // en quelques secondes, on passe sans elle.
+      await ref.read(adsServiceProvider).showAfterReservation();
+      if (!mounted) return;
 
       router.go(Routes.reservationResult(reservation.id.toString()));
     } on ApiException catch (e) {

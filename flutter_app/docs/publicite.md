@@ -6,15 +6,21 @@ personne ne l'allume.
 
 | Emplacement | Où | Format | Règle |
 |---|---|---|---|
-| Après une réservation | écran de confirmation | interstitiel | s'ouvre ~1,8 s après « réservation envoyée », jamais avant ; une seule par 30 min |
+| Après une réservation | entre « Réserver » et la confirmation | interstitiel | la place est enregistrée avant qu'elle ne s'ouvre ; préchargée pendant la saisie ; une seule par 30 min |
 | Points en vidéo | écran fidélité | vidéo récompensée | le membre la déclenche ; +5 points, 3 par jour |
 
-## Pourquoi la pub est *après* la confirmation
+## Où exactement la pub se place
 
-La réservation est ce que l'app vend. Une pub qui s'intercale avant en fait
-perdre, et une réservation perdue coûte plus que ce que l'interstitiel
-rapporte. Comme presque tout le monde réserve, le nombre d'impressions est le
-même des deux côtés de la confirmation — seul le risque change.
+La personne appuie sur « Réserver ». **La réservation part et s'enregistre**,
+puis la pub s'ouvre, puis l'écran « réservation envoyée » s'affiche. La place
+est donc acquise avant la première image de la publicité : même si le
+téléphone s'éteint pendant, la réservation est faite.
+
+La pub est préchargée dès l'ouverture de l'écran de réservation, pendant que
+la personne lit et coche. Sans ce préchargement, il y aurait trois à quatre
+secondes d'écran vide entre l'appui et la confirmation — et c'est l'attente,
+pas la publicité, qui fait désinstaller. Si elle n'est pas prête en quatre
+secondes, on passe directement à la confirmation.
 
 La vidéo récompensée, elle, ne peut pas être imposée : le règlement AdMob
 exige que le membre choisisse de la regarder. Un « regardez pour réserver »
@@ -82,8 +88,7 @@ déclaré est retirée.
 | Variable | Défaut | Effet |
 |---|---|---|
 | `ADS_ENABLED` | `false` | l'interrupteur général |
-| `ADS_RESERVATION_ENABLED` | `true` | l'interstitiel d'après-réservation |
-| `ADS_RESERVATION_DELAY_MS` | `1800` | temps de lecture de la confirmation |
+| `ADS_RESERVATION_ENABLED` | `true` | l'interstitiel de la réservation |
 | `ADS_RESERVATION_COOLDOWN_MINUTES` | `30` | une pub par tranche de |
 | `ADS_REWARDED_ENABLED` | `true` | la vidéo pour des points |
 | `ADS_REWARDED_POINTS` | `5` | points par vidéo |

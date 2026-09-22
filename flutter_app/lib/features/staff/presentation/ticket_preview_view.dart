@@ -353,6 +353,9 @@ class _DetailsCard extends StatelessWidget {
             _Row(label: 'Studio', value: preview.studio!),
           if (preview.attendeePhone != null)
             _Row(label: 'Téléphone', value: preview.attendeePhone!),
+          // Qui l'a amené : ni le nom de l'émission ni le billet ne le disent.
+          if (preview.referrerName != null)
+            _Row(label: 'Amené par', value: preview.referrerName!),
           _Row(label: 'Billet', value: preview.ticketCode),
         ],
       ),

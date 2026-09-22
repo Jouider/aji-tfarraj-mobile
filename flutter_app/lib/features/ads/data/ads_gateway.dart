@@ -12,10 +12,18 @@ abstract class AdsGateway {
   /// Recueille le consentement puis démarre le SDK. Idempotent.
   Future<void> initialize();
 
-  /// Charge et montre un interstitiel. Rend false si rien n'a pu être montré
-  /// — réseau, inventaire vide, unité inconnue : dans tous ces cas l'écran
-  /// continue comme si de rien n'était.
-  Future<bool> showInterstitial(String unitId);
+  /// Met un interstitiel de côté, prêt à s'ouvrir.
+  ///
+  /// Appelé pendant que la personne remplit sa réservation : une pub qui se
+  /// charge au moment de l'afficher fait attendre plusieurs secondes devant un
+  /// écran vide, et c'est l'attente, pas la pub, qui fait désinstaller.
+  Future<void> preloadInterstitial(String unitId);
+
+  /// Montre l'interstitiel préchargé, ou en charge un dans la limite de
+  /// [wait]. Rend false si rien n'a pu être montré — réseau, inventaire vide,
+  /// unité inconnue : dans tous ces cas l'écran continue comme si de rien
+  /// n'était.
+  Future<bool> showInterstitial(String unitId, {Duration wait});
 
   /// Charge et montre une vidéo récompensée. Rend true si le membre est allé
   /// au bout. Les points, eux, ne sont crédités que par le rappel signé que
@@ -29,9 +37,9 @@ class AdMobGateway implements AdsGateway {
 
   Future<void>? _starting;
 
-  /// Au-delà, on renonce : une pub qui arrive après que le membre est passé à
-  /// autre chose est pire que pas de pub.
-  static const _loadTimeout = Duration(seconds: 8);
+  /// L'interstitiel tenu prêt, et le chargement en cours s'il y en a un.
+  InterstitialAd? _ready;
+  bool _loading = false;
 
   @override
   Future<void> initialize() => _starting ??= _start();
@@ -67,29 +75,63 @@ class AdMobGateway implements AdsGateway {
     );
 
     // Un formulaire qui ne répond pas ne bloque pas l'app pour autant.
-    await gathered.future.timeout(const Duration(seconds: 10),
-        onTimeout: () => null);
+    await gathered.future
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
   }
 
   @override
-  Future<bool> showInterstitial(String unitId) async {
-    await initialize();
+  Future<void> preloadInterstitial(String unitId) async {
+    if (_ready != null || _loading) return;
 
-    final shown = Completer<bool>();
+    await initialize();
+    _loading = true;
 
     await InterstitialAd.load(
       adUnitId: unitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) => ad.dispose(),
-            onAdFailedToShowFullScreenContent: (ad, error) {
-              ad.dispose();
-              _complete(shown, false);
-            },
-          );
-          ad.show();
+          _ready = ad;
+          _loading = false;
+        },
+        onAdFailedToLoad: (error) {
+          _loading = false;
+          if (kDebugMode) debugPrint('[Ads] préchargement : ${error.message}');
+        },
+      ),
+    );
+  }
+
+  @override
+  Future<bool> showInterstitial(
+    String unitId, {
+    Duration wait = const Duration(seconds: 4),
+  }) async {
+    final ready = _ready;
+
+    if (ready != null) {
+      _ready = null;
+      _show(ready);
+      return true;
+    }
+
+    await initialize();
+
+    final shown = Completer<bool>();
+    var giveUp = false;
+
+    await InterstitialAd.load(
+      adUnitId: unitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          // Arrivée après le délai : l'écran est passé à autre chose, et une
+          // pub qui s'ouvre par-dessus serait prise pour un bug.
+          if (giveUp) {
+            ad.dispose();
+            return;
+          }
+          _show(ad);
           _complete(shown, true);
         },
         onAdFailedToLoad: (error) {
@@ -99,8 +141,18 @@ class AdMobGateway implements AdsGateway {
       ),
     );
 
-    return shown.future
-        .timeout(_loadTimeout, onTimeout: () => false);
+    return shown.future.timeout(wait, onTimeout: () {
+      giveUp = true;
+      return false;
+    });
+  }
+
+  void _show(InterstitialAd ad) {
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) => ad.dispose(),
+      onAdFailedToShowFullScreenContent: (ad, error) => ad.dispose(),
+    );
+    ad.show();
   }
 
   @override
@@ -161,7 +213,12 @@ class SilentAdsGateway implements AdsGateway {
   Future<void> initialize() async {}
 
   @override
-  Future<bool> showInterstitial(String unitId) async => false;
+  Future<void> preloadInterstitial(String unitId) async {}
+
+  @override
+  Future<bool> showInterstitial(String unitId,
+          {Duration wait = const Duration(seconds: 4)}) async =>
+      false;
 
   @override
   Future<bool> showRewarded(String unitId, {required String userId}) async =>

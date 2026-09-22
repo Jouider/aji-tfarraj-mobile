@@ -110,6 +110,11 @@ class TicketPreview {
   final int? reservationId;
   final int seats;
 
+  /// Le chargé public dont le code a servi à cette réservation. Null quand la
+  /// personne est venue d'elle-même — la porte doit pouvoir faire la
+  /// différence, c'est sur ce nom que la soirée se paie.
+  final String? referrerName;
+
   /// Stops the shuttle actually serves tonight. **Empty means there is no
   /// shuttle for this recording**, and the door must not ask the question.
   final List<ReturnPointOption> returnPoints;
@@ -142,6 +147,7 @@ class TicketPreview {
     this.departure,
     this.reservationId,
     this.seats = 1,
+    this.referrerName,
     this.returnPoints = const [],
     this.chosenReturnPointId,
     this.episodeId,
@@ -178,6 +184,7 @@ class TicketPreview {
         departure: departure,
         reservationId: reservationId,
         seats: seats,
+        referrerName: referrerName,
         returnPoints: returnPoints,
         chosenReturnPointId: pointId,
         episodeId: episodeId,
@@ -210,6 +217,7 @@ class TicketPreview {
         departure: departure,
         reservationId: reservationId,
         seats: seats,
+        referrerName: referrerName,
         returnPoints: returnPoints,
         chosenReturnPointId: chosenReturnPointId,
         episodeId: episodeId,
@@ -249,6 +257,8 @@ class TicketPreview {
       departure: Departure.fromJson(reservation['departure']),
       reservationId: reservation['id'] as int?,
       seats: reservation['seats'] as int? ?? 1,
+      referrerName:
+          (reservation['referrer'] as Map<String, dynamic>?)?['name'] as String?,
       returnPoints: (json['return_points'] as List<dynamic>? ?? [])
           .map((e) => ReturnPointOption.fromJson(e as Map<String, dynamic>))
           .toList(),
