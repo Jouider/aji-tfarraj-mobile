@@ -64,4 +64,20 @@ post_install do |installer|
   installer.pods_project.build_configurations.each do |config|
     config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
   end
+
+  # Et sur la cible Runner elle-même, pas seulement sur les pods.
+  #
+  # Clang construit un module avec les options du CLIENT qui l'importe : le
+  # SDK AdMob inclut un en-tête privé (GoogleMobileAds_Beta.h) depuis
+  # google_mobile_ads, et sans ce drapeau ici, l'archive échoue sur
+  # « Include of non-modular header inside framework module » — alors même que
+  # tous les pods l'ont déjà.
+  installer.aggregate_targets.each do |aggregate_target|
+    aggregate_target.user_project.native_targets.each do |native_target|
+      native_target.build_configurations.each do |config|
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      end
+    end
+    aggregate_target.user_project.save
+  end
 end
