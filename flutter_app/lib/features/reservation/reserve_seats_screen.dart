@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/ads/data/ads_service.dart';
-import 'package:aji_tfarraj/features/return_points/presentation/return_point_choice.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_point_field.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -197,21 +197,19 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
                 // Le retour : proposé seulement si une navette roule ce
                 // soir-là, sinon la question n'a pas de réponse utile.
                 if (episode != null && episode.returnPoints.isNotEmpty) ...[
-                  Text(s.returnPointQuestion, style: AppTypography.labelLarge),
+                  ReturnPointField(
+                    points: episode.returnPoints,
+                    selectedId: _returnPointId,
+                    isArabic: ref.watch(localeProvider) == AppLocale.ar,
+                    strings: s,
+                    enabled: !_isLoading,
+                    onChoose: (id) => setState(() => _returnPointId = id),
+                  ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     s.returnPointChangeable,
                     style: AppTypography.caption
                         .copyWith(color: AppColors.textMuted),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  ReturnPointChoice(
-                    points: episode.returnPoints,
-                    selectedId: _returnPointId,
-                    isArabic: ref.watch(localeProvider) == AppLocale.ar,
-                    noneLabel: s.returnPointNone,
-                    enabled: !_isLoading,
-                    onChoose: (id) => setState(() => _returnPointId = id),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                 ],

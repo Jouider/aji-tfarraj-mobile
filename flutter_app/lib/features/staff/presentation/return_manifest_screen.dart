@@ -201,14 +201,16 @@ class _ManifestView extends ConsumerWidget {
             _OrphanWarning(message: s.staffManifestOrphanWarning),
           ],
           const SizedBox(height: AppSpacing.lg),
-          if (manifest.points.isEmpty)
+          // Seuls les arrêts où quelqu'un attend : un arrêt desservi mais vide
+          // allonge la feuille sans rien apprendre au chauffeur.
+          if (manifest.servedTonight.isEmpty)
             EmptyState(
               icon: Icons.directions_bus_outlined,
               title: s.staffManifestNobody,
               description: s.staffManifestNobodySubtitle,
             )
           else
-            for (final point in manifest.points)
+            for (final point in manifest.servedTonight)
               _PointCard(point: point, isAr: isAr, s: s),
           const SizedBox(height: AppSpacing.lg),
           _ShareButton(manifest: manifest),

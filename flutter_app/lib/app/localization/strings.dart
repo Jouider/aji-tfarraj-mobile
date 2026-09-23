@@ -1143,6 +1143,10 @@ class AppStrings {
       ? 'Je rentre par mes propres moyens'
       : 'غادي نرجع بوحدي';
 
+  /// Sur la ligne repliée : ce qu'on tape pour ouvrir la liste.
+  String get returnPointChange =>
+      locale == AppLocale.fr ? 'Modifier' : 'بدّل';
+
   /// Dit en toutes lettres que le choix n'engage à rien : la porte le repose
   /// de toute façon.
   String get returnPointChangeable => locale == AppLocale.fr

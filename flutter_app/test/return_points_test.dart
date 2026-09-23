@@ -12,6 +12,7 @@ import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
 import 'package:aji_tfarraj/features/return_points/presentation/return_point_choice.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_point_field.dart';
 import 'package:aji_tfarraj/features/shows/domain/episode.dart';
 
 Map<String, dynamic> _stop(int id, String name, {String? ar, String? landmark}) =>
@@ -155,6 +156,82 @@ void main() {
       await tester.tap(find.text(s.returnPointNone));
       await tester.pumpAndSettle();
       expect(chosen, isNull);
+    });
+  });
+
+  group('la ligne repliée, à la réservation', () {
+    // Dix arrêts déroulés poussaient les conditions et le bouton hors de
+    // l'écran : la liste ne s'ouvre plus que si on la demande.
+    Future<int?> pump(WidgetTester tester, {int? selectedId}) async {
+      int? chosen = selectedId;
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) => ReturnPointField(
+              points: points,
+              selectedId: chosen,
+              isArabic: false,
+              strings: s,
+              onChoose: (id) => setState(() => chosen = id),
+            ),
+          ),
+        ),
+      ));
+
+      return chosen;
+    }
+
+    testWidgets('elle tient sur une ligne, sans dérouler les arrêts',
+        (tester) async {
+      await pump(tester);
+
+      expect(find.text(s.returnPointQuestion), findsOneWidget);
+      expect(find.text(s.returnPointNone), findsOneWidget,
+          reason: 'la réponse par défaut est affichée, pas un champ vide');
+      expect(find.text('Gare Casa-Port'), findsNothing);
+      expect(find.text('Ain Diab'), findsNothing);
+    });
+
+    testWidgets('elle montre l\'arrêt déjà choisi', (tester) async {
+      await pump(tester, selectedId: 1);
+
+      expect(find.text('Gare Casa-Port'), findsOneWidget);
+      expect(find.text(s.returnPointNone), findsNothing);
+    });
+
+    testWidgets('la liste s\'ouvre au toucher, et se referme sur le choix',
+        (tester) async {
+      await pump(tester);
+
+      await tester.tap(find.text(s.returnPointChange));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Gare Casa-Port'), findsOneWidget);
+      expect(find.text('Ain Diab'), findsOneWidget);
+
+      await tester.tap(find.text('Ain Diab'));
+      await tester.pumpAndSettle();
+
+      // La feuille est refermée, et la ligne porte le nouveau choix.
+      expect(find.text('Gare Casa-Port'), findsNothing);
+      expect(find.text('Ain Diab'), findsOneWidget);
+    });
+
+    testWidgets('sans navette, rien ne s\'affiche', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: ReturnPointField(
+            points: const [],
+            selectedId: null,
+            isArabic: false,
+            strings: s,
+            onChoose: (_) {},
+          ),
+        ),
+      ));
+
+      expect(find.text(s.returnPointQuestion), findsNothing);
     });
   });
 }

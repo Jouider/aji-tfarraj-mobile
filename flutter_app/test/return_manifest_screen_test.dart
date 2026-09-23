@@ -116,4 +116,50 @@ void main() {
     expect(find.text('Salma Idrissi'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  /// Un arrêt desservi où personne n'attend allonge la feuille sans rien
+  /// apprendre au chauffeur — et le PDF ne l'imprimait déjà pas.
+  testWidgets('un arrêt sans personne n\'est pas affiché', (tester) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    final manifest = ReturnManifest.fromJson({
+      'episode': {'id': 42, 'title': 'episode 1'},
+      'show': {'id': 1, 'title': 'Soirées électorales 2026'},
+      'has_shuttle': true,
+      'totals': {
+        'checked_in_people': 30,
+        'checked_in_tickets': 30,
+        'riders': 30,
+        'own_means': 0,
+      },
+      'points': [
+        {
+          'id': 1,
+          'name': 'Gare Casa-Port',
+          'served': true,
+          'people': 30,
+          'tickets': 30,
+          'passengers': [
+            {'name': 'Ahmed Bennani', 'seats': 1},
+          ],
+        },
+        {
+          'id': 2,
+          'name': 'Arrêt désert',
+          'served': true,
+          'people': 0,
+          'tickets': 0,
+          'passengers': [],
+        },
+      ],
+    });
+
+    await _pump(tester, manifest);
+
+    expect(find.text('Gare Casa-Port'), findsOneWidget);
+    expect(find.text('Arrêt désert'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }
