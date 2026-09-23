@@ -2,4 +2,3 @@
 
 NSPhotoLibraryUsageDescription = "Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil.";
 NSCameraUsageDescription = "Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil.";
-NSUserTrackingUsageDescription = "Pour vous proposer des publicités adaptées plutôt qu'au hasard. Vous pouvez refuser : l'application fonctionne pareil.";

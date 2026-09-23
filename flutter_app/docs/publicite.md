@@ -78,7 +78,23 @@ ADMOB_ANDROID_INTERSTITIAL=ca-app-pub-…/…
 ADMOB_ANDROID_REWARDED=ca-app-pub-…/…
 ```
 
-**5. Déclarer la publicité sur les deux stores.** Play Console → « Contient des
+**5. Remettre l'autorisation de suivi (iOS) — et la déclarer.**
+
+`NSUserTrackingUsageDescription` a été **retiré** d'`ios/Runner/Info.plist` en
+1.1.15 : sa seule présence fait refuser la soumission tant qu'App Privacy ne
+déclare pas le suivi, et déclarer un suivi qui n'existe pas affiche « Données
+utilisées pour vous suivre » sur la fiche App Store pour rien.
+
+Le jour où la publicité s'allume, les deux vont ensemble :
+
+- remettre la clé dans `Info.plist` et sa traduction dans les deux
+  `InfoPlist.strings` (voir le commentaire laissé à sa place) ;
+- dans App Store Connect → Confidentialité de l'app, déclarer que
+  l'identifiant publicitaire est utilisé **à des fins de suivi**.
+
+L'un sans l'autre bloque la mise en vente.
+
+**6. Déclarer la publicité sur les deux stores.** Play Console → « Contient des
 annonces » ; App Store Connect → confidentialité (identifiant publicitaire
 utilisé pour la publicité ciblée). Une app qui sert des pubs sans l'avoir
 déclaré est retirée.
