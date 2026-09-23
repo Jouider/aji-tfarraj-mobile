@@ -1126,6 +1126,38 @@ class AppStrings {
       : 'ما قدرناش نشغلو الفيديو دابا. تأكد من الاتصال ديالك.';
 
   // ============================================
+  // Retour après le tournage (navette)
+  // ============================================
+
+  /// Posé à la réservation, pour ne pas avoir à le demander à trois cents
+  /// personnes à la file à minuit devant le studio.
+  String get returnPointQuestion => locale == AppLocale.fr
+      ? 'Comment rentres-tu après le tournage ?'
+      : 'كيفاش غادي ترجع من بعد التصوير؟';
+
+  String get returnPointHint => locale == AppLocale.fr
+      ? 'La navette peut te déposer à l\'un de ces arrêts.'
+      : 'الطوبيس يقدر ينزلك فواحد من هاد المحطات.';
+
+  String get returnPointNone => locale == AppLocale.fr
+      ? 'Je rentre par mes propres moyens'
+      : 'غادي نرجع بوحدي';
+
+  /// Dit en toutes lettres que le choix n'engage à rien : la porte le repose
+  /// de toute façon.
+  String get returnPointChangeable => locale == AppLocale.fr
+      ? 'Facultatif — tu pourras changer sur place.'
+      : 'اختياري — تقدر تبدلو فعين المكان.';
+
+  /// Sur le billet et la confirmation.
+  String get returnPointChosen =>
+      locale == AppLocale.fr ? 'Retour' : 'الرجوع';
+
+  /// L'étape du même nom, à l'inscription sur place.
+  String get onSiteStepReturn =>
+      locale == AppLocale.fr ? 'Retour' : 'الرجوع';
+
+  // ============================================
   // Publicité — la vidéo qu'on regarde pour des points
   // ============================================
 

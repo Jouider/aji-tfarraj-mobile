@@ -45,6 +45,7 @@ class ReservationsRepository {
   Future<Reservation> createReservation({
     required int episodeId,
     String? referralCode,
+    int? returnPointId,
   }) async {
     try {
       final response = await _apiClient.post(
@@ -53,6 +54,10 @@ class ReservationsRepository {
           'episode_id': episodeId,
           if (referralCode != null && referralCode.isNotEmpty)
             'referral_code': referralCode,
+          // Absent = rentre par ses propres moyens. La porte reposera la
+          // question de toute façon : ce choix-ci évite juste de la poser à
+          // trois cents personnes à la file.
+          if (returnPointId != null) 'return_point_id': returnPointId,
         },
       );
       final data = response.data;
@@ -129,11 +134,13 @@ class MyReservationsNotifier extends AsyncNotifier<List<Reservation>> {
   Future<Reservation> createReservation({
     required int episodeId,
     String? referralCode,
+    int? returnPointId,
   }) async {
     final repository = ref.read(reservationsRepositoryProvider);
     final reservation = await repository.createReservation(
       episodeId: episodeId,
       referralCode: referralCode,
+      returnPointId: returnPointId,
     );
     // Refresh the list after creating
     await refresh();

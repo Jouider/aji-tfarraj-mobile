@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/ads/data/ads_service.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_point_choice.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/components/loading/skeleton_loader.dart';
+import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
@@ -43,6 +45,11 @@ class ReserveSeatsScreen extends ConsumerStatefulWidget {
 class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
   bool _isLoading = false;
   bool _agreedToTerms = false;
+
+  /// L'arrêt où la navette la dépose, choisi ici plutôt qu'à minuit devant le
+  /// studio. Null veut dire « je rentre par mes propres moyens » — la porte
+  /// repose la question de toute façon.
+  int? _returnPointId;
   String? _errorMessage;
   final _referralCodeController = TextEditingController();
   bool _referralInitiallyExpanded = false;
@@ -187,6 +194,28 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
 
+                // Le retour : proposé seulement si une navette roule ce
+                // soir-là, sinon la question n'a pas de réponse utile.
+                if (episode != null && episode.returnPoints.isNotEmpty) ...[
+                  Text(s.returnPointQuestion, style: AppTypography.labelLarge),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    s.returnPointChangeable,
+                    style: AppTypography.caption
+                        .copyWith(color: AppColors.textMuted),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  ReturnPointChoice(
+                    points: episode.returnPoints,
+                    selectedId: _returnPointId,
+                    isArabic: ref.watch(localeProvider) == AppLocale.ar,
+                    noneLabel: s.returnPointNone,
+                    enabled: !_isLoading,
+                    onChoose: (id) => setState(() => _returnPointId = id),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+
                 // FIX: Terms checkbox — branded primary checkbox, scale bounce
                 TermsCheckbox(
                   value: _agreedToTerms,
@@ -249,6 +278,7 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
           .createReservation(
             episodeId: episodeId,
             referralCode: referralCode.isNotEmpty ? referralCode : null,
+            returnPointId: _returnPointId,
           );
 
       // Attribution consumed — clear both the in-memory and the persisted code

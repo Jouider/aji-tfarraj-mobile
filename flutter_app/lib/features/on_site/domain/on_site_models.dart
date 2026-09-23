@@ -1,3 +1,5 @@
+import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
+
 // Models for on-site registration — the door flow where staff open a real
 // account for someone who turned up without booking.
 
@@ -10,6 +12,10 @@ class OnSiteEpisode {
   final int? capacity;
   final int? reservedSeats;
 
+  /// Les arrêts desservis ce soir-là. Vide = pas de navette, et la porte ne
+  /// pose pas la question.
+  final List<ReturnPointOption> returnPoints;
+
   const OnSiteEpisode({
     required this.id,
     this.title,
@@ -17,6 +23,7 @@ class OnSiteEpisode {
     this.studio,
     this.capacity,
     this.reservedSeats,
+    this.returnPoints = const [],
   });
 
   /// Seats still free, when the backend gave us both numbers.
@@ -33,6 +40,7 @@ class OnSiteEpisode {
         studio: json['studio'] as String?,
         capacity: json['capacity'] as int?,
         reservedSeats: json['reserved_seats'] as int?,
+        returnPoints: ReturnPointOption.listFrom(json['return_points']),
       );
 }
 

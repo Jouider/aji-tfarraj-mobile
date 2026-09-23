@@ -7,7 +7,6 @@
 // quelque chose à gagner aujourd'hui.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,10 +20,9 @@ import 'package:aji_tfarraj/features/loyalty/presentation/widgets/watch_for_poin
 
 /// Une porte qui ne montre rien mais retient ce qu'on lui a demandé.
 class _FakeGateway implements AdsGateway {
-  _FakeGateway({this.interstitialShown = true, this.rewardEarned = true});
+  _FakeGateway({this.interstitialShown = true});
 
   final bool interstitialShown;
-  final bool rewardEarned;
 
   int interstitialCalls = 0;
   int preloadCalls = 0;
@@ -50,7 +48,7 @@ class _FakeGateway implements AdsGateway {
   Future<bool> showRewarded(String unitId, {required String userId}) async {
     rewardedCalls++;
     lastUserId = userId;
-    return rewardEarned;
+    return true;
   }
 }
 
