@@ -64,6 +64,7 @@ class OnSiteRepository {
     required String district,
     required String photoPath,
     int? chargePublicId,
+    int? returnPointId,
     String? phoneNumber,
     String? email,
   }) async {
@@ -78,6 +79,9 @@ class OnSiteRepository {
         'city_name': cityName,
         'district': district,
         if (chargePublicId != null) 'charge_public_id': chargePublicId,
+        // Absent = « repart par ses propres moyens » : le serveur enregistre
+        // null, ce qui est une réponse, pas une absence de réponse.
+        if (returnPointId != null) 'return_point_id': returnPointId,
         if (phoneNumber != null && phoneNumber.isNotEmpty)
           'phone_number': phoneNumber,
         if (email != null && email.isNotEmpty) 'email': email,

@@ -1,4 +1,10 @@
 import 'package:aji_tfarraj/features/staff/domain/attendee.dart';
+import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
+
+// Les arrêts de la navette sont les mêmes pour la porte, la réservation et
+// l'inscription sur place : ré-export pour que les écrans du staff continuent
+// de les lire ici.
+export 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
 
 /// What the scanner sees after scanning, *before* admitting anyone.
 ///
@@ -54,33 +60,6 @@ enum WrongDateReason {
       };
 }
 
-/// A drop-off point the shuttle serves for this recording.
-class ReturnPointOption {
-  final int id;
-  final String name;
-  final String? nameAr;
-  final String? landmark;
-
-  const ReturnPointOption({
-    required this.id,
-    required this.name,
-    this.nameAr,
-    this.landmark,
-  });
-
-  /// Localised label — falls back to French when no Arabic name is set.
-  String localizedName(bool isAr) =>
-      (isAr && nameAr != null && nameAr!.isNotEmpty) ? nameAr! : name;
-
-  factory ReturnPointOption.fromJson(Map<String, dynamic> json) =>
-      ReturnPointOption(
-        id: json['id'] as int,
-        name: json['name'] as String? ?? '',
-        nameAr: json['name_ar'] as String?,
-        landmark: json['landmark'] as String?,
-      );
-}
-
 class TicketPreview {
   final TicketPreviewStatus status;
   final WrongDateReason? reason;
@@ -109,6 +88,11 @@ class TicketPreview {
   // Reservation
   final int? reservationId;
   final int seats;
+
+  /// Le chargé public dont le code a servi à cette réservation. Null quand la
+  /// personne est venue d'elle-même — la porte doit pouvoir faire la
+  /// différence, c'est sur ce nom que la soirée se paie.
+  final String? referrerName;
 
   /// Stops the shuttle actually serves tonight. **Empty means there is no
   /// shuttle for this recording**, and the door must not ask the question.
@@ -142,6 +126,7 @@ class TicketPreview {
     this.departure,
     this.reservationId,
     this.seats = 1,
+    this.referrerName,
     this.returnPoints = const [],
     this.chosenReturnPointId,
     this.episodeId,
@@ -178,6 +163,7 @@ class TicketPreview {
         departure: departure,
         reservationId: reservationId,
         seats: seats,
+        referrerName: referrerName,
         returnPoints: returnPoints,
         chosenReturnPointId: pointId,
         episodeId: episodeId,
@@ -210,6 +196,7 @@ class TicketPreview {
         departure: departure,
         reservationId: reservationId,
         seats: seats,
+        referrerName: referrerName,
         returnPoints: returnPoints,
         chosenReturnPointId: chosenReturnPointId,
         episodeId: episodeId,
@@ -249,9 +236,9 @@ class TicketPreview {
       departure: Departure.fromJson(reservation['departure']),
       reservationId: reservation['id'] as int?,
       seats: reservation['seats'] as int? ?? 1,
-      returnPoints: (json['return_points'] as List<dynamic>? ?? [])
-          .map((e) => ReturnPointOption.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      referrerName:
+          (reservation['referrer'] as Map<String, dynamic>?)?['name'] as String?,
+      returnPoints: ReturnPointOption.listFrom(json['return_points']),
       chosenReturnPointId:
           (reservation['return_point'] as Map<String, dynamic>?)?['id'] as int?,
       episodeId: episode['id'] as int?,

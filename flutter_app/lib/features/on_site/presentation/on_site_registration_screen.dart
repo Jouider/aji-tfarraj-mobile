@@ -8,10 +8,13 @@ import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
+import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/on_site/data/on_site_repository.dart';
 import 'package:aji_tfarraj/features/on_site/domain/on_site_models.dart';
+import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_point_choice.dart';
 import 'package:aji_tfarraj/features/profile/data/profile_repository.dart'
     show citiesProvider;
 import 'package:aji_tfarraj/features/profile/presentation/face_capture_screen.dart';
@@ -52,6 +55,12 @@ class _OnSiteRegistrationScreenState
   String? _cityName;
   String? _district;
 
+  /// Où la navette la dépose. Null est une vraie réponse — beaucoup rentrent
+  /// par leurs propres moyens — d'où [_returnAnswered], qui distingue « a dit
+  /// non » de « on ne lui a pas demandé ».
+  int? _returnPointId;
+  bool _returnAnswered = false;
+
   bool _submitting = false;
   String? _error;
 
@@ -82,9 +91,22 @@ class _OnSiteRegistrationScreenState
       _birthday = null;
       _cityName = null;
       _district = null;
+      _returnPointId = null;
+      _returnAnswered = false;
       _error = null;
     });
   }
+
+  /// Les arrêts desservis ce soir-là. Vide : pas de navette, et l'étape du
+  /// retour n'existe pas — on ne fait pas taper sur « aucun » pour rien.
+  List<ReturnPointOption> get _returnPoints => _episode?.returnPoints ?? const [];
+
+  bool get _hasShuttle => _returnPoints.isNotEmpty;
+
+  /// 3 étapes, 4 quand la navette roule.
+  int get _stepCount => _hasShuttle ? 4 : 3;
+
+  int get _lastStep => _stepCount - 1;
 
   bool _stepValid(int step) {
     switch (step) {
@@ -95,10 +117,17 @@ class _OnSiteRegistrationScreenState
             _lastName.text.trim().isNotEmpty &&
             _gender != null &&
             _birthday != null;
-      default:
+      case 2:
         return _cityName != null && _district != null;
+      default:
+        // Une réponse explicite, y compris « repart par ses propres moyens » :
+        // sans ça, personne ne saura si la question a été posée.
+        return _returnAnswered;
     }
   }
+
+  bool get _allStepsValid =>
+      List.generate(_stepCount, _stepValid).every((valid) => valid);
 
   Future<void> _capturePhoto() async {
     final path = await Navigator.of(context).push<String>(
@@ -129,7 +158,7 @@ class _OnSiteRegistrationScreenState
 
   Future<void> _submit() async {
     final s = ref.read(stringsProvider);
-    if (!_stepValid(0) || !_stepValid(1) || !_stepValid(2)) {
+    if (!_allStepsValid) {
       setState(() => _error = s.onSiteRequiredFields);
       return;
     }
@@ -150,6 +179,7 @@ class _OnSiteRegistrationScreenState
             district: _district!,
             photoPath: _photoPath!,
             chargePublicId: _chargePublic?.id,
+            returnPointId: _returnPointId,
             phoneNumber: _phone.text.trim(),
             email: _email.text.trim(),
           );
@@ -294,7 +324,12 @@ class _OnSiteRegistrationScreenState
   // ── Phase 2: the person ─────────────────────────────────────────────────
 
   Widget _buildPerson(dynamic s) {
-    final stepLabels = [s.onSiteStepPhoto, s.onSiteStepIdentity, s.onSiteStepLocation];
+    final stepLabels = [
+      s.onSiteStepPhoto,
+      s.onSiteStepIdentity,
+      s.onSiteStepLocation,
+      if (_hasShuttle) s.onSiteStepReturn,
+    ];
 
     return Column(
       children: [
@@ -316,7 +351,7 @@ class _OnSiteRegistrationScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(stepLabels[_step], style: AppTypography.h4),
-              Text(s.onSiteStepCounter(_step + 1, 3),
+              Text(s.onSiteStepCounter(_step + 1, _stepCount),
                   style: AppTypography.labelSmall
                       .copyWith(color: AppColors.textMuted)),
             ],
@@ -328,7 +363,8 @@ class _OnSiteRegistrationScreenState
             child: switch (_step) {
               0 => _buildPhotoStep(s),
               1 => _buildIdentityStep(s),
-              _ => _buildLocationStep(s),
+              2 => _buildLocationStep(s),
+              _ => _buildReturnStep(s),
             },
           ),
         ),
@@ -342,37 +378,99 @@ class _OnSiteRegistrationScreenState
     );
   }
 
+  /// L'aperçu est plafonné pour que le bouton reste visible sans faire
+  /// défiler : à la porte, un bouton qu'il faut chercher est un bouton qui
+  /// n'existe pas. Le cadre lui-même ouvre l'appareil photo.
   Widget _buildPhotoStep(dynamic s) {
+    final preview = MediaQuery.sizeOf(context).height * 0.38;
+    final taken = _photoPath != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: AppSpacing.md),
-        AspectRatio(
-          aspectRatio: 3 / 4,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            child: _photoPath == null
-                ? Container(
-                    color: AppColors.backgroundGrey,
-                    child: Center(
-                      child: Icon(Icons.person_outline,
-                          size: 64, color: AppColors.textLight),
-                    ),
-                  )
-                : Image.file(File(_photoPath!), fit: BoxFit.cover),
+        Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: preview),
+            child: AspectRatio(
+              aspectRatio: 3 / 4,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                child: Material(
+                  color: AppColors.backgroundGrey,
+                  child: InkWell(
+                    onTap: _capturePhoto,
+                    child: taken
+                        ? Image.file(File(_photoPath!), fit: BoxFit.cover)
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.photo_camera_outlined,
+                                  size: 48, color: AppColors.textMuted),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                s.onSiteTakePhoto,
+                                style: AppTypography.labelMedium
+                                    .copyWith(color: AppColors.textMuted),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.md),
+        SizedBox(
+          height: AppSpacing.buttonHeight,
+          child: FilledButton.icon(
+            onPressed: _capturePhoto,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.photo_camera_outlined),
+            label: Text(taken ? s.onSiteRetakePhoto : s.onSiteTakePhoto),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
         Text(s.onSitePhotoHint,
+            textAlign: TextAlign.center,
             style:
                 AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
         const SizedBox(height: AppSpacing.md),
-        OutlinedButton.icon(
-          onPressed: _capturePhoto,
-          icon: const Icon(Icons.photo_camera_outlined),
-          label: Text(
-              _photoPath == null ? s.onSiteTakePhoto : s.onSiteRetakePhoto),
+      ],
+    );
+  }
+
+  /// Où la navette la dépose. Posé à la porte parce que c'est là que les plans
+  /// changent — et enregistré même quand la réponse est « je me débrouille ».
+  Widget _buildReturnStep(dynamic s) {
+    final isArabic = ref.watch(localeProvider) == AppLocale.ar;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: AppSpacing.md),
+        Text(s.staffReturnPointQuestion, style: AppTypography.h4),
+        const SizedBox(height: AppSpacing.xs),
+        Text(s.returnPointHint,
+            style:
+                AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
+        const SizedBox(height: AppSpacing.lg),
+        ReturnPointChoice(
+          points: _returnPoints,
+          selectedId: _returnAnswered ? _returnPointId : -1,
+          isArabic: isArabic,
+          noneLabel: s.staffReturnPointNone,
+          onChoose: (id) => setState(() {
+            _returnPointId = id;
+            _returnAnswered = true;
+            _error = null;
+          }),
         ),
+        const SizedBox(height: AppSpacing.md),
       ],
     );
   }
@@ -498,7 +596,7 @@ class _OnSiteRegistrationScreenState
   }
 
   Widget _buildActions(dynamic s) {
-    final isLast = _step == 2;
+    final isLast = _step == _lastStep;
     final canAdvance = _stepValid(_step) && !_submitting;
 
     return Container(

@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Répertoire de travail du compilateur Kotlin 2.x (recréé à chaque build).
+.kotlin/

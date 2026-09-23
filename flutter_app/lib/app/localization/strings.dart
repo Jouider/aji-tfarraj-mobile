@@ -1125,6 +1125,76 @@ class AppStrings {
       ? 'Impossible de lire la vidéo pour le moment. Vérifie ta connexion.'
       : 'ما قدرناش نشغلو الفيديو دابا. تأكد من الاتصال ديالك.';
 
+  // ============================================
+  // Retour après le tournage (navette)
+  // ============================================
+
+  /// Posé à la réservation, pour ne pas avoir à le demander à trois cents
+  /// personnes à la file à minuit devant le studio.
+  String get returnPointQuestion => locale == AppLocale.fr
+      ? 'Comment rentres-tu après le tournage ?'
+      : 'كيفاش غادي ترجع من بعد التصوير؟';
+
+  String get returnPointHint => locale == AppLocale.fr
+      ? 'La navette peut te déposer à l\'un de ces arrêts.'
+      : 'الطوبيس يقدر ينزلك فواحد من هاد المحطات.';
+
+  String get returnPointNone => locale == AppLocale.fr
+      ? 'Je rentre par mes propres moyens'
+      : 'غادي نرجع بوحدي';
+
+  /// Dit en toutes lettres que le choix n'engage à rien : la porte le repose
+  /// de toute façon.
+  String get returnPointChangeable => locale == AppLocale.fr
+      ? 'Facultatif — tu pourras changer sur place.'
+      : 'اختياري — تقدر تبدلو فعين المكان.';
+
+  /// Sur le billet et la confirmation.
+  String get returnPointChosen =>
+      locale == AppLocale.fr ? 'Retour' : 'الرجوع';
+
+  /// L'étape du même nom, à l'inscription sur place.
+  String get onSiteStepReturn =>
+      locale == AppLocale.fr ? 'Retour' : 'الرجوع';
+
+  // ============================================
+  // Publicité — la vidéo qu'on regarde pour des points
+  // ============================================
+
+  /// Toujours formulé comme une proposition : regarder reste un choix, et le
+  /// règlement AdMob l'exige autant que le bon sens.
+  String get adRewardTitle => locale == AppLocale.fr
+      ? 'Gagne des points en vidéo'
+      : 'ربح النقط بالفيديو';
+
+  String adRewardPoints(int points) => locale == AppLocale.fr
+      ? '+$points points par vidéo'
+      : '+$points نقطة فكل فيديو';
+
+  String adRewardRemaining(int remaining) => locale == AppLocale.fr
+      ? (remaining > 1
+          ? 'Il te reste $remaining vidéos aujourd\'hui'
+          : 'Il te reste 1 vidéo aujourd\'hui')
+      : (remaining > 1
+          ? 'باقي ليك $remaining ديال الفيديوهات اليوم'
+          : 'باقي ليك فيديو وحدة اليوم');
+
+  String get adRewardWatch => locale == AppLocale.fr ? 'Regarder' : 'شوف';
+
+  /// Les points passent par Google puis par le serveur : ils n'apparaissent
+  /// pas à la seconde où la vidéo se termine, et le texte ne le promet pas.
+  String get adRewardEarned => locale == AppLocale.fr
+      ? 'Merci ! Tes points arrivent dans un instant.'
+      : 'شكرا! النقط ديالك غادي تبان من دابا شوية.';
+
+  String get adRewardUnavailable => locale == AppLocale.fr
+      ? 'Aucune vidéo disponible pour le moment. Réessaie plus tard.'
+      : 'ما كاين حتى فيديو دابا. عاود من بعد.';
+
+  /// Dans l'historique des points.
+  String get adRewardHistoryLabel =>
+      locale == AppLocale.fr ? 'Vidéo regardée' : 'فيديو متشاف';
+
   String get avatarFrameHint => locale == AppLocale.fr
       ? 'Placez votre visage dans le cadre'
       : 'ضع وجهك داخل الإطار';

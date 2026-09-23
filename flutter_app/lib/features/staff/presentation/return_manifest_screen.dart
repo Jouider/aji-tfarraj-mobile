@@ -286,18 +286,26 @@ class _Totals extends StatelessWidget {
           ),
         );
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        box(s.staffManifestWaiting, manifest.riders, AppColors.secondary.withValues(alpha: 0.12),
-            AppColors.secondary),
-        const SizedBox(width: AppSpacing.sm),
-        box(s.staffManifestOwnMeans, manifest.ownMeans, AppColors.backgroundWhite,
-            AppColors.textPrimary),
-        const SizedBox(width: AppSpacing.sm),
-        box(s.staffManifestPeopleIn, manifest.checkedInPeople,
-            AppColors.backgroundWhite, AppColors.textPrimary),
-      ],
+    // IntrinsicHeight, et pas seulement `stretch` : dans une liste, la hauteur
+    // disponible est infinie, et une rangée qui étire ses enfants dedans casse
+    // la mise en page — les arrêts et le bouton de partage, plus bas, ne se
+    // dessinaient alors jamais. Ici elle borne la rangée à la plus haute des
+    // trois cases, qui est ce qu'on voulait.
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          box(s.staffManifestWaiting, manifest.riders,
+              AppColors.secondary.withValues(alpha: 0.12),
+              AppColors.secondary),
+          const SizedBox(width: AppSpacing.sm),
+          box(s.staffManifestOwnMeans, manifest.ownMeans,
+              AppColors.backgroundWhite, AppColors.textPrimary),
+          const SizedBox(width: AppSpacing.sm),
+          box(s.staffManifestPeopleIn, manifest.checkedInPeople,
+              AppColors.backgroundWhite, AppColors.textPrimary),
+        ],
+      ),
     );
   }
 }

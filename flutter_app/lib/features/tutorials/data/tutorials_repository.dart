@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,7 +24,12 @@ class TutorialsRepository {
   /// because without the clips the app shows no video, and nothing else changes.
   Future<Object?> fetchAppConfig() async {
     try {
-      final response = await _client.get<dynamic>(AppConfig.appConfig);
+      final response = await _client.get<dynamic>(
+        AppConfig.appConfig,
+        // La plateforme décide des unités publicitaires renvoyées : sans elle
+        // le serveur n'en annonce aucune.
+        queryParameters: {'platform': Platform.isIOS ? 'ios' : 'android'},
+      );
       final data = response.data;
       return (data is Map && data['data'] is Map) ? data['data'] : data;
     } catch (e) {

@@ -1,3 +1,5 @@
+import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
+
 /// Episode model — a single recording/filming session within a Show
 class Episode {
   final int id;
@@ -18,6 +20,10 @@ class Episode {
   final String? cityAr;
   final String? studioAr;
 
+  /// Les arrêts que la navette dessert pour cet épisode. Vide = pas de
+  /// navette ce soir-là, et la question du retour ne se pose pas.
+  final List<ReturnPointOption> returnPoints;
+
   Episode({
     required this.id,
     required this.title,
@@ -34,6 +40,7 @@ class Episode {
     this.dateAr,
     this.cityAr,
     this.studioAr,
+    this.returnPoints = const [],
   });
 
   int get availableSeats => capacity - reservedSeats;
@@ -84,6 +91,7 @@ class Episode {
       dateAr: json['date_ar'] as String?,
       cityAr: json['city_ar'] as String?,
       studioAr: json['studio_ar'] as String?,
+      returnPoints: ReturnPointOption.listFrom(json['return_points']),
     );
   }
 
@@ -104,6 +112,7 @@ class Episode {
       'date_ar': dateAr,
       'city_ar': cityAr,
       'studio_ar': studioAr,
+      'return_points': returnPoints.map((p) => p.toJson()).toList(),
     };
   }
 

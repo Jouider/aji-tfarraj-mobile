@@ -43,6 +43,24 @@
 	<string>Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil et scanner les QR codes.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil.</string>
+	<key>GADApplicationIdentifier</key>
+	<!-- ⚠️ Identifiant de TEST de Google (voir AndroidManifest.xml et
+	     docs/publicite.md) : à remplacer par celui du compte AdMob avant la
+	     mise en production. -->
+	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Pour vous proposer des publicités adaptées plutôt qu'au hasard. Vous pouvez refuser : l'application fonctionne pareil.</string>
+	<key>SKAdNetworkItems</key>
+	<!-- Réseaux autorisés à mesurer une installation venue d'une publicité.
+	     Google d'abord ; la liste complète des réseaux de médiation est
+	     publiée par AdMob et se colle ici le jour où la médiation est
+	     activée. -->
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Utilisez Face ID pour déverrouiller l'application et protéger vos billets.</string>
 	<!-- Allow Railway media domain: TLS 1.3 uses CHACHA20-POLY1305 which is not

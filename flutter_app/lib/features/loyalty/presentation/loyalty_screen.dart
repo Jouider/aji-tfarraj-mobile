@@ -11,6 +11,9 @@ import 'package:aji_tfarraj/features/loyalty/data/loyalty_repository.dart';
 import 'package:aji_tfarraj/features/loyalty/domain/points_summary.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/widgets/points_total_card.dart';
 import 'package:aji_tfarraj/features/loyalty/presentation/widgets/points_history_list.dart';
+import 'package:aji_tfarraj/features/loyalty/presentation/widgets/watch_for_points_card.dart';
+import 'package:aji_tfarraj/features/ads/data/ads_service.dart';
+import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
@@ -29,6 +32,10 @@ class LoyaltyScreen extends ConsumerStatefulWidget {
 
 class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
   bool _showFullHistory = false;
+
+  /// Une vidéo en cours : le bouton laisse la place à l'indicateur, et un
+  /// deuxième appui n'ouvre pas une deuxième pub.
+  bool _watching = false;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +77,20 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
             balance: summary.balance,
             subtitle: strings.pointsSubtitle,
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Regarder une vidéo pour des points — seulement si le serveur le
+          // propose et qu'il en reste aujourd'hui.
+          if (summary.adReward.canWatch) ...[
+            WatchForPointsCard(
+              status: summary.adReward,
+              strings: strings,
+              busy: _watching,
+              onWatch: _watchForPoints,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          const SizedBox(height: AppSpacing.sm),
 
           // ── History section ──
           _SectionHeader(
@@ -129,6 +149,36 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
     );
   }
 
+  /// Ouvre la vidéo récompensée.
+  ///
+  /// Les points ne sont pas crédités ici : Google prévient le serveur de son
+  /// côté, et c'est lui qui écrit la ligne. D'où la relecture du solde une
+  /// paire de secondes plus tard, plutôt qu'un total ajusté à l'écran qui
+  /// mentirait si le rappel n'arrivait jamais.
+  Future<void> _watchForPoints() async {
+    final strings = ref.read(stringsProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    final userId = ref.read(loginAuthStateProvider).user?.id;
+
+    if (userId == null || _watching) return;
+
+    setState(() => _watching = true);
+    final earned = await ref.read(adsServiceProvider).showRewarded(userId: userId);
+    if (!mounted) return;
+    setState(() => _watching = false);
+
+    messenger.showSnackBar(SnackBar(
+      content: Text(
+        earned ? strings.adRewardEarned : strings.adRewardUnavailable,
+      ),
+    ));
+
+    if (!earned) return;
+
+    await Future<void>.delayed(const Duration(seconds: 3));
+    if (mounted) ref.invalidate(myPointsProvider);
+  }
+
   /// Resolve a points entry type to a localized label
   String _labelForType(String type, AppLocale locale) {
     switch (type) {
@@ -147,6 +197,8 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
         return locale == AppLocale.fr
             ? 'Retrait — parti avant la fin'
             : 'سحب النقاط — خرج قبل النهاية';
+      case 'ad_reward':
+        return locale == AppLocale.fr ? 'Vidéo regardée' : 'فيديو متشاف';
       case 'referral_revoked':
         return locale == AppLocale.fr ? 'Parrainage retiré' : 'إحالة ملغاة';
       default:
