@@ -46,6 +46,7 @@ class ReservationsRepository {
     required int episodeId,
     String? referralCode,
     int? returnPointId,
+    bool returnPointAsked = false,
   }) async {
     try {
       final response = await _apiClient.post(
@@ -58,6 +59,10 @@ class ReservationsRepository {
           // question de toute façon : ce choix-ci évite juste de la poser à
           // trois cents personnes à la file.
           if (returnPointId != null) 'return_point_id': returnPointId,
+          // « Je rentre par mes propres moyens » est une réponse : sans ce
+          // drapeau, le serveur ne la distinguerait pas d'un écran qui n'a
+          // rien demandé, et la porte reposerait la question à tout le monde.
+          if (returnPointAsked) 'return_point_answered': true,
         },
       );
       final data = response.data;
@@ -135,12 +140,14 @@ class MyReservationsNotifier extends AsyncNotifier<List<Reservation>> {
     required int episodeId,
     String? referralCode,
     int? returnPointId,
+    bool returnPointAsked = false,
   }) async {
     final repository = ref.read(reservationsRepositoryProvider);
     final reservation = await repository.createReservation(
       episodeId: episodeId,
       referralCode: referralCode,
       returnPointId: returnPointId,
+      returnPointAsked: returnPointAsked,
     );
     // Refresh the list after creating
     await refresh();

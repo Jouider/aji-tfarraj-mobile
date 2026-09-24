@@ -277,6 +277,8 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
             episodeId: episodeId,
             referralCode: referralCode.isNotEmpty ? referralCode : null,
             returnPointId: _returnPointId,
+            // La question n'a été posée que si une navette roule ce soir-là.
+            returnPointAsked: episode?.returnPoints.isNotEmpty ?? false,
           );
 
       // Attribution consumed — clear both the in-memory and the persisted code

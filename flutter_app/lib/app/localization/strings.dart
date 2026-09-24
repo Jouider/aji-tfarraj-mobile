@@ -1536,6 +1536,11 @@ class AppStrings {
       ? CopyFr.staff.returnPointNone
       : CopyAr.staff.returnPointNone;
 
+  /// Sous le bouton éteint, à la porte : ce qui manque pour valider.
+  String get staffReturnPointRequired => locale == AppLocale.fr
+      ? 'Indiquez d\'abord comment cette personne rentre.'
+      : 'قول أولا كيفاش غادي يرجع هاد الشخص.';
+
   String get staffReturnPointSaveError => locale == AppLocale.fr
       ? CopyFr.staff.returnPointSaveError
       : CopyAr.staff.returnPointSaveError;
