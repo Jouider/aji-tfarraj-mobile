@@ -451,6 +451,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   title: s.staffCheckInLabel,
                   onTap: () => context.push(Routes.staffCheckIn),
                 ),
+              // Photographier un membre pour son book : l'équipe, pas les
+              // scanneurs — pointer un billet et photographier le corps de
+              // quelqu'un ne sont pas le même métier.
+              if (user != null && user.isStaffOrAdmin)
+                _SettingsRow(
+                  icon: Icons.photo_camera_outlined,
+                  iconColor: AppColors.casting,
+                  title: s.staffCastingTitle,
+                  subtitle: s.staffCastingSubtitle,
+                  onTap: () => context.push(Routes.staffCasting),
+                ),
               // Scanners get this too: they are the ones at the door when
               // someone turns up without a booking.
               if (user != null && user.canRegisterOnSite)

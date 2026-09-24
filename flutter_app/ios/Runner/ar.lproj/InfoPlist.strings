@@ -2,4 +2,3 @@
 
 NSPhotoLibraryUsageDescription = "نحتاج إلى الوصول إلى معرضك لتغيير صورة ملفك الشخصي.";
 NSCameraUsageDescription = "نحتاج إلى الوصول إلى كاميرتك لالتقاط صورة ملفك الشخصي.";
-NSUserTrackingUsageDescription = "باش نقترحو عليك إشهارات مناسبة ماشي أي حاجة. تقدر ترفض: التطبيق غادي يخدم بحال بحال.";

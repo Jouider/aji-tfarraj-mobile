@@ -201,14 +201,16 @@ class _ManifestView extends ConsumerWidget {
             _OrphanWarning(message: s.staffManifestOrphanWarning),
           ],
           const SizedBox(height: AppSpacing.lg),
-          if (manifest.points.isEmpty)
+          // Seuls les arrêts où quelqu'un attend : un arrêt desservi mais vide
+          // allonge la feuille sans rien apprendre au chauffeur.
+          if (manifest.servedTonight.isEmpty)
             EmptyState(
               icon: Icons.directions_bus_outlined,
               title: s.staffManifestNobody,
               description: s.staffManifestNobodySubtitle,
             )
           else
-            for (final point in manifest.points)
+            for (final point in manifest.servedTonight)
               _PointCard(point: point, isAr: isAr, s: s),
           const SizedBox(height: AppSpacing.lg),
           _ShareButton(manifest: manifest),
@@ -476,6 +478,9 @@ class _PointCardState extends State<_PointCard> {
 /// Two formats, because they are read by different people at different moments:
 /// a PDF for the record and for the driver to tick names off, and a WhatsApp
 /// message for the transport lead who just wants the numbers.
+/// Ce que le scanneur a choisi d'envoyer.
+enum _ShareChoice { pdf, text }
+
 class _ShareButton extends ConsumerStatefulWidget {
   const _ShareButton({required this.manifest});
 
@@ -496,6 +501,7 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
       await Share.shareXFiles(
         [XFile(file.path, mimeType: 'application/pdf')],
         subject: s.staffManifestTitle,
+        sharePositionOrigin: _originRect(),
       );
     } catch (_) {
       if (mounted) {
@@ -509,13 +515,42 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
   }
 
   Future<void> _shareText() async {
-    await Share.share(ReturnManifestExport.buildText(widget.manifest));
+    final s = ref.read(stringsProvider);
+    try {
+      await Share.share(
+        ReturnManifestExport.buildText(widget.manifest),
+        sharePositionOrigin: _originRect(),
+      );
+    } catch (_) {
+      // Sans ce filet, un échec de partage ne disait rien du tout : le
+      // scanneur appuyait, et il ne se passait simplement rien.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(s.staffManifestShareError)),
+        );
+      }
+    }
   }
 
-  void _openSheet() {
+  /// D'où le panneau de partage sort, pour iPad : sans cette ancre, iOS n'a
+  /// nulle part où accrocher la popover et refuse de l'afficher.
+  Rect? _originRect() {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return null;
+
+    return box.localToGlobal(Offset.zero) & box.size;
+  }
+
+  /// Le choix fait dans la feuille de partage.
+  ///
+  /// La feuille rend son choix au lieu d'agir elle-même : sur iOS, ouvrir le
+  /// panneau de partage pendant qu'une autre feuille se referme est refusé
+  /// sans un mot — le PDF échouait, et « envoyer en message » ne faisait
+  /// rien du tout. On attend donc la fermeture, puis on partage.
+  Future<void> _openSheet() async {
     final s = ref.read(stringsProvider);
 
-    showModalBottomSheet<void>(
+    final choice = await showModalBottomSheet<_ShareChoice>(
       context: context,
       backgroundColor: AppColors.surfaceOverlay,
       shape: const RoundedRectangleBorder(
@@ -541,26 +576,36 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
                   color: AppColors.secondary),
               title: Text(s.staffManifestSharePdf,
                   style: AppTypography.bodyMedium),
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                _sharePdf();
-              },
+              onTap: () => Navigator.of(sheetContext).pop(_ShareChoice.pdf),
             ),
             ListTile(
               leading: const Icon(Icons.chat_bubble_outline,
                   color: AppColors.secondary),
               title: Text(s.staffManifestShareText,
                   style: AppTypography.bodyMedium),
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                _shareText();
-              },
+              onTap: () => Navigator.of(sheetContext).pop(_ShareChoice.text),
             ),
             const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
     );
+
+    if (!mounted || choice == null) return;
+
+    // Le Future ci-dessus se termine dès que la route est dépilée, pas quand
+    // l'animation de fermeture est finie. Or iOS refuse de présenter le
+    // panneau de partage tant que la feuille précédente s'en va — sans un
+    // mot. D'où cette attente, calée sur la durée de l'animation.
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+
+    switch (choice) {
+      case _ShareChoice.pdf:
+        await _sharePdf();
+      case _ShareChoice.text:
+        await _shareText();
+    }
   }
 
   @override

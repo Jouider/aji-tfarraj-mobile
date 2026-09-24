@@ -21,6 +21,7 @@ Future<String?> showPoseGuide(
   BuildContext context,
   WidgetRef ref, {
   required CastingPose pose,
+  int maxSide = 1024,
 }) async {
   final s = ref.read(stringsProvider);
   final copy = poseCopy(s.casting, pose);
@@ -143,7 +144,9 @@ Future<String?> showPoseGuide(
   if (go != true || !context.mounted) return null;
 
   return Navigator.of(context).push<String>(
-    MaterialPageRoute(builder: (_) => PoseCaptureScreen(pose: pose)),
+    MaterialPageRoute(
+      builder: (_) => PoseCaptureScreen(pose: pose, maxSide: maxSide),
+    ),
   );
 }
 

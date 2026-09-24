@@ -181,6 +181,7 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
                 ref.read(staffCheckInProvider.notifier).confirmPreview(),
             confirmLabel: s.staffValidateEntry,
             cancelLabel: s.staffScanAnother,
+            awaitingReturnLabel: s.staffReturnPointRequired,
           ),
         ],
       ),
@@ -431,6 +432,7 @@ class _Actions extends StatelessWidget {
     required this.onConfirm,
     required this.confirmLabel,
     required this.cancelLabel,
+    required this.awaitingReturnLabel,
   });
 
   final TicketPreview preview;
@@ -439,6 +441,9 @@ class _Actions extends StatelessWidget {
   final VoidCallback onConfirm;
   final String confirmLabel;
   final String cancelLabel;
+
+  /// Ce qui manque encore pour pouvoir valider.
+  final String awaitingReturnLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -463,7 +468,10 @@ class _Actions extends StatelessWidget {
               width: double.infinity,
               height: AppSpacing.buttonHeight,
               child: FilledButton.icon(
-                onPressed: loading ? null : onConfirm,
+                // Tant que le retour n'a pas de réponse, valider reviendrait à
+                // décider pour la personne : le bouton reste là, mais éteint.
+                onPressed:
+                    (loading || preview.awaitsReturnPoint) ? null : onConfirm,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.success,
                   foregroundColor: Colors.white,
@@ -478,6 +486,14 @@ class _Actions extends StatelessWidget {
                 label: Text(confirmLabel, style: AppTypography.buttonLarge),
               ),
             ),
+          if (preview.canAdmit && preview.awaitsReturnPoint) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              awaitingReturnLabel,
+              style: AppTypography.caption.copyWith(color: AppColors.textMuted),
+              textAlign: TextAlign.center,
+            ),
+          ],
           if (preview.canAdmit) const SizedBox(height: AppSpacing.sm),
           SizedBox(
             width: double.infinity,

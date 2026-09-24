@@ -48,8 +48,13 @@
 	     docs/publicite.md) : à remplacer par celui du compte AdMob avant la
 	     mise en production. -->
 	<string>ca-app-pub-3940256099942544~1458002511</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Pour vous proposer des publicités adaptées plutôt qu'au hasard. Vous pouvez refuser : l'application fonctionne pareil.</string>
+	<!-- Pas de clé d'autorisation de suivi (ATT) ici, volontairement.
+	     Sa seule présence fait refuser la soumission tant qu'App Privacy ne
+	     déclare pas le suivi — et déclarer un suivi qui n'existe pas afficherait
+	     « Données utilisées pour vous suivre » sur la fiche App Store pour rien :
+	     la publicité est éteinte côté serveur et les identifiants AdMob sont ceux
+	     de test. À remettre, avec la déclaration App Privacy, dans la version qui
+	     allume vraiment la publicité. Voir docs/publicite.md. -->
 	<key>SKAdNetworkItems</key>
 	<!-- Réseaux autorisés à mesurer une installation venue d'une publicité.
 	     Google d'abord ; la liste complète des réseaux de médiation est

@@ -55,6 +55,7 @@ class Routes {
 
   // Staff check-in (full screen, outside shell — staff/admin only)
   static const staffCheckIn = '/staff/check-in';
+  static const staffCasting = '/staff/casting';
   static const onSiteRegistration = '/staff/on-site-registration';
   static const returnManifest = '/staff/return-manifest';
   static const staffAttendees = '/staff/attendees';

@@ -102,6 +102,14 @@ class TicketPreview {
   /// scan — so the scanner does not ask twice.
   final int? chosenReturnPointId;
 
+  /// La question du retour a-t-elle reçu une réponse ?
+  ///
+  /// [chosenReturnPointId] à null ne le dit pas : « repart par ses propres
+  /// moyens » est une réponse, « personne n'a demandé » n'en est pas une. Tant
+  /// que c'est faux, la porte refuse de valider — sinon elle déciderait à la
+  /// place de la personne.
+  final bool returnPointAnswered;
+
   // Episode / show
   final int? episodeId;
   final String? episodeTitle;
@@ -129,6 +137,7 @@ class TicketPreview {
     this.referrerName,
     this.returnPoints = const [],
     this.chosenReturnPointId,
+    this.returnPointAnswered = false,
     this.episodeId,
     this.episodeTitle,
     this.episodeStartsAt,
@@ -138,6 +147,11 @@ class TicketPreview {
 
   /// Whether the scanner may validate this entry.
   bool get canAdmit => status == TicketPreviewStatus.canCheckIn;
+
+  /// Ce qui manque encore avant de pouvoir valider : la réponse sur le retour,
+  /// quand une navette roule ce soir-là. Sans cette barrière, valider revenait
+  /// à décider que la personne repart seule sans le lui avoir demandé.
+  bool get awaitsReturnPoint => asksReturnPoint && !returnPointAnswered;
 
   bool get wasExcludedBefore => pastExclusions > 0;
 
@@ -166,6 +180,8 @@ class TicketPreview {
         referrerName: referrerName,
         returnPoints: returnPoints,
         chosenReturnPointId: pointId,
+        // Choisir, c'est répondre — y compris « repart par ses propres moyens ».
+        returnPointAnswered: true,
         episodeId: episodeId,
         episodeTitle: episodeTitle,
         episodeStartsAt: episodeStartsAt,
@@ -199,6 +215,7 @@ class TicketPreview {
         referrerName: referrerName,
         returnPoints: returnPoints,
         chosenReturnPointId: chosenReturnPointId,
+        returnPointAnswered: returnPointAnswered,
         episodeId: episodeId,
         episodeTitle: episodeTitle,
         episodeStartsAt: episodeStartsAt,
@@ -241,6 +258,7 @@ class TicketPreview {
       returnPoints: ReturnPointOption.listFrom(json['return_points']),
       chosenReturnPointId:
           (reservation['return_point'] as Map<String, dynamic>?)?['id'] as int?,
+      returnPointAnswered: reservation['return_point_answered'] as bool? ?? false,
       episodeId: episode['id'] as int?,
       episodeTitle: episode['title'] as String?,
       episodeStartsAt: parse(episode['starts_at']),

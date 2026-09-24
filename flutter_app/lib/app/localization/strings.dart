@@ -1126,6 +1126,48 @@ class AppStrings {
       : 'ما قدرناش نشغلو الفيديو دابا. تأكد من الاتصال ديالك.';
 
   // ============================================
+  // Book casting photographié par l'équipe
+  // ============================================
+
+  String get staffCastingTitle => locale == AppLocale.fr
+      ? 'Photographier un membre'
+      : 'صور عضو';
+
+  /// Pourquoi l'écran existe : dit en une ligne sur la fiche du profil.
+  String get staffCastingSubtitle => locale == AppLocale.fr
+      ? 'Book casting, quand le téléphone du membre ne suit pas'
+      : 'البوك ديال الكاستينغ، منين تيليفون العضو ما تيقدرش';
+
+  String get staffCastingSearchHint => locale == AppLocale.fr
+      ? 'Chercher un nom ou un numéro'
+      : 'قلب على سمية ولا رقم';
+
+  String get staffCastingNobody =>
+      locale == AppLocale.fr ? 'Personne ne correspond' : 'ما لقينا حتى حد';
+
+  String get staffCastingNobodyHint => locale == AppLocale.fr
+      ? 'Le book casting est réservé aux membres majeurs.'
+      : 'البوك ديال الكاستينغ غير للي عندهم 18 عام وفوق.';
+
+  String get staffCastingBookComplete =>
+      locale == AppLocale.fr ? 'Complet' : 'كامل';
+
+  String get staffCastingBookHint => locale == AppLocale.fr
+      ? 'Le guide de la pose s\'ouvre avant la caméra, comme pour le membre.'
+      : 'دليل الوضعية كيتفتح قبل الكاميرا، بحال عند العضو.';
+
+  String get staffCastingRetake =>
+      locale == AppLocale.fr ? 'Reprendre' : 'عاود التصويرة';
+
+  String get staffCastingLoadError => locale == AppLocale.fr
+      ? 'Impossible de charger pour le moment.'
+      : 'ما قدرناش نجيبو المعطيات دابا.';
+
+  String get staffCastingUploadError => locale == AppLocale.fr
+      ? 'La photo n\'est pas partie. Réessayez.'
+      : 'التصويرة ما مشاتش. عاود.';
+
+  // ============================================
   // Retour après le tournage (navette)
   // ============================================
 
@@ -1142,6 +1184,10 @@ class AppStrings {
   String get returnPointNone => locale == AppLocale.fr
       ? 'Je rentre par mes propres moyens'
       : 'غادي نرجع بوحدي';
+
+  /// Sur la ligne repliée : ce qu'on tape pour ouvrir la liste.
+  String get returnPointChange =>
+      locale == AppLocale.fr ? 'Modifier' : 'بدّل';
 
   /// Dit en toutes lettres que le choix n'engage à rien : la porte le repose
   /// de toute façon.
@@ -1531,6 +1577,11 @@ class AppStrings {
   String get staffReturnPointNone => locale == AppLocale.fr
       ? CopyFr.staff.returnPointNone
       : CopyAr.staff.returnPointNone;
+
+  /// Sous le bouton éteint, à la porte : ce qui manque pour valider.
+  String get staffReturnPointRequired => locale == AppLocale.fr
+      ? 'Indiquez d\'abord comment cette personne rentre.'
+      : 'قول أولا كيفاش غادي يرجع هاد الشخص.';
 
   String get staffReturnPointSaveError => locale == AppLocale.fr
       ? CopyFr.staff.returnPointSaveError

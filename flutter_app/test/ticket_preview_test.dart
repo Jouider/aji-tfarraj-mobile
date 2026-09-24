@@ -214,4 +214,75 @@ void main() {
       expect(p.returnPoints[0].localizedName(false), 'Ain Sebaa');
     });
   });
+
+  group('le retour, avant de valider', () {
+    Map<String, dynamic> withShuttle({
+      bool answered = false,
+      int? chosen,
+      bool shuttle = true,
+    }) {
+      final json = payload(reservation: {
+        'id': 5933,
+        'seats': 1,
+        'return_point_answered': answered,
+        if (chosen != null) 'return_point': {'id': chosen, 'name': 'Casa-Port'},
+      });
+      json['return_points'] = shuttle
+          ? [
+              {'id': 1, 'name': 'Casa-Port'},
+              {'id': 2, 'name': 'Ain Diab'},
+            ]
+          : <dynamic>[];
+      return json;
+    }
+
+    /// Sans réponse, valider reviendrait à décider que la personne repart
+    /// seule sans le lui avoir demandé.
+    test('tant que personne n\'a répondu, on ne peut pas valider', () {
+      final p = TicketPreview.fromJson(withShuttle());
+
+      expect(p.canAdmit, isTrue, reason: 'le billet lui-même est bon');
+      expect(p.awaitsReturnPoint, isTrue);
+    });
+
+    test('un arrêt choisi en réservant règle la question', () {
+      final p = TicketPreview.fromJson(withShuttle(answered: true, chosen: 1));
+
+      expect(p.chosenReturnPointId, 1);
+      expect(p.awaitsReturnPoint, isFalse);
+    });
+
+    /// « Repart par ses propres moyens » est une réponse : aucun arrêt, mais
+    /// la question est réglée.
+    test('« repart seul » est une réponse, même sans arrêt', () {
+      final p = TicketPreview.fromJson(withShuttle(answered: true));
+
+      expect(p.chosenReturnPointId, isNull);
+      expect(p.awaitsReturnPoint, isFalse);
+    });
+
+    test('sans navette, la question ne se pose pas', () {
+      final p = TicketPreview.fromJson(withShuttle(shuttle: false));
+
+      expect(p.asksReturnPoint, isFalse);
+      expect(p.awaitsReturnPoint, isFalse, reason: 'rien ne doit bloquer la porte');
+    });
+
+    test('choisir à la porte règle la question sur-le-champ', () {
+      final p = TicketPreview.fromJson(withShuttle());
+
+      expect(p.withReturnPoint(2).awaitsReturnPoint, isFalse);
+      expect(p.withReturnPoint(null).awaitsReturnPoint, isFalse,
+          reason: 'y compris quand la porte répond « repart seul »');
+    });
+
+    /// Un serveur d'avant la fonction n'envoie pas le drapeau : la porte ne
+    /// doit pas se retrouver bloquée par une version plus ancienne.
+    test('un vieux serveur ne bloque pas la porte', () {
+      final json = payload(reservation: {'id': 5933, 'seats': 1});
+      json['return_points'] = <dynamic>[];
+
+      expect(TicketPreview.fromJson(json).awaitsReturnPoint, isFalse);
+    });
+  });
 }
