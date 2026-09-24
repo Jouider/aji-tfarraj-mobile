@@ -27,9 +27,21 @@ import 'package:aji_tfarraj/features/profile/domain/face_check.dart';
 ///
 /// Pops the captured file path, or null.
 class PoseCaptureScreen extends ConsumerStatefulWidget {
-  const PoseCaptureScreen({super.key, required this.pose});
+  const PoseCaptureScreen({
+    super.key,
+    required this.pose,
+    this.maxSide = 1024,
+  });
 
   final CastingPose pose;
+
+  /// Le plus grand côté du cliché envoyé.
+  ///
+  /// 1024 pour un membre : son téléphone tient rarement mieux, et le book se
+  /// remplit vite. Le staff photographie justement quand l'appareil du membre
+  /// ne suit pas — ses clichés partent plus grands, parce qu'un directeur de
+  /// casting les regarde vraiment.
+  final int maxSide;
 
   @override
   ConsumerState<PoseCaptureScreen> createState() => _PoseCaptureScreenState();
@@ -121,7 +133,8 @@ class _PoseCaptureScreenState extends ConsumerState<PoseCaptureScreen>
     try {
       final file = await controller.takePicture();
       // Bake EXIF orientation in, so the shot is not stored sideways.
-      final path = await normalizeCapturedImage(file.path);
+      final path =
+          await normalizeCapturedImage(file.path, maxSide: widget.maxSide);
       if (!mounted) return;
 
       // Two different strictnesses on purpose: faces are read reliably, so a

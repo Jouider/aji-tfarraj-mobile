@@ -39,7 +39,10 @@ class _StaffCastingBookScreenState
     final s = ref.read(stringsProvider);
     final messenger = ScaffoldMessenger.of(context);
 
-    final path = await showPoseGuide(context, ref, pose: pose);
+    // Plus grand que pour un membre : on photographie justement parce que son
+    // téléphone ne suit pas, et ces clichés-là sont regardés par un directeur
+    // de casting.
+    final path = await showPoseGuide(context, ref, pose: pose, maxSide: 1600);
     if (path == null || !mounted) return;
 
     setState(() => _uploading = pose);
