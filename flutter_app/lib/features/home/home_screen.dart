@@ -73,8 +73,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final locale = ref.watch(localeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final logo = locale == AppLocale.ar
-        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
-        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
+        ? (isDark
+            ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
+            : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
+        : (isDark
+            ? 'assets/images/ajitfarraj_logo/white_fr_logo.png'
+            : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -151,27 +155,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         show.nextEpisode?.startsAt ?? show.startsAt;
 
     // Hero show: first upcoming active show (prefer shows with upcoming episodes)
-    final Show heroShow = allShows
-        .where((show) {
+    final Show heroShow = allShows.where((show) {
           final date = effectiveDate(show);
           return date != null &&
               date.isAfter(now) &&
               show.isActive &&
               show.hasUpcomingEpisodes;
-        })
-        .fold<Show?>(null, (prev, show) {
+        }).fold<Show?>(null, (prev, show) {
           if (prev == null) return show;
           return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
               ? show
               : prev;
         }) ??
         // Fallback: any active upcoming show (backward compat)
-        allShows
-            .where((show) {
-              final date = effectiveDate(show);
-              return date != null && date.isAfter(now) && show.isActive;
-            })
-            .fold<Show?>(null, (prev, show) {
+        allShows.where((show) {
+          final date = effectiveDate(show);
+          return date != null && date.isAfter(now) && show.isActive;
+        }).fold<Show?>(null, (prev, show) {
           if (prev == null) return show;
           return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
               ? show
@@ -185,39 +185,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .firstWhere((show) => show.isActive, orElse: () => allShows.first);
 
     // Upcoming within 60 days, excluding hero
-    final prochains = allShows
-        .where(
-          (show) {
-            final date = effectiveDate(show);
-            return date != null &&
-                date.isAfter(now) &&
-                date.isBefore(upcoming60Days) &&
-                show.isActive &&
-                show.id != heroShow.id;
-          },
-        )
-        .toList()
+    final prochains = allShows.where(
+      (show) {
+        final date = effectiveDate(show);
+        return date != null &&
+            date.isAfter(now) &&
+            date.isBefore(upcoming60Days) &&
+            show.isActive &&
+            show.id != heroShow.id;
+      },
+    ).toList()
       ..sort((a, b) =>
           (effectiveDate(a) ?? now).compareTo(effectiveDate(b) ?? now));
 
     // Beyond 60 days or inactive
-    final bientot = allShows
-        .where((show) {
-          final date = effectiveDate(show);
-          return show.id != heroShow.id &&
-              (!show.isActive ||
-                  date == null ||
-                  date.isAfter(upcoming60Days));
-        })
-        .toList()
+    final bientot = allShows.where((show) {
+      final date = effectiveDate(show);
+      return show.id != heroShow.id &&
+          (!show.isActive || date == null || date.isAfter(upcoming60Days));
+    }).toList()
       ..sort((a, b) =>
           (effectiveDate(a) ?? now).compareTo(effectiveDate(b) ?? now));
 
     // Sorted by reserved seats descending (excluding the hero to avoid showing
     // the same show twice when it was chosen as a fallback hero)
-    final populaires = allShows
-        .where((show) => show.id != heroShow.id)
-        .toList()
+    final populaires = allShows.where((show) => show.id != heroShow.id).toList()
       ..sort((a, b) => b.reservedSeats.compareTo(a.reservedSeats));
 
     return RefreshIndicator(
@@ -229,7 +221,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         slivers: [
           // Hero show — always present (falls back to a popular show when nothing
           // has a confirmed date) so the home never opens on a bare header.
-          SliverToBoxAdapter(child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
+          SliverToBoxAdapter(
+              child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
 
           // Upcoming section
           if (prochains.isNotEmpty) ...[
@@ -241,7 +234,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             SliverToBoxAdapter(
-              child: _ShowsHorizontalSection(shows: prochains, s: s, isAr: isAr),
+              child:
+                  _ShowsHorizontalSection(shows: prochains, s: s, isAr: isAr),
             ),
           ],
 
@@ -299,7 +293,8 @@ class _HeroShowCard extends StatelessWidget {
   final AppStrings s;
   final bool isAr;
 
-  const _HeroShowCard({required this.show, required this.s, required this.isAr});
+  const _HeroShowCard(
+      {required this.show, required this.s, required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -322,8 +317,9 @@ class _HeroShowCard extends StatelessWidget {
                 ? Image.network(
                     show.imageUrl!,
                     fit: BoxFit.cover,
-                    loadingBuilder: (_, child, progress) =>
-                        progress == null ? child : Container(color: AppColors.backgroundGrey),
+                    loadingBuilder: (_, child, progress) => progress == null
+                        ? child
+                        : Container(color: AppColors.backgroundGrey),
                     errorBuilder: (_, __, ___) => _HeroPlaceholder(),
                   )
                 : _HeroPlaceholder(),
@@ -339,29 +335,33 @@ class _HeroShowCard extends StatelessWidget {
               ),
             ),
 
-            // FIX: Hero gradient — smooth 55% coverage, theme-aware bottom color
-            Builder(
-              builder: (context) {
-                final isDark = Theme.of(context).brightness == Brightness.dark;
-                final bottomColor =
-                    isDark ? const Color(0xFF0C0C0C) : const Color(0xFFFAFAFA);
-                return DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: const Alignment(0, -0.1),
-                      colors: [
-                        bottomColor,
-                        bottomColor.withValues(alpha: 0.85),
-                        bottomColor.withValues(alpha: 0.50),
-                        bottomColor.withValues(alpha: 0.15),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.25, 0.50, 0.75, 1.0],
-                    ),
-                  ),
-                );
-              },
+            // Le voile de lisibilité — SOMBRE dans les deux thèmes.
+            //
+            // Ce dégradé faisait deux métiers à la fois : rendre le texte
+            // lisible, et fondre l'affiche dans la page. Il prenait donc la
+            // couleur du thème, et en clair il finissait en blanc — avec un
+            // titre blanc écrit dessus. Invisible.
+            //
+            // Une affiche n'a pas de thème. Elle est sombre ou claire selon
+            // la photo, jamais selon le réglage du téléphone, et l'encre
+            // blanche qu'on écrit dessus a besoin d'un voile sombre des deux
+            // côtés. C'est ce que font Netflix, Apple TV et Prime : l'affiche
+            // s'assombrit vers le bas, la page reprend en dessous.
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment(0, -0.1),
+                  colors: [
+                    Color(0xFF000000),
+                    Color(0xD9000000),
+                    Color(0x80000000),
+                    Color(0x26000000),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.25, 0.50, 0.75, 1.0],
+                ),
+              ),
             ),
 
             // Content at bottom
@@ -377,8 +377,8 @@ class _HeroShowCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: ChannelBadge(
-                        label:
-                            (show.localizedChannel(isAr) ?? show.channel!).toUpperCase(),
+                        label: (show.localizedChannel(isAr) ?? show.channel!)
+                            .toUpperCase(),
                       ),
                     ),
 
@@ -408,7 +408,10 @@ class _HeroShowCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                            // Blanc, comme le titre : le voile derrière est
+                            // sombre dans les deux thèmes. `textSecondary`
+                            // suivait le thème et s'éteignait en clair.
+                            color: AppColors.inkOnPhotoMuted,
                             fontSize: 12,
                           ),
                         ),
@@ -426,7 +429,10 @@ class _HeroShowCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                            // Blanc, comme le titre : le voile derrière est
+                            // sombre dans les deux thèmes. `textSecondary`
+                            // suivait le thème et s'éteignait en clair.
+                            color: AppColors.inkOnPhotoMuted,
                             fontSize: 12,
                           ),
                         ),
@@ -457,8 +463,8 @@ class _HeroShowCard extends StatelessWidget {
                               foregroundColor: AppColors.onPrimary,
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppSpacing.radiusPill),
+                                borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusPill),
                               ),
                             ),
                             icon: const Icon(
@@ -487,6 +493,7 @@ class _HeroShowCard extends StatelessWidget {
                         SizedBox(
                           height: 56,
                           child: GlassPill(
+                            tone: GlassTone.onPhoto,
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -500,7 +507,10 @@ class _HeroShowCard extends StatelessWidget {
                                 Text(
                                   '${show.availableSeats}',
                                   style: AppTypography.labelMedium.copyWith(
-                                    color: AppColors.textPrimary,
+                                    // Sur l'affiche, pas sur la page :
+                                    // `textPrimary` devenait noir en thème
+                                    // clair, sur un voile noir.
+                                    color: AppColors.inkOnPhoto,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -677,19 +687,31 @@ class _ShowHorizontalCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
-                height: 170,
-                width: 150,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Image
-                    show.imageUrl != null
-                        ? Image.network(
-                            show.imageUrl!,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (_, child, progress) =>
-                                progress == null ? child : Container(color: AppColors.backgroundGrey),
-                            errorBuilder: (_, __, ___) => Container(
+                  height: 170,
+                  width: 150,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Image
+                      show.imageUrl != null
+                          ? Image.network(
+                              show.imageUrl!,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (_, child, progress) =>
+                                  progress == null
+                                      ? child
+                                      : Container(
+                                          color: AppColors.backgroundGrey),
+                              errorBuilder: (_, __, ___) => Container(
+                                color: AppColors.backgroundGrey,
+                                child: Icon(
+                                  Icons.tv,
+                                  size: 32,
+                                  color: AppColors.textLight,
+                                ),
+                              ),
+                            )
+                          : Container(
                               color: AppColors.backgroundGrey,
                               child: Icon(
                                 Icons.tv,
@@ -697,95 +719,86 @@ class _ShowHorizontalCard extends StatelessWidget {
                                 color: AppColors.textLight,
                               ),
                             ),
-                          )
-                        : Container(
-                            color: AppColors.backgroundGrey,
-                            child: Icon(
-                              Icons.tv,
-                              size: 32,
-                              color: AppColors.textLight,
-                            ),
-                          ),
 
-                    // Sold-out overlay
-                    if (show.isSoldOut)
-                      Container(
-                        color: Colors.black54,
-                        alignment: Alignment.center,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.error,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSm,
+                      // Sold-out overlay
+                      if (show.isSoldOut)
+                        Container(
+                          color: Colors.black54,
+                          alignment: Alignment.center,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
                             ),
-                          ),
-                          child: Text(
-                            s.homeSoldOutBadge,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
+                            decoration: BoxDecoration(
+                              color: AppColors.error,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSm,
+                              ),
+                            ),
+                            child: Text(
+                              s.homeSoldOutBadge,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                    // Coming soon overlay
-                    if (isComingSoon && !show.isSoldOut)
-                      Positioned(
-                        bottom: AppSpacing.sm,
-                        left: AppSpacing.sm,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondary,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSm,
+                      // Coming soon overlay
+                      if (isComingSoon && !show.isSoldOut)
+                        Positioned(
+                          bottom: AppSpacing.sm,
+                          left: AppSpacing.sm,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: 2,
                             ),
-                          ),
-                          child: Text(
-                            s.homeComingSoonBadge,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 9,
-                              letterSpacing: 0.5,
+                            decoration: BoxDecoration(
+                              color: AppColors.secondary,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSm,
+                              ),
+                            ),
+                            child: Text(
+                              s.homeComingSoonBadge,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 9,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                    // FIX: Channel tag — unified primary semi-transparent style (cards)
-                    if (show.channel != null)
-                      Positioned(
-                        top: AppSpacing.sm,
-                        right: AppSpacing.sm,
-                        child: ChannelBadge(
-                          label: (show.localizedChannel(isAr) ?? show.channel!)
-                              .toUpperCase(),
+                      // FIX: Channel tag — unified primary semi-transparent style (cards)
+                      if (show.channel != null)
+                        Positioned(
+                          top: AppSpacing.sm,
+                          right: AppSpacing.sm,
+                          child: ChannelBadge(
+                            label:
+                                (show.localizedChannel(isAr) ?? show.channel!)
+                                    .toUpperCase(),
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ), // ClipRRect
-          ), // Container shadow wrapper
+              ), // ClipRRect
+            ), // Container shadow wrapper
 
             const SizedBox(height: AppSpacing.sm),
 
             // Title — Cairo for AR (proper shaping), Inter for FR
             Text(
               show.localizedTitle(isAr),
-              style: isAr
-                  ? AppTypography.bodyMediumAr
-                  : AppTypography.labelMedium,
+              style:
+                  isAr ? AppTypography.bodyMediumAr : AppTypography.labelMedium,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

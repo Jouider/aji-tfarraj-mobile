@@ -18,6 +18,10 @@ class AppColors {
 
   static bool get _isDark => _brightness == Brightness.dark;
 
+  /// Pour les rares endroits qui doivent choisir une valeur hors palette —
+  /// une opacité d'ombre, par exemple.
+  static bool get isDark => _isDark;
+
   // ============================================
   // Primary Colors (same in both modes)
   // ============================================
@@ -143,6 +147,73 @@ class AppColors {
 
   static Color get border =>
       _isDark ? const Color(0xFF2C2C33) : const Color(0xFFE5E7EB);
+
+  // ============================================
+  // Verre
+  // ============================================
+  //
+  // Une règle, et elle tient en une phrase : **sur une photo le verre est
+  // sombre, sur la page il prend la couleur du thème**.
+  //
+  // Une photo n'a pas de thème. Elle est sombre ou claire selon ce qu'elle
+  // montre, jamais selon le réglage du téléphone, et l'encre blanche qu'on
+  // écrit dessus a besoin d'un voile sombre dans les deux cas. La page, elle,
+  // suit le thème : un voile noir posé sur une page blanche donne la plaque
+  // grise sale qu'on voyait en thème clair.
+
+  /// Le verre posé sur la page : barre d'onglets, capsules flottantes.
+  ///
+  /// L'opacité n'est pas un réglage de goût, c'est ce qui borne le fond. Un
+  /// voile d'alpha `a` posé sur n'importe quoi donne un fond compris entre
+  /// `a × voile` et `a × voile + (1-a) × 255` — et c'est le pire bout de cet
+  /// intervalle qui décide si le libellé se lit.
+  ///
+  /// À 34 %, l'ancien voile sombre laissait le fond monter jusqu'à 168 sur une
+  /// affiche claire : le gris des onglets inactifs y tombait à **1,6:1**, ce
+  /// qui veut dire invisible. À 62 % le fond plafonne à 97, et le même gris
+  /// remonte à 4,2:1. Côté clair, 82 % plancher le fond à 209 et l'encre
+  /// sombre tient 4,9:1.
+  static Color get glassSurface => _isDark
+      ? const Color(0x9E000000) // noir 62 %
+      : const Color(0xD1FFFFFF); // blanc 82 %
+
+  /// Son liseré — assez pour dessiner le bord, jamais assez pour se voir.
+  static Color get glassBorder => _isDark
+      ? const Color(0x1FFFFFFF) // blanc 12 %
+      : const Color(0x14000000); // noir 8 %
+
+  /// La capsule de l'onglet actif — **opaque**, et c'est tout l'intérêt.
+  ///
+  /// Tant qu'elle était translucide, la couleur de l'onglet actif dépendait de
+  /// l'affiche qui défilait derrière : l'or de la charte tombait à 2,3:1 dès
+  /// qu'une image claire passait sous la barre. Opaque, elle devient sa propre
+  /// surface — l'or y tient 7,8:1 quoi qu'il y ait derrière.
+  static Color get glassHighlight => _isDark
+      ? const Color(0xFF24242A)
+      : const Color(0xFFFDE8DD);
+
+  /// L'encre de l'onglet actif, sur cette capsule. L'or de la charte brille
+  /// sur du sombre et s'efface sur du clair : en thème clair, c'est le rouge
+  /// orangé de la charte qui prend le relais — 5,0:1 sur la capsule pâle.
+  static Color get glassAccent => _isDark ? secondary : primaryDark;
+
+  /// Le verre posé sur une photo : sombre dans les deux thèmes.
+  static const Color glassOnPhoto = Color(0x57000000); // noir 34 %
+
+  /// Sa variante opaque, pour une étiquette lue en vitesse dans une liste.
+  static const Color glassOnPhotoSolid = Color(0x6B000000); // noir 42 %
+
+  static const Color glassOnPhotoBorder = Color(0x29FFFFFF); // blanc 16 %
+
+  /// L'encre écrite sur une affiche. Blanche, dans les deux thèmes.
+  ///
+  /// Le corollaire de [glassOnPhoto] : un jeton de texte qui suit le thème
+  /// (`textPrimary`, `textSecondary`…) n'a rien à faire sur une photo. En
+  /// thème clair il devient sombre, et il disparaît dans le voile.
+  static const Color inkOnPhoto = Color(0xFFFFFFFF);
+
+  /// Sa variante secondaire — une date, un lieu, un décompte.
+  static const Color inkOnPhotoMuted = Color(0xE0FFFFFF); // blanc 88 %
 
   static Color get borderLight =>
       _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D5DB);

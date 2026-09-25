@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 
@@ -22,6 +24,8 @@ void main() {
   /// WCAG AA: 4.5:1 for body text, 3:1 for large text. Button labels are large
   /// and bold, but a CTA is the last thing that should be borderline.
   const aaNormalText = 4.5;
+
+  _glassTests();
 
   group('ink on the gold call-to-action', () {
     test('is readable, and by a wide margin', () {
@@ -93,4 +97,93 @@ void main() {
       );
     });
   });
+}
+
+/// ─────────────────────────────────────────────────────────────────────────
+/// Le verre
+/// ─────────────────────────────────────────────────────────────────────────
+///
+/// Une surface translucide n'a pas de couleur : elle a un INTERVALLE de
+/// couleurs, borné par son opacité. Un voile d'alpha `a` posé sur n'importe
+/// quoi donne un fond entre `a × voile` et `a × voile + (1-a) × blanc`, et
+/// c'est le pire bout qui décide si le libellé se lit.
+///
+/// C'est ce qui a rendu les onglets inactifs invisibles : le voile noir à 34 %
+/// laissait le fond monter à 168 dès qu'une affiche claire passait sous la
+/// barre, et le gris des libellés y tombait à 1,6:1. À l'œil, sur une page
+/// sombre, tout allait bien.
+void _glassTests() {
+  /// Le pire fond possible derrière un voile : le blanc pour un voile sombre,
+  /// le noir pour un voile clair.
+  Color worstCaseBehind(Color veil) {
+    final backdrop = veil.computeLuminance() < 0.5
+        ? const Color(0xFFFFFFFF)
+        : const Color(0xFF000000);
+
+    return Color.alphaBlend(veil, backdrop);
+  }
+
+  group('le verre de la barre', () {
+    /// 4,5:1 : les libellés font 9,5 px, c'est du petit texte.
+    const aaNormalText = 4.5;
+
+    for (final brightness in [Brightness.dark, Brightness.light]) {
+      final name = brightness == Brightness.dark ? 'sombre' : 'clair';
+
+      test('en thème $name, un onglet inactif reste lisible sur une affiche',
+          () {
+        AppColors.updateBrightness(brightness);
+
+        final worst = worstCaseBehind(AppColors.glassSurface);
+
+        expect(
+          contrast(AppColors.textSecondary, worst),
+          greaterThanOrEqualTo(4.0),
+          reason: 'Fond au pire ${worst.value.toRadixString(16)} : le voile '
+              'est trop transparent, l\'affiche derrière reprend le dessus.',
+        );
+      });
+
+      test('en thème $name, l\'onglet actif ne dépend pas de l\'affiche', () {
+        AppColors.updateBrightness(brightness);
+
+        // La capsule est opaque : c'est elle le fond, pas ce qui défile.
+        expect(
+          AppColors.glassHighlight.a,
+          1.0,
+          reason: 'Une capsule translucide rend la couleur de l\'onglet actif '
+              'dépendante de l\'image derrière — c\'est ce qui faisait tomber '
+              'l\'or à 2,3:1.',
+        );
+
+        expect(
+          contrast(AppColors.glassAccent, AppColors.glassHighlight),
+          greaterThanOrEqualTo(aaNormalText),
+        );
+      });
+    }
+
+    test('le verre de la page suit le thème, celui des affiches jamais', () {
+      AppColors.updateBrightness(Brightness.dark);
+      final pageDark = AppColors.glassSurface;
+      final photoDark = AppColors.glassOnPhoto;
+
+      AppColors.updateBrightness(Brightness.light);
+
+      expect(
+        AppColors.glassSurface,
+        isNot(pageDark),
+        reason: 'Le voile noir posé sur une page blanche ne fait pas du verre, '
+            'il fait une plaque grise.',
+      );
+      expect(
+        AppColors.glassOnPhoto,
+        photoDark,
+        reason: 'Une affiche n\'a pas de thème : son voile reste sombre, '
+            'sinon l\'encre blanche écrite dessus disparaît.',
+      );
+    });
+  });
+
+  tearDown(() => AppColors.updateBrightness(Brightness.dark));
 }

@@ -24,6 +24,19 @@ class AppShadows {
         ),
       ];
 
+  /// Sous une surface en verre. En thème clair, une pilule blanche posée sur
+  /// une page blanche n'existe pas : c'est l'ombre qui la décolle. En thème
+  /// sombre, le liseré suffit et l'ombre se contente de creuser un peu.
+  static List<BoxShadow> get glass => [
+        BoxShadow(
+          color: Colors.black.withValues(
+            alpha: AppColors.isDark ? 0.30 : 0.10,
+          ),
+          blurRadius: 20,
+          offset: const Offset(0, 6),
+        ),
+      ];
+
   /// Sous le bouton principal : le halo de la marque, réservé à l'action.
   static List<BoxShadow> get action => [
         BoxShadow(

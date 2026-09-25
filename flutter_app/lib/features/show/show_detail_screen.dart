@@ -393,27 +393,26 @@ class _HeroSectionState extends State<_HeroSection>
               ),
             ),
 
-            // FIX: Hero gradient — 50% coverage, 4-stop smooth, theme-aware
-            Builder(builder: (context) {
-              final isDark = Theme.of(context).brightness == Brightness.dark;
-              final bottomColor =
-                  isDark ? const Color(0xFF0C0C0C) : const Color(0xFFFAFAFA);
-              return DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.center,
-                    colors: [
-                      bottomColor,
-                      bottomColor.withValues(alpha: 0.80),
-                      bottomColor.withValues(alpha: 0.30),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.33, 0.66, 1.0],
-                  ),
+            // Le voile de lisibilité — SOMBRE dans les deux thèmes, pour la
+            // même raison qu'à l'accueil : une affiche n'a pas de thème, et
+            // l'encre blanche écrite dessus a besoin d'un voile sombre des
+            // deux côtés. En clair, ce dégradé finissait en blanc et le titre
+            // blanc disparaissait avec lui.
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.center,
+                  colors: [
+                    Color(0xFF000000),
+                    Color(0xCC000000),
+                    Color(0x4D000000),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.33, 0.66, 1.0],
                 ),
-              );
-            }),
+              ),
+            ),
 
             // Play button — center (only when video available)
             if (show.videoUrl != null)
@@ -549,7 +548,9 @@ class _HeroSectionState extends State<_HeroSection>
                                   .format(show.startsAt!.toLocal())
                               : dateTbc),
                       style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        // Blanc, comme le titre : le voile derrière est
+                        // sombre dans les deux thèmes.
+                        color: AppColors.inkOnPhotoMuted,
                         fontSize: 13,
                       ),
                     ),
@@ -561,7 +562,9 @@ class _HeroSectionState extends State<_HeroSection>
                       child: Text(
                         show.nextEpisode?.localizedCity(isAr) ?? show.city,
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                          // Blanc, comme le titre : le voile derrière est
+                          // sombre dans les deux thèmes.
+                          color: AppColors.inkOnPhotoMuted,
                           fontSize: 13,
                         ),
                         overflow: TextOverflow.ellipsis,

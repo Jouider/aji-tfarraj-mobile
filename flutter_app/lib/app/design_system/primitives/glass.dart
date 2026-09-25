@@ -2,7 +2,36 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
+
+/// Ce qu'il y a DERRIÈRE le verre — et c'est ça qui décide de sa teinte.
+///
+/// Le verre n'a pas de couleur à lui : il ne fait que teinter ce qu'on voit à
+/// travers. La seule question utile est donc « posé sur quoi ? ».
+enum GlassTone {
+  /// Sur une photo. Le voile reste sombre dans les deux thèmes.
+  ///
+  /// Une photo n'a pas de thème : elle est sombre ou claire selon ce qu'elle
+  /// montre, jamais selon le réglage du téléphone. L'encre écrite dessus est
+  /// blanche, et elle a besoin d'un voile sombre des deux côtés.
+  onPhoto,
+
+  /// Sur la page. Le voile prend la couleur du thème.
+  ///
+  /// Un voile noir sur une page blanche ne fait pas du verre, il fait une
+  /// plaque grise sale. En thème clair, le verre est blanc.
+  onPage,
+}
+
+extension _GlassColors on GlassTone {
+  Color get surface =>
+      this == GlassTone.onPhoto ? AppColors.glassOnPhoto : AppColors.glassSurface;
+
+  Color get border => this == GlassTone.onPhoto
+      ? AppColors.glassOnPhotoBorder
+      : AppColors.glassBorder;
+}
 
 /// Une capsule en verre : translucide, floutée, posée sur ce qu'il y a
 /// derrière.
@@ -21,6 +50,7 @@ class GlassPill extends StatelessWidget {
   const GlassPill({
     super.key,
     required this.child,
+    this.tone = GlassTone.onPage,
     this.padding = const EdgeInsets.symmetric(
       horizontal: AppSpacing.md,
       vertical: 10,
@@ -29,6 +59,11 @@ class GlassPill extends StatelessWidget {
   });
 
   final Widget child;
+
+  /// Sur quoi la capsule est posée. Voir [GlassTone] — ce n'est pas un détail
+  /// esthétique, c'est ce qui rend l'encre lisible ou non.
+  final GlassTone tone;
+
   final EdgeInsetsGeometry padding;
 
   /// Facultatif : une capsule sans geste reste une étiquette.
@@ -43,11 +78,9 @@ class GlassPill extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            // Voile sombre, comme la barre : le flou seul laisse passer les
-            // couleurs de l'affiche et le texte s'y noie.
-            color: Colors.black.withValues(alpha: 0.34),
+            color: tone.surface,
             borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+            border: Border.all(color: tone.border),
           ),
           child: child,
         ),
@@ -76,6 +109,10 @@ class GlassPill extends StatelessWidget {
 /// geste d'une information, ici, c'est l'aplat orange, et il n'y en a qu'un
 /// par écran.
 ///
+/// Toujours [GlassTone.onPhoto] : une étiquette de chaîne ne vit que sur une
+/// affiche, et son encre est blanche. En blanc sur une affiche claire, elle
+/// disparaîtrait.
+///
 /// Volontairement SANS flou, contrairement à [GlassPill] : une liste en montre
 /// une demi-douzaine à la fois, et une couche de flou par badge est
 /// exactement ce qui fait tomber le défilement sur un Android d'entrée de
@@ -91,9 +128,9 @@ class ChannelBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.42),
+        color: AppColors.glassOnPhotoSolid,
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        border: Border.all(color: AppColors.glassOnPhotoBorder),
       ),
       child: Text(
         label,
