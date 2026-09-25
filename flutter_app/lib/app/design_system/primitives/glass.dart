@@ -2,7 +2,6 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
-import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 
 /// Une capsule en verre : translucide, floutée, posée sur ce qu'il y a
@@ -65,12 +64,19 @@ class GlassPill extends StatelessWidget {
   }
 }
 
-/// L'étiquette d'une chaîne, ou tout badge court posé sur l'orange de marque.
+/// L'étiquette d'une chaîne : du verre, posé sur l'affiche.
 ///
-/// L'orange vif reste — c'est lui qui se voit de loin — mais l'encre passe au
-/// sombre : en blanc, ces majuscules de 10 px ne mesuraient que 3,1:1.
-class BrandBadge extends StatelessWidget {
-  const BrandBadge({super.key, required this.label});
+/// L'orange lui allait mal — sur cet écran, l'orange est la couleur de ce qui
+/// agit, et une chaîne ne se touche pas. En verre, elle informe sans réclamer
+/// le geste, et elle laisse voir l'image dessous.
+///
+/// Volontairement SANS flou, contrairement à [GlassPill] : une liste en montre
+/// une demi-douzaine à la fois, et une couche de flou par badge est
+/// exactement ce qui fait tomber le défilement sur un Android d'entrée de
+/// gamme. À cette taille, c'est le voile sombre qui fait tout le travail —
+/// le flou ne s'y verrait pas.
+class ChannelBadge extends StatelessWidget {
+  const ChannelBadge({super.key, required this.label});
 
   final String label;
 
@@ -79,16 +85,17 @@ class BrandBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: Colors.black.withValues(alpha: 0.42),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.4,
-          color: AppColors.onSecondary,
+          color: Color(0xFFF7F8F8),
         ),
       ),
     );
