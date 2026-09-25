@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -91,39 +93,40 @@ class _AppNavBar extends StatelessWidget {
     required this.items,
   });
 
-  /// De combien l'onglet actif se soulève hors de la pilule.
-  static const double _lift = 12;
-
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
 
     return Padding(
-      // Assez d'air en haut pour que la goutte sorte sans être rognée, et en
-      // bas pour que la pilule se détache du bord de l'écran.
-      padding: EdgeInsets.fromLTRB(14, _lift, 14, bottom > 0 ? bottom : 12),
-      child: Container(
-        height: 62,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceOverlay,
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.45),
-              blurRadius: 26,
-              offset: const Offset(0, 12),
+      padding: EdgeInsets.fromLTRB(12, 6, 12, bottom > 0 ? bottom : 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        // Le verre : le contenu de la page se devine derrière la barre au lieu
+        // de s'arrêter net. Le flou se recalcule à chaque image — c'est le
+        // geste le plus cher de l'interface, et la raison pour laquelle le
+        // rayon reste modéré.
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            height: 62,
+            decoration: BoxDecoration(
+              // Un voile SOMBRE, pas clair : le flou seul laisse passer les
+              // couleurs d'une affiche et les libellés s'y noient. C'est ce
+              // que fait WhatsApp — du verre teinté, pas du verre nu.
+              color: Colors.black.withValues(alpha: 0.34),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
             ),
-          ],
-        ),
-        child: Row(
-          children: List.generate(items.length, (index) {
-            return _NavItem(
-              data: items[index],
-              isActive: currentIndex == index,
-              onTap: () => onTap(index),
-            );
-          }),
+            child: Row(
+              children: List.generate(items.length, (index) {
+                return _NavItem(
+                  data: items[index],
+                  isActive: currentIndex == index,
+                  onTap: () => onTap(index),
+                );
+              }),
+            ),
+          ),
         ),
       ),
     );
@@ -143,54 +146,38 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? AppColors.textPrimary : AppColors.textMuted;
+    // Plus clair qu'ailleurs dans l'app : ce texte repose sur du verre, donc
+    // sur ce qui défile derrière, et le gris discret n'y survit pas.
+    final color = isActive ? AppColors.secondary : AppColors.textSecondary;
 
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // La goutte : l'onglet actif perle hors de la pilule. Les rayons
-            // sont volontairement inégaux — plus ronds en haut, resserrés en
-            // bas — pour que la forme tombe au lieu de flotter.
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 260),
-              curve: Curves.easeOutBack,
-              transform:
-                  Matrix4.translationValues(0, isActive ? -_AppNavBar._lift : 0, 0),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: isActive ? AppColors.hotGradient : null,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(18),
-                  bottom: Radius.circular(14),
-                ),
-                boxShadow: isActive
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.45),
-                          blurRadius: 16,
-                          offset: const Offset(0, 8),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Icon(
-                isActive ? data.activeIcon : data.icon,
-                size: 21,
-                // Encre sombre sur l'orange : le blanc n'y tient pas (3,1:1).
-                color: isActive ? AppColors.onPrimary : color,
-              ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+          // La capsule de l'onglet actif : un verre plus clair posé sur le
+          // verre. Elle englobe l'icône ET le libellé, et reste dans la barre
+          // — rien ne saute, rien ne dépasse.
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              color: isActive
+                  ? Colors.white.withValues(alpha: 0.14)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(18),
             ),
-            AnimatedSlide(
-              duration: const Duration(milliseconds: 260),
-              curve: Curves.easeOutBack,
-              offset: Offset(0, isActive ? -0.55 : 0),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 3),
-                child: Text(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isActive ? data.activeIcon : data.icon,
+                  size: 21,
+                  color: color,
+                ),
+                const SizedBox(height: 3),
+                Text(
                   data.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -201,9 +188,9 @@ class _NavItem extends StatelessWidget {
                     height: 1.0,
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
