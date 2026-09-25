@@ -221,6 +221,22 @@ class AppColors {
   /// Sa variante secondaire — une date, un lieu, un décompte.
   static const Color inkOnPhotoMuted = Color(0xE0FFFFFF); // blanc 88 %
 
+  // ============================================
+  // Puces de filtre
+  // ============================================
+
+  /// Une puce de filtre choisie.
+  ///
+  /// L'or plein qu'elle portait avant était l'élément le plus lumineux de
+  /// l'écran (0,47 de luminance sur une page à 0,01) — pour dire « aucun
+  /// filtre », l'état par défaut. Avec un halo doré autour, en plus. Le rouge
+  /// orangé de la charte descend à 0,13 : trois fois et demie moins lumineux,
+  /// toujours la marque, et il ne se confond pas avec l'or des places.
+  static Color get chipSelected => primaryAction;
+
+  /// Son encre — 4,6:1, mesuré.
+  static const Color chipSelectedInk = onPrimary;
+
   static Color get borderLight =>
       _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D5DB);
 

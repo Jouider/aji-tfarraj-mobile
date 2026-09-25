@@ -393,25 +393,20 @@ class _CityChip extends StatelessWidget {
           vertical: 6,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.secondary : AppColors.backgroundLight,
+          color:
+              isSelected ? AppColors.chipSelected : AppColors.backgroundLight,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
-            color: isSelected ? AppColors.secondary : AppColors.border,
+            color: isSelected ? AppColors.chipSelected : AppColors.border,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.secondary.withValues(alpha: 0.30),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
+          // Pas de halo. Un filtre n'irradie pas.
         ),
         child: Text(
           label,
           style: AppTypography.labelSmall.copyWith(
-            color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
+            color: isSelected
+                ? AppColors.chipSelectedInk
+                : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
@@ -609,8 +604,12 @@ class _BrowseShowCard extends StatelessWidget {
                     // Date
                     Row(
                       children: [
+                        // Gris, pas doré : ces icônes ne disent rien que le
+                        // texte à côté ne dise déjà. En or, elles mettaient
+                        // huit marques de couleur par écran au service d'une
+                        // décoration.
                         Icon(Icons.calendar_today_outlined,
-                            size: 12, color: AppColors.secondary),
+                            size: 12, color: AppColors.textMuted),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -631,7 +630,7 @@ class _BrowseShowCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined,
-                            size: 12, color: AppColors.secondary),
+                            size: 12, color: AppColors.textMuted),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
@@ -671,14 +670,13 @@ class _BrowseShowCard extends StatelessWidget {
                               horizontal: 8,
                               vertical: 4,
                             ),
+                            // Fond teinté et encre dorée : deux traitements
+                            // pour un chiffre, c'est déjà assez. Le liseré
+                            // en ajoutait un troisième.
                             decoration: BoxDecoration(
                               color:
                                   AppColors.secondary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color:
-                                    AppColors.secondary.withValues(alpha: 0.30),
-                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -709,9 +707,12 @@ class _BrowseShowCard extends StatelessWidget {
             // Chevron
             Padding(
               padding: const EdgeInsets.only(right: AppSpacing.sm),
+              // La ligne entière est tapable : ce chevron est un rappel,
+              // pas une information. En orange, il avait le même poids que
+              // le nombre de places.
               child: Icon(
                 Icons.chevron_right,
-                color: AppColors.primary.withValues(alpha: 0.60),
+                color: AppColors.textLight,
                 size: 16,
               ),
             ),
@@ -783,47 +784,13 @@ class _FilterSheet extends StatelessWidget {
                 runSpacing: AppSpacing.sm,
                 children: channels.map((ch) {
                   final isSelected = selectedChannel == ch;
-                  return GestureDetector(
+                  // La même puce que la barre de villes : c'était la même
+                  // décoration recopiée, et deux copies finissent toujours
+                  // par diverger.
+                  return _CityChip(
+                    label: ch,
+                    isSelected: isSelected,
                     onTap: () => onChannelSelected(isSelected ? null : ch),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.secondary
-                            : AppColors.backgroundLight,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusFull),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.secondary
-                              : AppColors.border,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: AppColors.secondary
-                                      .withValues(alpha: 0.30),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Text(
-                        ch,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: isSelected
-                              ? AppColors.primaryDark
-                              : AppColors.textSecondary,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w500,
-                        ),
-                      ),
-                    ),
                   );
                 }).toList(),
               ),
