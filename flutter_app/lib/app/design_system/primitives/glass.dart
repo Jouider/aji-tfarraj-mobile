@@ -70,6 +70,12 @@ class GlassPill extends StatelessWidget {
 /// agit, et une chaîne ne se touche pas. En verre, elle informe sans réclamer
 /// le geste, et elle laisse voir l'image dessous.
 ///
+/// En capsule comme [GlassPill] : tout ce qui est en verre appartient à la
+/// même famille. La forme ne dit pas ce qui se touche — la pastille des
+/// places est une capsule et n'est pas tapable non plus. Ce qui distingue un
+/// geste d'une information, ici, c'est l'aplat orange, et il n'y en a qu'un
+/// par écran.
+///
 /// Volontairement SANS flou, contrairement à [GlassPill] : une liste en montre
 /// une demi-douzaine à la fois, et une couche de flou par badge est
 /// exactement ce qui fait tomber le défilement sur un Android d'entrée de
@@ -86,7 +92,7 @@ class ChannelBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.42),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: Text(
