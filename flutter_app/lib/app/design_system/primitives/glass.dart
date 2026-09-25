@@ -97,48 +97,61 @@ class GlassPill extends StatelessWidget {
   }
 }
 
-/// L'étiquette d'une chaîne : du verre, posé sur l'affiche.
+/// L'étiquette d'une chaîne : 2M, Al Aoula, Medi1.
 ///
-/// L'orange lui allait mal — sur cet écran, l'orange est la couleur de ce qui
-/// agit, et une chaîne ne se touche pas. En verre, elle informe sans réclamer
-/// le geste, et elle laisse voir l'image dessous.
+/// L'orange plein lui allait mal — sur ces écrans, l'orange est la couleur de
+/// ce qui agit, et une chaîne ne se touche pas. Elle informe, donc elle se
+/// tait : un gris sur la page, un verre sombre sur l'affiche.
 ///
-/// En capsule comme [GlassPill] : tout ce qui est en verre appartient à la
-/// même famille. La forme ne dit pas ce qui se touche — la pastille des
-/// places est une capsule et n'est pas tapable non plus. Ce qui distingue un
-/// geste d'une information, ici, c'est l'aplat orange, et il n'y en a qu'un
-/// par écran.
-///
-/// Toujours [GlassTone.onPhoto] : une étiquette de chaîne ne vit que sur une
-/// affiche, et son encre est blanche. En blanc sur une affiche claire, elle
-/// disparaîtrait.
+/// **Le [tone] n'est pas un réglage esthétique.** Sur une affiche, l'encre est
+/// blanche et il faut un voile sombre pour la porter, quel que soit le thème —
+/// une affiche n'a pas de thème. Sur une carte, la surface derrière est plate
+/// et connue : il n'y a rien à voir au travers, et « du verre » n'y serait
+/// qu'une pastille teintée qui se prend pour une fenêtre. Autant l'assumer et
+/// prendre le gris de la page.
 ///
 /// Volontairement SANS flou, contrairement à [GlassPill] : une liste en montre
 /// une demi-douzaine à la fois, et une couche de flou par badge est
 /// exactement ce qui fait tomber le défilement sur un Android d'entrée de
-/// gamme. À cette taille, c'est le voile sombre qui fait tout le travail —
-/// le flou ne s'y verrait pas.
+/// gamme. À cette taille, c'est le voile qui fait tout le travail — le flou
+/// ne s'y verrait pas.
+///
+/// Le libellé passe en capitales ici, et pas chez l'appelant : trois écrans
+/// affichent cette étiquette, et c'est comme ça qu'on avait « AL AOULA » sur
+/// l'un et « Al Aoula » sur l'autre.
 class ChannelBadge extends StatelessWidget {
-  const ChannelBadge({super.key, required this.label});
+  const ChannelBadge({
+    super.key,
+    required this.label,
+    this.tone = GlassTone.onPhoto,
+  });
 
   final String label;
 
+  /// Ce qu'il y a derrière. Voir la note sur [ChannelBadge] — c'est ce qui
+  /// décide si l'encre est lisible.
+  final GlassTone tone;
+
   @override
   Widget build(BuildContext context) {
+    final onPhoto = tone == GlassTone.onPhoto;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.glassOnPhotoSolid,
+        color: onPhoto ? AppColors.glassOnPhotoSolid : AppColors.backgroundGrey,
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        border: Border.all(color: AppColors.glassOnPhotoBorder),
+        border: Border.all(
+          color: onPhoto ? AppColors.glassOnPhotoBorder : AppColors.border,
+        ),
       ),
       child: Text(
-        label,
-        style: const TextStyle(
+        label.toUpperCase(),
+        style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.4,
-          color: Color(0xFFF7F8F8),
+          color: onPhoto ? AppColors.inkOnPhoto : AppColors.textSecondary,
         ),
       ),
     );

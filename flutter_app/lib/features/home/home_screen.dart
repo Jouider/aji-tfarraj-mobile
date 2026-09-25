@@ -377,8 +377,7 @@ class _HeroShowCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: ChannelBadge(
-                        label: (show.localizedChannel(isAr) ?? show.channel!)
-                            .toUpperCase(),
+                        label: show.localizedChannel(isAr) ?? show.channel!,
                       ),
                     ),
 
@@ -781,9 +780,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                           top: AppSpacing.sm,
                           right: AppSpacing.sm,
                           child: ChannelBadge(
-                            label:
-                                (show.localizedChannel(isAr) ?? show.channel!)
-                                    .toUpperCase(),
+                            label: show.localizedChannel(isAr) ?? show.channel!,
                           ),
                         ),
                     ],

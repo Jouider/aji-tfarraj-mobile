@@ -200,8 +200,14 @@ class AppColors {
   /// Le verre posé sur une photo : sombre dans les deux thèmes.
   static const Color glassOnPhoto = Color(0x57000000); // noir 34 %
 
-  /// Sa variante opaque, pour une étiquette lue en vitesse dans une liste.
-  static const Color glassOnPhotoSolid = Color(0x6B000000); // noir 42 %
+  /// Sa variante sans flou, pour une étiquette lue en vitesse dans une liste.
+  ///
+  /// Plus dense que [glassOnPhoto], et pour une raison mesurée : sans flou, le
+  /// voile est tout ce qui sépare l'encre blanche de l'affiche. À 42 %, une
+  /// affiche claire remontait le fond à 148 et le blanc n'y tenait que
+  /// 3,0:1 — la pastille « MEDI1 » sur la carte rose. À 62 %, le fond
+  /// plafonne à 97 et le blanc tient 6,2:1 quelle que soit l'affiche.
+  static const Color glassOnPhotoSolid = Color(0x9E000000); // noir 62 %
 
   static const Color glassOnPhotoBorder = Color(0x29FFFFFF); // blanc 16 %
 

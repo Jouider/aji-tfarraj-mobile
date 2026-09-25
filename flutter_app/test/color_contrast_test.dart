@@ -163,6 +163,41 @@ void _glassTests() {
       });
     }
 
+    /// L'étiquette d'une chaîne n'a pas de flou : le voile est tout ce qui
+    /// sépare son encre blanche de l'affiche. Et elle apparaît sur trois
+    /// écrans, donc sur toutes les affiches du catalogue — y compris les
+    /// claires.
+    test('une étiquette de chaîne se lit sur n\'importe quelle affiche', () {
+      for (final brightness in [Brightness.dark, Brightness.light]) {
+        AppColors.updateBrightness(brightness);
+
+        final worst = Color.alphaBlend(
+          AppColors.glassOnPhotoSolid,
+          const Color(0xFFFFFFFF), // l'affiche la plus claire possible
+        );
+
+        expect(
+          contrast(AppColors.inkOnPhoto, worst),
+          greaterThanOrEqualTo(4.5),
+          reason: 'À 42 %, le voile laissait le blanc tomber à 3,0:1 sur une '
+              'affiche claire — la pastille MEDI1 sur la carte rose.',
+        );
+      }
+    });
+
+    /// La même étiquette posée sur une carte : là, la surface est connue, et
+    /// c'est le gris de la page qui s'applique — pas le voile des affiches.
+    test('posée sur une carte, elle se lit dans les deux thèmes', () {
+      for (final brightness in [Brightness.dark, Brightness.light]) {
+        AppColors.updateBrightness(brightness);
+
+        expect(
+          contrast(AppColors.textSecondary, AppColors.backgroundGrey),
+          greaterThanOrEqualTo(4.5),
+        );
+      }
+    });
+
     test('le verre de la page suit le thème, celui des affiches jamais', () {
       AppColors.updateBrightness(Brightness.dark);
       final pageDark = AppColors.glassSurface;

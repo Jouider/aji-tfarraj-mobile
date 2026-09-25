@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
@@ -276,17 +277,21 @@ class _SearchBar extends StatelessWidget {
           focusNode: focusNode,
           onChanged: onChanged,
           textInputAction: TextInputAction.search,
-          style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
+          style:
+              AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: s.browseSearchHint,
-            hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textLight),
-            prefixIcon: Icon(Icons.search, color: AppColors.textMuted, size: 22),
+            hintStyle:
+                AppTypography.bodyMedium.copyWith(color: AppColors.textLight),
+            prefixIcon:
+                Icon(Icons.search, color: AppColors.textMuted, size: 22),
             suffixIcon: ListenableBuilder(
               listenable: controller,
               builder: (_, __) => controller.text.isEmpty
                   ? const SizedBox.shrink()
                   : IconButton(
-                      icon: Icon(Icons.close, color: AppColors.textMuted, size: 20),
+                      icon: Icon(Icons.close,
+                          color: AppColors.textMuted, size: 20),
                       onPressed: onClear,
                     ),
             ),
@@ -306,7 +311,8 @@ class _SearchBar extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+              borderSide:
+                  const BorderSide(color: AppColors.secondary, width: 1.5),
             ),
           ),
         ),
@@ -424,7 +430,11 @@ class _StudioSection extends StatelessWidget {
   final List<Show> shows;
   final bool isAr;
 
-  const _StudioSection({required this.s, required this.studioName, required this.shows, required this.isAr});
+  const _StudioSection(
+      {required this.s,
+      required this.studioName,
+      required this.shows,
+      required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -487,7 +497,8 @@ class _BrowseShowCard extends StatelessWidget {
   final Show show;
   final bool isAr;
 
-  const _BrowseShowCard({required this.s, required this.show, required this.isAr});
+  const _BrowseShowCard(
+      {required this.s, required this.show, required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -533,8 +544,9 @@ class _BrowseShowCard extends StatelessWidget {
                     ? Image.network(
                         show.imageUrl!,
                         fit: BoxFit.cover,
-                        loadingBuilder: (_, child, progress) =>
-                            progress == null ? child : Container(color: AppColors.backgroundWhite),
+                        loadingBuilder: (_, child, progress) => progress == null
+                            ? child
+                            : Container(color: AppColors.backgroundWhite),
                         errorBuilder: (_, __, ___) => Container(
                           color: AppColors.backgroundWhite,
                           child: Icon(Icons.tv,
@@ -579,23 +591,14 @@ class _BrowseShowCard extends StatelessWidget {
                         ),
                         if (show.channel != null) ...[
                           const SizedBox(width: AppSpacing.sm),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              show.channel!,
-                              style: AppTypography.caption.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 10,
-                              ),
-                            ),
+                          // Sur la carte, pas sur l'affiche : la surface
+                          // derrière est plate et connue, donc pas de verre —
+                          // ce serait une pastille teintée qui se prend pour
+                          // une fenêtre. L'orange plein, lui, réclamait le
+                          // geste alors qu'une chaîne ne se touche pas.
+                          ChannelBadge(
+                            label: show.channel!,
+                            tone: GlassTone.onPage,
                           ),
                         ],
                       ],
@@ -669,10 +672,12 @@ class _BrowseShowCard extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.secondary.withValues(alpha: 0.15),
+                              color:
+                                  AppColors.secondary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: AppColors.secondary.withValues(alpha: 0.30),
+                                color:
+                                    AppColors.secondary.withValues(alpha: 0.30),
                               ),
                             ),
                             child: Row(
@@ -800,7 +805,8 @@ class _FilterSheet extends StatelessWidget {
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: AppColors.secondary.withValues(alpha: 0.30),
+                                  color: AppColors.secondary
+                                      .withValues(alpha: 0.30),
                                   blurRadius: 8,
                                   offset: const Offset(0, 3),
                                 ),
@@ -810,8 +816,11 @@ class _FilterSheet extends StatelessWidget {
                       child: Text(
                         ch,
                         style: AppTypography.labelSmall.copyWith(
-                          color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primaryDark
+                              : AppColors.textSecondary,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
                         ),
                       ),
                     ),

@@ -10,6 +10,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
@@ -481,29 +482,8 @@ class _HeroSectionState extends State<_HeroSection>
             Positioned(
               top: MediaQuery.of(context).padding.top + AppSpacing.sm,
               right: AppSpacing.md,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.tv_rounded,
-                        size: 13, color: AppColors.secondaryLight),
-                    const SizedBox(width: 4),
-                    Text(
-                      show.localizedChannel(isAr) ?? show.channel!,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
+              child: ChannelBadge(
+                label: show.localizedChannel(isAr) ?? show.channel!,
               ),
             ),
 
