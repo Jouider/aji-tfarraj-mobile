@@ -324,8 +324,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             title: s.casting.profileTile,
             subtitle: s.casting.profileTileSubtitle,
             icon: Icons.person_search_outlined,
-            color: AppColors.casting,
-            colorDark: AppColors.castingDark,
+            color: AppColors.primary,
+            colorDark: AppColors.primaryDark,
             onTap: () => context.push(Routes.casting),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -457,7 +457,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (user != null && user.isStaffOrAdmin)
                 _SettingsRow(
                   icon: Icons.photo_camera_outlined,
-                  iconColor: AppColors.casting,
+                  iconColor: AppColors.primary,
                   title: s.staffCastingTitle,
                   subtitle: s.staffCastingSubtitle,
                   onTap: () => context.push(Routes.staffCasting),

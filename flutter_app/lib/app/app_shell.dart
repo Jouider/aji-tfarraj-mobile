@@ -17,6 +17,9 @@ class AppShell extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
+      // Le contenu passe SOUS la barre : une pilule qui flotte au-dessus d'une
+      // bande vide ne flotte pas, elle est posée sur un socle.
+      extendBody: true,
       body: navigationShell,
       // FIX: Bottom Navigation Bar — pill active indicator, secondary color
       bottomNavigationBar: _AppNavBar(
@@ -88,27 +91,39 @@ class _AppNavBar extends StatelessWidget {
     required this.items,
   });
 
+  /// De combien l'onglet actif se soulève hors de la pilule.
+  static const double _lift = 12;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
-        border: Border(
-          top: BorderSide(color: AppColors.border, width: 0.5),
+    final bottom = MediaQuery.of(context).padding.bottom;
+
+    return Padding(
+      // Assez d'air en haut pour que la goutte sorte sans être rognée, et en
+      // bas pour que la pilule se détache du bord de l'écran.
+      padding: EdgeInsets.fromLTRB(14, _lift, 14, bottom > 0 ? bottom : 12),
+      child: Container(
+        height: 62,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceOverlay,
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.45),
+              blurRadius: 26,
+              offset: const Offset(0, 12),
+            ),
+          ],
         ),
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: List.generate(items.length, (index) {
-              return _NavItem(
-                data: items[index],
-                isActive: currentIndex == index,
-                onTap: () => onTap(index),
-              );
-            }),
-          ),
+        child: Row(
+          children: List.generate(items.length, (index) {
+            return _NavItem(
+              data: items[index],
+              isActive: currentIndex == index,
+              onTap: () => onTap(index),
+            );
+          }),
         ),
       ),
     );
@@ -128,9 +143,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const activeColor = AppColors.secondary;
-    final inactiveColor = AppColors.textMuted;
-    final color = isActive ? activeColor : inactiveColor;
+    final color = isActive ? AppColors.textPrimary : AppColors.textMuted;
 
     return Expanded(
       child: GestureDetector(
@@ -139,32 +152,55 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // FIX: Active pill indicator — secondary at 12% opacity, radius 20
+            // La goutte : l'onglet actif perle hors de la pilule. Les rayons
+            // sont volontairement inégaux — plus ronds en haut, resserrés en
+            // bas — pour que la forme tombe au lieu de flotter.
             AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutBack,
+              transform:
+                  Matrix4.translationValues(0, isActive ? -_AppNavBar._lift : 0, 0),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.secondary.withValues(alpha: 0.12)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
+                gradient: isActive ? AppColors.hotGradient : null,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(18),
+                  bottom: Radius.circular(14),
+                ),
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.45),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        ),
+                      ]
+                    : null,
               ),
               child: Icon(
                 isActive ? data.activeIcon : data.icon,
-                size: 22,
-                color: color,
+                size: 21,
+                // Encre sombre sur l'orange : le blanc n'y tient pas (3,1:1).
+                color: isActive ? AppColors.onPrimary : color,
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              data.label,
-              style: TextStyle(
-                fontSize: isActive ? 10.0 : 9.5,
-                fontWeight:
-                    isActive ? FontWeight.w600 : FontWeight.w400,
-                color: color,
-                height: 1.0,
+            AnimatedSlide(
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutBack,
+              offset: Offset(0, isActive ? -0.55 : 0),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text(
+                  data.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                    color: color,
+                    height: 1.0,
+                  ),
+                ),
               ),
             ),
           ],

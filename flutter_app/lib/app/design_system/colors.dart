@@ -151,9 +151,10 @@ class AppColors {
   // Status Colors (foreground — same in both modes)
   // ============================================
 
-  /// Casting — la seule zone de l'app qui n'est ni la marque ni un statut.
-  static const Color casting = Color(0xFF8B5CF6);
-  static const Color castingDark = Color(0xFF6D28D9);
+  // Le violet du casting est parti avec le bordeaux : la charte tient à une
+  // seule couleur, et une carte violette au milieu de l'orange ressortait
+  // comme une erreur. L'espace casting prend le dégradé de marque, le mode
+  // chargé public garde le doré — deux mondes distincts, même famille.
 
   /// Success (approved / checked_in)
   static const Color success = Color(0xFF4ADE80);
