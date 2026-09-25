@@ -198,7 +198,7 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
                     onPressed:
                         reward.canCollect && !_loading ? _collect : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: AppColors.primaryAction,
                       foregroundColor: AppColors.textPrimary,
                       disabledBackgroundColor: AppColors.disabled,
                       padding: const EdgeInsets.symmetric(

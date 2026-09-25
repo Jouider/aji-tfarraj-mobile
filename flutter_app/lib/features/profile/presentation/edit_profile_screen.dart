@@ -900,7 +900,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   child: FilledButton(
                     onPressed: _isLoading ? null : _save,
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: AppColors.primaryAction,
                       foregroundColor: AppColors.onPrimary,
                       disabledBackgroundColor:
                           AppColors.primary.withValues(alpha: 0.5),

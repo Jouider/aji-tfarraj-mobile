@@ -117,7 +117,7 @@ class AppTheme {
         // Elevated Button Theme
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.primaryAction,
             foregroundColor: AppColors.onPrimary,
             disabledBackgroundColor: const Color(0xFF3A3A3C),
             disabledForegroundColor: const Color(0xFF6B7280),
@@ -394,7 +394,7 @@ class AppTheme {
         // Elevated Button Theme
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.primaryAction,
             foregroundColor: AppColors.onPrimary,
             disabledBackgroundColor: const Color(0xFFD1D5DB),
             disabledForegroundColor: const Color(0xFF9CA3AF),

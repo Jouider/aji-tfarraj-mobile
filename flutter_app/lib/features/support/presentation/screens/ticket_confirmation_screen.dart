@@ -561,7 +561,7 @@ class _ActionButtons extends StatelessWidget {
               ),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: AppColors.primaryAction,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
               padding: EdgeInsets.zero,

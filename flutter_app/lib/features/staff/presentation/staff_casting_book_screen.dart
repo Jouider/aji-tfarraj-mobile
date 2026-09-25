@@ -198,7 +198,7 @@ class _PoseRow extends StatelessWidget {
                   onPressed: enabled ? onTake : null,
                   icon: const Icon(Icons.photo_camera_outlined),
                   style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.primaryAction,
                     foregroundColor: AppColors.onPrimary,
                   ),
                 ),

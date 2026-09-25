@@ -177,7 +177,7 @@ class _UpdateButton extends StatelessWidget {
       child: FilledButton(
         onPressed: onTap,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.primaryAction,
           foregroundColor: AppColors.onPrimary,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

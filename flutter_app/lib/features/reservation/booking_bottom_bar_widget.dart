@@ -127,7 +127,7 @@ class _ConfirmButton extends StatelessWidget {
         onPressed: (isLoading || !isActive) ? null : onConfirm,
         style: ElevatedButton.styleFrom(
           // FIX: Active → primary bg, white text; Disabled → border bg, textMuted
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.primaryAction,
           disabledBackgroundColor: AppColors.border,
           foregroundColor: AppColors.onPrimary,
           disabledForegroundColor: AppColors.textMuted,

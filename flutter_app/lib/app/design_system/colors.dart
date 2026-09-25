@@ -31,7 +31,7 @@ class AppColors {
   static const Color primaryLight = Color(0xFFF5813F);
   static const Color primaryDark = Color(0xFFB73626);
 
-  /// L'encre posée SUR l'orange : presque noire, comme sur le doré.
+  /// L'encre posée SUR l'orange : blanche, comme le logo sur fond orange.
   ///
   /// Le dégradé de la charte ne supporte AUCUNE encre sur toute sa longueur :
   /// le blanc mesure 3,1:1 sur l'orange clair, l'encre noire 3,3:1 sur le
@@ -39,8 +39,9 @@ class AppColors {
   ///
   /// D'où deux dégradés distincts : [hotGradient], celui de la charte, pour
   /// les grandes surfaces sans petit texte ; [actionGradient], resserré dans
-  /// la plage claire, pour tout ce qui porte un libellé.
-  static const Color onPrimary = Color(0xFF0C0C0C);
+  /// la moitié SOMBRE, pour tout ce qui porte un libellé — c'est là que le
+  /// blanc tient.
+  static const Color onPrimary = Color(0xFFF7F8F8);
 
   /// Le dégradé de la charte, tel quel. Bandeaux, écran de démarrage, vignettes
   /// — jamais de texte fin par-dessus.
@@ -50,14 +51,20 @@ class AppColors {
     colors: [primary, primaryDark],
   );
 
-  /// Le dégradé des boutons : la même montée d'orange, arrêtée là où l'encre
-  /// reste lisible. 5,9:1 au départ, 4,8:1 à l'arrivée.
-  static const Color primaryActionEnd = Color(0xFFE0491F);
+  /// Le dégradé des boutons : la moitié sombre de celui de la charte, là où
+  /// le blanc se lit. 4,6:1 au départ, 5,5:1 à l'arrivée.
+  ///
+  /// L'orange vif de [primary] reste celui des badges et des accents, où rien
+  /// n'est écrit par-dessus.
+  /// L'orange des surfaces qui portent un libellé : aplats de boutons comme
+  /// départ du dégradé. Le blanc y tient (4,6:1), là où il lâche sur
+  /// l'orange vif (3,1:1).
+  static const Color primaryAction = Color(0xFFC8431A);
 
   static const LinearGradient actionGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primary, primaryActionEnd],
+    colors: [primaryAction, primaryDark],
   );
 
   /// Le dégradé clair : ce qui récompense — points, badges, cadeaux.

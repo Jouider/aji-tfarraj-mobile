@@ -308,7 +308,7 @@ class _OnSiteRegistrationScreenState
               child: FilledButton(
                 onPressed: _episode == null ? null : () => setState(() {}),
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.primaryAction,
                   foregroundColor: AppColors.onPrimary,
                 ),
                 child:
@@ -427,7 +427,7 @@ class _OnSiteRegistrationScreenState
           child: FilledButton.icon(
             onPressed: _capturePhoto,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: AppColors.primaryAction,
               foregroundColor: AppColors.onPrimary,
             ),
             icon: const Icon(Icons.photo_camera_outlined),
@@ -626,7 +626,7 @@ class _OnSiteRegistrationScreenState
                     ? (isLast ? _submit : () => setState(() => _step += 1))
                     : null,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.primaryAction,
                   foregroundColor: AppColors.onPrimary,
                 ),
                 child: _submitting
@@ -733,7 +733,7 @@ class _ResultSheet extends ConsumerWidget {
             child: FilledButton(
               onPressed: () => Navigator.of(context).pop(),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.primaryAction,
                 foregroundColor: AppColors.onPrimary,
               ),
               child: Text(s.onSiteNextPerson,

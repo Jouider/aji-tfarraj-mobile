@@ -294,7 +294,7 @@ class _TutorialSheetState extends ConsumerState<TutorialSheet> {
                     child: FilledButton(
                       onPressed: () => closeTutorialSheet(context),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: AppColors.primaryAction,
                         foregroundColor: AppColors.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius:

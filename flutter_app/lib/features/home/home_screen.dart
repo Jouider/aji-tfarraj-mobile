@@ -469,7 +469,7 @@ class _HeroShowCard extends StatelessWidget {
                               Routes.showDetail(show.id.toString()),
                             ),
                             style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.primary,
+                              backgroundColor: AppColors.primaryAction,
                               foregroundColor: AppColors.onPrimary,
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(

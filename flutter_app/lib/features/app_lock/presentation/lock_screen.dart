@@ -88,7 +88,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                           style: AppTypography.buttonLarge
                               .copyWith(fontSize: 15)),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: AppColors.primaryAction,
                         foregroundColor: AppColors.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),

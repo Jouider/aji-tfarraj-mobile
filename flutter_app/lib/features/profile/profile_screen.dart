@@ -1064,7 +1064,7 @@ class _ReferralCodeChip extends StatelessWidget {
           SnackBar(
             content: Text(copiedLabel),
             duration: const Duration(seconds: 2),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.primaryAction,
           ),
         );
       },

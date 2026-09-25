@@ -367,7 +367,7 @@ class _ManualCodeTab extends ConsumerWidget {
             child: ElevatedButton(
               onPressed: isLoading ? null : () => _submit(ref, s),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.primaryAction,
                 foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -499,7 +499,7 @@ class _CheckInResultCard extends ConsumerWidget {
               icon: const Icon(Icons.qr_code_scanner, size: 20),
               label: Text(s.staffScanAnother),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.primaryAction,
                 foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -590,7 +590,7 @@ class _ErrorCard extends ConsumerWidget {
             child: ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.primaryAction,
                 foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),

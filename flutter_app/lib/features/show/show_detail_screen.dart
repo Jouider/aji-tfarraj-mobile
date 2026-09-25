@@ -1299,7 +1299,7 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
                         child: FilledButton.icon(
                           onPressed: widget.onReserve,
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: AppColors.primaryAction,
                             foregroundColor: AppColors.onPrimary,
                             minimumSize:
                                 const Size(double.infinity, 52),
@@ -1747,7 +1747,7 @@ class _EpisodeCard extends ConsumerWidget {
                       onPressed: () => context.go(Routes.episodeReserve(
                           showId, episode.id.toString())),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: AppColors.primaryAction,
                         foregroundColor: AppColors.onPrimary,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 10),

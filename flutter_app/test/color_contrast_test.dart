@@ -59,15 +59,18 @@ void main() {
     /// rouge foncé. C'est la raison d'être d'un dégradé de bouton distinct, et
     /// ce test le rappelle à qui voudrait les réunir.
     test('the charter gradient carries no ink from end to end', () {
-      final white = contrast(AppColors.primary, const Color(0xFFF7F8F8));
-      final ink = contrast(AppColors.primaryDark, AppColors.onPrimary);
+      // Les deux seules encres envisageables, chacune à son pire bout.
+      const white = Color(0xFFF7F8F8);
+      const dark = Color(0xFF0C0C0C);
 
-      expect(white, lessThan(aaNormalText));
-      expect(ink, lessThan(aaNormalText));
+      expect(contrast(AppColors.primary, white), lessThan(aaNormalText),
+          reason: 'le blanc lâche sur l\'orange clair');
+      expect(contrast(AppColors.primaryDark, dark), lessThan(aaNormalText),
+          reason: 'l\'encre sombre lâche sur le rouge foncé');
     });
 
     test('the button gradient is readable at both ends', () {
-      for (final end in [AppColors.primary, AppColors.primaryActionEnd]) {
+      for (final end in [AppColors.primaryAction, AppColors.primaryDark]) {
         expect(
           contrast(end, AppColors.onPrimary),
           greaterThanOrEqualTo(aaNormalText),

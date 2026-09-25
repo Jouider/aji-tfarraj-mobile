@@ -73,7 +73,7 @@ class _PrimaryActionButton extends StatelessWidget {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.primaryAction,
           foregroundColor: AppColors.onPrimary,
           elevation: 0,
           shadowColor: Colors.transparent,

@@ -518,7 +518,7 @@ class _ReservationDetailsCard extends ConsumerWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(s.resDetailCopied),
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.primaryAction,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
