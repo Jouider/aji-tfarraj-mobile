@@ -11,6 +11,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/buttons.dart';
@@ -177,7 +178,7 @@ class _TicketLoadingView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: AppColors.secondary),
+          CircularProgressIndicator(color: AppColors.accentInk),
           const SizedBox(height: AppSpacing.lg),
           Text(
             s.ticketLoading,
@@ -206,7 +207,7 @@ class _TicketLockedView extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
@@ -294,7 +295,7 @@ class _TicketsContentView extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
@@ -1422,12 +1423,16 @@ class _PastTicketCard extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.history, size: 20, color: Colors.white),
+                      // Sur un gris moyen, l'encre est la couleur de la
+                      // page : elle est toujours à l'opposé. En blanc, ce
+                      // bandeau tombait à 2,4:1 en thème sombre.
+                      Icon(Icons.history,
+                          size: 20, color: AppColors.backgroundWhite),
                       const SizedBox(width: 8),
                       Text(
                         s.ticketUsed,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppColors.backgroundWhite,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1542,13 +1547,7 @@ class _RulesReminderCard extends StatelessWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       padding: const EdgeInsets.all(20),
       child: Column(

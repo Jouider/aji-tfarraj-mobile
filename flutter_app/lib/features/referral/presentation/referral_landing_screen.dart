@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/loaders.dart';
@@ -81,7 +82,7 @@ class ReferralLandingScreen extends ConsumerWidget {
                     ),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                     border: Border.all(
-                      color: AppColors.secondary.withValues(alpha: 0.3),
+                      color: AppColors.accentInk.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -210,13 +211,7 @@ class ReferralLandingScreen extends ConsumerWidget {
             color: AppColors.backgroundLight,
             border:
                 Border(top: BorderSide(color: AppColors.border, width: 0.5)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
-              ),
-            ],
+            boxShadow: AppShadows.card,
           ),
           child: SafeArea(
             top: false,

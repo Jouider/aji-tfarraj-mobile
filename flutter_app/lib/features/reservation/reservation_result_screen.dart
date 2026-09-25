@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
@@ -215,13 +216,7 @@ class _ResultContentState extends ConsumerState<_ResultContent>
                 border: Border(
                   top: BorderSide(color: AppColors.border, width: 1),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 12,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
+                boxShadow: AppShadows.card,
               ),
               padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg, 16, AppSpacing.lg, 12),

@@ -54,7 +54,7 @@ class MyRewardsScreen extends ConsumerWidget {
           }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(myRewardsProvider),
-            color: AppColors.secondary,
+            color: AppColors.accentInk,
             child: ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: requests.length,

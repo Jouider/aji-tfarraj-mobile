@@ -566,7 +566,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+        borderSide: BorderSide(color: AppColors.accentInk, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -787,8 +787,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                    child: const LinearProgressIndicator(
-                        color: AppColors.secondary,
+                    child: LinearProgressIndicator(
+                        color: AppColors.accentInk,
                         backgroundColor: Colors.transparent),
                   ),
                 ),
@@ -1008,9 +1008,9 @@ class _AvatarHero extends ConsumerWidget {
                     child: isLoading
                         ? Container(
                             color: AppColors.backgroundGrey,
-                            child: const Center(
+                            child: Center(
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2.5, color: AppColors.secondary),
+                                  strokeWidth: 2.5, color: AppColors.accentInk),
                             ),
                           )
                         : (user?.avatarUrl != null
@@ -1060,14 +1060,14 @@ class _AvatarHero extends ConsumerWidget {
                           color: AppColors.backgroundWhite, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.secondary.withValues(alpha: 0.35),
+                          color: AppColors.accentInk.withValues(alpha: 0.35),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.camera_alt,
-                        size: 18, color: Colors.white),
+                    child: Icon(Icons.camera_alt,
+                        size: 18, color: AppColors.onSecondary),
                   ),
                 ),
               ),

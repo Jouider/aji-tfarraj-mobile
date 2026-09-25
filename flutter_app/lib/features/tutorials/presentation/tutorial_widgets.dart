@@ -175,7 +175,7 @@ class TutorialOfferBanner extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Material(
-        color: AppColors.secondary.withValues(alpha: 0.12),
+        color: AppColors.accentInk.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),

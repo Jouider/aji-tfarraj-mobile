@@ -10,6 +10,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -584,13 +585,7 @@ class _SeatsCard extends ConsumerWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         children: [
@@ -1517,10 +1512,10 @@ class _EpisodeShareButtonState extends ConsumerState<_EpisodeShareButton> {
                 Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
           ),
           child: _sharing
-              ? const Padding(
+              ? Padding(
                   padding: EdgeInsets.all(9),
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: AppColors.secondary),
+                      strokeWidth: 2, color: AppColors.accentInk),
                 )
               : Icon(Icons.share_outlined,
                   size: 18, color: AppColors.accentInk),

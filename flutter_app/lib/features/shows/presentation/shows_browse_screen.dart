@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -210,7 +211,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(showsListProvider.notifier).refresh(),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       backgroundColor: AppColors.backgroundGrey,
       child: ListView.builder(
         padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
@@ -312,7 +313,7 @@ class _SearchBar extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide:
-                  const BorderSide(color: AppColors.secondary, width: 1.5),
+                  BorderSide(color: AppColors.accentInk, width: 1.5),
             ),
           ),
         ),
@@ -516,13 +517,7 @@ class _BrowseShowCard extends StatelessWidget {
           color: AppColors.cardDarkElevated,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: AppShadows.card,
         ),
         child: Row(
           children: [

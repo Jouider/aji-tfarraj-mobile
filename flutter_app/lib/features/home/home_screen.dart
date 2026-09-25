@@ -214,7 +214,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(showsListProvider.notifier).refresh(),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       backgroundColor: AppColors.backgroundGrey,
       child: CustomScrollView(
         controller: _scrollController,

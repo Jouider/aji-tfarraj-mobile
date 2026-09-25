@@ -118,7 +118,7 @@ class _ConfirmationHeroState extends ConsumerState<ConfirmationHero>
                 color: AppColors.secondary.withValues(alpha: 0.35)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.secondary.withValues(alpha: 0.12),
+                color: AppColors.accentInk.withValues(alpha: 0.12),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),

@@ -58,7 +58,7 @@ class ReferralStatsScreen extends ConsumerWidget {
       dynamic s, dynamic user) {
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(myReferralStatsProvider),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -133,7 +133,7 @@ class ReferralStatsScreen extends ConsumerWidget {
                   label: s.referralTotalInvited,
                   value: stats.totalInvited.toString(),
                   icon: Icons.person_add_outlined,
-                  color: AppColors.secondary,
+                  color: AppColors.accentInk,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -164,7 +164,7 @@ class ReferralStatsScreen extends ConsumerWidget {
                   label: s.referralPointsEarned,
                   value: '${stats.totalPoints}',
                   icon: Icons.star_outlined,
-                  color: AppColors.secondary,
+                  color: AppColors.accentInk,
                 ),
               ),
             ],

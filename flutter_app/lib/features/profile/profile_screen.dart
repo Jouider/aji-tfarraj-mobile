@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
@@ -337,7 +338,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               title: s.cp.modeCardTitle,
               subtitle: s.cp.modeCardSubtitle,
               icon: Icons.workspace_premium_outlined,
-              color: AppColors.secondary,
+              color: AppColors.accentInk,
               colorDark: AppColors.secondaryDark,
               onTap: () {
                 ref.read(cpModeProvider.notifier).setEnabled(true);
@@ -404,11 +405,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: s.profileLoyaltyLabel,
                 trailing: pointsAsync.when(
                   data: (summary) => _LoyaltyBadge(points: summary.balance),
-                  loading: () => const SizedBox(
+                  loading: () => SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.secondary),
+                        strokeWidth: 2, color: AppColors.accentInk),
                   ),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
@@ -809,14 +810,15 @@ class _ProfileHeader extends StatelessWidget {
                             color: AppColors.backgroundWhite, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.secondary.withValues(alpha: 0.3),
+                            color: AppColors.accentInk.withValues(alpha: 0.3),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
                       child:
-                          const Icon(Icons.edit, size: 16, color: Colors.white),
+                          Icon(Icons.edit,
+                              size: 16, color: AppColors.onSecondary),
                     ),
                   ),
                 ),
@@ -893,13 +895,7 @@ class _SettingsGroup extends StatelessWidget {
             color: AppColors.cardDarkElevated,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            boxShadow: AppShadows.card,
           ),
           child: Column(
             children: List.generate(

@@ -66,7 +66,7 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
 
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(myPointsProvider),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -303,7 +303,7 @@ class _ReferralSummaryCard extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             border:
-                Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
+                Border.all(color: AppColors.accentInk.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [

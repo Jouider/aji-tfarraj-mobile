@@ -52,7 +52,7 @@ class MyReferralLinksScreen extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(myReferralLinksProvider),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       child: ListView.separated(
         padding: const EdgeInsets.all(AppSpacing.lg),
         itemCount: links.length,

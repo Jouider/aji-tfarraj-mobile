@@ -376,8 +376,8 @@ class _Player extends StatelessWidget {
                                   const SizedBox.shrink(),
                             ),
                           ),
-                        const CircularProgressIndicator(
-                            color: AppColors.secondary),
+                        CircularProgressIndicator(
+                            color: AppColors.accentInk),
                       ],
                     )
                   : LayoutBuilder(

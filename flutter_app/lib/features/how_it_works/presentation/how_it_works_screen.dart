@@ -248,7 +248,9 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accent,
-                        foregroundColor: Colors.white,
+                        // Le blanc tient 3,3:1 sur l'orange et 2,1:1 sur
+                        // l'or : l'encre suit l'aplat, elle ne le précède pas.
+                        foregroundColor: AppColors.inkOn(accent),
                         minimumSize: const Size.fromHeight(52),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -257,10 +259,10 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
                       ),
                       child: Text(
                         isLast ? s.howItWorksGotIt : s.howItWorksNext,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
-                          color: Colors.white,
+                          color: AppColors.inkOn(accent),
                         ),
                       ),
                     ),
@@ -409,8 +411,9 @@ class _StepCard extends StatelessWidget {
                     ),
                     child: Text(
                       '$number',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        // L'or veut de l'encre sombre, l'orange du blanc.
+                        color: AppColors.inkOn(accent),
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
                       ),

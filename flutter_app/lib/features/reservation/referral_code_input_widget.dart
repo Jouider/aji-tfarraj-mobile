@@ -72,7 +72,7 @@ class _ReferralCodeInputState extends State<ReferralCodeInput> {
         boxShadow: isActive
             ? [
                 BoxShadow(
-                  color: AppColors.secondary.withValues(alpha: 0.15),
+                  color: AppColors.accentInk.withValues(alpha: 0.15),
                   blurRadius: 6,
                   offset: Offset.zero,
                 ),

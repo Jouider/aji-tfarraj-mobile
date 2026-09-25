@@ -263,6 +263,15 @@ class AppColors {
   /// sombre, tandis que le rouge orangé d'[accentInk] s'y noierait.
   static const Color accentInkOnPhoto = secondary;
 
+  /// L'encre qui se lit sur un aplat de la charte.
+  ///
+  /// L'or et l'orange n'appellent pas la même, et c'est contre-intuitif : le
+  /// blanc tient 3,3:1 sur l'orange mais seulement **2,1:1 sur l'or**, où il
+  /// faut de l'encre sombre. Trois pastilles de l'app écrivaient en blanc sur
+  /// un disque doré — une icône invisible, dans les deux thèmes.
+  static Color inkOn(Color fill) =>
+      (fill == secondary || fill == secondaryLight) ? onSecondary : onPrimary;
+
   static Color get borderLight =>
       _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D5DB);
 

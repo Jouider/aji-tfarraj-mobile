@@ -129,7 +129,7 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
                 onRetry: () => ref.invalidate(cpDashboardProvider),
               ),
               data: (dash) => RefreshIndicator(
-                color: AppColors.secondary,
+                color: AppColors.accentInk,
                 onRefresh: () async => ref.invalidate(cpDashboardProvider),
                 child: switch (_index) {
                   0 => _AccueilTab(

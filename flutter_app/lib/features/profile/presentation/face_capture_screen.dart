@@ -171,8 +171,8 @@ class _FaceCaptureScreenState extends ConsumerState<FaceCaptureScreen>
         fit: StackFit.expand,
         children: [
           if (_initializing)
-            const Center(
-                child: CircularProgressIndicator(color: AppColors.secondary))
+            Center(
+                child: CircularProgressIndicator(color: AppColors.accentInk))
           else if (_cameraError || !ready)
             Center(
               child: Padding(
