@@ -416,8 +416,7 @@ class _Pill extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: AppSpacing.xs),
-          Text(label,
-              style: AppTypography.labelSmall.copyWith(color: color)),
+          Text(label, style: AppTypography.labelSmall.copyWith(color: color)),
         ],
       ),
     );
@@ -509,7 +508,6 @@ class _Actions extends StatelessWidget {
   }
 }
 
-
 /// Where the shuttle drops this person after the recording.
 ///
 /// Optional on purpose: "repart par ses propres moyens" is a real answer, and
@@ -546,7 +544,7 @@ class _ReturnPointPicker extends ConsumerWidget {
           Row(
             children: [
               Icon(Icons.directions_bus_outlined,
-                  size: 18, color: AppColors.secondary),
+                  size: 18, color: AppColors.accentInk),
               const SizedBox(width: AppSpacing.xs),
               Text(s.staffReturnPointTitle, style: AppTypography.labelMedium),
               if (saving) ...[
@@ -640,7 +638,7 @@ class _PointTile extends StatelessWidget {
                 ),
               ),
               if (selected)
-                Icon(Icons.check_circle, color: AppColors.secondary, size: 20),
+                Icon(Icons.check_circle, color: AppColors.accentInk, size: 20),
             ],
           ),
         ),

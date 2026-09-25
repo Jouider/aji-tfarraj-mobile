@@ -144,12 +144,11 @@ class _LinkCard extends StatelessWidget {
               ),
               if (link.isExpired)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.errorLight,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Text(
                     s.referralExpired,
@@ -164,8 +163,7 @@ class _LinkCard extends StatelessWidget {
             link.show.startsAt != null
                 ? dateFormat.format(link.show.startsAt!.toLocal())
                 : '—',
-            style:
-                AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.md),
 
@@ -188,7 +186,7 @@ class _LinkCard extends StatelessWidget {
                 IconButton(
                   onPressed: onShare,
                   icon: const Icon(Icons.share_outlined),
-                  color: AppColors.secondary,
+                  color: AppColors.accentInk,
                   iconSize: 20,
                   tooltip: s.referralShareLink,
                 ),
@@ -226,8 +224,7 @@ class _StatBadge extends StatelessWidget {
         const SizedBox(width: 2),
         Text(
           label,
-          style:
-              AppTypography.labelSmall.copyWith(color: AppColors.textMuted),
+          style: AppTypography.labelSmall.copyWith(color: AppColors.textMuted),
         ),
       ],
     );

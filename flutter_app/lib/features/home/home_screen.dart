@@ -398,7 +398,7 @@ class _HeroShowCard extends StatelessWidget {
                       Icon(
                         Icons.calendar_today_outlined,
                         size: 13,
-                        color: AppColors.secondary,
+                        color: AppColors.accentInkOnPhoto,
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -419,7 +419,7 @@ class _HeroShowCard extends StatelessWidget {
                       Icon(
                         Icons.location_on_outlined,
                         size: 13,
-                        color: AppColors.secondary,
+                        color: AppColors.accentInkOnPhoto,
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -500,7 +500,7 @@ class _HeroShowCard extends StatelessWidget {
                                 Icon(
                                   Icons.event_seat_outlined,
                                   size: 16,
-                                  color: AppColors.secondary,
+                                  color: AppColors.accentInkOnPhoto,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -578,7 +578,7 @@ class _SectionHeader extends StatelessWidget {
           TextButton.icon(
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.secondary,
+              foregroundColor: AppColors.accentInk,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.xs,
@@ -590,7 +590,7 @@ class _SectionHeader extends StatelessWidget {
             icon: Text(
               seeAllText,
               style: AppTypography.labelSmall.copyWith(
-                color: AppColors.secondary,
+                color: AppColors.accentInk,
               ),
             ),
           ),
@@ -623,6 +623,11 @@ class _ShowsHorizontalSection extends StatelessWidget {
       height: 240,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
+        // Sans ça, la liste coupe les ombres au ras de sa boîte — et comme
+        // elle fait toute la largeur, la coupe se lit comme un trait tiré
+        // d'un bord à l'autre de l'écran. Mesuré sur la capture : la page
+        // passe de 250 à 245 en une seule ligne de pixels, sur 1206.
+        clipBehavior: Clip.none,
         padding: const EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.sm,
@@ -828,7 +833,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                   Text(
                     s.episodeCount(show.upcomingEpisodesCount),
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.secondary,
+                      color: AppColors.accentInk,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

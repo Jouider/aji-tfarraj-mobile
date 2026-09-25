@@ -16,13 +16,29 @@ class AppShadows {
   AppShadows._();
 
   /// Sous une carte ou une feuille : diffuse, basse, jamais colorée.
-  static List<BoxShadow> get card => [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.45),
-          blurRadius: 24,
-          offset: const Offset(0, 10),
-        ),
-      ];
+  ///
+  /// Et beaucoup plus discrète en thème clair. Une ombre se lit par le
+  /// contraste qu'elle creuse avec la page : sur du noir il faut 45 % de noir
+  /// pour qu'elle existe, sur du blanc 8 % suffisent largement. Les mêmes
+  /// 45 % posés sur une page blanche donnaient un nuage sombre sous chaque
+  /// carte — et, les cartes n'étant espacées que de 14 points, les nuages se
+  /// rejoignaient en une plaque grise continue d'un bord à l'autre de
+  /// l'écran.
+  static List<BoxShadow> get card => AppColors.isDark
+      ? [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ]
+      : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ];
 
   /// Sous une surface en verre. En thème clair, une pilule blanche posée sur
   /// une page blanche n'existe pas : c'est l'ombre qui la décolle. En thème

@@ -105,9 +105,10 @@ class _CastingDetailScreenState extends ConsumerState<CastingDetailScreen> {
                       _Tag(
                         icon: Icons.cake_outlined,
                         label: [
-                          if (call.minAge != null) '${call.minAge}',
-                          if (call.maxAge != null) '${call.maxAge}',
-                        ].join(' – ') + ' ans',
+                              if (call.minAge != null) '${call.minAge}',
+                              if (call.maxAge != null) '${call.maxAge}',
+                            ].join(' – ') +
+                            ' ans',
                       ),
                     if (call.closesAt != null)
                       _Tag(
@@ -168,8 +169,9 @@ class _CastingDetailScreenState extends ConsumerState<CastingDetailScreen> {
                   _BlockedCard(
                     message: s.casting.applyBlocked,
                     actionLabel: s.casting.bookTitle,
-                    onAction: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const CastingBookScreen())),
+                    onAction: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const CastingBookScreen())),
                   )
                 else ...[
                   TextField(
@@ -196,8 +198,7 @@ class _CastingDetailScreenState extends ConsumerState<CastingDetailScreen> {
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.onSecondary))
+                                  strokeWidth: 2, color: AppColors.onSecondary))
                           : Text(s.casting.apply),
                     ),
                   ),
@@ -232,8 +233,8 @@ class _Tag extends StatelessWidget {
           Icon(icon, size: 14, color: AppColors.textMuted),
           const SizedBox(width: 5),
           Text(label,
-              style: AppTypography.caption
-                  .copyWith(color: AppColors.textMuted)),
+              style:
+                  AppTypography.caption.copyWith(color: AppColors.textMuted)),
         ],
       ),
     );
@@ -294,8 +295,8 @@ class _BlockedCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.photo_camera_outlined,
-                  color: AppColors.secondary, size: 20),
+              Icon(Icons.photo_camera_outlined,
+                  color: AppColors.accentInk, size: 20),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(message, style: AppTypography.bodyMedium),
@@ -459,7 +460,7 @@ class _PracticalInfo extends StatelessWidget {
                       color: AppColors.secondary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(icon, size: 17, color: AppColors.secondary),
+                    child: Icon(icon, size: 17, color: AppColors.accentInk),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
@@ -511,7 +512,7 @@ class _RulesList extends StatelessWidget {
                   ),
                   child: Text('${i + 1}',
                       style: AppTypography.caption
-                          .copyWith(color: AppColors.secondary)),
+                          .copyWith(color: AppColors.accentInk)),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
@@ -544,8 +545,8 @@ class _DetailsError extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(message,
-              style: AppTypography.bodySmall
-                  .copyWith(color: AppColors.textMuted)),
+              style:
+                  AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
         ),
         TextButton(onPressed: onRetry, child: Text(retryLabel)),
       ],

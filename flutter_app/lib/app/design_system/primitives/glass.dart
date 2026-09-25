@@ -25,8 +25,9 @@ enum GlassTone {
 }
 
 extension _GlassColors on GlassTone {
-  Color get surface =>
-      this == GlassTone.onPhoto ? AppColors.glassOnPhoto : AppColors.glassSurface;
+  Color get surface => this == GlassTone.onPhoto
+      ? AppColors.glassOnPhoto
+      : AppColors.glassSurface;
 
   Color get border => this == GlassTone.onPhoto
       ? AppColors.glassOnPhotoBorder
@@ -46,6 +47,13 @@ extension _GlassColors on GlassTone {
 ///
 /// Le flou se recalcule à chaque image : à réserver aux éléments posés sur une
 /// image, jamais en liste.
+///
+/// **En [GlassTone.onPhoto], la capsule ne garantit pas seule la lisibilité.**
+/// Son voile à 34 % laisse passer une affiche claire : le fond peut y monter
+/// à 168, et l'or y tombe à 1,2:1. Elle n'est donc à poser que sur une zone
+/// déjà assombrie — le bandeau du héros, dont le voile atteint 85 %. Une
+/// étiquette posée n'importe où sur une affiche prend [ChannelBadge], dont le
+/// voile est assez dense pour se suffire.
 class GlassPill extends StatelessWidget {
   const GlassPill({
     super.key,

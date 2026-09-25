@@ -23,7 +23,8 @@ class ReservationDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
-    final reservationAsync = ref.watch(reservationDetailProvider(int.parse(reservationId)));
+    final reservationAsync =
+        ref.watch(reservationDetailProvider(int.parse(reservationId)));
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -59,7 +60,8 @@ class ReservationDetailScreen extends ConsumerWidget {
         error: (error, stack) => _ErrorView(
           message: error.toString(),
           retryLabel: s.resDetailRetry,
-          onRetry: () => ref.refresh(reservationDetailProvider(int.parse(reservationId))),
+          onRetry: () =>
+              ref.refresh(reservationDetailProvider(int.parse(reservationId))),
         ),
         data: (reservation) {
           final isAr = ref.watch(isRtlProvider);
@@ -104,7 +106,8 @@ class ReservationDetailScreen extends ConsumerWidget {
                 ),
 
                 // Contextual info boxes
-                if (reservation.rejectionReason != null && statusHelper.isRejected) ...[
+                if (reservation.rejectionReason != null &&
+                    statusHelper.isRejected) ...[
                   const SizedBox(height: AppSpacing.lg),
                   _AlertInfoBox(
                     icon: Icons.info_outline,
@@ -181,7 +184,8 @@ class ReservationDetailScreen extends ConsumerWidget {
                   color: AppColors.errorLight,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.cancel_outlined, color: AppColors.error, size: 28),
+                child: const Icon(Icons.cancel_outlined,
+                    color: AppColors.error, size: 28),
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(s.resDetailCancelDialogTitle, style: AppTypography.h4),
@@ -189,7 +193,8 @@ class ReservationDetailScreen extends ConsumerWidget {
               Text(
                 s.resDetailCancelDialogBody,
                 textAlign: TextAlign.center,
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+                style: AppTypography.bodyMedium
+                    .copyWith(color: AppColors.textMuted),
               ),
               const SizedBox(height: AppSpacing.xl),
               Row(
@@ -203,7 +208,8 @@ class ReservationDetailScreen extends ConsumerWidget {
                         side: BorderSide(color: AppColors.border),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd),
                         ),
                       ),
                       child: Text(s.resDetailCancelDialogBack),
@@ -234,7 +240,8 @@ class ReservationDetailScreen extends ConsumerWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('$e', style: AppTypography.bodyMedium),
+                                content:
+                                    Text('$e', style: AppTypography.bodyMedium),
                                 backgroundColor: AppColors.errorLight,
                               ),
                             );
@@ -246,7 +253,8 @@ class ReservationDetailScreen extends ConsumerWidget {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd),
                         ),
                       ),
                       child: Text(s.resDetailCancelDialogConfirm),
@@ -508,8 +516,8 @@ class _ReservationDetailsCard extends ConsumerWidget {
           _DetailRow(
             label: s.resDetailLabelNumber,
             value: '#${reservation.id}',
-            valueStyle: const TextStyle(
-              color: AppColors.secondary,
+            valueStyle: TextStyle(
+              color: AppColors.accentInk,
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),
@@ -536,7 +544,8 @@ class _ReservationDetailsCard extends ConsumerWidget {
           Divider(height: 1, color: AppColors.border),
           _DetailRow(
             label: s.resDetailLabelCreatedAt,
-            value: DateFormat('dd/MM/yyyy').format(reservation.createdAt.toLocal()),
+            value: DateFormat('dd/MM/yyyy')
+                .format(reservation.createdAt.toLocal()),
             valueStyle: AppTypography.bodyMedium.copyWith(
               fontSize: 14,
               color: AppColors.textSecondary,
@@ -545,7 +554,9 @@ class _ReservationDetailsCard extends ConsumerWidget {
           if (reservation.expiresAt != null) ...[
             Divider(height: 1, color: AppColors.border),
             _DetailRow(
-              label: statusHelper.isExpired ? s.resDetailLabelExpiredAt : s.resDetailLabelExpiresAt,
+              label: statusHelper.isExpired
+                  ? s.resDetailLabelExpiredAt
+                  : s.resDetailLabelExpiresAt,
               value: DateFormat('dd/MM/yyyy à HH:mm')
                   .format(reservation.expiresAt!.toLocal()),
               valueStyle: TextStyle(
@@ -599,13 +610,15 @@ class _AlertInfoBox extends StatelessWidget {
             children: [
               Icon(icon, color: color, size: 18),
               const SizedBox(width: AppSpacing.sm),
-              Text(title, style: AppTypography.labelMedium.copyWith(color: color)),
+              Text(title,
+                  style: AppTypography.labelMedium.copyWith(color: color)),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             message,
-            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodySmall
+                .copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -663,7 +676,8 @@ class _ActionButtons extends ConsumerWidget {
         ],
 
         // FIX: Cancel button — errorLight bg, error border 1.5px, errorDark text, radius 14, h52, shadow
-        if (statusHelper.canCancel) _CancelButton(label: s.resDetailBtnCancel, onCancel: onCancel),
+        if (statusHelper.canCancel)
+          _CancelButton(label: s.resDetailBtnCancel, onCancel: onCancel),
       ],
     );
   }
@@ -731,7 +745,8 @@ class _ActionButton extends StatelessWidget {
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: Icon(icon, size: 18),
-        label: Text('  $label', style: AppTypography.buttonLarge.copyWith(color: resolvedColor)),
+        label: Text('  $label',
+            style: AppTypography.buttonLarge.copyWith(color: resolvedColor)),
         style: OutlinedButton.styleFrom(
           foregroundColor: resolvedColor,
           side: BorderSide(color: resolvedColor.withValues(alpha: 0.5)),
@@ -768,8 +783,7 @@ class _CancelButton extends StatelessWidget {
       ),
       child: OutlinedButton.icon(
         onPressed: onCancel,
-        icon: Icon(Icons.cancel_outlined,
-            size: 18, color: AppColors.errorDark),
+        icon: Icon(Icons.cancel_outlined, size: 18, color: AppColors.errorDark),
         label: Text(
           label,
           style: AppTypography.buttonLarge.copyWith(
@@ -883,8 +897,7 @@ class _DetailRow extends StatelessWidget {
                 const SizedBox(width: 6),
                 GestureDetector(
                   onTap: onCopy,
-                  child: const Icon(Icons.copy,
-                      size: 16, color: AppColors.secondary),
+                  child: Icon(Icons.copy, size: 16, color: AppColors.accentInk),
                 ),
               ],
             ],
@@ -923,7 +936,8 @@ class _ErrorView extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.bodyMedium
+                  .copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton.icon(

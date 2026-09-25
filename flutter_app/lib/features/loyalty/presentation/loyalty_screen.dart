@@ -60,7 +60,8 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
     );
   }
 
-  Widget _buildContent(BuildContext context, PointsSummary summary, dynamic strings) {
+  Widget _buildContent(
+      BuildContext context, PointsSummary summary, dynamic strings) {
     final locale = ref.watch(localeProvider);
 
     return RefreshIndicator(
@@ -163,7 +164,8 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
     if (userId == null || _watching) return;
 
     setState(() => _watching = true);
-    final earned = await ref.read(adsServiceProvider).showRewarded(userId: userId);
+    final earned =
+        await ref.read(adsServiceProvider).showRewarded(userId: userId);
     if (!mounted) return;
     setState(() => _watching = false);
 
@@ -189,7 +191,9 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
       case 'bonus':
         return locale == AppLocale.fr ? 'Bonus' : 'مكافأة';
       case 'charge_public_bonus':
-        return locale == AppLocale.fr ? 'Bonus première venue' : 'مكافأة أول حضور';
+        return locale == AppLocale.fr
+            ? 'Bonus première venue'
+            : 'مكافأة أول حضور';
       case 'redemption':
         return locale == AppLocale.fr ? 'Cadeau échangé' : 'هدية مستبدلة';
       // Left before the end of the recording: that evening's points go back.
@@ -263,8 +267,7 @@ class _RewardsPreview extends ConsumerWidget {
           children: [
             for (int i = 0; i < preview.length; i++) ...[
               RewardApiCard(reward: preview[i], previewMode: true),
-              if (i < preview.length - 1)
-                const SizedBox(height: AppSpacing.md),
+              if (i < preview.length - 1) const SizedBox(height: AppSpacing.md),
             ],
           ],
         );
@@ -311,8 +314,8 @@ class _ReferralSummaryCard extends StatelessWidget {
                   color: AppColors.secondary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.people_outline,
-                    color: AppColors.secondary, size: 22),
+                child: Icon(Icons.people_outline,
+                    color: AppColors.accentInk, size: 22),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(

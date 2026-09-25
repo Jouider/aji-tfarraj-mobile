@@ -42,8 +42,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final locale = ref.watch(localeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final logo = locale == AppLocale.ar
-        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
-        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
+        ? (isDark
+            ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
+            : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
+        : (isDark
+            ? 'assets/images/ajitfarraj_logo/white_fr_logo.png'
+            : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     final isAnyLoading = authState.isLoading || _loadingProvider != null;
 
@@ -95,7 +99,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 if (Platform.isIOS) ...[
                   _SocialButton(
                     label: s.continueWithApple,
-                    icon: const Icon(Icons.apple, size: 20, color: Colors.white),
+                    icon:
+                        const Icon(Icons.apple, size: 20, color: Colors.white),
                     isLoading: _loadingProvider == 'apple',
                     isDisabled: isAnyLoading,
                     onPressed: _handleApple,
@@ -165,14 +170,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? null
                         : () => context.push(Routes.forgotPassword),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.secondary,
+                      foregroundColor: AppColors.accentInk,
                       padding: EdgeInsets.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
                       s.forgotPassword,
                       style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.secondary,
+                        color: AppColors.accentInk,
                       ),
                     ),
                   ),
@@ -226,14 +231,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? null
                           : () => context.go(Routes.authLanding),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.accentInk,
                         padding: const EdgeInsets.only(left: AppSpacing.xs),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
                         s.registerLink,
                         style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.secondary,
+                          color: AppColors.accentInk,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -347,8 +352,8 @@ class _SocialButton extends StatelessWidget {
                   icon,
                   const SizedBox(width: AppSpacing.sm),
                   Text(label,
-                      style: AppTypography.labelLarge
-                          .copyWith(color: fgColor, fontWeight: FontWeight.w500)),
+                      style: AppTypography.labelLarge.copyWith(
+                          color: fgColor, fontWeight: FontWeight.w500)),
                 ],
               ),
       ),
@@ -467,7 +472,8 @@ class _ErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error, size: AppSpacing.iconMd),
+          const Icon(Icons.error_outline,
+              color: AppColors.error, size: AppSpacing.iconMd),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(

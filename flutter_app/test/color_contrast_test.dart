@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 
 /// Contrast is measurable, so it should be measured rather than eyeballed.
 ///
@@ -26,6 +27,8 @@ void main() {
   const aaNormalText = 4.5;
 
   _glassTests();
+  _accentInkTests();
+  _shadowTests();
 
   group('ink on the gold call-to-action', () {
     test('is readable, and by a wide margin', () {
@@ -217,6 +220,110 @@ void _glassTests() {
         reason: 'Une affiche n\'a pas de thème : son voile reste sombre, '
             'sinon l\'encre blanche écrite dessus disparaît.',
       );
+    });
+  });
+
+  tearDown(() => AppColors.updateBrightness(Brightness.dark));
+}
+
+/// ─────────────────────────────────────────────────────────────────────────
+/// L'or : un aplat, pas une encre
+/// ─────────────────────────────────────────────────────────────────────────
+///
+/// [AppColors.secondary] est fait pour qu'on écrive DESSUS, pas AVEC. Écrit
+/// sur la page claire, il tombe à 1,89:1 — « Voir tout » était dans ce cas,
+/// et soixante-dix autres libellés et icônes avec lui. Sur la page sombre il
+/// tenait 10:1, ce qui explique que personne ne l'ait vu.
+void _accentInkTests() {
+  group('l\'encre dorée', () {
+    for (final brightness in [Brightness.dark, Brightness.light]) {
+      final name = brightness == Brightness.dark ? 'sombre' : 'clair';
+
+      test('en thème $name, elle se lit sur la page', () {
+        AppColors.updateBrightness(brightness);
+
+        expect(
+          contrast(AppColors.accentInk, AppColors.backgroundWhite),
+          greaterThanOrEqualTo(4.5),
+        );
+      });
+
+      test('en thème $name, elle se lit sur une carte', () {
+        AppColors.updateBrightness(brightness);
+
+        expect(
+          contrast(AppColors.accentInk, AppColors.backgroundLight),
+          greaterThanOrEqualTo(4.5),
+        );
+      });
+    }
+
+    /// L'erreur exacte que ce jeton répare.
+    test('l\'or brut ne se lit pas sur la page claire', () {
+      AppColors.updateBrightness(Brightness.light);
+
+      expect(
+        contrast(AppColors.secondary, AppColors.backgroundWhite),
+        lessThan(3.0),
+        reason: 'C\'est pour ça qu\'accentInk existe : ne jamais écrire '
+            'directement avec AppColors.secondary sur une surface de page.',
+      );
+    });
+
+    /// Sur une affiche, en revanche, l'or reste l'or : le voile est sombre
+    /// dans les deux thèmes.
+    test('sur une affiche, l\'or ne bouge pas et reste lisible', () {
+      AppColors.updateBrightness(Brightness.light);
+      final light = AppColors.accentInkOnPhoto;
+      AppColors.updateBrightness(Brightness.dark);
+
+      expect(AppColors.accentInkOnPhoto, light);
+
+      // Le fond n'est pas « une affiche quelconque » : l'or n'est écrit sur
+      // une affiche que dans le bandeau du héros, où le voile de lisibilité
+      // atteint 85 % de noir. Même sur l'affiche la plus claire possible, le
+      // fond y reste à 38.
+      final heroScrim = Color.alphaBlend(
+        const Color(0xD9000000),
+        const Color(0xFFFFFFFF),
+      );
+      expect(
+        contrast(AppColors.accentInkOnPhoto, heroScrim),
+        greaterThanOrEqualTo(4.5),
+        reason: 'L\'or n\'est une encre acceptable que sous le voile du '
+            'héros. Hors de ce voile, un verre à 34 % le laisse tomber à '
+            '1,2:1 — d\'où la note sur GlassPill.',
+      );
+    });
+  });
+
+  tearDown(() => AppColors.updateBrightness(Brightness.dark));
+}
+
+/// ─────────────────────────────────────────────────────────────────────────
+/// Les ombres
+/// ─────────────────────────────────────────────────────────────────────────
+///
+/// Une ombre se lit par le contraste qu'elle creuse avec la page. Les 45 % de
+/// noir qu'il faut sur une page noire donnaient, sur une page blanche, un
+/// nuage sombre sous chaque carte — et comme les cartes ne sont espacées que
+/// de 14 points, les nuages se rejoignaient en une plaque continue.
+void _shadowTests() {
+  group('l\'ombre des cartes', () {
+    test('elle est bien plus discrète sur une page claire', () {
+      AppColors.updateBrightness(Brightness.dark);
+      final dark = AppShadows.card.first.color.a;
+
+      AppColors.updateBrightness(Brightness.light);
+      final light = AppShadows.card.first.color.a;
+
+      expect(
+        light,
+        lessThan(dark / 3),
+        reason: 'La même opacité des deux côtés, c\'est la plaque grise '
+            'sous la rangée de cartes.',
+      );
+      expect(light, lessThanOrEqualTo(0.12));
     });
   });
 

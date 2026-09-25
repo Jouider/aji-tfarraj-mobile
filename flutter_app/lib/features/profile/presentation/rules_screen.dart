@@ -27,7 +27,8 @@ class RulesScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             s.conditionsSubtitle,
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+            style:
+                AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.xl),
 
@@ -101,10 +102,10 @@ class RulesScreen extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.check_circle_outline,
                       size: AppSpacing.iconMd,
-                      color: AppColors.secondary,
+                      color: AppColors.accentInk,
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(

@@ -423,7 +423,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                           Row(
                             children: [
                               Icon(Icons.calendar_today_outlined,
-                                  size: 13, color: AppColors.secondary),
+                                  size: 13, color: AppColors.accentInk),
                               const SizedBox(width: AppSpacing.xs),
                               Expanded(
                                 child: Text(
@@ -447,7 +447,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                           Row(
                             children: [
                               Icon(Icons.location_on_outlined,
-                                  size: 13, color: AppColors.secondary),
+                                  size: 13, color: AppColors.accentInk),
                               const SizedBox(width: AppSpacing.xs),
                               Text(
                                 reservation.show!.city,

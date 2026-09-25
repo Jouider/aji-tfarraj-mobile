@@ -76,8 +76,7 @@ Future<void> openTutorial(
   // Les clips de l'espace chargé public ne concernent que ceux qui y entrent.
   final isChargePublic =
       ref.read(loginAuthStateProvider).user?.canUseChargePublicMode ?? false;
-  final offered =
-      only ?? TutorialTopic.offeredTo(chargePublic: isChargePublic);
+  final offered = only ?? TutorialTopic.offeredTo(chargePublic: isChargePublic);
 
   final all = [
     for (final t in offered)
@@ -212,7 +211,7 @@ class TutorialOfferBanner extends ConsumerWidget {
                       Text(
                         duration.isEmpty ? watch : '$watch · $duration',
                         style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.secondary,
+                            color: AppColors.accentInk,
                             fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -262,8 +261,8 @@ class TutorialHowToLink extends ConsumerWidget {
         icon: const Icon(Icons.play_circle_outline, size: 18),
         label: Text(
           duration.isEmpty ? s.tutorialHowTo : '${s.tutorialHowTo} · $duration',
-          style: AppTypography.labelMedium.copyWith(
-              color: AppColors.error, fontWeight: FontWeight.w600),
+          style: AppTypography.labelMedium
+              .copyWith(color: AppColors.error, fontWeight: FontWeight.w600),
         ),
       ),
     );

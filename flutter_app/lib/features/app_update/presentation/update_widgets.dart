@@ -46,7 +46,8 @@ class ForceUpdateScreen extends ConsumerWidget {
                         .copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: AppSpacing.xxl),
-                  _UpdateButton(label: s.updateNow, onTap: () => _openStore(storeUrl)),
+                  _UpdateButton(
+                      label: s.updateNow, onTap: () => _openStore(storeUrl)),
                 ],
               ),
             ),
@@ -85,14 +86,14 @@ class UpdateAvailableOverlay extends ConsumerWidget {
           child: Material(
             color: AppColors.surfaceOverlay,
             shape: const RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
+              borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppSpacing.radiusXl)),
             ),
             child: SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.lg,
-                    AppSpacing.xl, AppSpacing.xl),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl, AppSpacing.lg, AppSpacing.xl, AppSpacing.xl),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -105,8 +106,7 @@ class UpdateAvailableOverlay extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
-                    _UpdateIcon(
-                        color: AppColors.secondary, size: 64, icon: 32),
+                    _UpdateIcon(color: AppColors.accentInk, size: 64, icon: 32),
                     const SizedBox(height: AppSpacing.lg),
                     Text(s.updateTitle,
                         textAlign: TextAlign.center, style: AppTypography.h3),

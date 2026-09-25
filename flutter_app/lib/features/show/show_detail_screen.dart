@@ -519,7 +519,7 @@ class _HeroSectionState extends State<_HeroSection>
                 Row(
                   children: [
                     Icon(Icons.calendar_today_outlined,
-                        size: 13, color: AppColors.secondary),
+                        size: 13, color: AppColors.accentInkOnPhoto),
                     const SizedBox(width: 5),
                     Text(
                       show.localizedDate(isAr) ??
@@ -536,7 +536,7 @@ class _HeroSectionState extends State<_HeroSection>
                     ),
                     const SizedBox(width: AppSpacing.lg),
                     Icon(Icons.location_on_outlined,
-                        size: 13, color: AppColors.secondary),
+                        size: 13, color: AppColors.accentInkOnPhoto),
                     const SizedBox(width: 5),
                     Flexible(
                       child: Text(
@@ -724,8 +724,8 @@ class _DescriptionCardState extends ConsumerState<_DescriptionCard> {
         children: [
           Row(
             children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 16, color: AppColors.secondary),
+              Icon(Icons.info_outline_rounded,
+                  size: 16, color: AppColors.accentInk),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 s.showDetailAbout,
@@ -753,7 +753,7 @@ class _DescriptionCardState extends ConsumerState<_DescriptionCard> {
               child: Text(
                 _expanded ? s.showDetailSeeLess : s.showDetailSeeMore,
                 style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.secondary,
+                  color: AppColors.accentInk,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -924,7 +924,7 @@ class _DetailRow extends StatelessWidget {
               color: AppColors.backgroundWhite,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            child: Icon(icon, color: AppColors.secondary, size: 18),
+            child: Icon(icon, color: AppColors.accentInk, size: 18),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -1009,8 +1009,8 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
                       color: AppColors.backgroundWhite,
                       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
-                    child: const Icon(Icons.shield_outlined,
-                        color: AppColors.secondary, size: 18),
+                    child: Icon(Icons.shield_outlined,
+                        color: AppColors.accentInk, size: 18),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
@@ -1074,7 +1074,7 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
                                   child: Text(
                                     '${i + 1}',
                                     style: AppTypography.caption.copyWith(
-                                      color: AppColors.secondary,
+                                      color: AppColors.accentInk,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -1220,13 +1220,13 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star_rounded,
-                      color: AppColors.secondary, size: 18),
+                  Icon(Icons.star_rounded,
+                      color: AppColors.accentInk, size: 18),
                   const SizedBox(height: 2),
                   Text(
                     '+${episode?.effectiveRewardPoints ?? show.effectiveRewardPoints}',
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.secondary,
+                      color: AppColors.accentInk,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -1389,8 +1389,8 @@ class _EpisodesSection extends ConsumerWidget {
         // FIX: Episodes header — secondary icon, split title/count styling
         Row(
           children: [
-            const Icon(Icons.video_library_outlined,
-                size: 18, color: AppColors.secondary),
+            Icon(Icons.video_library_outlined,
+                size: 18, color: AppColors.accentInk),
             const SizedBox(width: AppSpacing.sm),
             RichText(
               text: TextSpan(
@@ -1522,8 +1522,8 @@ class _EpisodeShareButtonState extends ConsumerState<_EpisodeShareButton> {
                   child: CircularProgressIndicator(
                       strokeWidth: 2, color: AppColors.secondary),
                 )
-              : const Icon(Icons.share_outlined,
-                  size: 18, color: AppColors.secondary),
+              : Icon(Icons.share_outlined,
+                  size: 18, color: AppColors.accentInk),
         ),
       ),
     );
@@ -1692,7 +1692,7 @@ class _EpisodeCard extends ConsumerWidget {
                   Text(
                     s.episodeAvailableSeats(episode.availableSeats),
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.secondary,
+                      color: AppColors.accentInk,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),

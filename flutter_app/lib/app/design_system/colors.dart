@@ -188,9 +188,8 @@ class AppColors {
   /// l'affiche qui défilait derrière : l'or de la charte tombait à 2,3:1 dès
   /// qu'une image claire passait sous la barre. Opaque, elle devient sa propre
   /// surface — l'or y tient 7,8:1 quoi qu'il y ait derrière.
-  static Color get glassHighlight => _isDark
-      ? const Color(0xFF24242A)
-      : const Color(0xFFFDE8DD);
+  static Color get glassHighlight =>
+      _isDark ? const Color(0xFF24242A) : const Color(0xFFFDE8DD);
 
   /// L'encre de l'onglet actif, sur cette capsule. L'or de la charte brille
   /// sur du sombre et s'efface sur du clair : en thème clair, c'est le rouge
@@ -236,6 +235,33 @@ class AppColors {
 
   /// Son encre — 4,6:1, mesuré.
   static const Color chipSelectedInk = onPrimary;
+
+  // ============================================
+  // L'or, en aplat et en encre
+  // ============================================
+
+  /// L'or de la charte **écrit** : un libellé, une icône, un lien.
+  ///
+  /// [secondary] est un APLAT. Il est fait pour qu'on pose de l'encre sombre
+  /// dessus, et il ne bouge pas avec le thème — c'est même garanti par un
+  /// test. Mais l'or n'est pas une encre : sur la page claire il tombe à
+  /// **1,89:1**, ce qui veut dire illisible. « Voir tout » était dans ce
+  /// cas, et 70 autres libellés et icônes avec lui.
+  ///
+  /// Sur la page sombre, l'or reste l'or : 10,1:1. Sur la page claire, c'est
+  /// le rouge orangé de la charte qui prend le relais : 5,6:1. Même famille,
+  /// même intention, lisible des deux côtés.
+  ///
+  /// Ne s'applique PAS à l'encre posée sur une affiche : là c'est
+  /// [inkOnPhoto] qui décide, parce qu'une affiche n'a pas de thème.
+  static Color get accentInk => _isDark ? secondary : primaryDark;
+
+  /// L'exception, et la seule : l'or écrit SUR une affiche.
+  ///
+  /// Là, il ne bouge pas. Le voile derrière est sombre dans les deux thèmes —
+  /// une affiche n'a pas de thème —, donc l'or y tient 10:1 en clair comme en
+  /// sombre, tandis que le rouge orangé d'[accentInk] s'y noierait.
+  static const Color accentInkOnPhoto = secondary;
 
   static Color get borderLight =>
       _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D5DB);

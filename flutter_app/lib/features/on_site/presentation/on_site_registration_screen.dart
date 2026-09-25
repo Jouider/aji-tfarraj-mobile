@@ -99,7 +99,8 @@ class _OnSiteRegistrationScreenState
 
   /// Les arrêts desservis ce soir-là. Vide : pas de navette, et l'étape du
   /// retour n'existe pas — on ne fait pas taper sur « aucun » pour rien.
-  List<ReturnPointOption> get _returnPoints => _episode?.returnPoints ?? const [];
+  List<ReturnPointOption> get _returnPoints =>
+      _episode?.returnPoints ?? const [];
 
   bool get _hasShuttle => _returnPoints.isNotEmpty;
 
@@ -311,8 +312,8 @@ class _OnSiteRegistrationScreenState
                   backgroundColor: AppColors.primaryAction,
                   foregroundColor: AppColors.onPrimary,
                 ),
-                child:
-                    Text(s.onSiteStartSession, style: AppTypography.buttonLarge),
+                child: Text(s.onSiteStartSession,
+                    style: AppTypography.buttonLarge),
               ),
             ),
           ],
@@ -584,9 +585,8 @@ class _OnSiteRegistrationScreenState
                 for (final d in city?.districts ?? const <String>[])
                   DropdownMenuItem(value: d, child: Text(d)),
               ],
-              onChanged: city == null
-                  ? null
-                  : (v) => setState(() => _district = v),
+              onChanged:
+                  city == null ? null : (v) => setState(() => _district = v),
             ),
             const SizedBox(height: AppSpacing.lg),
           ],
@@ -614,8 +614,7 @@ class _OnSiteRegistrationScreenState
         children: [
           if (_step > 0)
             TextButton(
-              onPressed:
-                  _submitting ? null : () => setState(() => _step -= 1),
+              onPressed: _submitting ? null : () => setState(() => _step -= 1),
               child: Text(s.onSiteBack),
             ),
           Expanded(
@@ -684,7 +683,7 @@ class _ResultSheet extends ConsumerWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(s.onSiteRewardEarned(result.rewardAmount!),
                 style: AppTypography.labelMedium
-                    .copyWith(color: AppColors.secondary),
+                    .copyWith(color: AppColors.accentInk),
                 textAlign: TextAlign.center),
           ],
           const SizedBox(height: AppSpacing.lg),
@@ -716,8 +715,8 @@ class _ResultSheet extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           OutlinedButton.icon(
             onPressed: () async {
-              await Clipboard.setData(ClipboardData(
-                  text: '${result.email}\n${result.password}'));
+              await Clipboard.setData(
+                  ClipboardData(text: '${result.email}\n${result.password}'));
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(s.onSiteCopied)),
@@ -736,8 +735,7 @@ class _ResultSheet extends ConsumerWidget {
                 backgroundColor: AppColors.primaryAction,
                 foregroundColor: AppColors.onPrimary,
               ),
-              child: Text(s.onSiteNextPerson,
-                  style: AppTypography.buttonLarge),
+              child: Text(s.onSiteNextPerson, style: AppTypography.buttonLarge),
             ),
           ),
         ],
@@ -839,11 +837,12 @@ class _EpisodeTile extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         title: Text(episode.title ?? show.title,
-            style: AppTypography.bodyMedium
-                .copyWith(fontWeight: FontWeight.w600)),
+            style:
+                AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
         subtitle: Text(
           [
-            if (when != null) DateFormat('dd/MM · HH:mm').format(when.toLocal()),
+            if (when != null)
+              DateFormat('dd/MM · HH:mm').format(when.toLocal()),
             if (episode.studio != null) episode.studio!,
             if (seats != null) '$seats',
           ].join(' · '),

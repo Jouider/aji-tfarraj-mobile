@@ -1074,14 +1074,14 @@ class _ReferralCodeChip extends StatelessWidget {
           Text(
             code,
             style: AppTypography.labelSmall.copyWith(
-              color: AppColors.secondary,
+              color: AppColors.accentInk,
               fontWeight: FontWeight.w700,
               letterSpacing: 2,
               fontSize: 12,
             ),
           ),
           const SizedBox(width: 4),
-          const Icon(Icons.copy, size: 14, color: AppColors.secondary),
+          Icon(Icons.copy, size: 14, color: AppColors.accentInk),
         ],
       ),
     );

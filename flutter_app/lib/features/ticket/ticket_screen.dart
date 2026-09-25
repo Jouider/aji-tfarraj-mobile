@@ -236,8 +236,8 @@ class _TicketLockedView extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Text(
                 s.ticketPendingDesc,
-                style:
-                    AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+                style: AppTypography.bodyMedium
+                    .copyWith(color: AppColors.textMuted),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xxl),
@@ -386,7 +386,8 @@ class _TicketCountBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.confirmation_number, size: 16, color: AppColors.primary),
+          const Icon(Icons.confirmation_number,
+              size: 16, color: AppColors.primary),
           const SizedBox(width: AppSpacing.xs),
           Text(
             count == 1
@@ -609,7 +610,8 @@ class _TicketSwiperState extends State<_TicketSwiper> {
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textMuted),
+              Icon(Icons.arrow_forward_ios,
+                  size: 14, color: AppColors.textMuted),
             ],
           ),
       ],
@@ -704,126 +706,128 @@ class _TicketCard extends ConsumerWidget {
     final isUsed = ticket.isCheckedIn;
 
     return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.cardDarkElevated,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.12),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+        physics: const NeverScrollableScrollPhysics(),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.cardDarkElevated,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // FIX: Header band — primary gradient, white icon+text, radius top 20
-          _TicketHeaderBand(isUsed: isUsed, s: s),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // FIX: Header band — primary gradient, white icon+text, radius top 20
+              _TicketHeaderBand(isUsed: isUsed, s: s),
 
-          // Show info
-          if (show != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                children: [
-                  // FIX: Show title — textPrimary w700 20px centered
-                  Text(
-                    show.localizedTitle(isAr),
-                    style: AppTypography.h4.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 14),
+              // Show info
+              if (show != null)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Column(
+                    children: [
+                      // FIX: Show title — textPrimary w700 20px centered
+                      Text(
+                        show.localizedTitle(isAr),
+                        style: AppTypography.h4.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 14),
 
-                  // FIX: Info rows — secondary icons, textSecondary text 14px
-                  _TicketInfoRow(
-                    icon: Icons.calendar_today,
-                    iconColor: AppColors.secondary,
-                    label: show.startsAt != null
-                        ? dateFormat.format(show.startsAt!.toLocal())
-                        : '—',
+                      // FIX: Info rows — secondary icons, textSecondary text 14px
+                      _TicketInfoRow(
+                        icon: Icons.calendar_today,
+                        iconColor: AppColors.secondary,
+                        label: show.startsAt != null
+                            ? dateFormat.format(show.startsAt!.toLocal())
+                            : '—',
+                      ),
+                      const SizedBox(height: 8),
+                      _TicketInfoRow(
+                        icon: Icons.access_time,
+                        iconColor: AppColors.secondary,
+                        label: show.startsAt != null
+                            ? timeFormat.format(show.startsAt!.toLocal())
+                            : '—',
+                      ),
+                      const SizedBox(height: 8),
+                      _TicketInfoRow(
+                        icon: Icons.location_on,
+                        iconColor: AppColors.secondary,
+                        label: show.studio ?? show.city,
+                      ),
+                      if (show.channel != null) ...[
+                        const SizedBox(height: 8),
+                        _TicketInfoRow(
+                          icon: Icons.tv,
+                          iconColor: AppColors.secondary,
+                          label: show.channel!,
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      // FIX: Seat icon — primary color
+                      _TicketInfoRow(
+                        icon: Icons.event_seat,
+                        iconColor: AppColors.primary,
+                        label: s.ticketSeats(ticket.seats),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  _TicketInfoRow(
-                    icon: Icons.access_time,
-                    iconColor: AppColors.secondary,
-                    label: show.startsAt != null
-                        ? timeFormat.format(show.startsAt!.toLocal())
-                        : '—',
-                  ),
-                  const SizedBox(height: 8),
-                  _TicketInfoRow(
-                    icon: Icons.location_on,
-                    iconColor: AppColors.secondary,
-                    label: show.studio ?? show.city,
-                  ),
-                  if (show.channel != null) ...[
-                    const SizedBox(height: 8),
-                    _TicketInfoRow(
-                      icon: Icons.tv,
-                      iconColor: AppColors.secondary,
-                      label: show.channel!,
-                    ),
-                  ],
-                  const SizedBox(height: 8),
-                  // FIX: Seat icon — primary color
-                  _TicketInfoRow(
-                    icon: Icons.event_seat,
-                    iconColor: AppColors.primary,
-                    label: s.ticketSeats(ticket.seats),
-                  ),
-                ],
-              ),
-            ),
-
-          // FIX: Dashed divider with notch effect
-          _DashedDivider(),
-
-          // FIX: QR section — backgroundLight container, corner accents, 160px QR
-          _TicketQrSection(s: s, ticket: ticket, isUsed: isUsed),
-
-          // Checked-in footer
-          if (isUsed && ticket.checkedInAt != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppColors.successLight,
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(20),
                 ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.check_circle,
-                      size: 14, color: AppColors.successDark),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    s.ticketCheckinAt(
-                      DateFormat('dd/MM/yyyy à HH:mm')
-                          .format(ticket.checkedInAt!.toLocal()),
-                    ),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.successDark,
+
+              // FIX: Dashed divider with notch effect
+              _DashedDivider(),
+
+              // FIX: QR section — backgroundLight container, corner accents, 160px QR
+              _TicketQrSection(s: s, ticket: ticket, isUsed: isUsed),
+
+              // Checked-in footer
+              if (isUsed && ticket.checkedInAt != null)
+                Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.successLight,
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(20),
                     ),
                   ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    )); // closes SingleChildScrollView + Container
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check_circle,
+                          size: 14, color: AppColors.successDark),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        s.ticketCheckinAt(
+                          DateFormat('dd/MM/yyyy à HH:mm')
+                              .format(ticket.checkedInAt!.toLocal()),
+                        ),
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.successDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        )); // closes SingleChildScrollView + Container
   }
 }
 
@@ -1047,7 +1051,7 @@ class _TicketHolder extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.verified_user_outlined,
-                size: 13, color: AppColors.secondary),
+                size: 13, color: AppColors.accentInk),
             const SizedBox(width: 4),
             Text(
               s.ticketHolderLabel,
@@ -1168,7 +1172,7 @@ class _TicketQrSection extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.info_outline, size: 14, color: AppColors.secondary),
+              Icon(Icons.info_outline, size: 14, color: AppColors.accentInk),
               const SizedBox(width: 4),
               Flexible(
                 child: Text(
@@ -1293,7 +1297,7 @@ class _TicketCodeRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Icon(Icons.copy, size: 18, color: AppColors.secondary),
+            Icon(Icons.copy, size: 18, color: AppColors.accentInk),
           ],
         ),
       ),
@@ -1457,8 +1461,7 @@ class _PastTicketCard extends ConsumerWidget {
                               Row(
                                 children: [
                                   Icon(Icons.calendar_today,
-                                      size: 12,
-                                      color: AppColors.textMuted),
+                                      size: 12, color: AppColors.textMuted),
                                   const SizedBox(width: 4),
                                   Text(
                                     show.startsAt != null
@@ -1583,8 +1586,7 @@ class _RulesReminderCard extends StatelessWidget {
             final i = entry.key;
             final rule = entry.value;
             return Padding(
-              padding: EdgeInsets.only(
-                  bottom: i < rules.length - 1 ? 14 : 0),
+              padding: EdgeInsets.only(bottom: i < rules.length - 1 ? 14 : 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
