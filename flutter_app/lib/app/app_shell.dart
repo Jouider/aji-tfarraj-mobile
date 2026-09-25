@@ -166,7 +166,10 @@ class _NavItem extends StatelessWidget {
               color: isActive
                   ? Colors.white.withValues(alpha: 0.14)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(18),
+              // Complètement arrondie, comme la pilule qui la contient : un
+              // rectangle radouci au milieu d'une barre en stade jurait.
+              // La moitié de la hauteur utile (62 − 12 de marge) = 25.
+              borderRadius: BorderRadius.circular(25),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
