@@ -27,10 +27,10 @@ class ReservationSummaryCard extends ConsumerWidget {
     final detailRows = <_DetailRow>[
       _DetailRow(
         icon: Icons.confirmation_number_outlined,
-        iconColor: AppColors.secondary,
+        iconColor: AppColors.accentInk,
         label: s.reservationResultNumberLabel,
         value: '#${reservation.id}',
-        valueColor: AppColors.secondary,
+        valueColor: AppColors.accentInk,
         valueFontSize: 15,
         valueFontWeight: FontWeight.w700,
       ),
@@ -44,7 +44,7 @@ class ReservationSummaryCard extends ConsumerWidget {
       if (reservation.show?.startsAt != null)
         _DetailRow(
           icon: Icons.calendar_today_outlined,
-          iconColor: AppColors.secondary,
+          iconColor: AppColors.accentInk,
           label: s.reservationResultDateLabel,
           value: dateFormat
               .format(reservation.show!.startsAt!.toLocal()),

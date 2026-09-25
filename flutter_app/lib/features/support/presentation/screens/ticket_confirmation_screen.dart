@@ -247,7 +247,7 @@ class _ConfirmationHeroState extends State<_ConfirmationHero>
                 Border.all(color: AppColors.secondary.withValues(alpha: 0.35)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.accentInk.withValues(alpha: 0.12),
+            color: AppColors.secondary.withValues(alpha: 0.12),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),

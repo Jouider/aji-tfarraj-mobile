@@ -72,7 +72,13 @@ void main() {
     // que personne ne les voie.
     //
     // `accentInk` pour la page, `accentInkOnPhoto` pour une affiche.
-    final goldInk = RegExp(r'color\s*:\s*AppColors\.secondary\b(?!\w)');
+    // `color:` n'est pas le seul nom que prend une encre. `iconColor`,
+    // `valueColor`… : dix-sept de plus se cachaient derrière ces alias, dont
+    // les icônes de la carte de billet — dorées sur fond blanc.
+    final goldInk = RegExp(
+      r'\b(color|iconColor|textColor|labelColor|titleColor|valueColor'
+      r'|accentColor|tintColor)\s*:\s*AppColors\.secondary\b(?!\w)',
+    );
 
     final offenders = findAll(
       goldInk,

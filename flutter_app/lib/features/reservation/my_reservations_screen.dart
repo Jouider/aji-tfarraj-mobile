@@ -121,7 +121,10 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: AppColors.primary,
+        // Le même jeton que l'onglet actif de la barre du bas : « où je
+        // suis » ne se dit pas en orange en haut et en or en bas. L'encre
+        // suit la page — l'or sur le sombre, le rouge orangé sur le clair.
+        labelColor: AppColors.accentInk,
         unselectedLabelColor: AppColors.textMuted,
         labelStyle:
             AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700),
@@ -129,7 +132,7 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
             AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w400),
         dividerColor: Colors.transparent,
         indicator: UnderlineTabIndicator(
-          borderSide: const BorderSide(color: AppColors.primary, width: 3),
+          borderSide: BorderSide(color: AppColors.accentInk, width: 3),
           borderRadius: BorderRadius.circular(2),
         ),
         tabs: [
@@ -334,7 +337,14 @@ class _ReservationsList extends ConsumerWidget {
       onRefresh: onRefresh,
       color: AppColors.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        // Le contenu file sous la barre d'onglets en verre : sans cette
+        // réserve, la dernière carte reste inatteignable.
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg + MediaQuery.of(context).padding.bottom,
+        ),
         itemCount: reservations.length,
         itemBuilder: (context, index) {
           return Padding(

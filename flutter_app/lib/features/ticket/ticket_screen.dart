@@ -209,6 +209,7 @@ class _TicketLockedView extends StatelessWidget {
       onRefresh: () async => onRefresh(),
       color: AppColors.accentInk,
       child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -297,6 +298,7 @@ class _TicketsContentView extends StatelessWidget {
       onRefresh: () async => onRefresh(),
       color: AppColors.accentInk,
       child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -576,6 +578,8 @@ class _TicketSwiperState extends State<_TicketSwiper> {
               // Each page can scroll as a safety net during height transitions
               // and reports its natural height so the viewport can match it.
               itemBuilder: (context, index) => SingleChildScrollView(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).padding.bottom),
                 physics: const NeverScrollableScrollPhysics(),
                 child: _MeasureSize(
                   onChange: (size) => _onMeasured(index, size.height),
@@ -707,6 +711,7 @@ class _TicketCard extends ConsumerWidget {
     final isUsed = ticket.isCheckedIn;
 
     return SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         physics: const NeverScrollableScrollPhysics(),
         child: Container(
           width: double.infinity,
@@ -752,7 +757,7 @@ class _TicketCard extends ConsumerWidget {
                       // FIX: Info rows — secondary icons, textSecondary text 14px
                       _TicketInfoRow(
                         icon: Icons.calendar_today,
-                        iconColor: AppColors.secondary,
+                        iconColor: AppColors.accentInk,
                         label: show.startsAt != null
                             ? dateFormat.format(show.startsAt!.toLocal())
                             : '—',
@@ -760,7 +765,7 @@ class _TicketCard extends ConsumerWidget {
                       const SizedBox(height: 8),
                       _TicketInfoRow(
                         icon: Icons.access_time,
-                        iconColor: AppColors.secondary,
+                        iconColor: AppColors.accentInk,
                         label: show.startsAt != null
                             ? timeFormat.format(show.startsAt!.toLocal())
                             : '—',
@@ -768,14 +773,14 @@ class _TicketCard extends ConsumerWidget {
                       const SizedBox(height: 8),
                       _TicketInfoRow(
                         icon: Icons.location_on,
-                        iconColor: AppColors.secondary,
+                        iconColor: AppColors.accentInk,
                         label: show.studio ?? show.city,
                       ),
                       if (show.channel != null) ...[
                         const SizedBox(height: 8),
                         _TicketInfoRow(
                           icon: Icons.tv,
-                          iconColor: AppColors.secondary,
+                          iconColor: AppColors.accentInk,
                           label: show.channel!,
                         ),
                       ],

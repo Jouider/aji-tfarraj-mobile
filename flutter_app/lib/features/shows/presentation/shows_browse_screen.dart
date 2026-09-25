@@ -214,7 +214,8 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
       color: AppColors.accentInk,
       backgroundColor: AppColors.backgroundGrey,
       child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg),
         itemCount: grouped.length,
         itemBuilder: (context, index) {
           final studioName = grouped.keys.elementAt(index);
@@ -312,8 +313,7 @@ class _SearchBar extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide:
-                  BorderSide(color: AppColors.accentInk, width: 1.5),
+              borderSide: BorderSide(color: AppColors.accentInk, width: 1.5),
             ),
           ),
         ),

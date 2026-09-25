@@ -278,8 +278,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         automaticallyImplyLeading: false,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
+        // Le contenu file sous la barre d'onglets en verre : sans cette
+        // réserve, le bas de la liste reste inatteignable.
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl + MediaQuery.of(context).padding.bottom,
+        ),
         children: [
           // Incomplete profile warning
           if (user != null &&
@@ -338,7 +344,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               title: s.cp.modeCardTitle,
               subtitle: s.cp.modeCardSubtitle,
               icon: Icons.workspace_premium_outlined,
-              color: AppColors.accentInk,
+              color: AppColors.secondary,
               colorDark: AppColors.secondaryDark,
               onTap: () {
                 ref.read(cpModeProvider.notifier).setEnabled(true);
@@ -367,7 +373,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               _SettingsRow(
                 icon: themeIcon,
-                iconColor: AppColors.secondary,
+                iconColor: AppColors.accentInk,
                 title: s.profileThemeLabel,
                 subtitle: themeLabel,
                 trailing: Icon(Icons.swap_horiz,
@@ -401,7 +407,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               _SettingsRow(
                 icon: Icons.star_outline,
-                iconColor: AppColors.secondary,
+                iconColor: AppColors.accentInk,
                 title: s.profileLoyaltyLabel,
                 trailing: pointsAsync.when(
                   data: (summary) => _LoyaltyBadge(points: summary.balance),
@@ -448,7 +454,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (user != null && user.isStaffOrAdmin)
                 _SettingsRow(
                   icon: Icons.qr_code_scanner,
-                  iconColor: AppColors.secondary,
+                  iconColor: AppColors.accentInk,
                   title: s.staffCheckInLabel,
                   onTap: () => context.push(Routes.staffCheckIn),
                 ),
@@ -478,7 +484,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (user != null && user.canRegisterOnSite)
                 _SettingsRow(
                   icon: Icons.directions_bus_outlined,
-                  iconColor: AppColors.secondary,
+                  iconColor: AppColors.accentInk,
                   title: s.staffProfileManifestTile,
                   subtitle: s.staffManifestSubtitle,
                   onTap: () => context.push(Routes.returnManifest),
@@ -506,7 +512,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               _SettingsRow(
                 icon: Icons.help_outline,
-                iconColor: AppColors.secondary,
+                iconColor: AppColors.accentInk,
                 title: s.howItWorksProfileTileLabel,
                 subtitle: s.howItWorksProfileTileSubtitle,
                 onTap: () => context.push(Routes.howItWorks),
@@ -523,7 +529,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               // dialog, after someone has actually attended a recording.
               _SettingsRow(
                 icon: Icons.star_outline,
-                iconColor: AppColors.secondary,
+                iconColor: AppColors.accentInk,
                 title: s.rateAppTitle,
                 subtitle: s.rateAppSubtitle,
                 onTap: () =>
@@ -605,10 +611,10 @@ class _SpaceCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppColors.inkOn(color).withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: Colors.white, size: 24),
+              child: Icon(icon, color: AppColors.inkOn(color), size: 24),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -617,8 +623,10 @@ class _SpaceCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      // L'or ne porte pas le blanc : 2,1:1. L'encre suit
+                      // l'aplat de la carte, elle ne le précède pas.
+                      color: AppColors.inkOn(color),
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -626,7 +634,9 @@ class _SpaceCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    style: TextStyle(
+                        color: AppColors.inkOn(color).withValues(alpha: 0.78),
+                        fontSize: 12),
                   ),
                 ],
               ),
@@ -635,7 +645,7 @@ class _SpaceCard extends StatelessWidget {
               Directionality.of(context) == TextDirection.rtl
                   ? Icons.arrow_back_ios
                   : Icons.arrow_forward_ios,
-              color: Colors.white,
+              color: AppColors.inkOn(color),
               size: 16,
             ),
           ],
@@ -810,15 +820,14 @@ class _ProfileHeader extends StatelessWidget {
                             color: AppColors.backgroundWhite, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.accentInk.withValues(alpha: 0.3),
+                            color: AppColors.secondary.withValues(alpha: 0.3),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      child:
-                          Icon(Icons.edit,
-                              size: 16, color: AppColors.onSecondary),
+                      child: Icon(Icons.edit,
+                          size: 16, color: AppColors.onSecondary),
                     ),
                   ),
                 ),

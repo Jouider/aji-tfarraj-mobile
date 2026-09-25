@@ -872,7 +872,7 @@ class _DetailsCard extends ConsumerWidget {
               icon: Icons.star_rounded,
               label: s.showDetailLoyaltyPointsLabel,
               value: s.showDetailLoyaltyPointsValue(show.effectiveRewardPoints),
-              valueColor: AppColors.secondary,
+              valueColor: AppColors.accentInk,
               isLast: true,
             ),
           ],

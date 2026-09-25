@@ -413,21 +413,21 @@ class _ShowInfoCard extends ConsumerWidget {
     final rows = <_InfoRow>[
       _InfoRow(
         icon: Icons.calendar_today_outlined,
-        iconColor: AppColors.secondary,
+        iconColor: AppColors.accentInk,
         label: show.startsAt != null
             ? dateFormat.format(show.startsAt!.toLocal())
             : '—',
       ),
       _InfoRow(
         icon: Icons.access_time_outlined,
-        iconColor: AppColors.secondary,
+        iconColor: AppColors.accentInk,
         label: show.startsAt != null
             ? timeFormat.format(show.startsAt!.toLocal())
             : '—',
       ),
       _InfoRow(
         icon: Icons.location_on_outlined,
-        iconColor: AppColors.secondary,
+        iconColor: AppColors.accentInk,
         label: show.studio ?? show.city,
       ),
       if (show.channel != null)
