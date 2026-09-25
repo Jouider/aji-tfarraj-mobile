@@ -222,7 +222,9 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
                 ),
               ],
 
-              const SizedBox(height: 120),
+              // La case « j'accepte » doit rester atteignable au-dessus de la
+              // barre de confirmation, barre d'onglets comprise.
+              SizedBox(height: 140 + MediaQuery.of(context).padding.bottom),
             ],
           ),
         ),
