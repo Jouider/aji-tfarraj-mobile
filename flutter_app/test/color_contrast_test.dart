@@ -53,11 +53,40 @@ void main() {
     });
   });
 
-  group('ink on the other filled buttons', () {
-    test('white on the maroon primary is readable', () {
+  group('ink on the orange call-to-action', () {
+    /// Le dégradé de la charte ne supporte aucune encre d'un bout à l'autre :
+    /// le blanc tombe à 3,1:1 sur l'orange clair, l'encre noire à 3,3:1 sur le
+    /// rouge foncé. C'est la raison d'être d'un dégradé de bouton distinct, et
+    /// ce test le rappelle à qui voudrait les réunir.
+    test('the charter gradient carries no ink from end to end', () {
+      final white = contrast(AppColors.primary, const Color(0xFFF7F8F8));
+      final ink = contrast(AppColors.primaryDark, AppColors.onPrimary);
+
+      expect(white, lessThan(aaNormalText));
+      expect(ink, lessThan(aaNormalText));
+    });
+
+    test('the button gradient is readable at both ends', () {
+      for (final end in [AppColors.primary, AppColors.primaryActionEnd]) {
+        expect(
+          contrast(end, AppColors.onPrimary),
+          greaterThanOrEqualTo(aaNormalText),
+          reason: 'un libellé de bouton se lit sur toute la longueur',
+        );
+      }
+    });
+
+    /// Ce qui reste vrai quoi qu'il arrive : le blanc n'a rien à faire sur
+    /// l'orange clair, et l'encre noire rien à faire sur le rouge foncé.
+    test('the two inks are never interchangeable', () {
       expect(
         contrast(AppColors.primary, const Color(0xFFFFFFFF)),
+        lessThan(aaNormalText),
+      );
+      expect(
+        contrast(AppColors.primaryDark, const Color(0xFFF7F8F8)),
         greaterThanOrEqualTo(aaNormalText),
+        reason: 'le rouge foncé, lui, porte le blanc — pour un aplat uni',
       );
     });
   });

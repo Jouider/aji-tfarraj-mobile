@@ -901,7 +901,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     onPressed: _isLoading ? null : _save,
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.onPrimary,
                       disabledBackgroundColor:
                           AppColors.primary.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
@@ -913,7 +913,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
+                                strokeWidth: 2, color: AppColors.onPrimary),
                           )
                         : Text(s.saveChanges,
                             style: AppTypography.buttonLarge

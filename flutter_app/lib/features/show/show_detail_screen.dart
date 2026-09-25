@@ -1300,7 +1300,7 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
                           onPressed: widget.onReserve,
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
+                            foregroundColor: AppColors.onPrimary,
                             minimumSize:
                                 const Size(double.infinity, 52),
                             shape: RoundedRectangleBorder(
@@ -1310,12 +1310,12 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
                           icon: const Icon(
                             Icons.confirmation_number_outlined,
                             size: 18,
-                            color: Colors.white,
+                            color: AppColors.onPrimary,
                           ),
                           label: Text(
                             s.showDetailReserveNow,
                             style: AppTypography.buttonLarge.copyWith(
-                              color: Colors.white,
+                              color: AppColors.onPrimary,
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),
@@ -1748,7 +1748,7 @@ class _EpisodeCard extends ConsumerWidget {
                           showId, episode.id.toString())),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.onPrimary,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 10),
                         minimumSize: Size.zero,
@@ -1760,7 +1760,7 @@ class _EpisodeCard extends ConsumerWidget {
                       child: Text(
                         s.reserveEpisode,
                         style: AppTypography.labelSmall.copyWith(
-                          color: Colors.white,
+                          color: AppColors.onPrimary,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),

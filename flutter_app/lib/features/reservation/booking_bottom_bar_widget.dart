@@ -129,7 +129,7 @@ class _ConfirmButton extends StatelessWidget {
           // FIX: Active → primary bg, white text; Disabled → border bg, textMuted
           backgroundColor: AppColors.primary,
           disabledBackgroundColor: AppColors.border,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.onPrimary,
           disabledForegroundColor: AppColors.textMuted,
           elevation: 0,
           shadowColor: Colors.transparent,
@@ -143,7 +143,7 @@ class _ConfirmButton extends StatelessWidget {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Colors.white,
+                  color: AppColors.onPrimary,
                 ),
               )
             : Row(

@@ -470,7 +470,7 @@ class _HeroShowCard extends StatelessWidget {
                             ),
                             style: FilledButton.styleFrom(
                               backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
+                              foregroundColor: AppColors.onPrimary,
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -479,12 +479,12 @@ class _HeroShowCard extends StatelessWidget {
                             icon: const Icon(
                               Icons.confirmation_number_outlined,
                               size: 18,
-                              color: Colors.white,
+                              color: AppColors.onPrimary,
                             ),
                             label: Text(
                               show.isSoldOut ? s.homeSoldOut : s.reserve,
                               style: AppTypography.buttonMedium.copyWith(
-                                color: Colors.white,
+                                color: AppColors.onPrimary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

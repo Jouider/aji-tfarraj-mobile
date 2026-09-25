@@ -368,7 +368,7 @@ class _ManualCodeTab extends ConsumerWidget {
               onPressed: isLoading ? null : () => _submit(ref, s),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
@@ -379,12 +379,12 @@ class _ManualCodeTab extends ConsumerWidget {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                       ),
                     )
                   : Text(s.staffValidateButton,
                       style: AppTypography.labelLarge
-                          .copyWith(color: Colors.white)),
+                          .copyWith(color: AppColors.onPrimary)),
             ),
           ),
         ],
@@ -500,7 +500,7 @@ class _CheckInResultCard extends ConsumerWidget {
               label: Text(s.staffScanAnother),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
@@ -591,7 +591,7 @@ class _ErrorCard extends ConsumerWidget {
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),

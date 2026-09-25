@@ -22,17 +22,58 @@ class AppColors {
   // Primary Colors (same in both modes)
   // ============================================
 
-  /// Primary / Bordeaux - Main CTA, buttons, approved badges
-  static const Color primary = Color(0xFF8B1E3F);
-  static const Color primaryLight = Color(0xFFB84A6B);
-  static const Color primaryDark = Color(0xFF5E0A24);
+  /// Orange de marque — l'action : boutons principaux, badges approuvés.
+  ///
+  /// Charte « logo AJI TFARRAJ », septembre 2026. [primary] est le départ du
+  /// dégradé chaud, [primaryDark] son arrivée ; un aplat uni utilise
+  /// [primary], une surface qui respire utilise [hotGradient].
+  static const Color primary = Color(0xFFF15C24);
+  static const Color primaryLight = Color(0xFFF5813F);
+  static const Color primaryDark = Color(0xFFB73626);
+
+  /// L'encre posée SUR l'orange : presque noire, comme sur le doré.
+  ///
+  /// Le dégradé de la charte ne supporte AUCUNE encre sur toute sa longueur :
+  /// le blanc mesure 3,1:1 sur l'orange clair, l'encre noire 3,3:1 sur le
+  /// rouge foncé. Les deux passent sous le seuil de 4,5:1, chacune à un bout.
+  ///
+  /// D'où deux dégradés distincts : [hotGradient], celui de la charte, pour
+  /// les grandes surfaces sans petit texte ; [actionGradient], resserré dans
+  /// la plage claire, pour tout ce qui porte un libellé.
+  static const Color onPrimary = Color(0xFF0C0C0C);
+
+  /// Le dégradé de la charte, tel quel. Bandeaux, écran de démarrage, vignettes
+  /// — jamais de texte fin par-dessus.
+  static const LinearGradient hotGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [primary, primaryDark],
+  );
+
+  /// Le dégradé des boutons : la même montée d'orange, arrêtée là où l'encre
+  /// reste lisible. 5,9:1 au départ, 4,8:1 à l'arrivée.
+  static const Color primaryActionEnd = Color(0xFFE0491F);
+
+  static const LinearGradient actionGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [primary, primaryActionEnd],
+  );
+
+  /// Le dégradé clair : ce qui récompense — points, badges, cadeaux.
+  static const LinearGradient warmGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [secondaryLight, secondary],
+  );
 
   // ============================================
   // Secondary Colors (same in both modes)
   // ============================================
 
-  /// Secondary / Gold - Accents, icons, highlights, selected states
-  static const Color secondary = Color(0xFFF4A21E);
+  /// Orange clair — l'accent : icônes, sélection, points gagnés.
+  /// Presque le doré d'avant : la transition passera inaperçue.
+  static const Color secondary = Color(0xFFF9A81C);
 
   /// Ink drawn ON TOP of [secondary].
   ///
@@ -45,7 +86,7 @@ class AppColors {
   /// now: `backgroundWhite` reads correctly on gold in the dark theme and
   /// becomes unreadable in the light one.
   static const Color onSecondary = Color(0xFF0C0C0C);
-  static const Color secondaryLight = Color(0xFFFFC04D);
+  static const Color secondaryLight = Color(0xFFF57E21);
   static const Color secondaryDark = Color(0xFFC77B00);
 
   // ============================================
@@ -68,38 +109,39 @@ class AppColors {
   // Background / Surface Colors
   // ============================================
 
-  /// Main scaffold background
+  /// Fond principal. Le noir de la charte, très légèrement relevé : du noir
+  /// pur sous une carte noire n'a plus de contour sur un écran OLED.
   static Color get backgroundWhite =>
-      _isDark ? const Color(0xFF0C0C0C) : const Color(0xFFFAFAFA);
+      _isDark ? const Color(0xFF08080A) : const Color(0xFFFAFAFA);
 
   /// Card / chip backgrounds
   static Color get backgroundGrey =>
-      _isDark ? const Color(0xFF1C1C1E) : const Color(0xFFF3F4F6);
+      _isDark ? const Color(0xFF1C1C21) : const Color(0xFFF3F4F6);
 
   /// Slightly elevated surfaces
   static Color get backgroundLight =>
-      _isDark ? const Color(0xFF111111) : const Color(0xFFFFFFFF);
+      _isDark ? const Color(0xFF131316) : const Color(0xFFFFFFFF);
 
   /// Elevated card surface (hero card, modals)
   static Color get cardDarkElevated =>
-      _isDark ? const Color(0xFF252528) : const Color(0xFFFFFFFF);
+      _isDark ? const Color(0xFF24242A) : const Color(0xFFFFFFFF);
 
   /// Surface overlay (bottom sheets, dialogs)
   static Color get surfaceOverlay =>
-      _isDark ? const Color(0xFF1A1A1C) : const Color(0xFFFFFFFF);
+      _isDark ? const Color(0xFF17171C) : const Color(0xFFFFFFFF);
 
   // ============================================
   // Border Colors
   // ============================================
 
   static Color get border =>
-      _isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E7EB);
+      _isDark ? const Color(0xFF2C2C33) : const Color(0xFFE5E7EB);
 
   static Color get borderLight =>
       _isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D5DB);
 
   static Color get divider =>
-      _isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E7EB);
+      _isDark ? const Color(0xFF2C2C33) : const Color(0xFFE5E7EB);
 
   /// Disabled state
   static Color get disabled =>

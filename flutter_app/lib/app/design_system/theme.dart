@@ -118,7 +118,7 @@ class AppTheme {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.onPrimary,
             disabledBackgroundColor: const Color(0xFF3A3A3C),
             disabledForegroundColor: const Color(0xFF6B7280),
             elevation: 0,
@@ -126,7 +126,7 @@ class AppTheme {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            textStyle: AppTypography.buttonLarge.copyWith(color: Colors.white),
+            textStyle: AppTypography.buttonLarge.copyWith(color: AppColors.onPrimary),
           ),
         ),
 
@@ -395,7 +395,7 @@ class AppTheme {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.onPrimary,
             disabledBackgroundColor: const Color(0xFFD1D5DB),
             disabledForegroundColor: const Color(0xFF9CA3AF),
             elevation: 0,
@@ -403,7 +403,7 @@ class AppTheme {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            textStyle: AppTypography.buttonLarge.copyWith(color: Colors.white),
+            textStyle: AppTypography.buttonLarge.copyWith(color: AppColors.onPrimary),
           ),
         ),
 

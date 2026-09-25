@@ -14,6 +14,10 @@ class AppTypography {
   static const FontWeight regular = FontWeight.w400;
   static const FontWeight medium = FontWeight.w500;
   static const FontWeight semiBold = FontWeight.w600;
+  static const FontWeight bold = FontWeight.w700;
+
+  /// Le poids des titres de la charte : Cairo ExtraBold.
+  static const FontWeight extraBold = FontWeight.w800;
 
   // ============================================
   // Font Families
@@ -29,26 +33,30 @@ class AppTypography {
   // Headings (FR - Inter)
   // ============================================
 
-  /// H1 - Page titles
-  static TextStyle get h1 => GoogleFonts.inter(
-        fontSize: 28,
-        fontWeight: semiBold,
+  /// H1 — titres de page. Cairo, comme la charte.
+  ///
+  /// Cairo est plus large qu'Inter : à taille égale un titre déborde, d'où
+  /// les deux points de moins. Il s'arrête aux grands titres — en dessous de
+  /// 20 px, Inter reste plus lisible, et c'est là que vivent les libellés.
+  static TextStyle get h1 => GoogleFonts.cairo(
+        fontSize: 26,
+        fontWeight: extraBold,
         color: AppColors.textPrimary,
         height: 1.3,
       );
 
-  /// H2 - Section titles
-  static TextStyle get h2 => GoogleFonts.inter(
-        fontSize: 24,
-        fontWeight: semiBold,
+  /// H2 — titres de section. Cairo également.
+  static TextStyle get h2 => GoogleFonts.cairo(
+        fontSize: 22,
+        fontWeight: extraBold,
         color: AppColors.textPrimary,
         height: 1.3,
       );
 
-  /// H3 - Card titles
-  static TextStyle get h3 => GoogleFonts.inter(
-        fontSize: 20,
-        fontWeight: semiBold,
+  /// H3 — titres de carte : la dernière taille où Cairo tient.
+  static TextStyle get h3 => GoogleFonts.cairo(
+        fontSize: 19,
+        fontWeight: bold,
         color: AppColors.textPrimary,
         height: 1.4,
       );

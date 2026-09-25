@@ -309,7 +309,7 @@ class _OnSiteRegistrationScreenState
                 onPressed: _episode == null ? null : () => setState(() {}),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.onPrimary,
                 ),
                 child:
                     Text(s.onSiteStartSession, style: AppTypography.buttonLarge),
@@ -428,7 +428,7 @@ class _OnSiteRegistrationScreenState
             onPressed: _capturePhoto,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.onPrimary,
             ),
             icon: const Icon(Icons.photo_camera_outlined),
             label: Text(taken ? s.onSiteRetakePhoto : s.onSiteTakePhoto),
@@ -627,14 +627,14 @@ class _OnSiteRegistrationScreenState
                     : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.onPrimary,
                 ),
                 child: _submitting
                     ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
+                            strokeWidth: 2, color: AppColors.onPrimary),
                       )
                     : Text(isLast ? s.onSiteSubmit : s.onSiteNext,
                         style: AppTypography.buttonLarge),
@@ -734,7 +734,7 @@ class _ResultSheet extends ConsumerWidget {
               onPressed: () => Navigator.of(context).pop(),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.onPrimary,
               ),
               child: Text(s.onSiteNextPerson,
                   style: AppTypography.buttonLarge),

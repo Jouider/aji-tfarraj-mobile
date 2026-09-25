@@ -163,7 +163,7 @@ class _PrimaryButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.backgroundWhite,
+        foregroundColor: AppColors.onPrimary,
         disabledBackgroundColor: AppColors.disabled,
         disabledForegroundColor: AppColors.textLight,
         elevation: 0,

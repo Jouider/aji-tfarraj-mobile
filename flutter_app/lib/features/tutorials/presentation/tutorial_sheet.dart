@@ -295,7 +295,7 @@ class _TutorialSheetState extends ConsumerState<TutorialSheet> {
                       onPressed: () => closeTutorialSheet(context),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius:
                               BorderRadius.circular(AppSpacing.radiusMd),
@@ -304,7 +304,7 @@ class _TutorialSheetState extends ConsumerState<TutorialSheet> {
                       child: Text(
                         s.howItWorksGotIt,
                         style: AppTypography.labelLarge.copyWith(
-                            color: Colors.white, fontWeight: FontWeight.w700),
+                            color: AppColors.onPrimary, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
