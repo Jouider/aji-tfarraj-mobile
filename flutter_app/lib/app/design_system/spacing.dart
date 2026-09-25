@@ -86,6 +86,11 @@ class AppSpacing {
   /// Large radius (12px) - Cards
   static const double radiusLg = 12.0;
   
+  /// Capsule (28px) — tout ce qui se touche : boutons, pastilles, puces.
+  /// À une hauteur de 56, c'est un stade parfait, et ça rime avec la barre
+  /// du bas. C'est le rayon qui dit « ceci réagit au doigt ».
+  static const double radiusPill = 28.0;
+
   /// Extra large radius (16px) - Modals, bottom sheets
   static const double radiusXl = 16.0;
   

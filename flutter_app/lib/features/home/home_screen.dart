@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
@@ -372,24 +374,11 @@ class _HeroShowCard extends StatelessWidget {
                 children: [
                   // FIX: Channel tag — unified primary semi-transparent style (hero)
                   if (show.channel != null)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        (show.localizedChannel(isAr) ?? show.channel!).toUpperCase(),
-                        style: AppTypography.labelSmall.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 10,
-                          letterSpacing: 0.5,
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: BrandBadge(
+                        label:
+                            (show.localizedChannel(isAr) ?? show.channel!).toUpperCase(),
                       ),
                     ),
 
@@ -453,16 +442,11 @@ class _HeroShowCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Container(
-                          height: 52,
+                          height: 56,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.30),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusPill),
+                            boxShadow: AppShadows.action,
                           ),
                           child: FilledButton.icon(
                             onPressed: () => context.push(
@@ -473,7 +457,8 @@ class _HeroShowCard extends StatelessWidget {
                               foregroundColor: AppColors.onPrimary,
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius:
+                                    BorderRadius.circular(AppSpacing.radiusPill),
                               ),
                             ),
                             icon: const Icon(
@@ -494,33 +479,33 @@ class _HeroShowCard extends StatelessWidget {
 
                       const SizedBox(width: AppSpacing.md),
 
+                      // Les places restantes ne sont pas un geste : en doré
+                      // plein, la pastille avait le poids d'un second bouton
+                      // et l'œil hésitait. En verre, elle informe et laisse
+                      // l'affiche passer derrière.
                       if (!show.isSoldOut)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.event_seat_outlined,
-                                size: 15,
-                                color: AppColors.primaryDark,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                '${show.availableSeats}',
-                                style: AppTypography.labelMedium.copyWith(
-                                  color: AppColors.primaryDark,
-                                  fontWeight: FontWeight.w700,
+                        SizedBox(
+                          height: 56,
+                          child: GlassPill(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.event_seat_outlined,
+                                  size: 16,
+                                  color: AppColors.secondary,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${show.availableSeats}',
+                                  style: AppTypography.labelMedium.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                     ],
@@ -576,10 +561,9 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTypography.h3.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
+            // Le jeton porte déjà Cairo et son poids : le réécrire ici, c'est
+            // le contredire à chaque appel.
+            style: AppTypography.h3,
           ),
           const Spacer(),
           TextButton.icon(
@@ -688,13 +672,7 @@ class _ShowHorizontalCard extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF1A1A1A).withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: AppShadows.card,
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
@@ -789,23 +767,9 @@ class _ShowHorizontalCard extends StatelessWidget {
                       Positioned(
                         top: AppSpacing.sm,
                         right: AppSpacing.sm,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.85),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            (show.localizedChannel(isAr) ?? show.channel!).toUpperCase(),
-                            style: AppTypography.caption.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 10,
-                            ),
-                          ),
+                        child: BrandBadge(
+                          label: (show.localizedChannel(isAr) ?? show.channel!)
+                              .toUpperCase(),
                         ),
                       ),
                   ],
@@ -819,11 +783,9 @@ class _ShowHorizontalCard extends StatelessWidget {
             // Title — Cairo for AR (proper shaping), Inter for FR
             Text(
               show.localizedTitle(isAr),
-              style: (isAr ? AppTypography.bodyMediumAr : AppTypography.labelMedium)
-                  .copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w500,
-              ),
+              style: isAr
+                  ? AppTypography.bodyMediumAr
+                  : AppTypography.labelMedium,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
