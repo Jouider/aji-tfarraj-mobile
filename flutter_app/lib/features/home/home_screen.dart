@@ -112,7 +112,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // entre les deux, ni au bord ni au milieu.
       centerTitle: false,
       titleSpacing: AppSpacing.lg,
-      title: const AppLogo(variant: AppLogoVariant.mark, height: 30),
+      // 34 et pas 30 : à 30 le symbole se faisait plus petit que les
+      // icônes d'à côté, et une marque qui s'excuse n'est pas une marque.
+      title: const AppLogo(variant: AppLogoVariant.mark, height: 34),
       actions: [
         IconButton(
           icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
