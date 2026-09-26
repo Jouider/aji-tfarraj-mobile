@@ -107,7 +107,8 @@ PoseCheck evaluatePose(PoseObservation? body, CastingPose pose) {
   if (pose == CastingPose.fullFront && ratio < PoseCheckRules.minFrontRatio) {
     return PoseCheck.notFacing;
   }
-  if (pose == CastingPose.fullProfile && ratio > PoseCheckRules.maxProfileRatio) {
+  if (pose == CastingPose.fullProfile &&
+      ratio > PoseCheckRules.maxProfileRatio) {
     return PoseCheck.notSideways;
   }
 

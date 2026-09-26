@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/app_bar_actions.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
@@ -14,14 +15,11 @@ import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
-import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart'
     show pendingNavigationProvider;
-import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
-import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 /// Home Screen — Cinematic discovery layout inspired by premium streaming apps
 class HomeScreen extends ConsumerStatefulWidget {
@@ -94,7 +92,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
     final s = ref.watch(stringsProvider);
     final isAr = ref.watch(isRtlProvider);
-    final locale = ref.watch(localeProvider);
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       extendBodyBehindAppBar: true,
@@ -206,22 +203,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             child: child,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.headset_mic_outlined),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => const SupportTicketsScreen()),
-                ),
-              ),
-              // Help, always in reach: both walkthrough videos.
-              const TutorialHelpAction(),
-              _NotificationBellButton(unreadCount: unreadCount, s: s),
-              const SizedBox(width: AppSpacing.xs),
-            ],
-          ),
+          child: const AppBarActions(),
         ),
       ],
     );
@@ -951,53 +933,6 @@ class _ShowHorizontalCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────
 // Notification Bell Button
 // ─────────────────────────────────────────────────────
-
-class _NotificationBellButton extends StatelessWidget {
-  final int unreadCount;
-  final AppStrings s;
-
-  const _NotificationBellButton({required this.unreadCount, required this.s});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Sans couleur : elle prend celle de la barre, qui change selon
-          // qu'on est sur l'affiche ou sur le verre.
-          const Icon(
-            Icons.notifications_outlined,
-          ),
-          if (unreadCount > 0)
-            Positioned(
-              right: -4,
-              top: -4,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: AppColors.secondary,
-                  shape: BoxShape.circle,
-                ),
-                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                child: Text(
-                  unreadCount > 99 ? '99+' : unreadCount.toString(),
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-        ],
-      ),
-      tooltip: s.homeNotificationsTooltip,
-      onPressed: () => context.push(Routes.notifications),
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────
 // Loading Skeleton

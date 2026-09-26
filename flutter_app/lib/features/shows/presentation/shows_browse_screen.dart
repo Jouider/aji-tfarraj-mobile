@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
+import 'package:aji_tfarraj/app/app_bar_actions.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
@@ -99,23 +101,18 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text(
-          s.browseTitle,
-          style: AppTypography.h4.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => context.pop(),
-        ),
+        title: AppBarBrandTitle(s.browseTitle),
+        centerTitle: false,
+        titleSpacing: AppSpacing.lg,
+        // Pas de chevron : c'est la racine d'un onglet, il n'y a rien à
+        // dépiler. Il appelait `context.pop()` dans le vide.
+        automaticallyImplyLeading: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
           child: Container(height: 0.5, color: AppColors.border),
         ),
         actions: [
+          const AppBarActions(),
           // Filter icon with active indicator
           Stack(
             alignment: Alignment.center,

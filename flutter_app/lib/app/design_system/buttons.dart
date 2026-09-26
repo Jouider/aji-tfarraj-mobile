@@ -23,8 +23,10 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
-    final textStyle = isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge;
+    final height =
+        isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
+    final textStyle =
+        isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge;
 
     return SizedBox(
       height: height,
@@ -88,9 +90,11 @@ class AppButtonSecondary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
-    final textStyle = (isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge)
-        .copyWith(color: AppColors.primary);
+    final height =
+        isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
+    final textStyle =
+        (isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge)
+            .copyWith(color: AppColors.primary);
 
     return SizedBox(
       height: height,

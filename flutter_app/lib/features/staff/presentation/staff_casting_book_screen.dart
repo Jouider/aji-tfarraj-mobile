@@ -63,7 +63,8 @@ class _StaffCastingBookScreenState
         SnackBar(content: Text(e.message)),
       );
     } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(s.staffCastingUploadError)));
+      messenger
+          .showSnackBar(SnackBar(content: Text(s.staffCastingUploadError)));
     } finally {
       if (mounted) setState(() => _uploading = null);
     }
@@ -88,8 +89,8 @@ class _StaffCastingBookScreenState
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
             Text(s.staffCastingBookHint,
-                style:
-                    AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
+                style: AppTypography.bodySmall
+                    .copyWith(color: AppColors.textMuted)),
             const SizedBox(height: AppSpacing.lg),
             for (final pose in CastingPose.values) ...[
               _PoseRow(

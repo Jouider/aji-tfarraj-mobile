@@ -22,9 +22,8 @@ class StaffRepository {
       'Exactly one of qrToken or ticketCode must be provided',
     );
 
-    final body = qrToken != null
-        ? {'qr_token': qrToken}
-        : {'ticket_code': ticketCode};
+    final body =
+        qrToken != null ? {'qr_token': qrToken} : {'ticket_code': ticketCode};
 
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
@@ -228,8 +227,10 @@ class StaffCheckInState {
   /// Who was scanned, before anyone is admitted.
   final TicketPreview? preview;
   final String? errorMessage;
+
   /// checked_in_at from a 409 response, if available
   final DateTime? alreadyCheckedInAt;
+
   /// When false, scanner should not trigger new requests
   final bool scannerActive;
 
@@ -414,7 +415,6 @@ final staffCheckInProvider =
     StateNotifierProvider.autoDispose<StaffCheckInNotifier, StaffCheckInState>(
   (ref) => StaffCheckInNotifier(ref.watch(staffRepositoryProvider)),
 );
-
 
 // ─── Shuttle manifest ────────────────────────────────────────────────────────
 

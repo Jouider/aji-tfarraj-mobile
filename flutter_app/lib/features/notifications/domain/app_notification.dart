@@ -71,12 +71,13 @@ class AppNotification {
 
   /// Create AppNotification from Firebase RemoteMessage data
   /// Supports various payload formats from backend
-  factory AppNotification.fromRemoteMessage(Map<String, dynamic> data, {
+  factory AppNotification.fromRemoteMessage(
+    Map<String, dynamic> data, {
     String? notificationTitle,
     String? notificationBody,
   }) {
     // Generate unique ID based on timestamp and data hash
-    final id = data['id']?.toString() ?? 
+    final id = data['id']?.toString() ??
         '${DateTime.now().millisecondsSinceEpoch}_${data.hashCode}';
 
     // Extract title and body - prefer data payload, fallback to notification.
@@ -84,27 +85,23 @@ class AppNotification {
     // the device's registered locale (see DeviceRepository.registerDevice).
     // If both payload and notification fields are missing, we leave the title
     // empty and let the UI render a locale-aware fallback via AppStrings.
-    final title = data['title']?.toString() ??
-        notificationTitle ??
-        '';
+    final title = data['title']?.toString() ?? notificationTitle ?? '';
 
-    final body = data['body']?.toString() ??
-        notificationBody ??
-        '';
+    final body = data['body']?.toString() ?? notificationBody ?? '';
 
     // Determine notification type
     final typeString = data['type']?.toString();
     final type = NotificationType.fromString(typeString);
 
     // Extract optional fields - support both snake_case and camelCase
-    final reservationId = data['reservation_id']?.toString() ?? 
-        data['reservationId']?.toString();
-    
-    final ticketCode = data['ticket_code']?.toString() ?? 
-        data['ticketCode']?.toString();
-    
-    final deepLink = data['deep_link']?.toString() ?? 
-        data['deepLink']?.toString();
+    final reservationId =
+        data['reservation_id']?.toString() ?? data['reservationId']?.toString();
+
+    final ticketCode =
+        data['ticket_code']?.toString() ?? data['ticketCode']?.toString();
+
+    final deepLink =
+        data['deep_link']?.toString() ?? data['deepLink']?.toString();
 
     return AppNotification(
       id: id,

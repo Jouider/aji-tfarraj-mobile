@@ -123,7 +123,8 @@ class Ticket {
           ? DateTime.parse(json['updated_at'] as String)
           : null,
       reservationInfo: json['reservation'] != null
-          ? TicketReservationInfo.fromJson(json['reservation'] as Map<String, dynamic>)
+          ? TicketReservationInfo.fromJson(
+              json['reservation'] as Map<String, dynamic>)
           : null,
     );
   }

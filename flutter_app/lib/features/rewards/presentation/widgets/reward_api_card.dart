@@ -33,9 +33,7 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
     setState(() => _loading = true);
 
     try {
-      await ref
-          .read(rewardsRepositoryProvider)
-          .collectReward(widget.reward.id);
+      await ref.read(rewardsRepositoryProvider).collectReward(widget.reward.id);
 
       // Refresh rewards list and points balance
       ref.invalidate(rewardsListProvider);
@@ -195,14 +193,13 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
                 SizedBox(
                   height: 32,
                   child: ElevatedButton(
-                    onPressed:
-                        reward.canCollect && !_loading ? _collect : null,
+                    onPressed: reward.canCollect && !_loading ? _collect : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryAction,
                       foregroundColor: AppColors.textPrimary,
                       disabledBackgroundColor: AppColors.disabled,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusFull),
@@ -253,9 +250,8 @@ class _RewardApiCardState extends ConsumerState<RewardApiCard> {
       child: Text(
         '${reward.pointsRequired} ${strings.pointsRequired}',
         style: AppTypography.labelSmall.copyWith(
-          color: reward.canCollect
-              ? AppColors.secondaryDark
-              : AppColors.textMuted,
+          color:
+              reward.canCollect ? AppColors.secondaryDark : AppColors.textMuted,
           fontWeight: AppTypography.semiBold,
         ),
       ),

@@ -79,9 +79,8 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
         : _track;
     final isParrain = track == HowToTrack.parrain;
 
-    final steps = isParrain
-        ? s.howItWorksParrainSteps
-        : s.howItWorksClientSteps;
+    final steps =
+        isParrain ? s.howItWorksParrainSteps : s.howItWorksClientSteps;
     final headline =
         isParrain ? s.howItWorksParrainHeadline : s.howItWorksClientHeadline;
     final subtitle =
@@ -120,8 +119,7 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
             // Track selector — only when the parrain track is available.
             if (allowParrain)
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: _TrackSelector(
                   track: track,
                   clientLabel: s.howItWorksTrackClient,
@@ -157,8 +155,7 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
             if (videos.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Column(
                   children: [
                     for (var i = 0; i < videos.length; i++) ...[
@@ -167,8 +164,8 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
                         label:
                             '${tutorialTitle(s, videos[i].topic)} · ${formatClipDuration(videos[i].clip.duration)}',
                         accent: accent,
-                        onTap: () => openTutorial(
-                            context, ref, videos[i].topic, topics),
+                        onTap: () =>
+                            openTutorial(context, ref, videos[i].topic, topics),
                       ),
                     ],
                   ],
@@ -202,8 +199,8 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
             const SizedBox(height: AppSpacing.sm),
             Text(
               s.howItWorksStepCounter(_currentPage + 1, steps.length),
-              style: AppTypography.labelSmall
-                  .copyWith(color: AppColors.textMuted),
+              style:
+                  AppTypography.labelSmall.copyWith(color: AppColors.textMuted),
             ),
             const SizedBox(height: AppSpacing.md),
 
@@ -231,8 +228,7 @@ class _HowItWorksScreenState extends ConsumerState<HowItWorksScreen> {
                             size: 20, color: AppColors.textSecondary),
                       ),
                     ),
-                  if (_currentPage > 0)
-                    const SizedBox(width: AppSpacing.md),
+                  if (_currentPage > 0) const SizedBox(width: AppSpacing.md),
                   Expanded(
                     flex: 2,
                     child: ElevatedButton(

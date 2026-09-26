@@ -46,7 +46,8 @@ class BiometricService {
   }
 }
 
-final biometricServiceProvider = Provider<BiometricService>((_) => BiometricService());
+final biometricServiceProvider =
+    Provider<BiometricService>((_) => BiometricService());
 
 class AppLockState {
   final bool enabled;
@@ -83,7 +84,8 @@ class AppLockController extends StateNotifier<AppLockState> {
   /// user can't lock themselves out. Returns the resulting enabled state.
   Future<bool> setEnabled(bool value) async {
     if (value) {
-      final ok = await _ref.read(biometricServiceProvider).authenticate(_reason);
+      final ok =
+          await _ref.read(biometricServiceProvider).authenticate(_reason);
       if (!ok) return false;
     }
     try {

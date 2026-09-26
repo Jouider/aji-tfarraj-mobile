@@ -26,8 +26,7 @@ class SupportService {
 
   Future<SupportTicketDetail> getTicket(int id) async {
     try {
-      final response =
-          await _apiClient.get(AppConfig.supportTicketDetail(id));
+      final response = await _apiClient.get(AppConfig.supportTicketDetail(id));
       return SupportTicketDetail.fromJson(
           response.data as Map<String, dynamic>);
     } on DioException catch (e) {

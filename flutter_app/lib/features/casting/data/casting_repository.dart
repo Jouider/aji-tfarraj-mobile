@@ -135,8 +135,8 @@ class CastingRepository {
 
   Future<List<MyApplication>> myApplications() async {
     try {
-      final response = await _api
-          .get<Map<String, dynamic>>('/api/me/casting-applications');
+      final response =
+          await _api.get<Map<String, dynamic>>('/api/me/casting-applications');
       return (response.data?['applications'] as List<dynamic>? ?? const [])
           .map((e) => MyApplication.fromJson(e as Map<String, dynamic>))
           .toList();

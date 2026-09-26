@@ -67,8 +67,7 @@ class Episode {
       (isAr && cityAr != null && cityAr!.isNotEmpty) ? cityAr! : city;
 
   /// Localized studio name — falls back to French if Arabic is null.
-  String? localizedStudio(bool isAr) =>
-      isAr ? (studioAr ?? studio) : studio;
+  String? localizedStudio(bool isAr) => isAr ? (studioAr ?? studio) : studio;
 
   factory Episode.fromJson(Map<String, dynamic> json) {
     return Episode(

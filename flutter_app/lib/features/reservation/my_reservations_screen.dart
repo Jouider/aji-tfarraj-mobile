@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/app_bar_actions.dart';
 import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/shadows.dart';
@@ -74,6 +75,7 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
       // FIX: App bar — backgroundWhite, centered title, w700 18px, no back arrow
       appBar: AppBar(
         title: AppBarBrandTitle(s.myReservationsTitle),
+        actions: const [AppBarActions()],
         centerTitle: false,
         titleSpacing: AppSpacing.lg,
         backgroundColor: AppColors.backgroundWhite,

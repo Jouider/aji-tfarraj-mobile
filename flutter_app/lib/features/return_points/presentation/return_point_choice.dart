@@ -97,8 +97,7 @@ class _Option extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md, vertical: AppSpacing.md),
             decoration: BoxDecoration(
-              border: Border.all(
-                  color: border, width: selected ? 1.6 : 1),
+              border: Border.all(color: border, width: selected ? 1.6 : 1),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Row(

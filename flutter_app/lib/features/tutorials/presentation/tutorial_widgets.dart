@@ -119,13 +119,18 @@ class TutorialHelpAction extends ConsumerWidget {
   /// siens, sans mélanger les tutoriels du mode public.
   final List<TutorialTopic>? only;
 
-  /// The icon colour; defaults to the text colour.
+  /// La couleur de l'icône. Laissée nulle, elle suit l'`IconTheme` ambiant —
+  /// ce qui est presque toujours ce qu'on veut.
+  ///
+  /// Elle retombait avant sur `textPrimary`, qui est noir en thème clair :
+  /// posé sur le voile sombre du héros, le « ? » devenait invisible. Une
+  /// icône de barre n'a pas à décider de sa couleur, la barre le fait.
   final Color? color;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
-      icon: Icon(Icons.help_outline, color: color ?? AppColors.textPrimary),
+      icon: Icon(Icons.help_outline, color: color),
       tooltip: ref.watch(stringsProvider).tutorialWatch,
       onPressed: () => openTutorial(context, ref, topic, only),
     );

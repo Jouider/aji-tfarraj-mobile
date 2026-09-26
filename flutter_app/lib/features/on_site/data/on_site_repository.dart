@@ -33,7 +33,8 @@ class OnSiteRepository {
   }
 
   /// Search chargés publics so staff can pick who brought the person.
-  Future<List<ChargePublicOption>> searchChargePublics({String query = ''}) async {
+  Future<List<ChargePublicOption>> searchChargePublics(
+      {String query = ''}) async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
         '/api/staff/charge-publics',

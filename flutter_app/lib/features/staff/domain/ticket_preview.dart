@@ -225,7 +225,8 @@ class TicketPreview {
 
   factory TicketPreview.fromJson(Map<String, dynamic> json) {
     final attendee = json['attendee'] as Map<String, dynamic>? ?? const {};
-    final reservation = json['reservation'] as Map<String, dynamic>? ?? const {};
+    final reservation =
+        json['reservation'] as Map<String, dynamic>? ?? const {};
     final episode = json['episode'] as Map<String, dynamic>? ?? const {};
     final show = json['show'] as Map<String, dynamic>? ?? const {};
     final exclusions =
@@ -253,12 +254,13 @@ class TicketPreview {
       departure: Departure.fromJson(reservation['departure']),
       reservationId: reservation['id'] as int?,
       seats: reservation['seats'] as int? ?? 1,
-      referrerName:
-          (reservation['referrer'] as Map<String, dynamic>?)?['name'] as String?,
+      referrerName: (reservation['referrer'] as Map<String, dynamic>?)?['name']
+          as String?,
       returnPoints: ReturnPointOption.listFrom(json['return_points']),
       chosenReturnPointId:
           (reservation['return_point'] as Map<String, dynamic>?)?['id'] as int?,
-      returnPointAnswered: reservation['return_point_answered'] as bool? ?? false,
+      returnPointAnswered:
+          reservation['return_point_answered'] as bool? ?? false,
       episodeId: episode['id'] as int?,
       episodeTitle: episode['title'] as String?,
       episodeStartsAt: parse(episode['starts_at']),

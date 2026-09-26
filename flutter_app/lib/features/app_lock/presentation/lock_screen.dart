@@ -85,8 +85,8 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                             )
                           : const Icon(Icons.fingerprint, size: 22),
                       label: Text(s.biometricUnlockButton,
-                          style: AppTypography.buttonLarge
-                              .copyWith(fontSize: 15)),
+                          style:
+                              AppTypography.buttonLarge.copyWith(fontSize: 15)),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primaryAction,
                         foregroundColor: AppColors.onPrimary,

@@ -126,7 +126,8 @@ class AppTheme {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            textStyle: AppTypography.buttonLarge.copyWith(color: AppColors.onPrimary),
+            textStyle:
+                AppTypography.buttonLarge.copyWith(color: AppColors.onPrimary),
           ),
         ),
 
@@ -403,7 +404,8 @@ class AppTheme {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            textStyle: AppTypography.buttonLarge.copyWith(color: AppColors.onPrimary),
+            textStyle:
+                AppTypography.buttonLarge.copyWith(color: AppColors.onPrimary),
           ),
         ),
 

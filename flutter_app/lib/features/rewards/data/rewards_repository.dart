@@ -32,14 +32,16 @@ class RewardsRepository {
     } on DioException catch (e) {
       if (_cachedRewards != null) {
         if (kDebugMode) {
-          debugPrint('[RewardsRepository] Network error – returning in-memory cache');
+          debugPrint(
+              '[RewardsRepository] Network error – returning in-memory cache');
         }
         return _cachedRewards!;
       }
       final disk = await _loadCachedRewards();
       if (disk != null) {
         if (kDebugMode) {
-          debugPrint('[RewardsRepository] Network error – returning disk cache');
+          debugPrint(
+              '[RewardsRepository] Network error – returning disk cache');
         }
         _cachedRewards = disk;
         return disk;
@@ -116,7 +118,10 @@ class RewardsRepository {
       final raw = prefs.getString(_kRewardsCacheKey);
       if (raw == null) return null;
       final list = jsonDecode(raw) as List<dynamic>;
-      return list.whereType<Map<String, dynamic>>().map(Reward.fromJson).toList();
+      return list
+          .whereType<Map<String, dynamic>>()
+          .map(Reward.fromJson)
+          .toList();
     } catch (_) {
       return null;
     }

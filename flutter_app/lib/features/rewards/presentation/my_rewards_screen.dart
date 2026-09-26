@@ -110,7 +110,8 @@ class _RewardRequestTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(request.localizedTitle(isAr), style: AppTypography.labelMedium),
+                Text(request.localizedTitle(isAr),
+                    style: AppTypography.labelMedium),
                 const SizedBox(height: 2),
                 Text(
                   '${strings.requestedAt} $date',

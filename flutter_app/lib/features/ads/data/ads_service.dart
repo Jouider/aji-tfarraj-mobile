@@ -100,7 +100,8 @@ class AdsService {
   bool _cooldownElapsed(Duration cooldown) {
     if (cooldown == Duration.zero) return true;
 
-    final last = DateTime.tryParse(_prefs.getString(_lastInterstitialKey) ?? '');
+    final last =
+        DateTime.tryParse(_prefs.getString(_lastInterstitialKey) ?? '');
     if (last == null) return true;
 
     return _clock().difference(last) >= cooldown;

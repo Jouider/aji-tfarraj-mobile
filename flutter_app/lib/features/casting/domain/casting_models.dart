@@ -63,7 +63,10 @@ class CastingBook {
   }
 
   bool get hasMeasurements =>
-      heightCm != null || weightKg != null || clothingSize != null || shoeSize != null;
+      heightCm != null ||
+      weightKg != null ||
+      clothingSize != null ||
+      shoeSize != null;
 
   factory CastingBook.fromJson(Map<String, dynamic> json) {
     final profile = json['profile'] as Map<String, dynamic>?;
@@ -86,11 +89,11 @@ class CastingBook {
       studioVerified:
           (json['studio'] as Map<String, dynamic>?)?['verified'] as bool? ??
               false,
-      studioShotOn: (json['studio'] as Map<String, dynamic>?)?['shot_on']
-              is String
-          ? DateTime.tryParse(
-              (json['studio'] as Map<String, dynamic>)['shot_on'] as String)
-          : null,
+      studioShotOn:
+          (json['studio'] as Map<String, dynamic>?)?['shot_on'] is String
+              ? DateTime.tryParse(
+                  (json['studio'] as Map<String, dynamic>)['shot_on'] as String)
+              : null,
     );
   }
 }
@@ -139,6 +142,7 @@ class CastingCall {
   final String? titleAr;
   final String? description;
   final String? descriptionAr;
+
   /// The cover — first in the sequence an admin arranged.
   final String? imageUrl;
 

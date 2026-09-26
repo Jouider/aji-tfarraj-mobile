@@ -21,4 +21,5 @@ class CpModeNotifier extends Notifier<bool> {
   }
 }
 
-final cpModeProvider = NotifierProvider<CpModeNotifier, bool>(CpModeNotifier.new);
+final cpModeProvider =
+    NotifierProvider<CpModeNotifier, bool>(CpModeNotifier.new);

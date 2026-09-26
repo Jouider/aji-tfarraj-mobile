@@ -262,11 +262,13 @@ class AppStrings {
       ? CopyFr.auth.passwordRequired
       : CopyAr.auth.passwordRequired;
 
-  String get passwordMin =>
-      locale == AppLocale.fr ? CopyFr.auth.passwordMin : CopyAr.auth.passwordMin;
+  String get passwordMin => locale == AppLocale.fr
+      ? CopyFr.auth.passwordMin
+      : CopyAr.auth.passwordMin;
 
-  String get passwordWeak =>
-      locale == AppLocale.fr ? CopyFr.auth.passwordWeak : CopyAr.auth.passwordWeak;
+  String get passwordWeak => locale == AppLocale.fr
+      ? CopyFr.auth.passwordWeak
+      : CopyAr.auth.passwordWeak;
 
   String get nameRequired => locale == AppLocale.fr
       ? CopyFr.auth.nameRequired
@@ -353,9 +355,8 @@ class AppStrings {
   String get seeAll =>
       locale == AppLocale.fr ? CopyFr.common.seeAll : CopyAr.common.seeAll;
 
-  String get back => locale == AppLocale.fr
-      ? CopyFr.common.back
-      : CopyAr.common.back;
+  String get back =>
+      locale == AppLocale.fr ? CopyFr.common.back : CopyAr.common.back;
 
   String get backToHome => locale == AppLocale.fr
       ? CopyFr.common.backToHome
@@ -386,9 +387,8 @@ class AppStrings {
   // ============================================
   // Profile
   // ============================================
-  String get profileTitle => locale == AppLocale.fr
-      ? CopyFr.profile.title
-      : CopyAr.profile.title;
+  String get profileTitle =>
+      locale == AppLocale.fr ? CopyFr.profile.title : CopyAr.profile.title;
 
   String get profileLanguageLabel => locale == AppLocale.fr
       ? CopyFr.profile.languageLabel
@@ -975,11 +975,13 @@ class AppStrings {
       ? CopyFr.ticket.swipeHint
       : CopyAr.ticket.swipeHint;
 
-  String get ticketUsed =>
-      locale == AppLocale.fr ? CopyFr.ticket.ticketUsed : CopyAr.ticket.ticketUsed;
+  String get ticketUsed => locale == AppLocale.fr
+      ? CopyFr.ticket.ticketUsed
+      : CopyAr.ticket.ticketUsed;
 
-  String get ticketValid =>
-      locale == AppLocale.fr ? CopyFr.ticket.ticketValid : CopyAr.ticket.ticketValid;
+  String get ticketValid => locale == AppLocale.fr
+      ? CopyFr.ticket.ticketValid
+      : CopyAr.ticket.ticketValid;
 
   String get ticketCheckedInLabel => locale == AppLocale.fr
       ? CopyFr.ticket.checkedInLabel
@@ -1046,9 +1048,8 @@ class AppStrings {
   String get tutorialHowTo =>
       locale == AppLocale.fr ? 'Voir comment faire' : 'شوف كيفاش';
 
-  String get tutorialProfileTitle => locale == AppLocale.fr
-      ? 'Compléter mon profil'
-      : 'تكميل الملف الشخصي';
+  String get tutorialProfileTitle =>
+      locale == AppLocale.fr ? 'Compléter mon profil' : 'تكميل الملف الشخصي';
 
   String get tutorialReservationTitle => locale == AppLocale.fr
       ? 'Réserver avec une invitation'
@@ -1063,9 +1064,8 @@ class AppStrings {
       ? 'Partager et inviter mes contacts'
       : 'تشارك وتعيّط لصحابك';
 
-  String get tutorialCpGuestsTitle => locale == AppLocale.fr
-      ? 'Suivre mes invités'
-      : 'تتبع المدعوين ديالي';
+  String get tutorialCpGuestsTitle =>
+      locale == AppLocale.fr ? 'Suivre mes invités' : 'تتبع المدعوين ديالي';
 
   String get tutorialCpEarningsTitle =>
       locale == AppLocale.fr ? 'Comprendre mes gains' : 'تفهم الأرباح ديالك';
@@ -1129,9 +1129,8 @@ class AppStrings {
   // Book casting photographié par l'équipe
   // ============================================
 
-  String get staffCastingTitle => locale == AppLocale.fr
-      ? 'Photographier un membre'
-      : 'صور عضو';
+  String get staffCastingTitle =>
+      locale == AppLocale.fr ? 'Photographier un membre' : 'صور عضو';
 
   /// Pourquoi l'écran existe : dit en une ligne sur la fiche du profil.
   String get staffCastingSubtitle => locale == AppLocale.fr
@@ -1186,8 +1185,7 @@ class AppStrings {
       : 'غادي نرجع بوحدي';
 
   /// Sur la ligne repliée : ce qu'on tape pour ouvrir la liste.
-  String get returnPointChange =>
-      locale == AppLocale.fr ? 'Modifier' : 'بدّل';
+  String get returnPointChange => locale == AppLocale.fr ? 'Modifier' : 'بدّل';
 
   /// Dit en toutes lettres que le choix n'engage à rien : la porte le repose
   /// de toute façon.
@@ -1196,12 +1194,10 @@ class AppStrings {
       : 'اختياري — تقدر تبدلو فعين المكان.';
 
   /// Sur le billet et la confirmation.
-  String get returnPointChosen =>
-      locale == AppLocale.fr ? 'Retour' : 'الرجوع';
+  String get returnPointChosen => locale == AppLocale.fr ? 'Retour' : 'الرجوع';
 
   /// L'étape du même nom, à l'inscription sur place.
-  String get onSiteStepReturn =>
-      locale == AppLocale.fr ? 'Retour' : 'الرجوع';
+  String get onSiteStepReturn => locale == AppLocale.fr ? 'Retour' : 'الرجوع';
 
   // ============================================
   // Publicité — la vidéo qu'on regarde pour des points
@@ -1380,13 +1376,11 @@ class AppStrings {
       ? CopyFr.navTabs.reservations
       : CopyAr.navTabs.reservations;
 
-  String get navTabTicket => locale == AppLocale.fr
-      ? CopyFr.navTabs.ticket
-      : CopyAr.navTabs.ticket;
+  String get navTabTicket =>
+      locale == AppLocale.fr ? CopyFr.navTabs.ticket : CopyAr.navTabs.ticket;
 
-  String get navTabProfile => locale == AppLocale.fr
-      ? CopyFr.navTabs.profile
-      : CopyAr.navTabs.profile;
+  String get navTabProfile =>
+      locale == AppLocale.fr ? CopyFr.navTabs.profile : CopyAr.navTabs.profile;
 
   // ============================================
   // Casting
@@ -1410,9 +1404,8 @@ class AppStrings {
       ? CopyFr.staff.checkInTitle
       : CopyAr.staff.checkInTitle;
 
-  String get staffTabScanQr => locale == AppLocale.fr
-      ? CopyFr.staff.tabScanQr
-      : CopyAr.staff.tabScanQr;
+  String get staffTabScanQr =>
+      locale == AppLocale.fr ? CopyFr.staff.tabScanQr : CopyAr.staff.tabScanQr;
 
   String get staffTabManualCode => locale == AppLocale.fr
       ? CopyFr.staff.tabManualCode
@@ -1438,9 +1431,8 @@ class AppStrings {
       ? CopyFr.staff.alreadyUsed
       : CopyAr.staff.alreadyUsed;
 
-  String get staffNotFound => locale == AppLocale.fr
-      ? CopyFr.staff.notFound
-      : CopyAr.staff.notFound;
+  String get staffNotFound =>
+      locale == AppLocale.fr ? CopyFr.staff.notFound : CopyAr.staff.notFound;
 
   String get staffAccessDenied => locale == AppLocale.fr
       ? CopyFr.staff.accessDenied
@@ -1457,7 +1449,6 @@ class AppStrings {
   String get staffNetworkError => locale == AppLocale.fr
       ? CopyFr.staff.networkError
       : CopyAr.staff.networkError;
-
 
   // ============================================
   // Shuttle manifest (staff)
@@ -1587,7 +1578,6 @@ class AppStrings {
       ? CopyFr.staff.returnPointSaveError
       : CopyAr.staff.returnPointSaveError;
 
-
   String get staffCameraPermissionDenied => locale == AppLocale.fr
       ? CopyFr.staff.cameraPermissionDenied
       : CopyAr.staff.cameraPermissionDenied;
@@ -1608,21 +1598,18 @@ class AppStrings {
       ? CopyFr.staff.profileStaffTile
       : CopyAr.staff.profileStaffTile;
 
-  String get staffRetry => locale == AppLocale.fr
-      ? CopyFr.staff.retry
-      : CopyAr.staff.retry;
+  String get staffRetry =>
+      locale == AppLocale.fr ? CopyFr.staff.retry : CopyAr.staff.retry;
 
-  String get staffBack => locale == AppLocale.fr
-      ? CopyFr.staff.back
-      : CopyAr.staff.back;
+  String get staffBack =>
+      locale == AppLocale.fr ? CopyFr.staff.back : CopyAr.staff.back;
 
   String get staffAttendeeName => locale == AppLocale.fr
       ? CopyFr.staff.attendeeName
       : CopyAr.staff.attendeeName;
 
-  String get staffShowLabel => locale == AppLocale.fr
-      ? CopyFr.staff.showLabel
-      : CopyAr.staff.showLabel;
+  String get staffShowLabel =>
+      locale == AppLocale.fr ? CopyFr.staff.showLabel : CopyAr.staff.showLabel;
 
   String get staffTicketCodeLabel => locale == AppLocale.fr
       ? CopyFr.staff.ticketCodeLabel
@@ -1694,9 +1681,8 @@ class AppStrings {
       ? CopyFr.howItWorks.gotIt
       : CopyAr.howItWorks.gotIt;
 
-  String get howItWorksNext => locale == AppLocale.fr
-      ? CopyFr.howItWorks.next
-      : CopyAr.howItWorks.next;
+  String get howItWorksNext =>
+      locale == AppLocale.fr ? CopyFr.howItWorks.next : CopyAr.howItWorks.next;
 
   // ============================================
   // Charge public ("Mode Chargé Public")
@@ -1722,8 +1708,9 @@ class AppStrings {
 
   String badgeAttendanceCount(int n) =>
       _fr ? '$n présence${n > 1 ? 's' : ''}' : '$n حضور';
-  String badgeCpCount(int n) =>
-      _fr ? '$n invité${n > 1 ? 's' : ''} ramené${n > 1 ? 's' : ''}' : '$n مدعو';
+  String badgeCpCount(int n) => _fr
+      ? '$n invité${n > 1 ? 's' : ''} ramené${n > 1 ? 's' : ''}'
+      : '$n مدعو';
 
   String badgeRemainingAttendance(int n) => _fr
       ? 'Encore $n présence${n > 1 ? 's' : ''} pour le niveau suivant'
@@ -1763,13 +1750,11 @@ class AppStrings {
   // ============================================
   // Inscription sur place (on-site registration)
   // ============================================
-  String get onSiteTitle => locale == AppLocale.fr
-      ? CopyFr.onSite.title
-      : CopyAr.onSite.title;
+  String get onSiteTitle =>
+      locale == AppLocale.fr ? CopyFr.onSite.title : CopyAr.onSite.title;
 
-  String get onSiteSubtitle => locale == AppLocale.fr
-      ? CopyFr.onSite.subtitle
-      : CopyAr.onSite.subtitle;
+  String get onSiteSubtitle =>
+      locale == AppLocale.fr ? CopyFr.onSite.subtitle : CopyAr.onSite.subtitle;
 
   String get onSiteProfileTileSubtitle => locale == AppLocale.fr
       ? CopyFr.onSite.profileTileSubtitle
@@ -1843,65 +1828,52 @@ class AppStrings {
       ? CopyFr.onSite.firstName
       : CopyAr.onSite.firstName;
 
-  String get onSiteLastName => locale == AppLocale.fr
-      ? CopyFr.onSite.lastName
-      : CopyAr.onSite.lastName;
+  String get onSiteLastName =>
+      locale == AppLocale.fr ? CopyFr.onSite.lastName : CopyAr.onSite.lastName;
 
-  String get onSiteGender => locale == AppLocale.fr
-      ? CopyFr.onSite.gender
-      : CopyAr.onSite.gender;
+  String get onSiteGender =>
+      locale == AppLocale.fr ? CopyFr.onSite.gender : CopyAr.onSite.gender;
 
-  String get onSiteMale => locale == AppLocale.fr
-      ? CopyFr.onSite.male
-      : CopyAr.onSite.male;
+  String get onSiteMale =>
+      locale == AppLocale.fr ? CopyFr.onSite.male : CopyAr.onSite.male;
 
-  String get onSiteFemale => locale == AppLocale.fr
-      ? CopyFr.onSite.female
-      : CopyAr.onSite.female;
+  String get onSiteFemale =>
+      locale == AppLocale.fr ? CopyFr.onSite.female : CopyAr.onSite.female;
 
-  String get onSiteBirthday => locale == AppLocale.fr
-      ? CopyFr.onSite.birthday
-      : CopyAr.onSite.birthday;
+  String get onSiteBirthday =>
+      locale == AppLocale.fr ? CopyFr.onSite.birthday : CopyAr.onSite.birthday;
 
-  String get onSitePhone => locale == AppLocale.fr
-      ? CopyFr.onSite.phone
-      : CopyAr.onSite.phone;
+  String get onSitePhone =>
+      locale == AppLocale.fr ? CopyFr.onSite.phone : CopyAr.onSite.phone;
 
-  String get onSiteEmail => locale == AppLocale.fr
-      ? CopyFr.onSite.email
-      : CopyAr.onSite.email;
+  String get onSiteEmail =>
+      locale == AppLocale.fr ? CopyFr.onSite.email : CopyAr.onSite.email;
 
   String get onSiteEmailHint => locale == AppLocale.fr
       ? CopyFr.onSite.emailHint
       : CopyAr.onSite.emailHint;
 
-  String get onSiteCity => locale == AppLocale.fr
-      ? CopyFr.onSite.city
-      : CopyAr.onSite.city;
+  String get onSiteCity =>
+      locale == AppLocale.fr ? CopyFr.onSite.city : CopyAr.onSite.city;
 
-  String get onSiteDistrict => locale == AppLocale.fr
-      ? CopyFr.onSite.district
-      : CopyAr.onSite.district;
+  String get onSiteDistrict =>
+      locale == AppLocale.fr ? CopyFr.onSite.district : CopyAr.onSite.district;
 
-  String get onSiteNext => locale == AppLocale.fr
-      ? CopyFr.onSite.next
-      : CopyAr.onSite.next;
+  String get onSiteNext =>
+      locale == AppLocale.fr ? CopyFr.onSite.next : CopyAr.onSite.next;
 
-  String get onSiteBack => locale == AppLocale.fr
-      ? CopyFr.onSite.back
-      : CopyAr.onSite.back;
+  String get onSiteBack =>
+      locale == AppLocale.fr ? CopyFr.onSite.back : CopyAr.onSite.back;
 
-  String get onSiteSubmit => locale == AppLocale.fr
-      ? CopyFr.onSite.submit
-      : CopyAr.onSite.submit;
+  String get onSiteSubmit =>
+      locale == AppLocale.fr ? CopyFr.onSite.submit : CopyAr.onSite.submit;
 
   String get onSiteNextPerson => locale == AppLocale.fr
       ? CopyFr.onSite.nextPerson
       : CopyAr.onSite.nextPerson;
 
-  String get onSiteClose => locale == AppLocale.fr
-      ? CopyFr.onSite.close
-      : CopyAr.onSite.close;
+  String get onSiteClose =>
+      locale == AppLocale.fr ? CopyFr.onSite.close : CopyAr.onSite.close;
 
   String get onSiteDoneTitle => locale == AppLocale.fr
       ? CopyFr.onSite.doneTitle
@@ -1919,9 +1891,8 @@ class AppStrings {
       ? CopyFr.onSite.copyCredentials
       : CopyAr.onSite.copyCredentials;
 
-  String get onSiteCopied => locale == AppLocale.fr
-      ? CopyFr.onSite.copied
-      : CopyAr.onSite.copied;
+  String get onSiteCopied =>
+      locale == AppLocale.fr ? CopyFr.onSite.copied : CopyAr.onSite.copied;
 
   String get onSiteRequiredFields => locale == AppLocale.fr
       ? CopyFr.onSite.requiredFields
@@ -1950,9 +1921,8 @@ class AppStrings {
   // ============================================
   // Referral / Parrainage
   // ============================================
-  String get referralTitle => locale == AppLocale.fr
-      ? CopyFr.referral.title
-      : CopyAr.referral.title;
+  String get referralTitle =>
+      locale == AppLocale.fr ? CopyFr.referral.title : CopyAr.referral.title;
 
   String get referralMyCode => locale == AppLocale.fr
       ? CopyFr.referral.myReferralCode
@@ -2014,9 +1984,8 @@ class AppStrings {
       ? CopyFr.referral.myLinks
       : CopyAr.referral.myLinks;
 
-  String get referralClicks => locale == AppLocale.fr
-      ? CopyFr.referral.clicks
-      : CopyAr.referral.clicks;
+  String get referralClicks =>
+      locale == AppLocale.fr ? CopyFr.referral.clicks : CopyAr.referral.clicks;
 
   String get referralConversions => locale == AppLocale.fr
       ? CopyFr.referral.conversions
@@ -2109,9 +2078,8 @@ class AppStrings {
       ? CopyFr.episode.upcomingEpisodes
       : CopyAr.episode.upcomingEpisodes;
 
-  String get episodeSoldOut => locale == AppLocale.fr
-      ? CopyFr.episode.soldOut
-      : CopyAr.episode.soldOut;
+  String get episodeSoldOut =>
+      locale == AppLocale.fr ? CopyFr.episode.soldOut : CopyAr.episode.soldOut;
 
   String episodeAvailableSeats(int n) => locale == AppLocale.fr
       ? CopyFr.episode.availableSeats(n)
@@ -2301,130 +2269,184 @@ class AppStrings {
   // Support Tickets
   // ============================================
   String get supportListTitle => locale == AppLocale.fr
-      ? CopyFr.support.listTitle : CopyAr.support.listTitle;
+      ? CopyFr.support.listTitle
+      : CopyAr.support.listTitle;
   String get supportCreateTitle => locale == AppLocale.fr
-      ? CopyFr.support.createTitle : CopyAr.support.createTitle;
+      ? CopyFr.support.createTitle
+      : CopyAr.support.createTitle;
   String get supportNewButton => locale == AppLocale.fr
-      ? CopyFr.support.newButton : CopyAr.support.newButton;
+      ? CopyFr.support.newButton
+      : CopyAr.support.newButton;
 
   String get supportStatusOpen => locale == AppLocale.fr
-      ? CopyFr.support.statusOpen : CopyAr.support.statusOpen;
+      ? CopyFr.support.statusOpen
+      : CopyAr.support.statusOpen;
   String get supportStatusInProgress => locale == AppLocale.fr
-      ? CopyFr.support.statusInProgress : CopyAr.support.statusInProgress;
+      ? CopyFr.support.statusInProgress
+      : CopyAr.support.statusInProgress;
   String get supportStatusClosed => locale == AppLocale.fr
-      ? CopyFr.support.statusClosed : CopyAr.support.statusClosed;
+      ? CopyFr.support.statusClosed
+      : CopyAr.support.statusClosed;
 
   String get supportBannerOpenTitle => locale == AppLocale.fr
-      ? CopyFr.support.bannerOpenTitle : CopyAr.support.bannerOpenTitle;
+      ? CopyFr.support.bannerOpenTitle
+      : CopyAr.support.bannerOpenTitle;
   String get supportBannerOpenMsg => locale == AppLocale.fr
-      ? CopyFr.support.bannerOpenMsg : CopyAr.support.bannerOpenMsg;
+      ? CopyFr.support.bannerOpenMsg
+      : CopyAr.support.bannerOpenMsg;
   String get supportBannerInProgressTitle => locale == AppLocale.fr
-      ? CopyFr.support.bannerInProgressTitle : CopyAr.support.bannerInProgressTitle;
+      ? CopyFr.support.bannerInProgressTitle
+      : CopyAr.support.bannerInProgressTitle;
   String get supportBannerInProgressMsg => locale == AppLocale.fr
-      ? CopyFr.support.bannerInProgressMsg : CopyAr.support.bannerInProgressMsg;
+      ? CopyFr.support.bannerInProgressMsg
+      : CopyAr.support.bannerInProgressMsg;
   String get supportBannerClosedTitle => locale == AppLocale.fr
-      ? CopyFr.support.bannerClosedTitle : CopyAr.support.bannerClosedTitle;
+      ? CopyFr.support.bannerClosedTitle
+      : CopyAr.support.bannerClosedTitle;
   String get supportBannerClosedMsg => locale == AppLocale.fr
-      ? CopyFr.support.bannerClosedMsg : CopyAr.support.bannerClosedMsg;
+      ? CopyFr.support.bannerClosedMsg
+      : CopyAr.support.bannerClosedMsg;
 
   String get supportCardSubtitle => locale == AppLocale.fr
-      ? CopyFr.support.cardSubtitle : CopyAr.support.cardSubtitle;
+      ? CopyFr.support.cardSubtitle
+      : CopyAr.support.cardSubtitle;
 
   String get supportEmptyTitle => locale == AppLocale.fr
-      ? CopyFr.support.emptyTitle : CopyAr.support.emptyTitle;
+      ? CopyFr.support.emptyTitle
+      : CopyAr.support.emptyTitle;
   String get supportEmptySubtitle => locale == AppLocale.fr
-      ? CopyFr.support.emptySubtitle : CopyAr.support.emptySubtitle;
+      ? CopyFr.support.emptySubtitle
+      : CopyAr.support.emptySubtitle;
   String get supportEmptyButton => locale == AppLocale.fr
-      ? CopyFr.support.emptyButton : CopyAr.support.emptyButton;
+      ? CopyFr.support.emptyButton
+      : CopyAr.support.emptyButton;
   String get supportErrorMsg => locale == AppLocale.fr
-      ? CopyFr.support.errorMsg : CopyAr.support.errorMsg;
+      ? CopyFr.support.errorMsg
+      : CopyAr.support.errorMsg;
   String get supportRetryButton => locale == AppLocale.fr
-      ? CopyFr.support.retryButton : CopyAr.support.retryButton;
+      ? CopyFr.support.retryButton
+      : CopyAr.support.retryButton;
 
   String get supportInfoBannerTitle => locale == AppLocale.fr
-      ? CopyFr.support.infoBannerTitle : CopyAr.support.infoBannerTitle;
+      ? CopyFr.support.infoBannerTitle
+      : CopyAr.support.infoBannerTitle;
   String get supportInfoBannerBody => locale == AppLocale.fr
-      ? CopyFr.support.infoBannerBody : CopyAr.support.infoBannerBody;
+      ? CopyFr.support.infoBannerBody
+      : CopyAr.support.infoBannerBody;
   String get supportSubjectLabel => locale == AppLocale.fr
-      ? CopyFr.support.subjectLabel : CopyAr.support.subjectLabel;
+      ? CopyFr.support.subjectLabel
+      : CopyAr.support.subjectLabel;
   String get supportSubjectHint => locale == AppLocale.fr
-      ? CopyFr.support.subjectHint : CopyAr.support.subjectHint;
+      ? CopyFr.support.subjectHint
+      : CopyAr.support.subjectHint;
   String get supportSubjectRequired => locale == AppLocale.fr
-      ? CopyFr.support.subjectRequired : CopyAr.support.subjectRequired;
+      ? CopyFr.support.subjectRequired
+      : CopyAr.support.subjectRequired;
   String get supportMessageLabel => locale == AppLocale.fr
-      ? CopyFr.support.messageLabel : CopyAr.support.messageLabel;
+      ? CopyFr.support.messageLabel
+      : CopyAr.support.messageLabel;
   String get supportMessageHint => locale == AppLocale.fr
-      ? CopyFr.support.messageHint : CopyAr.support.messageHint;
+      ? CopyFr.support.messageHint
+      : CopyAr.support.messageHint;
   String get supportSubmitButton => locale == AppLocale.fr
-      ? CopyFr.support.submitButton : CopyAr.support.submitButton;
+      ? CopyFr.support.submitButton
+      : CopyAr.support.submitButton;
 
   String get supportConfirmationTitle => locale == AppLocale.fr
-      ? CopyFr.support.confirmationTitle : CopyAr.support.confirmationTitle;
+      ? CopyFr.support.confirmationTitle
+      : CopyAr.support.confirmationTitle;
   String get supportConfirmationBadge => locale == AppLocale.fr
-      ? CopyFr.support.confirmationBadge : CopyAr.support.confirmationBadge;
+      ? CopyFr.support.confirmationBadge
+      : CopyAr.support.confirmationBadge;
   String get supportSummarySubject => locale == AppLocale.fr
-      ? CopyFr.support.summarySubject : CopyAr.support.summarySubject;
+      ? CopyFr.support.summarySubject
+      : CopyAr.support.summarySubject;
   String get supportSummaryTicket => locale == AppLocale.fr
-      ? CopyFr.support.summaryTicket : CopyAr.support.summaryTicket;
+      ? CopyFr.support.summaryTicket
+      : CopyAr.support.summaryTicket;
   String get supportSummarySubmitted => locale == AppLocale.fr
-      ? CopyFr.support.summarySubmitted : CopyAr.support.summarySubmitted;
+      ? CopyFr.support.summarySubmitted
+      : CopyAr.support.summarySubmitted;
   String get supportStepsTitle => locale == AppLocale.fr
-      ? CopyFr.support.stepsTitle : CopyAr.support.stepsTitle;
-  String get supportStep1 => locale == AppLocale.fr
-      ? CopyFr.support.step1 : CopyAr.support.step1;
-  String get supportStep2 => locale == AppLocale.fr
-      ? CopyFr.support.step2 : CopyAr.support.step2;
-  String get supportStep3 => locale == AppLocale.fr
-      ? CopyFr.support.step3 : CopyAr.support.step3;
+      ? CopyFr.support.stepsTitle
+      : CopyAr.support.stepsTitle;
+  String get supportStep1 =>
+      locale == AppLocale.fr ? CopyFr.support.step1 : CopyAr.support.step1;
+  String get supportStep2 =>
+      locale == AppLocale.fr ? CopyFr.support.step2 : CopyAr.support.step2;
+  String get supportStep3 =>
+      locale == AppLocale.fr ? CopyFr.support.step3 : CopyAr.support.step3;
   String get supportBtnViewTickets => locale == AppLocale.fr
-      ? CopyFr.support.btnViewTickets : CopyAr.support.btnViewTickets;
+      ? CopyFr.support.btnViewTickets
+      : CopyAr.support.btnViewTickets;
   String get supportBtnBackHome => locale == AppLocale.fr
-      ? CopyFr.support.btnBackHome : CopyAr.support.btnBackHome;
+      ? CopyFr.support.btnBackHome
+      : CopyAr.support.btnBackHome;
 
   String get supportDetailSubjectSection => locale == AppLocale.fr
-      ? CopyFr.support.detailSubjectSection : CopyAr.support.detailSubjectSection;
+      ? CopyFr.support.detailSubjectSection
+      : CopyAr.support.detailSubjectSection;
   String get supportDetailMessageSection => locale == AppLocale.fr
-      ? CopyFr.support.detailMessageSection : CopyAr.support.detailMessageSection;
+      ? CopyFr.support.detailMessageSection
+      : CopyAr.support.detailMessageSection;
   String get supportDetailMetaSection => locale == AppLocale.fr
-      ? CopyFr.support.detailMetaSection : CopyAr.support.detailMetaSection;
+      ? CopyFr.support.detailMetaSection
+      : CopyAr.support.detailMetaSection;
   String get supportMetaTicketNumber => locale == AppLocale.fr
-      ? CopyFr.support.metaTicketNumber : CopyAr.support.metaTicketNumber;
+      ? CopyFr.support.metaTicketNumber
+      : CopyAr.support.metaTicketNumber;
   String get supportMetaSubmittedAt => locale == AppLocale.fr
-      ? CopyFr.support.metaSubmittedAt : CopyAr.support.metaSubmittedAt;
+      ? CopyFr.support.metaSubmittedAt
+      : CopyAr.support.metaSubmittedAt;
   String get supportMetaUpdatedAt => locale == AppLocale.fr
-      ? CopyFr.support.metaUpdatedAt : CopyAr.support.metaUpdatedAt;
+      ? CopyFr.support.metaUpdatedAt
+      : CopyAr.support.metaUpdatedAt;
   String get supportInfoCallPending => locale == AppLocale.fr
-      ? CopyFr.support.infoCallPending : CopyAr.support.infoCallPending;
+      ? CopyFr.support.infoCallPending
+      : CopyAr.support.infoCallPending;
   String get supportInfoClosed => locale == AppLocale.fr
-      ? CopyFr.support.infoClosed : CopyAr.support.infoClosed;
+      ? CopyFr.support.infoClosed
+      : CopyAr.support.infoClosed;
   String get supportDetailError => locale == AppLocale.fr
-      ? CopyFr.support.detailError : CopyAr.support.detailError;
+      ? CopyFr.support.detailError
+      : CopyAr.support.detailError;
   String get supportDetailForbidden => locale == AppLocale.fr
-      ? CopyFr.support.detailForbidden : CopyAr.support.detailForbidden;
+      ? CopyFr.support.detailForbidden
+      : CopyAr.support.detailForbidden;
   String get supportDetailRetry => locale == AppLocale.fr
-      ? CopyFr.support.detailRetry : CopyAr.support.detailRetry;
+      ? CopyFr.support.detailRetry
+      : CopyAr.support.detailRetry;
 
   String get supportProfileTitle => locale == AppLocale.fr
-      ? CopyFr.support.profileTitle : CopyAr.support.profileTitle;
+      ? CopyFr.support.profileTitle
+      : CopyAr.support.profileTitle;
   String get supportProfileSubtitle => locale == AppLocale.fr
-      ? CopyFr.support.profileSubtitle : CopyAr.support.profileSubtitle;
+      ? CopyFr.support.profileSubtitle
+      : CopyAr.support.profileSubtitle;
 
   // ── App gate: update prompt + biometric lock ──
   String get updateTitle => locale == AppLocale.fr
-      ? CopyFr.appGate.updateTitle : CopyAr.appGate.updateTitle;
+      ? CopyFr.appGate.updateTitle
+      : CopyAr.appGate.updateTitle;
   String get updateMessage => locale == AppLocale.fr
-      ? CopyFr.appGate.updateMessage : CopyAr.appGate.updateMessage;
+      ? CopyFr.appGate.updateMessage
+      : CopyAr.appGate.updateMessage;
   String get updateForcedTitle => locale == AppLocale.fr
-      ? CopyFr.appGate.updateForcedTitle : CopyAr.appGate.updateForcedTitle;
+      ? CopyFr.appGate.updateForcedTitle
+      : CopyAr.appGate.updateForcedTitle;
   String get updateForcedMessage => locale == AppLocale.fr
-      ? CopyFr.appGate.updateForcedMessage : CopyAr.appGate.updateForcedMessage;
+      ? CopyFr.appGate.updateForcedMessage
+      : CopyAr.appGate.updateForcedMessage;
   String get updateNow => locale == AppLocale.fr
-      ? CopyFr.appGate.updateNow : CopyAr.appGate.updateNow;
+      ? CopyFr.appGate.updateNow
+      : CopyAr.appGate.updateNow;
   String get updateLater => locale == AppLocale.fr
-      ? CopyFr.appGate.updateLater : CopyAr.appGate.updateLater;
+      ? CopyFr.appGate.updateLater
+      : CopyAr.appGate.updateLater;
 
   String get biometricLockLabel => locale == AppLocale.fr
-      ? CopyFr.appGate.biometricLockLabel : CopyAr.appGate.biometricLockLabel;
+      ? CopyFr.appGate.biometricLockLabel
+      : CopyAr.appGate.biometricLockLabel;
   String get biometricLockSubtitle => locale == AppLocale.fr
       ? CopyFr.appGate.biometricLockSubtitle
       : CopyAr.appGate.biometricLockSubtitle;
@@ -2438,7 +2460,8 @@ class AppStrings {
       ? CopyFr.appGate.biometricUnlockButton
       : CopyAr.appGate.biometricUnlockButton;
   String get biometricReason => locale == AppLocale.fr
-      ? CopyFr.appGate.biometricReason : CopyAr.appGate.biometricReason;
+      ? CopyFr.appGate.biometricReason
+      : CopyAr.appGate.biometricReason;
   String get biometricUnavailable => locale == AppLocale.fr
       ? CopyFr.appGate.biometricUnavailable
       : CopyAr.appGate.biometricUnavailable;

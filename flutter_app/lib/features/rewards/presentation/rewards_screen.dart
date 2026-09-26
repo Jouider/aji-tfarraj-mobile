@@ -31,8 +31,7 @@ class RewardsScreen extends ConsumerWidget {
           const TutorialHelpAction(topic: TutorialTopic.rewards),
           TextButton.icon(
             onPressed: () => context.push(Routes.myRewards),
-            icon: Icon(Icons.history, size: 18,
-                color: AppColors.textSecondary),
+            icon: Icon(Icons.history, size: 18, color: AppColors.textSecondary),
             label: Text(
               strings.myRewardsTitle,
               style: AppTypography.labelSmall

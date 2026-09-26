@@ -5,9 +5,9 @@ import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/notifications/domain/app_notification.dart';
 
 /// Push Router - Handles navigation from push notifications
-/// 
+///
 /// Supports backend payload formats:
-/// 
+///
 /// Format A: { "type": "reservation", "reservation_id": "123", "title": "...", "body": "..." }
 /// Format B: { "type": "ticket", "title": "...", "body": "..." }
 /// Format C: { "deep_link": "/reservation/123" }
@@ -21,19 +21,19 @@ class PushRouter {
       // Priority 1: Deep link if provided (Format C)
       if (notification.deepLink != null && notification.deepLink!.isNotEmpty) {
         final deepLink = notification.deepLink!;
-        
+
         // Validate deep link format (must start with /)
         if (deepLink.startsWith('/')) {
           return _validateAndSanitizeRoute(deepLink);
         }
-        
+
         _debugLog('Invalid deep link format: $deepLink');
       }
 
       // Priority 2: Type-based routing (Format A & B)
       switch (notification.type) {
         case NotificationType.reservation:
-          if (notification.reservationId != null && 
+          if (notification.reservationId != null &&
               notification.reservationId!.isNotEmpty) {
             return Routes.reservationDetail(notification.reservationId!);
           }
@@ -70,7 +70,7 @@ class PushRouter {
 
       // Check type-based routing (Format A & B)
       final type = data['type']?.toString();
-      
+
       if (type == 'reservation') {
         final reservationId = data['reservation_id']?.toString();
         if (reservationId != null && reservationId.isNotEmpty) {
@@ -78,7 +78,7 @@ class PushRouter {
         }
         return Routes.myReservations;
       }
-      
+
       if (type == 'ticket') {
         return Routes.ticket;
       }
@@ -143,7 +143,7 @@ class PushRouter {
       }
 
       // Handle web URLs
-      if (rawDeepLink.startsWith('https://') || 
+      if (rawDeepLink.startsWith('https://') ||
           rawDeepLink.startsWith('http://')) {
         final uri = Uri.parse(rawDeepLink);
         return uri.path;
@@ -182,7 +182,7 @@ class PushRouter {
 
     // Check if route matches any valid prefix
     final isValid = validPrefixes.any((prefix) => route.startsWith(prefix));
-    
+
     if (isValid) {
       return route;
     }

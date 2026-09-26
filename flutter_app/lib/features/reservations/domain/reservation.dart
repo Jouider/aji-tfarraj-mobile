@@ -50,7 +50,8 @@ class Reservation {
         'status': json['status'],
         'show': json['show'],
       };
-      ticket = Ticket.fromJsonWithReservationContext(ticketJson, reservationContext);
+      ticket =
+          Ticket.fromJsonWithReservationContext(ticketJson, reservationContext);
     }
 
     return Reservation(

@@ -80,7 +80,8 @@ class ReturnPointField extends StatelessWidget {
                       // Sans arrêt choisi, la réponse est « par mes propres
                       // moyens » : c'en est une, et l'afficher évite de faire
                       // croire qu'il reste quelque chose à remplir.
-                      chosen?.localizedName(isArabic) ?? strings.returnPointNone,
+                      chosen?.localizedName(isArabic) ??
+                          strings.returnPointNone,
                       style: AppTypography.bodyMedium,
                     ),
                   ],
@@ -109,8 +110,8 @@ class ReturnPointField extends StatelessWidget {
       ),
       builder: (sheetContext) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md,
-              AppSpacing.lg, AppSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -130,8 +131,8 @@ class ReturnPointField extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 strings.returnPointHint,
-                style:
-                    AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+                style: AppTypography.bodySmall
+                    .copyWith(color: AppColors.textMuted),
               ),
               const SizedBox(height: AppSpacing.lg),
               // Beaucoup d'arrêts : la liste défile dans la feuille, pas la

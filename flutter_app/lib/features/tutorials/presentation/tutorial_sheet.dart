@@ -304,7 +304,8 @@ class _TutorialSheetState extends ConsumerState<TutorialSheet> {
                       child: Text(
                         s.howItWorksGotIt,
                         style: AppTypography.labelLarge.copyWith(
-                            color: AppColors.onPrimary, fontWeight: FontWeight.w700),
+                            color: AppColors.onPrimary,
+                            fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
@@ -376,8 +377,7 @@ class _Player extends StatelessWidget {
                                   const SizedBox.shrink(),
                             ),
                           ),
-                        CircularProgressIndicator(
-                            color: AppColors.accentInk),
+                        CircularProgressIndicator(color: AppColors.accentInk),
                       ],
                     )
                   : LayoutBuilder(

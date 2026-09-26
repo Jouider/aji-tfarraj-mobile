@@ -39,7 +39,8 @@ class _SupportTicketsScreenState extends ConsumerState<SupportTicketsScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
-    final locale = ref.watch(localeProvider).languageCode == 'ar' ? 'ar' : 'fr_FR';
+    final locale =
+        ref.watch(localeProvider).languageCode == 'ar' ? 'ar' : 'fr_FR';
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -174,16 +175,15 @@ class _EmptyState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryAction,
                 foregroundColor: AppColors.onPrimary,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
               child: Text(
                 s.supportEmptyButton,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
           ],

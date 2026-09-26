@@ -28,8 +28,10 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
-    final textStyle = isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge;
+    final height =
+        isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
+    final textStyle =
+        isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge;
 
     // Le dégradé de la charte sur le geste principal, avec l'encre sombre :
     // c'est la seule paire lisible d'un bout à l'autre du bouton (voir
@@ -122,9 +124,11 @@ class AppSecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
-    final textStyle = (isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge)
-        .copyWith(color: AppColors.primary);
+    final height =
+        isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
+    final textStyle =
+        (isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge)
+            .copyWith(color: AppColors.primary);
 
     return SizedBox(
       height: height,
@@ -148,7 +152,8 @@ class AppSecondaryButton extends StatelessWidget {
       return Text(text, style: textStyle);
     }
 
-    final iconWidget = Icon(icon, size: AppSpacing.iconSm, color: AppColors.primary);
+    final iconWidget =
+        Icon(icon, size: AppSpacing.iconSm, color: AppColors.primary);
     final textWidget = Text(text, style: textStyle);
     final spacing = SizedBox(width: AppSpacing.sm);
 
@@ -183,8 +188,9 @@ class AppTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = (isSmall ? AppTypography.buttonMedium : AppTypography.buttonMedium)
-        .copyWith(color: AppColors.primary);
+    final textStyle =
+        (isSmall ? AppTypography.buttonMedium : AppTypography.buttonMedium)
+            .copyWith(color: AppColors.primary);
 
     return TextButton(
       onPressed: onPressed,
@@ -204,7 +210,8 @@ class AppTextButton extends StatelessWidget {
       return Text(text, style: textStyle);
     }
 
-    final iconWidget = Icon(icon, size: AppSpacing.iconSm, color: AppColors.primary);
+    final iconWidget =
+        Icon(icon, size: AppSpacing.iconSm, color: AppColors.primary);
     final textWidget = Text(text, style: textStyle);
     final spacing = SizedBox(width: AppSpacing.xs);
 

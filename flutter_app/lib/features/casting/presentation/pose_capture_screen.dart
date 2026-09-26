@@ -266,8 +266,7 @@ class _PoseCaptureScreenState extends ConsumerState<PoseCaptureScreen>
         fit: StackFit.expand,
         children: [
           if (_initializing)
-            Center(
-                child: CircularProgressIndicator(color: AppColors.accentInk))
+            Center(child: CircularProgressIndicator(color: AppColors.accentInk))
           else if (_cameraError || !ready)
             _CameraProblem(
               message: _permissionDenied

@@ -130,7 +130,9 @@ class _AppTextFieldState extends State<AppTextField> {
             ),
             filled: true,
             fillColor: widget.enabled
-                ? (_isFocused ? AppColors.backgroundWhite : AppColors.backgroundLight)
+                ? (_isFocused
+                    ? AppColors.backgroundWhite
+                    : AppColors.backgroundLight)
                 : AppColors.disabled,
             contentPadding: EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
@@ -247,7 +249,9 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
       textInputAction: widget.textInputAction,
       obscureText: _obscureText,
       prefixIcon: Icons.lock_outline,
-      suffixIcon: _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+      suffixIcon: _obscureText
+          ? Icons.visibility_off_outlined
+          : Icons.visibility_outlined,
       onSuffixTap: _toggleVisibility,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,

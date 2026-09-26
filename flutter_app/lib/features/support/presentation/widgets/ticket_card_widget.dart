@@ -69,12 +69,10 @@ class TicketCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     s.supportCardSubtitle,
-                    style:
-                        TextStyle(color: AppColors.textMuted, fontSize: 12),
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 12),
                   ),
                 ),
-                Icon(Icons.chevron_right,
-                    size: 18, color: AppColors.textMuted),
+                Icon(Icons.chevron_right, size: 18, color: AppColors.textMuted),
               ],
             ),
           ],

@@ -87,8 +87,8 @@ class _StaffCastingScreenState extends ConsumerState<StaffCastingScreen> {
                       description: s.staffCastingNobodyHint,
                     )
                   : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0,
-                          AppSpacing.lg, AppSpacing.xxl),
+                      padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xxl),
                       itemCount: list.length,
                       separatorBuilder: (_, __) =>
                           const SizedBox(height: AppSpacing.sm),
