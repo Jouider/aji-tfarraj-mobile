@@ -1,3 +1,4 @@
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +34,25 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
 
+  /// La page a-t-elle quitté le haut ?
+  ///
+  /// Un ValueNotifier plutôt qu'un setState : le défilement émet des dizaines
+  /// d'événements par seconde, et seule la barre a besoin d'être redessinée.
+  final ValueNotifier<bool> _scrolled = ValueNotifier(false);
+
+  /// Le point de bascule. Assez bas pour que la barre réagisse tout de suite,
+  /// assez haut pour qu'un tremblement du pouce ne la fasse pas clignoter.
+  static const double _solidFrom = 32;
+
+  /// Assez court pour suivre le pouce, assez long pour ne pas clignoter.
+  static const Duration _barFade = Duration(milliseconds: 220);
+
+  /// L'encre de la barre suit ce qu'il y a derrière elle : blanche sur
+  /// l'affiche, la couleur du texte sur le verre. C'est la même règle que
+  /// partout ailleurs — une photo n'a pas de thème, une page si.
+  static Color _barInk(bool scrolled) =>
+      scrolled ? AppColors.textPrimary : AppColors.inkOnPhoto;
+
   @override
   void initState() {
     super.initState();
@@ -55,10 +75,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _scrolled.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    _scrolled.value = _scrollController.position.pixels > _solidFrom;
+
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       ref.read(showsListProvider.notifier).loadMore();
@@ -85,16 +108,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xE6000000), // 90% black
-              Colors.transparent,
-            ],
-          ),
+      // Deux barres, fondues l'une dans l'autre selon la position de la page.
+      //
+      // En haut, l'affiche est la vedette : la barre disparaît sous un simple
+      // voile sombre, juste assez pour que les icônes blanches tiennent.
+      // Dès que la page défile, l'affiche s'en va et la barre a besoin d'un
+      // fond à elle — le même verre que la barre du bas, pour que les deux
+      // extrémités de l'écran parlent la même matière.
+      flexibleSpace: ValueListenableBuilder<bool>(
+        valueListenable: _scrolled,
+        builder: (context, scrolled, _) => Stack(
+          fit: StackFit.expand,
+          children: [
+            AnimatedOpacity(
+              opacity: scrolled ? 0 : 1,
+              duration: _barFade,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xE6000000), Colors.transparent],
+                  ),
+                ),
+              ),
+            ),
+            AnimatedOpacity(
+              opacity: scrolled ? 1 : 0,
+              duration: _barFade,
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.glassSurface,
+                      border: Border(
+                        bottom: BorderSide(color: AppColors.glassBorder),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       // Le logo au bord d'attaque, les actions à l'autre bout.
@@ -114,18 +170,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       titleSpacing: AppSpacing.lg,
       // 34 et pas 30 : à 30 le symbole se faisait plus petit que les
       // icônes d'à côté, et une marque qui s'excuse n'est pas une marque.
-      title: const AppLogo(variant: AppLogoVariant.mark, height: 34),
+      title: ValueListenableBuilder<bool>(
+        valueListenable: _scrolled,
+        builder: (context, scrolled, _) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AppLogo(variant: AppLogoVariant.mark, height: 34),
+            const SizedBox(width: AppSpacing.sm),
+            // Le nom de la section n'apparaît qu'une fois l'affiche passée :
+            // en haut, le titre de l'émission est déjà écrit en grand juste
+            // en dessous, et deux titres l'un sur l'autre n'en font aucun.
+            //
+            // Il occupe sa place même invisible — sinon la barre se
+            // réorganiserait au premier pixel de défilement.
+            AnimatedOpacity(
+              opacity: scrolled ? 1 : 0,
+              duration: _barFade,
+              child: Text(
+                s.navTabEmissions,
+                style: AppTypography.h3.copyWith(color: _barInk(scrolled)),
+              ),
+            ),
+          ],
+        ),
+      ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SupportTicketsScreen()),
+        ValueListenableBuilder<bool>(
+          valueListenable: _scrolled,
+          builder: (context, scrolled, child) => TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: _barInk(scrolled)),
+            duration: _barFade,
+            builder: (context, ink, child) => IconTheme(
+              data: IconThemeData(color: ink),
+              child: child!,
+            ),
+            child: child,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.headset_mic_outlined),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const SupportTicketsScreen()),
+                ),
+              ),
+              // Help, always in reach: both walkthrough videos.
+              const TutorialHelpAction(),
+              _NotificationBellButton(unreadCount: unreadCount, s: s),
+              const SizedBox(width: AppSpacing.xs),
+            ],
           ),
         ),
-        // Help, always in reach: both walkthrough videos.
-        const TutorialHelpAction(color: Colors.white),
-        _NotificationBellButton(unreadCount: unreadCount, s: s),
-        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }
@@ -867,9 +964,10 @@ class _NotificationBellButton extends StatelessWidget {
       icon: Stack(
         clipBehavior: Clip.none,
         children: [
+          // Sans couleur : elle prend celle de la barre, qui change selon
+          // qu'on est sur l'affiche ou sur le verre.
           const Icon(
             Icons.notifications_outlined,
-            color: Colors.white,
           ),
           if (unreadCount > 0)
             Positioned(
