@@ -17,13 +17,17 @@ void main() {
   final declared = File('pubspec.yaml').readAsStringSync();
 
   group('les fichiers du logo', () {
-    test('les cinq variantes existent', () {
+    test('les neuf variantes existent', () {
       final expected = [
         'mark.png',
         'lockup_fr_on_dark.png',
         'lockup_fr_on_light.png',
         'lockup_ar_on_dark.png',
         'lockup_ar_on_light.png',
+        'compact_fr_on_dark.png',
+        'compact_fr_on_light.png',
+        'compact_ar_on_dark.png',
+        'compact_ar_on_light.png',
       ];
 
       for (final name in expected) {
@@ -99,6 +103,21 @@ void main() {
 
       expect(seen, hasLength(1));
       expect(seen.single, endsWith('mark.png'));
+    });
+
+    testWidgets('le logotype secondaire aussi', (tester) async {
+      // Symbole + mot, sans la signature : quatre fichiers comme le complet.
+      final seen = <String>{};
+      for (final locale in AppLocale.values) {
+        for (final b in Brightness.values) {
+          final path = await assetShown(tester,
+              variant: AppLogoVariant.compact, locale: locale, brightness: b);
+          seen.add(path);
+          expect(File(path).existsSync(), isTrue, reason: '$path est absent');
+        }
+      }
+
+      expect(seen, hasLength(AppLocale.values.length * 2));
     });
 
     testWidgets('le logotype suit la langue et le fond', (tester) async {

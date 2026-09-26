@@ -15,7 +15,21 @@ enum AppLogoVariant {
   /// se déployer et où rien ne lui dispute l'attention.
   lockup,
 
-  /// Le symbole seul. Pour une barre de navigation.
+  /// Le symbole et le mot, sans la signature. Le logotype secondaire.
+  ///
+  /// C'est la pièce qui manquait à la charte : le designer livre le logotype
+  /// complet et les icônes, rien entre les deux. Elle est dérivée du fichier
+  /// vectoriel — la signature retirée, le reste laissé tel quel. Le filet
+  /// vertical était déjà à la hauteur du mot, il n'y avait donc rien à
+  /// redessiner.
+  ///
+  /// Pourquoi pas le logotype complet dans une barre : la signature y ferait
+  /// **4,4 points** de haut, treize pixels pour toute la ligne. Ce n'est plus
+  /// du petit texte, c'est du bruit — et du texte flou dans un logo est le
+  /// signe le plus net d'une app amateur.
+  compact,
+
+  /// Le symbole seul. Quand même le mot est de trop.
   ///
   /// La signature fait 6 pixels de haut dans une barre de 56 : elle n'est plus
   /// une signature, c'est une bavure. Le symbole, lui, reste net à 30 px — et
@@ -42,10 +56,18 @@ class AppLogo extends ConsumerWidget {
     this.variant = AppLogoVariant.lockup,
     this.width,
     this.height,
+    this.onPhoto = false,
     this.semanticLabel = 'Aji Tfarraj',
   });
 
   final AppLogoVariant variant;
+
+  /// Le logo est-il posé sur une affiche plutôt que sur la page ?
+  ///
+  /// Une affiche n'a pas de thème : elle porte toujours un voile sombre, donc
+  /// toujours l'encre claire. Sans ce drapeau, la barre de l'accueil servait
+  /// le « tfarraj » noir en thème clair — sur le voile sombre du héros.
+  final bool onPhoto;
 
   /// Donnez l'une ou l'autre, pas les deux : le logo garde ses proportions.
   final double? width;
@@ -57,9 +79,15 @@ class AppLogo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asset = switch (variant) {
       AppLogoVariant.mark => 'assets/images/ajitfarraj_logo/mark.png',
-      AppLogoVariant.lockup => _lockupFor(
+      AppLogoVariant.lockup => _wordmarkFor(
+          'lockup',
           isArabic: ref.watch(localeProvider) == AppLocale.ar,
-          onDark: AppColors.isDark,
+          onDark: onPhoto || AppColors.isDark,
+        ),
+      AppLogoVariant.compact => _wordmarkFor(
+          'compact',
+          isArabic: ref.watch(localeProvider) == AppLocale.ar,
+          onDark: onPhoto || AppColors.isDark,
         ),
     };
 
@@ -75,11 +103,15 @@ class AppLogo extends ConsumerWidget {
   /// Le nom du fichier dit sur quoi il se pose, pas de quelle couleur il est :
   /// « blanc » et « noir » se lisaient dans les deux sens, et un appelant sur
   /// deux se trompait.
-  static String _lockupFor({required bool isArabic, required bool onDark}) {
+  static String _wordmarkFor(
+    String kind, {
+    required bool isArabic,
+    required bool onDark,
+  }) {
     final lang = isArabic ? 'ar' : 'fr';
     final ground = onDark ? 'dark' : 'light';
 
-    return 'assets/images/ajitfarraj_logo/lockup_${lang}_on_$ground.png';
+    return 'assets/images/ajitfarraj_logo/${kind}_${lang}_on_$ground.png';
   }
 }
 

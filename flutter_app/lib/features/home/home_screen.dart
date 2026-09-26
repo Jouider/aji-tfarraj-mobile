@@ -167,25 +167,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       titleSpacing: AppSpacing.lg,
       // 34 et pas 30 : à 30 le symbole se faisait plus petit que les
       // icônes d'à côté, et une marque qui s'excuse n'est pas une marque.
+      // La marque accueille, puis s'efface devant la navigation.
+      //
+      // En haut de page, la barre porte le nom entier : c'est la porte
+      // d'entrée de l'app, et le titre de l'émission est déjà écrit en grand
+      // juste en dessous — inutile d'annoncer « Émissions » par-dessus.
+      //
+      // Dès que la page défile, l'affiche s'en va, il faut dire où l'on est :
+      // le nom de la marque se réduit au symbole et la section prend le
+      // relais. C'est le geste de Netflix, et il suit la même logique que le
+      // fond de la barre, qui se solidifie au même moment.
       title: ValueListenableBuilder<bool>(
         valueListenable: _scrolled,
-        builder: (context, scrolled, _) => Row(
-          mainAxisSize: MainAxisSize.min,
+        // Une pile, pas un `AnimatedCrossFade` : celui-ci anime la TAILLE,
+        // donc il comprime le second enfant pendant la transition et le Row
+        // débordait — d'où le bandeau rouge « OVERFLOWED » en plein milieu du
+        // titre. Superposés, les deux gardent leur largeur naturelle, et
+        // comme le symbole occupe la même place dans les deux, il paraît
+        // immobile pendant que le mot cède la place au nom de la section.
+        builder: (context, scrolled, _) => Stack(
+          alignment: AlignmentDirectional.centerStart,
           children: [
-            const AppLogo(variant: AppLogoVariant.mark, height: 34),
-            const SizedBox(width: AppSpacing.sm),
-            // Le nom de la section n'apparaît qu'une fois l'affiche passée :
-            // en haut, le titre de l'émission est déjà écrit en grand juste
-            // en dessous, et deux titres l'un sur l'autre n'en font aucun.
-            //
-            // Il occupe sa place même invisible — sinon la barre se
-            // réorganiserait au premier pixel de défilement.
+            AnimatedOpacity(
+              opacity: scrolled ? 0 : 1,
+              duration: _barFade,
+              // `onPhoto` : au repos la barre est posée sur l'affiche, dont
+              // le voile est sombre dans les deux thèmes. Sans ça, le
+              // « tfarraj » sortait en noir sur fond sombre en thème clair.
+              child: const AppLogo(
+                variant: AppLogoVariant.compact,
+                onPhoto: true,
+                height: 30,
+              ),
+            ),
             AnimatedOpacity(
               opacity: scrolled ? 1 : 0,
               duration: _barFade,
-              child: Text(
-                s.navTabEmissions,
-                style: AppTypography.h3.copyWith(color: _barInk(scrolled)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const AppLogo(variant: AppLogoVariant.mark, height: 30),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    s.navTabEmissions,
+                    style:
+                        AppTypography.h3.copyWith(color: AppColors.textPrimary),
+                  ),
+                ],
               ),
             ),
           ],
