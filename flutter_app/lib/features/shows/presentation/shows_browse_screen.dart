@@ -112,7 +112,10 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
           child: Container(height: 0.5, color: AppColors.border),
         ),
         actions: [
-          const AppBarActions(),
+          // Pas de support ici : c'est la barre la plus chargée de l'app —
+          // logo, titre, et le filtre qui appartient à cet écran. Le support
+          // reste à un geste depuis le profil.
+          const AppBarActions(showSupport: false),
           // Filter icon with active indicator
           Stack(
             alignment: Alignment.center,
