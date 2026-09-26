@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_point_search.dart';
 import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -508,11 +509,17 @@ class _Actions extends StatelessWidget {
   }
 }
 
-/// Where the shuttle drops this person after the recording.
+/// Où la navette dépose cette personne après le tournage.
 ///
-/// Optional on purpose: "repart par ses propres moyens" is a real answer, and
-/// forcing a stop would fill the transport figures with noise.
-class _ReturnPointPicker extends ConsumerWidget {
+/// **À la porte, le geste est obligatoire** — c'est la demande du staff. Pas
+/// pour ressaisir : pour relire à voix haute ce que la personne avait annoncé
+/// en réservant, et le corriger si elle a changé d'avis entre-temps. D'où
+/// l'annonce affichée en tête, et l'arrêt déjà coché : dans la grande
+/// majorité des cas, il n'y a qu'à confirmer.
+///
+/// « Repart par ses propres moyens » reste une réponse comme une autre. Ce
+/// qui est obligatoire, c'est de répondre, pas de prendre la navette.
+class _ReturnPointPicker extends ConsumerStatefulWidget {
   const _ReturnPointPicker({
     required this.preview,
     required this.saving,
@@ -526,9 +533,49 @@ class _ReturnPointPicker extends ConsumerWidget {
   final ValueChanged<int?> onChoose;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ReturnPointPicker> createState() => _ReturnPointPickerState();
+}
+
+class _ReturnPointPickerState extends ConsumerState<_ReturnPointPicker> {
+  final TextEditingController _search = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _search.addListener(_onQuery);
+  }
+
+  @override
+  void dispose() {
+    _search.removeListener(_onQuery);
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _onQuery() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = widget.preview;
+    final saving = widget.saving;
+    final error = widget.error;
+    final onChoose = widget.onChoose;
     final s = ref.watch(stringsProvider);
     final isAr = ref.watch(isRtlProvider);
+
+    final searchable =
+        preview.returnPoints.length >= ReturnPointSearchField.showFrom;
+    final query = _search.text;
+    final shown = searchable
+        ? preview.returnPoints.where((p) => p.matches(query)).toList()
+        : preview.returnPoints;
+    final filtering = searchable && query.trim().isNotEmpty;
+
+    final declared = preview.hasDeclaredReturnPoint
+        ? preview.returnPoints
+            .where((p) => p.id == preview.chosenReturnPointId)
+            .firstOrNull
+        : null;
 
     return Container(
       width: double.infinity,
@@ -557,11 +604,41 @@ class _ReturnPointPicker extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(s.staffReturnPointQuestion,
-              style:
-                  AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
+          Text(
+            preview.hasDeclaredReturnPoint
+                ? s.returnPointConfirmAtDoor
+                : s.staffReturnPointQuestion,
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+          ),
+          // Ce que la personne avait annoncé en réservant, rappelé en
+          // toutes lettres : le scanner n'a plus à le deviner dans une liste
+          // de dix, il n'a qu'à le relire.
+          if (preview.hasDeclaredReturnPoint) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Icon(Icons.history, size: 14, color: AppColors.textMuted),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: Text(
+                    '${s.returnPointDeclared} : '
+                    '${declared?.localizedName(isAr) ?? s.staffReturnPointNone}',
+                    style: AppTypography.caption
+                        .copyWith(color: AppColors.textSecondary),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.sm),
-          for (final point in preview.returnPoints)
+          if (searchable) ...[
+            ReturnPointSearchField(
+              controller: _search,
+              hint: s.returnPointSearch,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+          for (final point in shown)
             _PointTile(
               label: point.localizedName(isAr),
               sublabel: point.landmark,
@@ -569,13 +646,25 @@ class _ReturnPointPicker extends ConsumerWidget {
               enabled: !saving,
               onTap: () => onChoose(point.id),
             ),
-          // Clearing must be as easy as choosing.
-          _PointTile(
-            label: s.staffReturnPointNone,
-            selected: preview.chosenReturnPointId == null,
-            enabled: !saving,
-            onTap: () => onChoose(null),
-          ),
+          if (shown.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Text(
+                s.returnPointNoMatch,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodySmall
+                    .copyWith(color: AppColors.textMuted),
+              ),
+            ),
+          // Une réponse, pas un arrêt : le filtre ne doit pas l'emporter.
+          if (!filtering || shown.isEmpty)
+            _PointTile(
+              label: s.staffReturnPointNone,
+              selected: preview.chosenReturnPointId == null &&
+                  preview.returnPointConfirmed,
+              enabled: !saving,
+              onTap: () => onChoose(null),
+            ),
           if (error != null) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(error!,

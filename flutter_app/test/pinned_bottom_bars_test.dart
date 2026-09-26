@@ -45,7 +45,7 @@ void main() {
                   child: BookingBottomBar(
                     isLoading: false,
                     isSoldOut: false,
-                    agreedToTerms: true,
+                    canConfirm: true,
                     onConfirm: () {},
                     s: s,
                   ),

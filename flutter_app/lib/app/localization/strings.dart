@@ -1184,14 +1184,50 @@ class AppStrings {
       ? 'Je rentre par mes propres moyens'
       : 'غادي نرجع بوحدي';
 
+  /// Sur la ligne repliée, tant que rien n'est choisi : le verbe dit qu'il
+  /// reste un geste à faire, là où « Modifier » laissait croire le contraire.
+  String get returnPointChoose => locale == AppLocale.fr ? 'Choisir' : 'اختار';
+
   /// Sur la ligne repliée : ce qu'on tape pour ouvrir la liste.
   String get returnPointChange => locale == AppLocale.fr ? 'Modifier' : 'بدّل';
 
-  /// Dit en toutes lettres que le choix n'engage à rien : la porte le repose
-  /// de toute façon.
+  /// Le choix n'est plus facultatif, mais il reste révisable : la porte le
+  /// reconfirme de toute façon.
   String get returnPointChangeable => locale == AppLocale.fr
-      ? 'Facultatif — tu pourras changer sur place.'
-      : 'اختياري — تقدر تبدلو فعين المكان.';
+      ? 'Tu pourras encore changer sur place.'
+      : 'تقدر تبدلو فعين المكان.';
+
+  /// Ce que la ligne affiche tant que personne n'a répondu.
+  ///
+  /// Sans ça, l'absence de réponse s'affichait « Je rentre par mes propres
+  /// moyens » — la même chose qu'un vrai refus. Le staff ne pouvait pas
+  /// distinguer celui qui a dit non de celui à qui on n'a rien demandé, et
+  /// le membre croyait la question déjà réglée.
+  String get returnPointUnanswered =>
+      locale == AppLocale.fr ? 'À choisir' : 'اختار';
+
+  /// Pourquoi le bouton de confirmation ne réagit pas.
+  String get returnPointRequired => locale == AppLocale.fr
+      ? 'Choisis comment tu rentres avant de confirmer.'
+      : 'اختار كيفاش غادي ترجع قبل ما تأكد.';
+
+  /// Au-dessus d'une longue liste d'arrêts.
+  String get returnPointSearch =>
+      locale == AppLocale.fr ? 'Chercher un arrêt…' : 'قلّب على محطة…';
+
+  /// Quand la recherche ne donne rien.
+  String get returnPointNoMatch => locale == AppLocale.fr
+      ? 'Aucun arrêt ne correspond'
+      : 'ما كاين حتى محطة بهاد الاسم';
+
+  /// Sur le billet du scanner : ce que le membre avait annoncé.
+  String get returnPointDeclared =>
+      locale == AppLocale.fr ? 'Annoncé à la réservation' : 'اللي قال فالحجز';
+
+  /// Le geste demandé au scanner : confirmer, pas ressaisir.
+  String get returnPointConfirmAtDoor => locale == AppLocale.fr
+      ? 'Confirme l\'arrêt avec la personne'
+      : 'أكد المحطة مع الشخص';
 
   /// Sur le billet et la confirmation.
   String get returnPointChosen => locale == AppLocale.fr ? 'Retour' : 'الرجوع';

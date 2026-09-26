@@ -462,9 +462,15 @@ class _OnSiteRegistrationScreenState
         const SizedBox(height: AppSpacing.lg),
         ReturnPointChoice(
           points: _returnPoints,
-          selectedId: _returnAnswered ? _returnPointId : -1,
+          // `-1` en sentinelle avant : le composant ne savait pas distinguer
+          // « rien choisi » de « par ses propres moyens », et il fallait lui
+          // passer un identifiant qui n'existe pas. Il le sait maintenant.
+          selectedId: _returnPointId,
+          answered: _returnAnswered,
           isArabic: isArabic,
           noneLabel: s.staffReturnPointNone,
+          searchHint: s.returnPointSearch,
+          noMatchLabel: s.returnPointNoMatch,
           onChoose: (id) => setState(() {
             _returnPointId = id;
             _returnAnswered = true;

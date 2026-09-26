@@ -18,6 +18,7 @@ class ReturnPointField extends StatelessWidget {
     super.key,
     required this.points,
     required this.selectedId,
+    required this.answered,
     required this.onChoose,
     required this.isArabic,
     required this.strings,
@@ -27,7 +28,12 @@ class ReturnPointField extends StatelessWidget {
   final List<ReturnPointOption> points;
 
   /// L'arrêt choisi, ou null pour « je rentre par mes propres moyens ».
+  ///
+  /// Ne veut rien dire tant que [answered] est faux.
   final int? selectedId;
+
+  /// La question a-t-elle reçu une réponse ?
+  final bool answered;
 
   final ValueChanged<int?> onChoose;
   final bool isArabic;
@@ -56,14 +62,24 @@ class ReturnPointField extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md, vertical: AppSpacing.md),
+          // Tant que personne n'a répondu, la ligne se signale : liseré à
+          // l'accent, fond teinté, icône colorée. Le staff rapportait qu'on
+          // ne la voyait pas — elle avait exactement l'apparence d'un champ
+          // déjà rempli, parce qu'elle en était un.
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.border),
+            color:
+                answered ? null : AppColors.accentInk.withValues(alpha: 0.06),
+            border: Border.all(
+              color: answered ? AppColors.border : AppColors.accentInk,
+              width: answered ? 1 : 1.6,
+            ),
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
           child: Row(
             children: [
               Icon(Icons.directions_bus_outlined,
-                  size: 20, color: AppColors.textMuted),
+                  size: 20,
+                  color: answered ? AppColors.textMuted : AppColors.accentInk),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -77,21 +93,30 @@ class ReturnPointField extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      // Sans arrêt choisi, la réponse est « par mes propres
-                      // moyens » : c'en est une, et l'afficher évite de faire
-                      // croire qu'il reste quelque chose à remplir.
-                      chosen?.localizedName(isArabic) ??
-                          strings.returnPointNone,
-                      style: AppTypography.bodyMedium,
+                      // Trois états, trois libellés. « Par mes propres
+                      // moyens » ne s'affiche que si la personne l'a
+                      // vraiment choisi.
+                      !answered
+                          ? strings.returnPointUnanswered
+                          : chosen?.localizedName(isArabic) ??
+                              strings.returnPointNone,
+                      style: answered
+                          ? AppTypography.bodyMedium
+                          : AppTypography.bodyMedium.copyWith(
+                              color: AppColors.accentInk,
+                              fontWeight: AppTypography.semiBold,
+                            ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                strings.returnPointChange,
+                answered
+                    ? strings.returnPointChange
+                    : strings.returnPointChoose,
                 style: AppTypography.labelMedium
-                    .copyWith(color: AppColors.primary),
+                    .copyWith(color: AppColors.accentInk),
               ),
             ],
           ),
@@ -142,8 +167,11 @@ class ReturnPointField extends StatelessWidget {
                   child: ReturnPointChoice(
                     points: points,
                     selectedId: selectedId,
+                    answered: answered,
                     isArabic: isArabic,
                     noneLabel: strings.returnPointNone,
+                    searchHint: strings.returnPointSearch,
+                    noMatchLabel: strings.returnPointNoMatch,
                     onChoose: (id) {
                       onChoose(id);
                       Navigator.of(sheetContext).pop();

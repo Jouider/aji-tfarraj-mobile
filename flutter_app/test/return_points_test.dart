@@ -15,15 +15,19 @@ import 'package:aji_tfarraj/features/return_points/presentation/return_point_cho
 import 'package:aji_tfarraj/features/return_points/presentation/return_point_field.dart';
 import 'package:aji_tfarraj/features/shows/domain/episode.dart';
 
-Map<String, dynamic> _stop(int id, String name, {String? ar, String? landmark}) =>
+Map<String, dynamic> _stop(int id, String name,
+        {String? ar, String? landmark}) =>
     {'id': id, 'name': name, 'name_ar': ar, 'landmark': landmark};
 
 void main() {
+  _threeStateTests();
+  _searchTests();
+
   const s = AppStrings(AppLocale.fr);
 
   final points = [
-    ReturnPointOption.fromJson(
-        _stop(1, 'Gare Casa-Port', ar: 'محطة كازا-بور', landmark: 'devant la pharmacie')),
+    ReturnPointOption.fromJson(_stop(1, 'Gare Casa-Port',
+        ar: 'محطة كازا-بور', landmark: 'devant la pharmacie')),
     ReturnPointOption.fromJson(_stop(2, 'Ain Diab')),
   ];
 
@@ -39,7 +43,12 @@ void main() {
     });
 
     test('rien, une liste vide ou du bruit ne donnent aucun arrêt', () {
-      for (final json in <Object?>[null, <dynamic>[], 'nope', <dynamic>[42, 'x']]) {
+      for (final json in <Object?>[
+        null,
+        <dynamic>[],
+        'nope',
+        <dynamic>[42, 'x']
+      ]) {
         expect(ReturnPointOption.listFrom(json), isEmpty, reason: '$json');
       }
     });
@@ -72,7 +81,9 @@ void main() {
     });
 
     test('ce qui est lu se relit après un aller-retour par le cache', () {
-      final episode = parse({'return_points': [_stop(3, 'Sidi Maarouf')]});
+      final episode = parse({
+        'return_points': [_stop(3, 'Sidi Maarouf')]
+      });
 
       expect(Episode.fromJson(episode.toJson()).returnPoints.single.name,
           'Sidi Maarouf');
@@ -91,6 +102,9 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: ReturnPointChoice(
+            answered: true,
+            searchHint: 'Chercher',
+            noMatchLabel: 'Aucun',
             points: points,
             selectedId: selectedId,
             isArabic: false,
@@ -139,6 +153,9 @@ void main() {
         home: Scaffold(
           body: StatefulBuilder(
             builder: (context, setState) => ReturnPointChoice(
+              answered: true,
+              searchHint: 'Chercher',
+              noMatchLabel: 'Aucun',
               points: points,
               selectedId: chosen,
               isArabic: false,
@@ -169,6 +186,7 @@ void main() {
         home: Scaffold(
           body: StatefulBuilder(
             builder: (context, setState) => ReturnPointField(
+              answered: true,
               points: points,
               selectedId: chosen,
               isArabic: false,
@@ -222,6 +240,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: ReturnPointField(
+            answered: true,
             points: const [],
             selectedId: null,
             isArabic: false,
@@ -233,5 +252,166 @@ void main() {
 
       expect(find.text(s.returnPointQuestion), findsNothing);
     });
+  });
+}
+
+/// ─────────────────────────────────────────────────────────────────────────
+/// Trois états, pas deux
+/// ─────────────────────────────────────────────────────────────────────────
+///
+/// Le staff rapportait deux choses : que personne ne remarquait la question,
+/// et que la moitié des réservations arrivaient sans réponse utile. Les deux
+/// avaient la même cause — `null` servait à la fois pour « pas encore
+/// répondu » et pour « je rentre par mes propres moyens ». La ligne
+/// s'affichait donc remplie dès l'ouverture, avec une réponse que personne
+/// n'avait donnée.
+void _threeStateTests() {
+  const s = AppStrings(AppLocale.fr);
+
+  final points = [
+    ReturnPointOption.fromJson(
+        {'id': 1, 'name': 'Gare Casa-Port', 'landmark': 'devant la pharmacie'}),
+    ReturnPointOption.fromJson({'id': 2, 'name': 'Ain Diab'}),
+  ];
+
+  Future<void> pumpField(WidgetTester tester, {required bool answered}) =>
+      tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: ReturnPointField(
+            points: points,
+            selectedId: null,
+            answered: answered,
+            isArabic: false,
+            strings: s,
+            onChoose: (_) {},
+          ),
+        ),
+      ));
+
+  group('la ligne repliée', () {
+    testWidgets('sans réponse, elle réclame un choix', (tester) async {
+      await pumpField(tester, answered: false);
+
+      expect(find.text(s.returnPointUnanswered), findsOneWidget);
+      expect(find.text(s.returnPointChoose), findsOneWidget);
+      // Surtout pas : c'est la réponse que personne n'a donnée.
+      expect(find.text(s.returnPointNone), findsNothing);
+    });
+
+    testWidgets('une fois répondu « par mes propres moyens », elle le dit',
+        (tester) async {
+      await pumpField(tester, answered: true);
+
+      expect(find.text(s.returnPointNone), findsOneWidget);
+      expect(find.text(s.returnPointUnanswered), findsNothing);
+      expect(find.text(s.returnPointChange), findsOneWidget);
+    });
+  });
+
+  group('la liste', () {
+    testWidgets('sans réponse, aucune ligne n\'est cochée', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: ReturnPointChoice(
+            points: points,
+            selectedId: null,
+            answered: false,
+            isArabic: false,
+            noneLabel: s.returnPointNone,
+            searchHint: s.returnPointSearch,
+            noMatchLabel: s.returnPointNoMatch,
+            onChoose: (_) {},
+          ),
+        ),
+      ));
+
+      expect(find.byIcon(Icons.radio_button_checked), findsNothing);
+      expect(find.byIcon(Icons.radio_button_unchecked), findsNWidgets(3));
+    });
+  });
+}
+
+/// ─────────────────────────────────────────────────────────────────────────
+/// Chercher un arrêt
+/// ─────────────────────────────────────────────────────────────────────────
+///
+/// Le staff met du temps à trouver l'arrêt dans la liste, surtout au scan,
+/// avec la file qui attend. Le champ n'apparaît qu'à partir du seuil : en
+/// dessous, la liste tient à l'écran et un champ de plus volerait une ligne.
+void _searchTests() {
+  const s = AppStrings(AppLocale.fr);
+
+  List<ReturnPointOption> stops(int n) => [
+        for (var i = 1; i <= n; i++)
+          ReturnPointOption.fromJson({
+            'id': i,
+            'name': i == 1 ? 'Témara' : 'Arrêt $i',
+            'name_ar': i == 2 ? 'عين الذياب' : null,
+            'landmark': i == 3 ? 'devant la pharmacie' : null,
+          }),
+      ];
+
+  Future<void> pumpList(WidgetTester tester, int count) =>
+      tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          // Comme dans l'app : la liste vit dans une feuille qui défile.
+          body: SingleChildScrollView(
+              child: ReturnPointChoice(
+            points: stops(count),
+            selectedId: null,
+            answered: false,
+            isArabic: false,
+            noneLabel: s.returnPointNone,
+            searchHint: s.returnPointSearch,
+            noMatchLabel: s.returnPointNoMatch,
+            onChoose: (_) {},
+          )),
+        ),
+      ));
+
+  testWidgets('une liste courte n\'a pas de champ de recherche',
+      (tester) async {
+    await pumpList(tester, 3);
+
+    expect(find.byType(TextField), findsNothing);
+  });
+
+  testWidgets('une longue liste en a un', (tester) async {
+    await pumpList(tester, 9);
+
+    expect(find.byType(TextField), findsOneWidget);
+  });
+
+  testWidgets('la recherche ignore les accents', (tester) async {
+    await pumpList(tester, 9);
+    await tester.enterText(find.byType(TextField), 'temara');
+    await tester.pump();
+
+    expect(find.text('Témara'), findsOneWidget);
+    expect(find.text('Arrêt 5'), findsNothing);
+  });
+
+  testWidgets('elle cherche aussi dans l\'arabe et dans le repère',
+      (tester) async {
+    await pumpList(tester, 9);
+
+    await tester.enterText(find.byType(TextField), 'الذياب');
+    await tester.pump();
+    expect(find.text('Arrêt 2'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'pharmacie');
+    await tester.pump();
+    expect(find.text('Arrêt 3'), findsOneWidget);
+  });
+
+  testWidgets('« par mes propres moyens » reste atteignable sans résultat',
+      (tester) async {
+    await pumpList(tester, 9);
+    await tester.enterText(find.byType(TextField), 'zzzz');
+    await tester.pump();
+
+    expect(find.text(s.returnPointNoMatch), findsOneWidget);
+    // Une réponse, pas un arrêt : le filtre ne doit pas l'emporter.
+    expect(find.text(s.returnPointNone), findsOneWidget);
   });
 }

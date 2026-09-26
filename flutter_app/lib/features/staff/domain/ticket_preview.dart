@@ -110,6 +110,15 @@ class TicketPreview {
   /// place de la personne.
   final bool returnPointAnswered;
 
+  /// La porte a-t-elle relu l'arrêt avec la personne ?
+  ///
+  /// Distinct de [returnPointAnswered] depuis que le membre répond en
+  /// réservant : sans ça, tout le monde arrivait « déjà répondu » et le
+  /// scanner n'avait plus rien à confirmer, alors que c'est exactement ce
+  /// que le staff demande — relire à voix haute, et corriger si la personne
+  /// a changé d'avis en chemin.
+  final bool returnPointConfirmed;
+
   // Episode / show
   final int? episodeId;
   final String? episodeTitle;
@@ -138,6 +147,7 @@ class TicketPreview {
     this.returnPoints = const [],
     this.chosenReturnPointId,
     this.returnPointAnswered = false,
+    this.returnPointConfirmed = false,
     this.episodeId,
     this.episodeTitle,
     this.episodeStartsAt,
@@ -151,7 +161,14 @@ class TicketPreview {
   /// Ce qui manque encore avant de pouvoir valider : la réponse sur le retour,
   /// quand une navette roule ce soir-là. Sans cette barrière, valider revenait
   /// à décider que la personne repart seule sans le lui avoir demandé.
-  bool get awaitsReturnPoint => asksReturnPoint && !returnPointAnswered;
+  bool get awaitsReturnPoint => asksReturnPoint && !returnPointConfirmed;
+
+  /// Le membre avait-il annoncé quelque chose en réservant ?
+  ///
+  /// Ce qui permet de le proposer au scanner plutôt que de le lui faire
+  /// chercher : dans la grande majorité des cas, il n'a qu'à confirmer.
+  bool get hasDeclaredReturnPoint =>
+      returnPointAnswered && !returnPointConfirmed;
 
   bool get wasExcludedBefore => pastExclusions > 0;
 
@@ -180,8 +197,11 @@ class TicketPreview {
         referrerName: referrerName,
         returnPoints: returnPoints,
         chosenReturnPointId: pointId,
-        // Choisir, c'est répondre — y compris « repart par ses propres moyens ».
+        // Choisir, c'est répondre — y compris « repart par ses propres
+        // moyens ». Et à la porte, choisir vaut confirmer : c'est ce geste
+        // que le staff doit poser avant de valider.
         returnPointAnswered: true,
+        returnPointConfirmed: true,
         episodeId: episodeId,
         episodeTitle: episodeTitle,
         episodeStartsAt: episodeStartsAt,
@@ -216,6 +236,7 @@ class TicketPreview {
         returnPoints: returnPoints,
         chosenReturnPointId: chosenReturnPointId,
         returnPointAnswered: returnPointAnswered,
+        returnPointConfirmed: returnPointConfirmed,
         episodeId: episodeId,
         episodeTitle: episodeTitle,
         episodeStartsAt: episodeStartsAt,
@@ -261,6 +282,10 @@ class TicketPreview {
           (reservation['return_point'] as Map<String, dynamic>?)?['id'] as int?,
       returnPointAnswered:
           reservation['return_point_answered'] as bool? ?? false,
+      // Absent d'un serveur pas encore déployé : on retombe alors sur
+      // l'ancien comportement plutôt que de bloquer toutes les entrées.
+      returnPointConfirmed: reservation['return_point_confirmed'] as bool? ??
+          (reservation['return_point_answered'] as bool? ?? false),
       episodeId: episode['id'] as int?,
       episodeTitle: episode['title'] as String?,
       episodeStartsAt: parse(episode['starts_at']),

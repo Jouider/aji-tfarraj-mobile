@@ -49,6 +49,12 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
   /// studio. Null veut dire « je rentre par mes propres moyens » — la porte
   /// repose la question de toute façon.
   int? _returnPointId;
+
+  /// La question du retour a-t-elle reçu une réponse ?
+  ///
+  /// Séparé de [_returnPointId] parce que `null` y veut dire « je rentre par
+  /// mes propres moyens » — une réponse, pas une absence de réponse.
+  bool _returnAnswered = false;
   String? _errorMessage;
   final _referralCodeController = TextEditingController();
   bool _referralInitiallyExpanded = false;
@@ -197,16 +203,25 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
                   ReturnPointField(
                     points: episode.returnPoints,
                     selectedId: _returnPointId,
+                    answered: _returnAnswered,
                     isArabic: ref.watch(localeProvider) == AppLocale.ar,
                     strings: s,
                     enabled: !_isLoading,
-                    onChoose: (id) => setState(() => _returnPointId = id),
+                    onChoose: (id) => setState(() {
+                      _returnPointId = id;
+                      _returnAnswered = true;
+                    }),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    s.returnPointChangeable,
-                    style: AppTypography.caption
-                        .copyWith(color: AppColors.textMuted),
+                    _returnAnswered
+                        ? s.returnPointChangeable
+                        : s.returnPointRequired,
+                    style: AppTypography.caption.copyWith(
+                      color: _returnAnswered
+                          ? AppColors.textMuted
+                          : AppColors.accentInk,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
@@ -234,7 +249,9 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
           child: BookingBottomBar(
             isLoading: _isLoading,
             isSoldOut: isSoldOut,
-            agreedToTerms: _agreedToTerms,
+            // Deux conditions, pas une : la case des conditions, et le
+            // choix du retour quand une navette roule ce soir-là.
+            canConfirm: _agreedToTerms && _returnSettled(episode),
             onConfirm: () => _submitReservation(context),
             s: s,
           ),
@@ -242,6 +259,13 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
       ],
     );
   }
+
+  /// La question du retour est-elle réglée ?
+  ///
+  /// Vraie d'office quand aucune navette ne roule : on ne bloque pas sur une
+  /// question qu'on n'a pas posée.
+  bool _returnSettled(Episode? episode) =>
+      (episode?.returnPoints.isEmpty ?? true) || _returnAnswered;
 
   Future<void> _submitReservation(BuildContext context) async {
     final router = GoRouter.of(context);

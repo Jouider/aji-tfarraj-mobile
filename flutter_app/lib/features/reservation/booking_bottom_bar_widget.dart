@@ -10,7 +10,11 @@ import 'package:aji_tfarraj/app/localization/strings.dart';
 class BookingBottomBar extends StatelessWidget {
   final bool isLoading;
   final bool isSoldOut;
-  final bool agreedToTerms;
+
+  /// Toutes les conditions de confirmation réunies, pas seulement la case
+  /// cochée : depuis que le choix du retour est obligatoire, il y en a deux.
+  /// Le nom d'avant — `agreedToTerms` — aurait menti.
+  final bool canConfirm;
   final VoidCallback onConfirm;
   final AppStrings s;
 
@@ -18,7 +22,7 @@ class BookingBottomBar extends StatelessWidget {
     super.key,
     required this.isLoading,
     required this.isSoldOut,
-    required this.agreedToTerms,
+    required this.canConfirm,
     required this.onConfirm,
     required this.s,
   });
@@ -81,7 +85,7 @@ class BookingBottomBar extends StatelessWidget {
                 ? _SoldOutButton(s: s)
                 : _ConfirmButton(
                     isLoading: isLoading,
-                    isActive: agreedToTerms && !isLoading,
+                    isActive: canConfirm && !isLoading,
                     onConfirm: onConfirm,
                     s: s,
                   ),
