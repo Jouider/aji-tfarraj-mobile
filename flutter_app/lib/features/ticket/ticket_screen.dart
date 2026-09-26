@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:aji_tfarraj/app/analytics/analytics_service.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/shadows.dart';
@@ -87,15 +88,9 @@ class _TicketScreenState extends ConsumerState<TicketScreen> {
       backgroundColor: AppColors.backgroundLight,
       // FIX: App bar — backgroundWhite, centered title w700 18px, no back arrow
       appBar: AppBar(
-        title: Text(
-          s.ticketTitle,
-          style: AppTypography.h4.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        centerTitle: true,
+        title: AppBarBrandTitle(s.ticketTitle),
+        centerTitle: false,
+        titleSpacing: AppSpacing.lg,
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         scrolledUnderElevation: 0,

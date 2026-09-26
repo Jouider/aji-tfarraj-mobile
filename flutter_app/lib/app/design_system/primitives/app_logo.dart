@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/spacing.dart';
+import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
@@ -78,5 +80,42 @@ class AppLogo extends ConsumerWidget {
     final ground = onDark ? 'dark' : 'light';
 
     return 'assets/images/ajitfarraj_logo/lockup_${lang}_on_$ground.png';
+  }
+}
+
+/// Le titre d'un onglet : le symbole, puis le nom de l'écran.
+///
+/// La même composition que l'accueil une fois défilé, et pour la même raison :
+/// la marque ouvre la ligne, le nom dit où l'on est, les gestes ferment à
+/// l'autre bout. Un titre centré entre un nombre inégal d'icônes se lit
+/// toujours comme décalé ; au bord, la question ne se pose pas.
+///
+/// À poser avec `centerTitle: false` et `titleSpacing: AppSpacing.lg` — sur
+/// iOS, Flutter centre le titre par défaut.
+class AppBarBrandTitle extends StatelessWidget {
+  const AppBarBrandTitle(this.title, {super.key});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const AppLogo(variant: AppLogoVariant.mark, height: 28),
+        const SizedBox(width: AppSpacing.sm),
+        // `h3` et pas un style écrit sur place : deux de ces écrans
+        // demandaient 18 px en w700 dans la police du système, un troisième
+        // le jeton. Trois onglets, deux typographies.
+        Flexible(
+          child: Text(
+            title,
+            style: AppTypography.h3,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
   }
 }

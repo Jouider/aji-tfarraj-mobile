@@ -63,7 +63,8 @@ class _PrimaryActionButton extends StatelessWidget {
       ),
       child: ElevatedButton.icon(
         onPressed: onTap,
-        icon: const Icon(Icons.list_alt_outlined, size: 18, color: Colors.white),
+        icon:
+            const Icon(Icons.list_alt_outlined, size: 18, color: Colors.white),
         label: Text(
           label,
           style: const TextStyle(
@@ -99,7 +100,8 @@ class _SecondaryActionButton extends StatelessWidget {
       height: 54,
       child: OutlinedButton.icon(
         onPressed: onTap,
-        icon: const Icon(Icons.home_outlined, size: 18, color: AppColors.primary),
+        icon:
+            const Icon(Icons.home_outlined, size: 18, color: AppColors.primary),
         label: Text(
           label,
           style: const TextStyle(

@@ -25,8 +25,8 @@ class ReservationResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reservationAsync = ref.watch(
-        reservationDetailProvider(int.parse(reservationId)));
+    final reservationAsync =
+        ref.watch(reservationDetailProvider(int.parse(reservationId)));
 
     return Scaffold(
       // FIX: No app bar — full immersive confirmation feel
@@ -38,8 +38,8 @@ class ReservationResultScreen extends ConsumerWidget {
           error: (error, stack) => ErrorState(
             message: error.toString(),
             retryText: 'Réessayer',
-            onRetry: () => ref.refresh(
-                reservationDetailProvider(int.parse(reservationId))),
+            onRetry: () => ref
+                .refresh(reservationDetailProvider(int.parse(reservationId))),
           ),
           data: (reservation) => _ResultContent(reservation: reservation),
         ),
@@ -90,14 +90,12 @@ class _ResultContentState extends ConsumerState<_ResultContent>
     _stepsSlide = _slideInterval(0.56, 1.00);
   }
 
-  Animation<double> _interval(double begin, double end) =>
-      CurvedAnimation(
+  Animation<double> _interval(double begin, double end) => CurvedAnimation(
         parent: _ctrl,
         curve: Interval(begin, end, curve: Curves.easeOut),
       );
 
-  Animation<Offset> _slideInterval(double begin, double end) =>
-      Tween<Offset>(
+  Animation<Offset> _slideInterval(double begin, double end) => Tween<Offset>(
         begin: const Offset(0, 0.04),
         end: Offset.zero,
       ).animate(CurvedAnimation(
@@ -154,8 +152,8 @@ class _ResultContentState extends ConsumerState<_ResultContent>
                     ),
                   ),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -180,29 +178,30 @@ class _ResultContentState extends ConsumerState<_ResultContent>
                     child: const ConfirmationHero(),
                   ),
 
-                // FIX: status badge → title spacing 28px, badge → card 28px
-                const SizedBox(height: 28),
+                  // FIX: status badge → title spacing 28px, badge → card 28px
+                  const SizedBox(height: 28),
 
-                _Animated(
-                  opacity: _cardOpacity,
-                  slide: _cardSlide,
-                  child: ReservationSummaryCard(reservation: widget.reservation),
-                ),
+                  _Animated(
+                    opacity: _cardOpacity,
+                    slide: _cardSlide,
+                    child:
+                        ReservationSummaryCard(reservation: widget.reservation),
+                  ),
 
-                const SizedBox(height: 28),
+                  const SizedBox(height: 28),
 
-                _Animated(
-                  opacity: _stepsOpacity,
-                  slide: _stepsSlide,
-                  child: const NextStepsSection(),
-                ),
+                  _Animated(
+                    opacity: _stepsOpacity,
+                    slide: _stepsSlide,
+                    child: const NextStepsSection(),
+                  ),
 
-                // FIX: Bottom spacing before the pinned action bar
-                const SizedBox(height: 24),
-              ],
+                  // FIX: Bottom spacing before the pinned action bar
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
-        ),
 
           // FIX: Persistent action bar — primary CTA only ("Voir mes
           // réservations"); "Retour" now lives top-left + swipe-back.

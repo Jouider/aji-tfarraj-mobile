@@ -37,7 +37,8 @@ class ProfileRepository {
           if (district != null) 'district': district,
           if (phoneCountryCode != null) 'phone_country_code': phoneCountryCode,
           if (phoneNumber != null) 'phone_number': phoneNumber,
-          if (dateOfBirth != null) 'birthday': dateOfBirth.toIso8601String().split('T').first,
+          if (dateOfBirth != null)
+            'birthday': dateOfBirth.toIso8601String().split('T').first,
           if (gender != null) 'gender': gender,
           if (instagram != null) 'instagram': instagram,
           if (tiktok != null) 'tiktok': tiktok,

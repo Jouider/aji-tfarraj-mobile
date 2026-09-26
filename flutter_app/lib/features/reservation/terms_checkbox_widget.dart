@@ -38,10 +38,8 @@ class _TermsCheckboxState extends State<TermsCheckbox>
     );
     // FIX: Scale bounce — grow then snap back
     _scale = TweenSequence<double>([
-      TweenSequenceItem(
-          tween: Tween(begin: 1.0, end: 1.25), weight: 50),
-      TweenSequenceItem(
-          tween: Tween(begin: 1.25, end: 1.0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.25), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.25, end: 1.0), weight: 50),
     ]).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 

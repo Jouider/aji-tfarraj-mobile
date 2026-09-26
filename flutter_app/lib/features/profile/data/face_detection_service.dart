@@ -6,7 +6,8 @@ import 'package:aji_tfarraj/features/profile/domain/face_check.dart';
 /// ML Kit n'a pas de tranche arm64 pour le simulateur ; le vrai service est
 /// dans /tmp/face_real.dart le temps de la prévisualisation.
 class FaceDetectionService {
-  Future<FaceCheck> check(String imagePath, {bool requireSmile = false}) async =>
+  Future<FaceCheck> check(String imagePath,
+          {bool requireSmile = false}) async =>
       FaceCheck.ok;
 }
 

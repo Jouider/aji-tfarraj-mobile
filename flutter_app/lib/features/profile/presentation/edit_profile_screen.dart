@@ -1060,7 +1060,7 @@ class _AvatarHero extends ConsumerWidget {
                           color: AppColors.backgroundWhite, width: 2),
                       boxShadow: [
                         BoxShadow(
-            color: AppColors.secondary.withValues(alpha: 0.35),
+                          color: AppColors.secondary.withValues(alpha: 0.35),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),

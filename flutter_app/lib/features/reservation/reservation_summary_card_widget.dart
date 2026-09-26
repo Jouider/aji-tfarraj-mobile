@@ -21,8 +21,8 @@ class ReservationSummaryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
     final isAr = ref.watch(isRtlProvider);
-    final dateFormat = DateFormat(
-        'dd MMMM yyyy à HH:mm', isAr ? 'ar' : 'fr_FR');
+    final dateFormat =
+        DateFormat('dd MMMM yyyy à HH:mm', isAr ? 'ar' : 'fr_FR');
 
     final detailRows = <_DetailRow>[
       _DetailRow(
@@ -46,8 +46,7 @@ class ReservationSummaryCard extends ConsumerWidget {
           icon: Icons.calendar_today_outlined,
           iconColor: AppColors.accentInk,
           label: s.reservationResultDateLabel,
-          value: dateFormat
-              .format(reservation.show!.startsAt!.toLocal()),
+          value: dateFormat.format(reservation.show!.startsAt!.toLocal()),
         ),
       if (reservation.expiresAt != null)
         _DetailRow(
@@ -169,8 +168,8 @@ class _DetailRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg, vertical: 12),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 12),
       child: Row(
         children: [
           Icon(row.icon, color: row.iconColor, size: 18),

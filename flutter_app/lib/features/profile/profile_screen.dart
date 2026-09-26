@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -273,8 +274,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(s.profileTitle, style: AppTypography.h3),
-        centerTitle: true,
+        title: AppBarBrandTitle(s.profileTitle),
+        centerTitle: false,
+        titleSpacing: AppSpacing.lg,
         automaticallyImplyLeading: false,
       ),
       body: ListView(
