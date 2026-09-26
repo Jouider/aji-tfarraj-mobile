@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -42,13 +43,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final s = ref.watch(stringsProvider);
     final locale = ref.watch(localeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final logo = locale == AppLocale.ar
-        ? (isDark
-            ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
-            : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
-        : (isDark
-            ? 'assets/images/ajitfarraj_logo/white_fr_logo.png'
-            : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
       if (next.isAuthenticated) context.go(Routes.home);
@@ -70,7 +64,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo
-                Center(child: Image.asset(logo, width: 120)),
+                Center(child: const AppLogo(width: 170)),
                 const SizedBox(height: AppSpacing.xl),
 
                 // Title

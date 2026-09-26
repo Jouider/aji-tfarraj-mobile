@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
 import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -71,24 +72,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final s = ref.watch(stringsProvider);
     final isAr = ref.watch(isRtlProvider);
     final locale = ref.watch(localeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final logo = locale == AppLocale.ar
-        ? (isDark
-            ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
-            : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
-        : (isDark
-            ? 'assets/images/ajitfarraj_logo/white_fr_logo.png'
-            : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
-
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(unreadCount, s, logo),
+      appBar: _buildAppBar(unreadCount, s),
       body: _buildBody(showsState, s, isAr),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(int unreadCount, AppStrings s, String logo) {
+  PreferredSizeWidget _buildAppBar(int unreadCount, AppStrings s) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -105,19 +97,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-      title: Image.asset(
-        logo,
-        height: 130,
-        fit: BoxFit.contain,
-        alignment: Alignment.centerLeft,
-      ),
-      leading: IconButton(
-        icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const SupportTicketsScreen()),
-        ),
-      ),
+      // Le logo au bord d'attaque, les actions à l'autre bout.
+      //
+      // Il était centré, et ça ne pouvait pas tomber juste : une icône à
+      // gauche, deux à droite — un titre mathématiquement centré dans une
+      // rangée déséquilibrée se lit toujours comme décalé. Il était centré SUR
+      // l'affiche, en plus, le fond le plus chargé de l'écran.
+      //
+      // Au bord, plus rien à arbitrer : la marque ouvre la ligne, les gestes
+      // la ferment. C'est ce que font Instagram et Airbnb, et en arabe tout
+      // bascule de l'autre côté sans une ligne de plus.
+      automaticallyImplyLeading: false,
+      // Sur iOS, Flutter centre le titre par défaut — d'où le logo échoué
+      // entre les deux, ni au bord ni au milieu.
+      centerTitle: false,
+      titleSpacing: AppSpacing.lg,
+      title: const AppLogo(variant: AppLogoVariant.mark, height: 30),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const SupportTicketsScreen()),
+          ),
+        ),
         // Help, always in reach: both walkthrough videos.
         const TutorialHelpAction(color: Colors.white),
         _NotificationBellButton(unreadCount: unreadCount, s: s),

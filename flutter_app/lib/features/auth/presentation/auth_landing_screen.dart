@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -31,9 +32,6 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
     final s = ref.watch(stringsProvider);
     final locale = ref.watch(localeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final logo = locale == AppLocale.ar
-        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
-        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     // Navigate to home once authenticated
     ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
@@ -58,7 +56,7 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
 
               // ── Logo ──
               Center(
-                child: Image.asset(logo, width: 160),
+                child: const AppLogo(width: 210),
               ),
               const SizedBox(height: AppSpacing.lg),
 
@@ -127,10 +125,8 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.secondary,
                     foregroundColor: AppColors.onSecondary,
-
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                   ),
                   child: Text(s.continueWithEmail,
@@ -151,12 +147,10 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
                     foregroundColor: AppColors.textPrimary,
                     side: BorderSide(color: AppColors.border),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
                   ),
-                  child: Text(s.createAccount,
-                      style: AppTypography.labelLarge),
+                  child: Text(s.createAccount, style: AppTypography.labelLarge),
                 ),
               ),
 
@@ -265,8 +259,8 @@ class _SocialButton extends StatelessWidget {
                   icon,
                   const SizedBox(width: AppSpacing.sm),
                   Text(label,
-                      style: AppTypography.labelLarge
-                          .copyWith(color: fgColor, fontWeight: FontWeight.w500)),
+                      style: AppTypography.labelLarge.copyWith(
+                          color: fgColor, fontWeight: FontWeight.w500)),
                 ],
               ),
       ),
@@ -350,8 +344,7 @@ class _ErrorBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style:
-                  AppTypography.bodySmall.copyWith(color: AppColors.error),
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           ),
         ],

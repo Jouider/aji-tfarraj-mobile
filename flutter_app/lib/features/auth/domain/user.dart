@@ -16,19 +16,25 @@ class User {
   final String? phoneNumber;
   final DateTime? phoneVerifiedAt;
   final DateTime? dateOfBirth;
+
   /// 'male' | 'female' (null if not set yet)
   final String? gender;
   final DateTime createdAt;
   final DateTime updatedAt;
+
   /// User role: 'client' | 'staff' | 'admin' (null treated as 'client')
   final String? role;
+
   /// Unique 8-char referral code for this user
   final String? referralCode;
+
   /// Backend `is_charge_public` — already combines role `charge_public` OR the
   /// admin-set capability. Drives whether to offer "Mode Chargé Public".
   final bool chargePublicEnabled;
+
   /// Gamification badges (attendance always present; charge_public/staff optional).
   final UserBadges? badges;
+
   /// Optional social accounts, for collaborations and castings. Stored as the
   /// bare username (or a Facebook numeric id), never as a link.
   final String? instagram;
@@ -180,7 +186,9 @@ class User {
       missingProfileFields: missingProfileFields ?? this.missingProfileFields,
       phoneCountryCode: phoneCountryCode ?? this.phoneCountryCode,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      phoneVerifiedAt: clearPhoneVerification ? null : (phoneVerifiedAt ?? this.phoneVerifiedAt),
+      phoneVerifiedAt: clearPhoneVerification
+          ? null
+          : (phoneVerifiedAt ?? this.phoneVerifiedAt),
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       gender: gender ?? this.gender,
       createdAt: createdAt ?? this.createdAt,
@@ -235,6 +243,7 @@ class User {
 class AuthResponse {
   final String token;
   final User user;
+
   /// UTC expiry from the server's `expires_at` field (null if backend omits it)
   final DateTime? expiresAt;
 
