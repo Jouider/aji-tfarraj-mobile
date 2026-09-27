@@ -28,18 +28,39 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
-    final textStyle = isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge;
+    final height =
+        isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
+    final textStyle =
+        isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge;
 
-    return SizedBox(
+    // Le dégradé de la charte sur le geste principal, avec l'encre sombre :
+    // c'est la seule paire lisible d'un bout à l'autre du bouton (voir
+    // AppColors.onPrimary). Le dégradé vit dans le Container, parce qu'un
+    // ElevatedButton ne sait peindre qu'un aplat.
+    return Container(
       height: height,
+      decoration: BoxDecoration(
+        gradient: onPressed == null ? null : AppColors.actionGradient,
+        color: onPressed == null ? AppColors.disabled : null,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        boxShadow: onPressed == null
+            ? null
+            : [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.28),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+      ),
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.backgroundWhite,
-          disabledBackgroundColor: AppColors.primaryLight,
-          disabledForegroundColor: AppColors.backgroundWhite.withValues(alpha: 0.7),
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          foregroundColor: AppColors.onPrimary,
+          disabledBackgroundColor: Colors.transparent,
+          disabledForegroundColor: AppColors.onPrimary.withValues(alpha: 0.5),
           elevation: 0,
           padding: AppEdgeInsets.symmetric(horizontal: AppSpacing.xl),
           shape: RoundedRectangleBorder(
@@ -53,7 +74,7 @@ class AppButton extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.backgroundWhite.withValues(alpha: 0.7),
+                    AppColors.onPrimary.withValues(alpha: 0.7),
                   ),
                 ),
               )
@@ -103,9 +124,11 @@ class AppSecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
-    final textStyle = (isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge)
-        .copyWith(color: AppColors.primary);
+    final height =
+        isSmall ? AppSpacing.buttonHeightSm : AppSpacing.buttonHeight;
+    final textStyle =
+        (isSmall ? AppTypography.buttonMedium : AppTypography.buttonLarge)
+            .copyWith(color: AppColors.primary);
 
     return SizedBox(
       height: height,
@@ -129,7 +152,8 @@ class AppSecondaryButton extends StatelessWidget {
       return Text(text, style: textStyle);
     }
 
-    final iconWidget = Icon(icon, size: AppSpacing.iconSm, color: AppColors.primary);
+    final iconWidget =
+        Icon(icon, size: AppSpacing.iconSm, color: AppColors.primary);
     final textWidget = Text(text, style: textStyle);
     final spacing = SizedBox(width: AppSpacing.sm);
 
@@ -164,8 +188,9 @@ class AppTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = (isSmall ? AppTypography.buttonMedium : AppTypography.buttonMedium)
-        .copyWith(color: AppColors.primary);
+    final textStyle =
+        (isSmall ? AppTypography.buttonMedium : AppTypography.buttonMedium)
+            .copyWith(color: AppColors.primary);
 
     return TextButton(
       onPressed: onPressed,
@@ -185,7 +210,8 @@ class AppTextButton extends StatelessWidget {
       return Text(text, style: textStyle);
     }
 
-    final iconWidget = Icon(icon, size: AppSpacing.iconSm, color: AppColors.primary);
+    final iconWidget =
+        Icon(icon, size: AppSpacing.iconSm, color: AppColors.primary);
     final textWidget = Text(text, style: textStyle);
     final spacing = SizedBox(width: AppSpacing.xs);
 

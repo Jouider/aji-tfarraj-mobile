@@ -21,24 +21,25 @@ import 'package:aji_tfarraj/features/reservations/data/reservations_repository.d
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Ensure Firebase is initialized for background handling
   await Firebase.initializeApp();
-  
+
   if (kDebugMode) {
-    debugPrint('[PushService] Background message received: ${message.messageId}');
+    debugPrint(
+        '[PushService] Background message received: ${message.messageId}');
   }
-  
+
   // Note: We can't update providers from background handler
   // The notification will be processed when app comes to foreground
 }
 
 /// Push Service - Singleton for Firebase Cloud Messaging integration
-/// 
+///
 /// Responsibilities:
 /// - Initialize Firebase Messaging
 /// - Request permissions (iOS)
 /// - Handle foreground, background, and terminated state messages
 /// - Show local notifications
 /// - Coordinate with NotificationsProvider
-/// 
+///
 /// TODO BACKEND (Abdellah):
 /// Create endpoint POST /api/devices/register
 /// Body:
@@ -50,13 +51,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Call it here after login or token refresh.
 class PushService {
   PushService._();
-  
+
   static final PushService instance = PushService._();
-  
+
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = 
+  final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
-  
+
   WidgetRef? _ref;
   GoRouter? _router;
   BuildContext? _context;
@@ -67,12 +68,13 @@ class PushService {
   /// in the post-first-frame callback). Held here and flushed by [setRouter] so
   /// the tap is never silently dropped.
   AppNotification? _pendingNotification;
-  
+
   // Stream controller for notification taps
-  final StreamController<AppNotification> _notificationTapController = 
+  final StreamController<AppNotification> _notificationTapController =
       StreamController<AppNotification>.broadcast();
-  
-  Stream<AppNotification> get onNotificationTap => _notificationTapController.stream;
+
+  Stream<AppNotification> get onNotificationTap =>
+      _notificationTapController.stream;
 
   /// Initialize push notification service
   /// Must be called after Firebase.initializeApp()
@@ -84,7 +86,8 @@ class PushService {
 
     try {
       // Set background message handler
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
 
       // Initialize local notifications
       await _initializeLocalNotifications();
@@ -131,8 +134,9 @@ class PushService {
 
   /// Initialize local notifications plugin
   Future<void> _initializeLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -171,8 +175,8 @@ class PushService {
       _handleNotificationTap(notification);
     } on FormatException {
       // Bare route string (legacy payload) — not valid JSON.
-      final notification =
-          AppNotification.fromRemoteMessage(<String, dynamic>{'deep_link': payload});
+      final notification = AppNotification.fromRemoteMessage(
+          <String, dynamic>{'deep_link': payload});
       _handleNotificationTap(notification);
     } catch (e) {
       _debugLog('Error parsing local notification payload: $e');
@@ -245,13 +249,13 @@ class PushService {
   Future<void> _checkInitialMessage() async {
     try {
       final initialMessage = await _messaging.getInitialMessage();
-      
+
       if (initialMessage != null) {
         _debugLog('App opened from terminated state via notification');
-        
+
         // Small delay to ensure app is ready
         await Future.delayed(const Duration(milliseconds: 500));
-        
+
         _handleMessageOpenedApp(initialMessage);
       }
     } catch (e) {
@@ -320,7 +324,8 @@ class PushService {
   /// Open the platform store URL for an "open_store" notification.
   /// Backend data: { action: open_store, ios_url, android_url }.
   Future<void> _openStore(Map<String, dynamic> data) async {
-    final url = (Platform.isIOS ? data['ios_url'] : data['android_url']) as String?;
+    final url =
+        (Platform.isIOS ? data['ios_url'] : data['android_url']) as String?;
 
     if (url == null || url.isEmpty) {
       _debugLog('open_store: no store URL for this platform');

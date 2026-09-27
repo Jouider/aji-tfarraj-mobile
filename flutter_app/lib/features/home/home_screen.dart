@@ -1,23 +1,25 @@
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/app_bar_actions.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
-import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart'
     show pendingNavigationProvider;
-import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
-import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 /// Home Screen — Cinematic discovery layout inspired by premium streaming apps
 class HomeScreen extends ConsumerStatefulWidget {
@@ -29,6 +31,25 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+
+  /// La page a-t-elle quitté le haut ?
+  ///
+  /// Un ValueNotifier plutôt qu'un setState : le défilement émet des dizaines
+  /// d'événements par seconde, et seule la barre a besoin d'être redessinée.
+  final ValueNotifier<bool> _scrolled = ValueNotifier(false);
+
+  /// Le point de bascule. Assez bas pour que la barre réagisse tout de suite,
+  /// assez haut pour qu'un tremblement du pouce ne la fasse pas clignoter.
+  static const double _solidFrom = 32;
+
+  /// Assez court pour suivre le pouce, assez long pour ne pas clignoter.
+  static const Duration _barFade = Duration(milliseconds: 220);
+
+  /// L'encre de la barre suit ce qu'il y a derrière elle : blanche sur
+  /// l'affiche, la couleur du texte sur le verre. C'est la même règle que
+  /// partout ailleurs — une photo n'a pas de thème, une page si.
+  static Color _barInk(bool scrolled) =>
+      scrolled ? AppColors.textPrimary : AppColors.inkOnPhoto;
 
   @override
   void initState() {
@@ -52,10 +73,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _scrolled.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    _scrolled.value = _scrollController.position.pixels > _solidFrom;
+
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       ref.read(showsListProvider.notifier).loadMore();
@@ -68,54 +92,147 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
     final s = ref.watch(stringsProvider);
     final isAr = ref.watch(isRtlProvider);
-    final locale = ref.watch(localeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final logo = locale == AppLocale.ar
-        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
-        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
-
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(unreadCount, s, logo),
+      appBar: _buildAppBar(unreadCount, s),
       body: _buildBody(showsState, s, isAr),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(int unreadCount, AppStrings s, String logo) {
+  PreferredSizeWidget _buildAppBar(int unreadCount, AppStrings s) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xE6000000), // 90% black
-              Colors.transparent,
-            ],
-          ),
+      // Deux barres, fondues l'une dans l'autre selon la position de la page.
+      //
+      // En haut, l'affiche est la vedette : la barre disparaît sous un simple
+      // voile sombre, juste assez pour que les icônes blanches tiennent.
+      // Dès que la page défile, l'affiche s'en va et la barre a besoin d'un
+      // fond à elle — le même verre que la barre du bas, pour que les deux
+      // extrémités de l'écran parlent la même matière.
+      flexibleSpace: ValueListenableBuilder<bool>(
+        valueListenable: _scrolled,
+        builder: (context, scrolled, _) => Stack(
+          fit: StackFit.expand,
+          children: [
+            AnimatedOpacity(
+              opacity: scrolled ? 0 : 1,
+              duration: _barFade,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xE6000000), Colors.transparent],
+                  ),
+                ),
+              ),
+            ),
+            AnimatedOpacity(
+              opacity: scrolled ? 1 : 0,
+              duration: _barFade,
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.glassSurface,
+                      border: Border(
+                        bottom: BorderSide(color: AppColors.glassBorder),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      title: Image.asset(
-        logo,
-        height: 130,
-        fit: BoxFit.contain,
-        alignment: Alignment.centerLeft,
-      ),
-      leading: IconButton(
-        icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const SupportTicketsScreen()),
+      // Le logo au bord d'attaque, les actions à l'autre bout.
+      //
+      // Il était centré, et ça ne pouvait pas tomber juste : une icône à
+      // gauche, deux à droite — un titre mathématiquement centré dans une
+      // rangée déséquilibrée se lit toujours comme décalé. Il était centré SUR
+      // l'affiche, en plus, le fond le plus chargé de l'écran.
+      //
+      // Au bord, plus rien à arbitrer : la marque ouvre la ligne, les gestes
+      // la ferment. C'est ce que font Instagram et Airbnb, et en arabe tout
+      // bascule de l'autre côté sans une ligne de plus.
+      automaticallyImplyLeading: false,
+      // Sur iOS, Flutter centre le titre par défaut — d'où le logo échoué
+      // entre les deux, ni au bord ni au milieu.
+      centerTitle: false,
+      titleSpacing: AppSpacing.lg,
+      // 34 et pas 30 : à 30 le symbole se faisait plus petit que les
+      // icônes d'à côté, et une marque qui s'excuse n'est pas une marque.
+      // La marque accueille, puis s'efface devant la navigation.
+      //
+      // En haut de page, la barre porte le nom entier : c'est la porte
+      // d'entrée de l'app, et le titre de l'émission est déjà écrit en grand
+      // juste en dessous — inutile d'annoncer « Émissions » par-dessus.
+      //
+      // Dès que la page défile, l'affiche s'en va, il faut dire où l'on est :
+      // le nom de la marque se réduit au symbole et la section prend le
+      // relais. C'est le geste de Netflix, et il suit la même logique que le
+      // fond de la barre, qui se solidifie au même moment.
+      title: ValueListenableBuilder<bool>(
+        valueListenable: _scrolled,
+        // Une pile, pas un `AnimatedCrossFade` : celui-ci anime la TAILLE,
+        // donc il comprime le second enfant pendant la transition et le Row
+        // débordait — d'où le bandeau rouge « OVERFLOWED » en plein milieu du
+        // titre. Superposés, les deux gardent leur largeur naturelle, et
+        // comme le symbole occupe la même place dans les deux, il paraît
+        // immobile pendant que le mot cède la place au nom de la section.
+        builder: (context, scrolled, _) => Stack(
+          alignment: AlignmentDirectional.centerStart,
+          children: [
+            AnimatedOpacity(
+              opacity: scrolled ? 0 : 1,
+              duration: _barFade,
+              // `onPhoto` : au repos la barre est posée sur l'affiche, dont
+              // le voile est sombre dans les deux thèmes. Sans ça, le
+              // « tfarraj » sortait en noir sur fond sombre en thème clair.
+              child: const AppLogo(
+                variant: AppLogoVariant.compact,
+                onPhoto: true,
+                height: 30,
+              ),
+            ),
+            AnimatedOpacity(
+              opacity: scrolled ? 1 : 0,
+              duration: _barFade,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const AppLogo(variant: AppLogoVariant.mark, height: 30),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    s.navTabEmissions,
+                    style:
+                        AppTypography.h3.copyWith(color: AppColors.textPrimary),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
       actions: [
-        // Help, always in reach: both walkthrough videos.
-        const TutorialHelpAction(color: Colors.white),
-        _NotificationBellButton(unreadCount: unreadCount, s: s),
-        const SizedBox(width: AppSpacing.xs),
+        ValueListenableBuilder<bool>(
+          valueListenable: _scrolled,
+          builder: (context, scrolled, child) => TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: _barInk(scrolled)),
+            duration: _barFade,
+            builder: (context, ink, child) => IconTheme(
+              data: IconThemeData(color: ink),
+              child: child!,
+            ),
+            child: child,
+          ),
+          child: const AppBarActions(),
+        ),
       ],
     );
   }
@@ -149,27 +266,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         show.nextEpisode?.startsAt ?? show.startsAt;
 
     // Hero show: first upcoming active show (prefer shows with upcoming episodes)
-    final Show heroShow = allShows
-        .where((show) {
+    final Show heroShow = allShows.where((show) {
           final date = effectiveDate(show);
           return date != null &&
               date.isAfter(now) &&
               show.isActive &&
               show.hasUpcomingEpisodes;
-        })
-        .fold<Show?>(null, (prev, show) {
+        }).fold<Show?>(null, (prev, show) {
           if (prev == null) return show;
           return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
               ? show
               : prev;
         }) ??
         // Fallback: any active upcoming show (backward compat)
-        allShows
-            .where((show) {
-              final date = effectiveDate(show);
-              return date != null && date.isAfter(now) && show.isActive;
-            })
-            .fold<Show?>(null, (prev, show) {
+        allShows.where((show) {
+          final date = effectiveDate(show);
+          return date != null && date.isAfter(now) && show.isActive;
+        }).fold<Show?>(null, (prev, show) {
           if (prev == null) return show;
           return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
               ? show
@@ -183,51 +296,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .firstWhere((show) => show.isActive, orElse: () => allShows.first);
 
     // Upcoming within 60 days, excluding hero
-    final prochains = allShows
-        .where(
-          (show) {
-            final date = effectiveDate(show);
-            return date != null &&
-                date.isAfter(now) &&
-                date.isBefore(upcoming60Days) &&
-                show.isActive &&
-                show.id != heroShow.id;
-          },
-        )
-        .toList()
+    final prochains = allShows.where(
+      (show) {
+        final date = effectiveDate(show);
+        return date != null &&
+            date.isAfter(now) &&
+            date.isBefore(upcoming60Days) &&
+            show.isActive &&
+            show.id != heroShow.id;
+      },
+    ).toList()
       ..sort((a, b) =>
           (effectiveDate(a) ?? now).compareTo(effectiveDate(b) ?? now));
 
     // Beyond 60 days or inactive
-    final bientot = allShows
-        .where((show) {
-          final date = effectiveDate(show);
-          return show.id != heroShow.id &&
-              (!show.isActive ||
-                  date == null ||
-                  date.isAfter(upcoming60Days));
-        })
-        .toList()
+    final bientot = allShows.where((show) {
+      final date = effectiveDate(show);
+      return show.id != heroShow.id &&
+          (!show.isActive || date == null || date.isAfter(upcoming60Days));
+    }).toList()
       ..sort((a, b) =>
           (effectiveDate(a) ?? now).compareTo(effectiveDate(b) ?? now));
 
     // Sorted by reserved seats descending (excluding the hero to avoid showing
     // the same show twice when it was chosen as a fallback hero)
-    final populaires = allShows
-        .where((show) => show.id != heroShow.id)
-        .toList()
+    final populaires = allShows.where((show) => show.id != heroShow.id).toList()
       ..sort((a, b) => b.reservedSeats.compareTo(a.reservedSeats));
 
     return RefreshIndicator(
       onRefresh: () => ref.read(showsListProvider.notifier).refresh(),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       backgroundColor: AppColors.backgroundGrey,
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
           // Hero show — always present (falls back to a popular show when nothing
           // has a confirmed date) so the home never opens on a bare header.
-          SliverToBoxAdapter(child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
+          SliverToBoxAdapter(
+              child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
 
           // Upcoming section
           if (prochains.isNotEmpty) ...[
@@ -239,7 +345,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             SliverToBoxAdapter(
-              child: _ShowsHorizontalSection(shows: prochains, s: s, isAr: isAr),
+              child:
+                  _ShowsHorizontalSection(shows: prochains, s: s, isAr: isAr),
             ),
           ],
 
@@ -297,7 +404,8 @@ class _HeroShowCard extends StatelessWidget {
   final AppStrings s;
   final bool isAr;
 
-  const _HeroShowCard({required this.show, required this.s, required this.isAr});
+  const _HeroShowCard(
+      {required this.show, required this.s, required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -320,8 +428,9 @@ class _HeroShowCard extends StatelessWidget {
                 ? Image.network(
                     show.imageUrl!,
                     fit: BoxFit.cover,
-                    loadingBuilder: (_, child, progress) =>
-                        progress == null ? child : Container(color: AppColors.backgroundGrey),
+                    loadingBuilder: (_, child, progress) => progress == null
+                        ? child
+                        : Container(color: AppColors.backgroundGrey),
                     errorBuilder: (_, __, ___) => _HeroPlaceholder(),
                   )
                 : _HeroPlaceholder(),
@@ -337,29 +446,33 @@ class _HeroShowCard extends StatelessWidget {
               ),
             ),
 
-            // FIX: Hero gradient — smooth 55% coverage, theme-aware bottom color
-            Builder(
-              builder: (context) {
-                final isDark = Theme.of(context).brightness == Brightness.dark;
-                final bottomColor =
-                    isDark ? const Color(0xFF0C0C0C) : const Color(0xFFFAFAFA);
-                return DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: const Alignment(0, -0.1),
-                      colors: [
-                        bottomColor,
-                        bottomColor.withValues(alpha: 0.85),
-                        bottomColor.withValues(alpha: 0.50),
-                        bottomColor.withValues(alpha: 0.15),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.25, 0.50, 0.75, 1.0],
-                    ),
-                  ),
-                );
-              },
+            // Le voile de lisibilité — SOMBRE dans les deux thèmes.
+            //
+            // Ce dégradé faisait deux métiers à la fois : rendre le texte
+            // lisible, et fondre l'affiche dans la page. Il prenait donc la
+            // couleur du thème, et en clair il finissait en blanc — avec un
+            // titre blanc écrit dessus. Invisible.
+            //
+            // Une affiche n'a pas de thème. Elle est sombre ou claire selon
+            // la photo, jamais selon le réglage du téléphone, et l'encre
+            // blanche qu'on écrit dessus a besoin d'un voile sombre des deux
+            // côtés. C'est ce que font Netflix, Apple TV et Prime : l'affiche
+            // s'assombrit vers le bas, la page reprend en dessous.
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment(0, -0.1),
+                  colors: [
+                    Color(0xFF000000),
+                    Color(0xD9000000),
+                    Color(0x80000000),
+                    Color(0x26000000),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.25, 0.50, 0.75, 1.0],
+                ),
+              ),
             ),
 
             // Content at bottom
@@ -372,24 +485,10 @@ class _HeroShowCard extends StatelessWidget {
                 children: [
                   // FIX: Channel tag — unified primary semi-transparent style (hero)
                   if (show.channel != null)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        (show.localizedChannel(isAr) ?? show.channel!).toUpperCase(),
-                        style: AppTypography.labelSmall.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 10,
-                          letterSpacing: 0.5,
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: ChannelBadge(
+                        label: show.localizedChannel(isAr) ?? show.channel!,
                       ),
                     ),
 
@@ -410,7 +509,7 @@ class _HeroShowCard extends StatelessWidget {
                       Icon(
                         Icons.calendar_today_outlined,
                         size: 13,
-                        color: AppColors.secondary,
+                        color: AppColors.accentInkOnPhoto,
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -419,7 +518,10 @@ class _HeroShowCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                            // Blanc, comme le titre : le voile derrière est
+                            // sombre dans les deux thèmes. `textSecondary`
+                            // suivait le thème et s'éteignait en clair.
+                            color: AppColors.inkOnPhotoMuted,
                             fontSize: 12,
                           ),
                         ),
@@ -428,7 +530,7 @@ class _HeroShowCard extends StatelessWidget {
                       Icon(
                         Icons.location_on_outlined,
                         size: 13,
-                        color: AppColors.secondary,
+                        color: AppColors.accentInkOnPhoto,
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -437,7 +539,10 @@ class _HeroShowCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                            // Blanc, comme le titre : le voile derrière est
+                            // sombre dans les deux thèmes. `textSecondary`
+                            // suivait le thème et s'éteignait en clair.
+                            color: AppColors.inkOnPhotoMuted,
                             fontSize: 12,
                           ),
                         ),
@@ -453,38 +558,34 @@ class _HeroShowCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Container(
-                          height: 52,
+                          height: 56,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.30),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusPill),
+                            boxShadow: AppShadows.action,
                           ),
                           child: FilledButton.icon(
                             onPressed: () => context.push(
                               Routes.showDetail(show.id.toString()),
                             ),
                             style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
+                              backgroundColor: AppColors.primaryAction,
+                              foregroundColor: AppColors.onPrimary,
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusPill),
                               ),
                             ),
                             icon: const Icon(
                               Icons.confirmation_number_outlined,
                               size: 18,
-                              color: Colors.white,
+                              color: AppColors.onPrimary,
                             ),
                             label: Text(
                               show.isSoldOut ? s.homeSoldOut : s.reserve,
                               style: AppTypography.buttonMedium.copyWith(
-                                color: Colors.white,
+                                color: AppColors.onPrimary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -494,33 +595,37 @@ class _HeroShowCard extends StatelessWidget {
 
                       const SizedBox(width: AppSpacing.md),
 
+                      // Les places restantes ne sont pas un geste : en doré
+                      // plein, la pastille avait le poids d'un second bouton
+                      // et l'œil hésitait. En verre, elle informe et laisse
+                      // l'affiche passer derrière.
                       if (!show.isSoldOut)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.event_seat_outlined,
-                                size: 15,
-                                color: AppColors.primaryDark,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                '${show.availableSeats}',
-                                style: AppTypography.labelMedium.copyWith(
-                                  color: AppColors.primaryDark,
-                                  fontWeight: FontWeight.w700,
+                        SizedBox(
+                          height: 56,
+                          child: GlassPill(
+                            tone: GlassTone.onPhoto,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.event_seat_outlined,
+                                  size: 16,
+                                  color: AppColors.accentInkOnPhoto,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${show.availableSeats}',
+                                  style: AppTypography.labelMedium.copyWith(
+                                    // Sur l'affiche, pas sur la page :
+                                    // `textPrimary` devenait noir en thème
+                                    // clair, sur un voile noir.
+                                    color: AppColors.inkOnPhoto,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                     ],
@@ -576,16 +681,15 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTypography.h3.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
+            // Le jeton porte déjà Cairo et son poids : le réécrire ici, c'est
+            // le contredire à chaque appel.
+            style: AppTypography.h3,
           ),
           const Spacer(),
           TextButton.icon(
             onPressed: onSeeAll,
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.secondary,
+              foregroundColor: AppColors.accentInk,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.xs,
@@ -597,7 +701,7 @@ class _SectionHeader extends StatelessWidget {
             icon: Text(
               seeAllText,
               style: AppTypography.labelSmall.copyWith(
-                color: AppColors.secondary,
+                color: AppColors.accentInk,
               ),
             ),
           ),
@@ -630,6 +734,11 @@ class _ShowsHorizontalSection extends StatelessWidget {
       height: 240,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
+        // Sans ça, la liste coupe les ombres au ras de sa boîte — et comme
+        // elle fait toute la largeur, la coupe se lit comme un trait tiré
+        // d'un bord à l'autre de l'écran. Mesuré sur la capture : la page
+        // passe de 250 à 245 en une seule ligne de pixels, sur 1206.
+        clipBehavior: Clip.none,
         padding: const EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.sm,
@@ -688,30 +797,36 @@ class _ShowHorizontalCard extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF1A1A1A).withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: AppShadows.card,
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: SizedBox(
-                height: 170,
-                width: 150,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Image
-                    show.imageUrl != null
-                        ? Image.network(
-                            show.imageUrl!,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (_, child, progress) =>
-                                progress == null ? child : Container(color: AppColors.backgroundGrey),
-                            errorBuilder: (_, __, ___) => Container(
+                  height: 170,
+                  width: 150,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Image
+                      show.imageUrl != null
+                          ? Image.network(
+                              show.imageUrl!,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (_, child, progress) =>
+                                  progress == null
+                                      ? child
+                                      : Container(
+                                          color: AppColors.backgroundGrey),
+                              errorBuilder: (_, __, ___) => Container(
+                                color: AppColors.backgroundGrey,
+                                child: Icon(
+                                  Icons.tv,
+                                  size: 32,
+                                  color: AppColors.textLight,
+                                ),
+                              ),
+                            )
+                          : Container(
                               color: AppColors.backgroundGrey,
                               child: Icon(
                                 Icons.tv,
@@ -719,111 +834,84 @@ class _ShowHorizontalCard extends StatelessWidget {
                                 color: AppColors.textLight,
                               ),
                             ),
-                          )
-                        : Container(
-                            color: AppColors.backgroundGrey,
-                            child: Icon(
-                              Icons.tv,
-                              size: 32,
-                              color: AppColors.textLight,
-                            ),
-                          ),
 
-                    // Sold-out overlay
-                    if (show.isSoldOut)
-                      Container(
-                        color: Colors.black54,
-                        alignment: Alignment.center,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.error,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSm,
+                      // Sold-out overlay
+                      if (show.isSoldOut)
+                        Container(
+                          color: Colors.black54,
+                          alignment: Alignment.center,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
                             ),
-                          ),
-                          child: Text(
-                            s.homeSoldOutBadge,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
+                            decoration: BoxDecoration(
+                              color: AppColors.error,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSm,
+                              ),
+                            ),
+                            child: Text(
+                              s.homeSoldOutBadge,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                    // Coming soon overlay
-                    if (isComingSoon && !show.isSoldOut)
-                      Positioned(
-                        bottom: AppSpacing.sm,
-                        left: AppSpacing.sm,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondary,
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSm,
+                      // Coming soon overlay
+                      if (isComingSoon && !show.isSoldOut)
+                        Positioned(
+                          bottom: AppSpacing.sm,
+                          left: AppSpacing.sm,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: 2,
                             ),
-                          ),
-                          child: Text(
-                            s.homeComingSoonBadge,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 9,
-                              letterSpacing: 0.5,
+                            decoration: BoxDecoration(
+                              color: AppColors.secondary,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSm,
+                              ),
+                            ),
+                            child: Text(
+                              s.homeComingSoonBadge,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 9,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                    // FIX: Channel tag — unified primary semi-transparent style (cards)
-                    if (show.channel != null)
-                      Positioned(
-                        top: AppSpacing.sm,
-                        right: AppSpacing.sm,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.85),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            (show.localizedChannel(isAr) ?? show.channel!).toUpperCase(),
-                            style: AppTypography.caption.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 10,
-                            ),
+                      // FIX: Channel tag — unified primary semi-transparent style (cards)
+                      if (show.channel != null)
+                        Positioned(
+                          top: AppSpacing.sm,
+                          right: AppSpacing.sm,
+                          child: ChannelBadge(
+                            label: show.localizedChannel(isAr) ?? show.channel!,
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ), // ClipRRect
-          ), // Container shadow wrapper
+              ), // ClipRRect
+            ), // Container shadow wrapper
 
             const SizedBox(height: AppSpacing.sm),
 
             // Title — Cairo for AR (proper shaping), Inter for FR
             Text(
               show.localizedTitle(isAr),
-              style: (isAr ? AppTypography.bodyMediumAr : AppTypography.labelMedium)
-                  .copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w500,
-              ),
+              style:
+                  isAr ? AppTypography.bodyMediumAr : AppTypography.labelMedium,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -856,7 +944,7 @@ class _ShowHorizontalCard extends StatelessWidget {
                   Text(
                     s.episodeCount(show.upcomingEpisodesCount),
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.secondary,
+                      color: AppColors.accentInk,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -873,52 +961,6 @@ class _ShowHorizontalCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────
 // Notification Bell Button
 // ─────────────────────────────────────────────────────
-
-class _NotificationBellButton extends StatelessWidget {
-  final int unreadCount;
-  final AppStrings s;
-
-  const _NotificationBellButton({required this.unreadCount, required this.s});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          const Icon(
-            Icons.notifications_outlined,
-            color: Colors.white,
-          ),
-          if (unreadCount > 0)
-            Positioned(
-              right: -4,
-              top: -4,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: AppColors.secondary,
-                  shape: BoxShape.circle,
-                ),
-                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                child: Text(
-                  unreadCount > 99 ? '99+' : unreadCount.toString(),
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-        ],
-      ),
-      tooltip: s.homeNotificationsTooltip,
-      onPressed: () => context.push(Routes.notifications),
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────
 // Loading Skeleton

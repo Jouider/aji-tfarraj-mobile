@@ -19,8 +19,7 @@ class AppGate extends ConsumerStatefulWidget {
   ConsumerState<AppGate> createState() => _AppGateState();
 }
 
-class _AppGateState extends ConsumerState<AppGate>
-    with WidgetsBindingObserver {
+class _AppGateState extends ConsumerState<AppGate> with WidgetsBindingObserver {
   bool _updateDismissed = false;
 
   @override

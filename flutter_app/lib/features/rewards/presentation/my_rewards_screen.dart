@@ -54,7 +54,7 @@ class MyRewardsScreen extends ConsumerWidget {
           }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(myRewardsProvider),
-            color: AppColors.secondary,
+            color: AppColors.accentInk,
             child: ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: requests.length,
@@ -110,7 +110,8 @@ class _RewardRequestTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(request.localizedTitle(isAr), style: AppTypography.labelMedium),
+                Text(request.localizedTitle(isAr),
+                    style: AppTypography.labelMedium),
                 const SizedBox(height: 2),
                 Text(
                   '${strings.requestedAt} $date',

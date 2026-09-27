@@ -28,6 +28,7 @@ class Show {
   final String city;
   final String? studio;
   final DateTime? startsAt;
+
   /// End of the recording. Often null in production (episodes.ends_at is not
   /// filled yet), so callers must keep a fallback — see TicketScreen's grace.
   final DateTime? endsAt;

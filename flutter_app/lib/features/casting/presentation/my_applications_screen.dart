@@ -136,8 +136,7 @@ class MyApplicationsScreen extends ConsumerWidget {
                       // someone's decision.
                       if (application.withdrawable)
                         TextButton(
-                          onPressed: () =>
-                              _withdraw(context, ref, application),
+                          onPressed: () => _withdraw(context, ref, application),
                           child: Text(s.casting.withdraw,
                               style: AppTypography.bodySmall
                                   .copyWith(color: AppColors.error)),

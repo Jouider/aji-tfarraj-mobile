@@ -4,6 +4,7 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_point_search.dart';
 
 /// « Où la navette te dépose ? », posé partout de la même façon.
 ///
@@ -13,21 +14,40 @@ import 'package:aji_tfarraj/features/return_points/domain/return_point_option.da
 ///
 /// Ne s'affiche jamais avec une liste vide : pas d'arrêt veut dire pas de
 /// navette, et proposer une navette qui ne passe pas est pire que se taire.
-class ReturnPointChoice extends StatelessWidget {
+class ReturnPointChoice extends StatefulWidget {
   const ReturnPointChoice({
     super.key,
     required this.points,
     required this.selectedId,
+    required this.answered,
     required this.onChoose,
     required this.isArabic,
     required this.noneLabel,
+    required this.searchHint,
+    required this.noMatchLabel,
     this.enabled = true,
+    this.autofocusSearch = false,
   });
 
   final List<ReturnPointOption> points;
 
   /// L'arrêt choisi, ou null pour « par mes propres moyens ».
+  ///
+  /// À ne lire que si [answered] : sinon `null` ne veut rien dire d'autre que
+  /// « la question n'a pas encore reçu de réponse ».
   final int? selectedId;
+
+  /// Quelqu'un a-t-il répondu ?
+  ///
+  /// Sans cette distinction, `null` servait à la fois pour « pas encore
+  /// répondu » et pour « je rentre par mes propres moyens » : la deuxième
+  /// ligne apparaissait cochée d'emblée, le membre croyait la question
+  /// réglée, et le staff ne pouvait pas distinguer un refus d'un silence.
+  final bool answered;
+
+  final String searchHint;
+  final String noMatchLabel;
+  final bool autofocusSearch;
 
   final ValueChanged<int?> onChoose;
   final bool isArabic;
@@ -39,26 +59,77 @@ class ReturnPointChoice extends StatelessWidget {
   final bool enabled;
 
   @override
+  State<ReturnPointChoice> createState() => _ReturnPointChoiceState();
+}
+
+class _ReturnPointChoiceState extends State<ReturnPointChoice> {
+  final TextEditingController _search = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _search.addListener(_onQueryChanged);
+  }
+
+  @override
+  void dispose() {
+    _search.removeListener(_onQueryChanged);
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged() => setState(() {});
+
+  @override
   Widget build(BuildContext context) {
-    if (points.isEmpty) return const SizedBox.shrink();
+    if (widget.points.isEmpty) return const SizedBox.shrink();
+
+    final searchable = widget.points.length >= ReturnPointSearchField.showFrom;
+    final query = _search.text;
+    final shown = searchable
+        ? widget.points.where((p) => p.matches(query)).toList()
+        : widget.points;
+    final filtering = searchable && query.trim().isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final point in points)
-          _Option(
-            label: point.localizedName(isArabic),
-            sublabel: point.landmark,
-            selected: selectedId == point.id,
-            enabled: enabled,
-            onTap: () => onChoose(point.id),
+        if (searchable) ...[
+          ReturnPointSearchField(
+            controller: _search,
+            hint: widget.searchHint,
+            autofocus: widget.autofocusSearch,
           ),
-        _Option(
-          label: noneLabel,
-          selected: selectedId == null,
-          enabled: enabled,
-          onTap: () => onChoose(null),
-        ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        for (final point in shown)
+          _Option(
+            label: point.localizedName(widget.isArabic),
+            sublabel: point.landmark,
+            selected: widget.answered && widget.selectedId == point.id,
+            enabled: widget.enabled,
+            onTap: () => widget.onChoose(point.id),
+          ),
+        if (shown.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            child: Text(
+              widget.noMatchLabel,
+              textAlign: TextAlign.center,
+              style:
+                  AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+            ),
+          ),
+        // « Par mes propres moyens » échappe au filtre : c'est une réponse,
+        // pas un arrêt, et elle doit rester atteignable même quand la
+        // recherche ne renvoie rien.
+        if (!filtering || shown.isEmpty)
+          _Option(
+            label: widget.noneLabel,
+            selected: widget.answered && widget.selectedId == null,
+            enabled: widget.enabled,
+            onTap: () => widget.onChoose(null),
+          ),
       ],
     );
   }
@@ -97,8 +168,7 @@ class _Option extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md, vertical: AppSpacing.md),
             decoration: BoxDecoration(
-              border: Border.all(
-                  color: border, width: selected ? 1.6 : 1),
+              border: Border.all(color: border, width: selected ? 1.6 : 1),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Row(

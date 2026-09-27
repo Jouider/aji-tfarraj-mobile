@@ -25,8 +25,8 @@ class ReturnManifestExport {
   /// every string gets the direction its own script needs. Stop names and
   /// attendee names come from a bilingual database — forcing one direction on
   /// the whole document would mangle half of them.
-  static final _arabic = RegExp(
-      '[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]');
+  static final _arabic =
+      RegExp('[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]');
 
   static pw.TextDirection _direction(String value) =>
       _arabic.hasMatch(value) ? pw.TextDirection.rtl : pw.TextDirection.ltr;
@@ -54,8 +54,10 @@ class ReturnManifestExport {
   static Future<Uint8List> pdfBytes(ReturnManifest manifest) async {
     // The built-in PDF fonts carry no Arabic glyphs at all, so an Arabic name
     // would come out as blanks. Cairo is the app's Arabic face already.
-    final regular = pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Regular.ttf'));
-    final bold = pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Bold.ttf'));
+    final regular =
+        pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Regular.ttf'));
+    final bold =
+        pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Bold.ttf'));
 
     final doc = pw.Document(
       theme: pw.ThemeData.withFont(base: regular, bold: bold),
@@ -107,7 +109,8 @@ class ReturnManifestExport {
   }
 
   static String fileName(ReturnManifest manifest) {
-    final stamp = _fileStamp.format(manifest.episode.startsAt ?? manifest.generatedAt);
+    final stamp =
+        _fileStamp.format(manifest.episode.startsAt ?? manifest.generatedAt);
     return 'retour-navette_$stamp.pdf';
   }
 
@@ -122,7 +125,8 @@ class ReturnManifestExport {
       padding: const pw.EdgeInsets.only(bottom: 12),
       margin: const pw.EdgeInsets.only(bottom: 16),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey400, width: 1)),
+        border: pw.Border(
+            bottom: pw.BorderSide(color: PdfColors.grey400, width: 1)),
       ),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -133,18 +137,23 @@ class ReturnManifestExport {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text('Feuille de retour — navette',
-                    style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 18, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 4),
                 if (subtitle.isNotEmpty)
                   _text(subtitle, style: const pw.TextStyle(fontSize: 11)),
                 pw.SizedBox(height: 2),
                 _text(
                   [
-                    if (episode.startsAt != null) _dateTime.format(episode.startsAt!),
-                    if (episode.studio != null && episode.studio!.isNotEmpty) episode.studio!,
-                    if (episode.city != null && episode.city!.isNotEmpty) episode.city!,
+                    if (episode.startsAt != null)
+                      _dateTime.format(episode.startsAt!),
+                    if (episode.studio != null && episode.studio!.isNotEmpty)
+                      episode.studio!,
+                    if (episode.city != null && episode.city!.isNotEmpty)
+                      episode.city!,
                   ].join(' · '),
-                  style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+                  style:
+                      const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
                 ),
               ],
             ),
@@ -162,7 +171,8 @@ class ReturnManifestExport {
   static pw.Widget _totals(ReturnManifest manifest) {
     pw.Widget box(String label, int value, PdfColor colour) => pw.Expanded(
           child: pw.Container(
-            padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            padding:
+                const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             margin: const pw.EdgeInsets.only(right: 8),
             decoration: pw.BoxDecoration(
               color: colour,
@@ -172,9 +182,12 @@ class ReturnManifestExport {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text('$value',
-                    style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
+                    style: pw.TextStyle(
+                        fontSize: 20, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 2),
-                pw.Text(label, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey800)),
+                pw.Text(label,
+                    style: const pw.TextStyle(
+                        fontSize: 8, color: PdfColors.grey800)),
               ],
             ),
           ),
@@ -200,14 +213,17 @@ class ReturnManifestExport {
       );
 
   static pw.Widget _pointsTable(ReturnManifest manifest) {
-    pw.Widget cell(pw.Widget child, {pw.Alignment align = pw.Alignment.centerLeft}) =>
+    pw.Widget cell(pw.Widget child,
+            {pw.Alignment align = pw.Alignment.centerLeft}) =>
         pw.Container(
           padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 8),
           alignment: align,
           child: child,
         );
 
-    pw.Widget head(String label, {pw.Alignment align = pw.Alignment.centerLeft}) => cell(
+    pw.Widget head(String label,
+            {pw.Alignment align = pw.Alignment.centerLeft}) =>
+        cell(
           pw.Text(label,
               style: pw.TextStyle(
                   fontSize: 9,
@@ -247,20 +263,25 @@ class ReturnManifestExport {
                         fontWeight: point.isEmpty
                             ? pw.FontWeight.normal
                             : pw.FontWeight.bold,
-                        color: point.isEmpty ? PdfColors.grey600 : PdfColors.black)),
+                        color: point.isEmpty
+                            ? PdfColors.grey600
+                            : PdfColors.black)),
                 if (!point.served)
                   pw.Text('hors liste de ce tournage',
-                      style: const pw.TextStyle(fontSize: 7, color: PdfColors.red700)),
+                      style: const pw.TextStyle(
+                          fontSize: 7, color: PdfColors.red700)),
               ],
             )),
             cell(_text(point.landmark ?? '—',
-                style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
+                style:
+                    const pw.TextStyle(fontSize: 9, color: PdfColors.grey700))),
             cell(
               pw.Text('${point.people}',
                   style: pw.TextStyle(
                       fontSize: 12,
                       fontWeight: pw.FontWeight.bold,
-                      color: point.isEmpty ? PdfColors.grey500 : PdfColors.black)),
+                      color:
+                          point.isEmpty ? PdfColors.grey500 : PdfColors.black)),
               align: pw.Alignment.centerRight,
             ),
           ]),
@@ -268,11 +289,13 @@ class ReturnManifestExport {
           decoration: const pw.BoxDecoration(color: PdfColors.grey100),
           children: [
             cell(pw.Text('Total navette',
-                style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
+                style: pw.TextStyle(
+                    fontSize: 10, fontWeight: pw.FontWeight.bold))),
             cell(pw.SizedBox()),
             cell(
               pw.Text('${manifest.riders}',
-                  style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                  style: pw.TextStyle(
+                      fontSize: 12, fontWeight: pw.FontWeight.bold)),
               align: pw.Alignment.centerRight,
             ),
           ],
@@ -314,10 +337,12 @@ class ReturnManifestExport {
           pw.Row(children: [
             pw.Expanded(
               child: _text(point.name,
-                  style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                  style: pw.TextStyle(
+                      fontSize: 10, fontWeight: pw.FontWeight.bold)),
             ),
             pw.Text('${point.people} pers.',
-                style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                style:
+                    const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
           ]),
           pw.Divider(height: 8, color: PdfColors.grey300),
           _passengerGrid(point.passengers),
@@ -370,13 +395,15 @@ class ReturnManifestExport {
             ),
           ),
           pw.Expanded(
-            child: _text(passenger.name, style: const pw.TextStyle(fontSize: 9)),
+            child:
+                _text(passenger.name, style: const pw.TextStyle(fontSize: 9)),
           ),
           // Never happens while a booking is capped at one seat, but a legacy
           // multi-seat row must not be under-reported to the driver.
           if (passenger.seats > 1)
             pw.Text('×${passenger.seats}',
-                style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                style:
+                    pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
         ]),
       );
 

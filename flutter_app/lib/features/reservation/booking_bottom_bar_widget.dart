@@ -10,7 +10,11 @@ import 'package:aji_tfarraj/app/localization/strings.dart';
 class BookingBottomBar extends StatelessWidget {
   final bool isLoading;
   final bool isSoldOut;
-  final bool agreedToTerms;
+
+  /// Toutes les conditions de confirmation réunies, pas seulement la case
+  /// cochée : depuis que le choix du retour est obligatoire, il y en a deux.
+  /// Le nom d'avant — `agreedToTerms` — aurait menti.
+  final bool canConfirm;
   final VoidCallback onConfirm;
   final AppStrings s;
 
@@ -18,7 +22,7 @@ class BookingBottomBar extends StatelessWidget {
     super.key,
     required this.isLoading,
     required this.isSoldOut,
-    required this.agreedToTerms,
+    required this.canConfirm,
     required this.onConfirm,
     required this.s,
   });
@@ -35,58 +39,58 @@ class BookingBottomBar extends StatelessWidget {
       decoration: BoxDecoration(
         // FIX: backgroundLight bg + top border token
         color: AppColors.backgroundLight,
-        border: Border(
-            top: BorderSide(color: AppColors.border, width: 1)),
+        border: Border(top: BorderSide(color: AppColors.border, width: 1)),
       ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // FIX: Récapitulatif row — textMuted uppercase ls0.8 + primary seat icon
-            Row(
-              children: [
-                Text(
-                  s.reserveSeatsRecap.toUpperCase(),
-                  style: const TextStyle(
-                    color: AppColors.info,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.8,
-                  ),
+      // Pas de SafeArea ici : la marge du bas au-dessus contient déjà l'inset,
+      // et cet écran vit sous la barre d'onglets en verre — l'inset y vaut
+      // l'encombrement de cette barre, pas les 34 points de l'indicateur
+      // d'accueil. L'appliquer deux fois laissait 200 points de vide.
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // FIX: Récapitulatif row — textMuted uppercase ls0.8 + primary seat icon
+          Row(
+            children: [
+              Text(
+                s.reserveSeatsRecap.toUpperCase(),
+                style: const TextStyle(
+                  color: AppColors.info,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.8,
                 ),
-                const Spacer(),
-                const Icon(Icons.event_seat_outlined,
-                    size: 16, color: AppColors.primary),
-                const SizedBox(width: 5),
-                Text(
-                  // FIX: textPrimary w700 16px
-                  '1 ${s.place}',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
+              ),
+              const Spacer(),
+              const Icon(Icons.event_seat_outlined,
+                  size: 16, color: AppColors.primary),
+              const SizedBox(width: 5),
+              Text(
+                // FIX: textPrimary w700 16px
+                '1 ${s.place}',
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
 
-            // Confirm / sold-out button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: isSoldOut
-                  ? _SoldOutButton(s: s)
-                  : _ConfirmButton(
-                      isLoading: isLoading,
-                      isActive: agreedToTerms && !isLoading,
-                      onConfirm: onConfirm,
-                      s: s,
-                    ),
-            ),
-          ],
-        ),
+          // Confirm / sold-out button
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: isSoldOut
+                ? _SoldOutButton(s: s)
+                : _ConfirmButton(
+                    isLoading: isLoading,
+                    isActive: canConfirm && !isLoading,
+                    onConfirm: onConfirm,
+                    s: s,
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -127,9 +131,9 @@ class _ConfirmButton extends StatelessWidget {
         onPressed: (isLoading || !isActive) ? null : onConfirm,
         style: ElevatedButton.styleFrom(
           // FIX: Active → primary bg, white text; Disabled → border bg, textMuted
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.primaryAction,
           disabledBackgroundColor: AppColors.border,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.onPrimary,
           disabledForegroundColor: AppColors.textMuted,
           elevation: 0,
           shadowColor: Colors.transparent,
@@ -143,7 +147,7 @@ class _ConfirmButton extends StatelessWidget {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Colors.white,
+                  color: AppColors.onPrimary,
                 ),
               )
             : Row(

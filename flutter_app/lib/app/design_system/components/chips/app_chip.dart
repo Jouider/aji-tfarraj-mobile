@@ -43,14 +43,18 @@ class AppChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isSelected ? AppColors.backgroundWhite : AppColors.textSecondary,
+                color: isSelected
+                    ? AppColors.backgroundWhite
+                    : AppColors.textSecondary,
               ),
               const SizedBox(width: AppSpacing.xs),
             ],
             Text(
               label,
               style: AppTypography.labelMedium.copyWith(
-                color: isSelected ? AppColors.backgroundWhite : AppColors.textSecondary,
+                color: isSelected
+                    ? AppColors.backgroundWhite
+                    : AppColors.textSecondary,
               ),
             ),
           ],

@@ -34,7 +34,8 @@ class DeviceRepository {
         if (deviceName != null) 'device_name': deviceName,
       };
 
-      _debugLog('Registering device with backend: platform=$platform, locale=$locale');
+      _debugLog(
+          'Registering device with backend: platform=$platform, locale=$locale');
 
       final response = await _apiClient.post(
         '/api/devices/register',
@@ -42,13 +43,13 @@ class DeviceRepository {
       );
 
       final success = response.statusCode == 200 || response.statusCode == 201;
-      
+
       if (success) {
         _debugLog('Device registered successfully with backend');
       } else {
         _debugLog('Device registration failed: ${response.statusCode}');
       }
-      
+
       return success;
     } catch (e) {
       _debugLog('Error registering device: $e');
@@ -69,13 +70,13 @@ class DeviceRepository {
       );
 
       final success = response.statusCode == 200;
-      
+
       if (success) {
         _debugLog('Device unregistered successfully');
       } else {
         _debugLog('Device unregistration failed: ${response.statusCode}');
       }
-      
+
       return success;
     } catch (e) {
       _debugLog('Error unregistering device: $e');

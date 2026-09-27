@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/app_bar_actions.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
@@ -272,13 +275,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(s.profileTitle, style: AppTypography.h3),
-        centerTitle: true,
+        title: AppBarBrandTitle(s.profileTitle),
+        actions: const [AppBarActions()],
+        centerTitle: false,
+        titleSpacing: AppSpacing.lg,
         automaticallyImplyLeading: false,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
+        // Le contenu file sous la barre d'onglets en verre : sans cette
+        // réserve, le bas de la liste reste inatteignable.
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl + MediaQuery.of(context).padding.bottom,
+        ),
         children: [
           // Incomplete profile warning
           if (user != null &&
@@ -324,8 +335,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             title: s.casting.profileTile,
             subtitle: s.casting.profileTileSubtitle,
             icon: Icons.person_search_outlined,
-            color: AppColors.casting,
-            colorDark: AppColors.castingDark,
+            color: AppColors.primary,
+            colorDark: AppColors.primaryDark,
             onTap: () => context.push(Routes.casting),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -366,7 +377,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               _SettingsRow(
                 icon: themeIcon,
-                iconColor: AppColors.secondary,
+                iconColor: AppColors.accentInk,
                 title: s.profileThemeLabel,
                 subtitle: themeLabel,
                 trailing: Icon(Icons.swap_horiz,
@@ -400,15 +411,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               _SettingsRow(
                 icon: Icons.star_outline,
-                iconColor: AppColors.secondary,
+                iconColor: AppColors.accentInk,
                 title: s.profileLoyaltyLabel,
                 trailing: pointsAsync.when(
                   data: (summary) => _LoyaltyBadge(points: summary.balance),
-                  loading: () => const SizedBox(
+                  loading: () => SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.secondary),
+                        strokeWidth: 2, color: AppColors.accentInk),
                   ),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
@@ -447,7 +458,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (user != null && user.isStaffOrAdmin)
                 _SettingsRow(
                   icon: Icons.qr_code_scanner,
-                  iconColor: AppColors.secondary,
+                  iconColor: AppColors.accentInk,
                   title: s.staffCheckInLabel,
                   onTap: () => context.push(Routes.staffCheckIn),
                 ),
@@ -457,7 +468,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (user != null && user.isStaffOrAdmin)
                 _SettingsRow(
                   icon: Icons.photo_camera_outlined,
-                  iconColor: AppColors.casting,
+                  iconColor: AppColors.primary,
                   title: s.staffCastingTitle,
                   subtitle: s.staffCastingSubtitle,
                   onTap: () => context.push(Routes.staffCasting),
@@ -477,7 +488,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (user != null && user.canRegisterOnSite)
                 _SettingsRow(
                   icon: Icons.directions_bus_outlined,
-                  iconColor: AppColors.secondary,
+                  iconColor: AppColors.accentInk,
                   title: s.staffProfileManifestTile,
                   subtitle: s.staffManifestSubtitle,
                   onTap: () => context.push(Routes.returnManifest),
@@ -505,7 +516,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               _SettingsRow(
                 icon: Icons.help_outline,
-                iconColor: AppColors.secondary,
+                iconColor: AppColors.accentInk,
                 title: s.howItWorksProfileTileLabel,
                 subtitle: s.howItWorksProfileTileSubtitle,
                 onTap: () => context.push(Routes.howItWorks),
@@ -522,7 +533,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               // dialog, after someone has actually attended a recording.
               _SettingsRow(
                 icon: Icons.star_outline,
-                iconColor: AppColors.secondary,
+                iconColor: AppColors.accentInk,
                 title: s.rateAppTitle,
                 subtitle: s.rateAppSubtitle,
                 onTap: () =>
@@ -604,10 +615,10 @@ class _SpaceCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppColors.inkOn(color).withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: Colors.white, size: 24),
+              child: Icon(icon, color: AppColors.inkOn(color), size: 24),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -616,8 +627,10 @@ class _SpaceCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      // L'or ne porte pas le blanc : 2,1:1. L'encre suit
+                      // l'aplat de la carte, elle ne le précède pas.
+                      color: AppColors.inkOn(color),
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -625,7 +638,9 @@ class _SpaceCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    style: TextStyle(
+                        color: AppColors.inkOn(color).withValues(alpha: 0.78),
+                        fontSize: 12),
                   ),
                 ],
               ),
@@ -634,7 +649,7 @@ class _SpaceCard extends StatelessWidget {
               Directionality.of(context) == TextDirection.rtl
                   ? Icons.arrow_back_ios
                   : Icons.arrow_forward_ios,
-              color: Colors.white,
+              color: AppColors.inkOn(color),
               size: 16,
             ),
           ],
@@ -815,8 +830,8 @@ class _ProfileHeader extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child:
-                          const Icon(Icons.edit, size: 16, color: Colors.white),
+                      child: Icon(Icons.edit,
+                          size: 16, color: AppColors.onSecondary),
                     ),
                   ),
                 ),
@@ -893,13 +908,7 @@ class _SettingsGroup extends StatelessWidget {
             color: AppColors.cardDarkElevated,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            boxShadow: AppShadows.card,
           ),
           child: Column(
             children: List.generate(
@@ -1064,7 +1073,7 @@ class _ReferralCodeChip extends StatelessWidget {
           SnackBar(
             content: Text(copiedLabel),
             duration: const Duration(seconds: 2),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.primaryAction,
           ),
         );
       },
@@ -1074,14 +1083,14 @@ class _ReferralCodeChip extends StatelessWidget {
           Text(
             code,
             style: AppTypography.labelSmall.copyWith(
-              color: AppColors.secondary,
+              color: AppColors.accentInk,
               fontWeight: FontWeight.w700,
               letterSpacing: 2,
               fontSize: 12,
             ),
           ),
           const SizedBox(width: 4),
-          const Icon(Icons.copy, size: 14, color: AppColors.secondary),
+          Icon(Icons.copy, size: 14, color: AppColors.accentInk),
         ],
       ),
     );

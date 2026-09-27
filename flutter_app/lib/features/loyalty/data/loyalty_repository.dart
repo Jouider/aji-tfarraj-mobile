@@ -43,14 +43,16 @@ class LoyaltyRepository {
       // Prefer in-memory cache, then fall back to disk
       if (_cachedSummary != null) {
         if (kDebugMode) {
-          debugPrint('[LoyaltyRepository] Network error – returning in-memory cache');
+          debugPrint(
+              '[LoyaltyRepository] Network error – returning in-memory cache');
         }
         return _cachedSummary!;
       }
       final disk = await _loadCachedSummary();
       if (disk != null) {
         if (kDebugMode) {
-          debugPrint('[LoyaltyRepository] Network error – returning disk cache');
+          debugPrint(
+              '[LoyaltyRepository] Network error – returning disk cache');
         }
         _cachedSummary = disk;
         return disk;

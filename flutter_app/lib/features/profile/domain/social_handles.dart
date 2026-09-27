@@ -22,13 +22,30 @@ enum SocialPlatform {
 abstract final class SocialHandles {
   /// First path segments that are not a username (posts, reels, menus).
   static const _instagramReserved = {
-    'p', 'reel', 'reels', 'tv', 'explore', 'accounts', 'direct',
+    'p',
+    'reel',
+    'reels',
+    'tv',
+    'explore',
+    'accounts',
+    'direct',
   };
 
   static const _facebookReserved = {
-    'share', 'sharer', 'sharer.php', 'groups', 'pages', 'events', 'watch',
-    'marketplace', 'story.php', 'photo.php', 'permalink.php', 'people',
-    'login', 'home.php',
+    'share',
+    'sharer',
+    'sharer.php',
+    'groups',
+    'pages',
+    'events',
+    'watch',
+    'marketplace',
+    'story.php',
+    'photo.php',
+    'permalink.php',
+    'people',
+    'login',
+    'home.php',
   };
 
   static final _link = RegExp(

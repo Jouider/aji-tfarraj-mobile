@@ -3,6 +3,7 @@
 enum AppLocale {
   /// French locale
   fr,
+
   /// Arabic locale
   ar;
 

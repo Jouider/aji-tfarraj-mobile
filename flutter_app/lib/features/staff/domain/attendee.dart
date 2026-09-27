@@ -122,15 +122,15 @@ class Attendee {
         name: json['name'] as String? ?? '—',
         photoUrl: json['photo_url'] as String?,
         ticketCode: json['ticket_code'] as String?,
-        checkedInAt:
-            DateTime.tryParse(json['checked_in_at'] as String? ?? '')?.toLocal(),
+        checkedInAt: DateTime.tryParse(json['checked_in_at'] as String? ?? '')
+            ?.toLocal(),
         chargePublic: json['charge_public'] as String?,
         hasAccount: json['has_account'] as bool? ?? true,
         departure: Departure.fromJson(json['departure']),
         pastExclusions: json['past_exclusions'] as int? ?? 0,
-        lastExclusionAt: DateTime.tryParse(
-                json['last_exclusion_at'] as String? ?? '')
-            ?.toLocal(),
+        lastExclusionAt:
+            DateTime.tryParse(json['last_exclusion_at'] as String? ?? '')
+                ?.toLocal(),
       );
 }
 
@@ -195,12 +195,27 @@ class AttendeeList {
 }
 
 const _accents = {
-  'à': 'a', 'â': 'a', 'ä': 'a', 'á': 'a',
-  'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
-  'î': 'i', 'ï': 'i', 'í': 'i',
-  'ô': 'o', 'ö': 'o', 'ó': 'o',
-  'ù': 'u', 'û': 'u', 'ü': 'u', 'ú': 'u',
-  'ç': 'c', 'ÿ': 'y', 'ñ': 'n',
+  'à': 'a',
+  'â': 'a',
+  'ä': 'a',
+  'á': 'a',
+  'é': 'e',
+  'è': 'e',
+  'ê': 'e',
+  'ë': 'e',
+  'î': 'i',
+  'ï': 'i',
+  'í': 'i',
+  'ô': 'o',
+  'ö': 'o',
+  'ó': 'o',
+  'ù': 'u',
+  'û': 'u',
+  'ü': 'u',
+  'ú': 'u',
+  'ç': 'c',
+  'ÿ': 'y',
+  'ñ': 'n',
 };
 
 /// Lower-case, accents dropped: "Hélène" and "helene" are the same search.

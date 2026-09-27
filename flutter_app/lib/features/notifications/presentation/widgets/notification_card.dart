@@ -26,12 +26,13 @@ class NotificationCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
-    final displayTitle =
-        notification.title.isNotEmpty ? notification.title : s.notificationsTitle;
+    final displayTitle = notification.title.isNotEmpty
+        ? notification.title
+        : s.notificationsTitle;
     return Dismissible(
       key: Key(notification.id),
-      direction: onDismiss != null 
-          ? DismissDirection.endToStart 
+      direction: onDismiss != null
+          ? DismissDirection.endToStart
           : DismissDirection.none,
       onDismissed: (_) => onDismiss?.call(),
       background: Container(
@@ -46,8 +47,8 @@ class NotificationCard extends ConsumerWidget {
       child: AppCard(
         padding: EdgeInsets.zero,
         onTap: onTap,
-        backgroundColor: notification.isRead 
-            ? AppColors.backgroundWhite 
+        backgroundColor: notification.isRead
+            ? AppColors.backgroundWhite
             : AppColors.backgroundLight,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -57,7 +58,7 @@ class NotificationCard extends ConsumerWidget {
               // Icon
               _NotificationIcon(type: notification.type),
               const SizedBox(width: AppSpacing.md),
-              
+
               // Content
               Expanded(
                 child: Column(
@@ -70,8 +71,8 @@ class NotificationCard extends ConsumerWidget {
                           child: Text(
                             displayTitle,
                             style: AppTypography.labelLarge.copyWith(
-                              fontWeight: notification.isRead 
-                                  ? FontWeight.w500 
+                              fontWeight: notification.isRead
+                                  ? FontWeight.w500
                                   : FontWeight.w600,
                             ),
                             maxLines: 1,
@@ -91,7 +92,7 @@ class NotificationCard extends ConsumerWidget {
                         ],
                       ],
                     ),
-                    
+
                     // Body
                     if (notification.body.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.xs),
@@ -104,7 +105,7 @@ class NotificationCard extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                    
+
                     // Timestamp
                     const SizedBox(height: AppSpacing.sm),
                     Text(
@@ -116,7 +117,7 @@ class NotificationCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              
+
               // Chevron
               const SizedBox(width: AppSpacing.sm),
               Icon(
@@ -201,7 +202,7 @@ class NotificationCardSkeleton extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          
+
           // Content skeleton
           Expanded(
             child: Column(

@@ -77,7 +77,7 @@ class CpShareTab extends ConsumerWidget {
               ],
             )
           : RefreshIndicator(
-              color: AppColors.secondary,
+              color: AppColors.accentInk,
               onRefresh: () async => ref.invalidate(cpShareEpisodesProvider),
               child: ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.lg),

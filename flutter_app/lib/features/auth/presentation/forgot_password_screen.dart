@@ -41,9 +41,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         title: Text(s.forgotPasswordTitle, style: AppTypography.h3),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go(Routes.login),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(Routes.login),
         ),
       ),
       body: SafeArea(
@@ -79,16 +78,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         Text(
           s.forgotPasswordSuccessMessage,
           textAlign: TextAlign.center,
-          style: AppTypography.bodyMedium
-              .copyWith(color: AppColors.textMuted),
+          style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
         ),
         const SizedBox(height: AppSpacing.xxxl),
         SizedBox(
           height: AppSpacing.buttonHeight,
           child: FilledButton(
-            onPressed: () => context.canPop()
-                ? context.pop()
-                : context.go(Routes.login),
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go(Routes.login),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.secondary,
               foregroundColor: AppColors.onSecondary,
@@ -116,8 +113,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           const SizedBox(height: AppSpacing.lg),
           Text(
             s.forgotPasswordSubtitle,
-            style: AppTypography.bodyMedium
-                .copyWith(color: AppColors.textMuted),
+            style:
+                AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.xxl),
 
@@ -128,8 +125,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               decoration: BoxDecoration(
                 color: AppColors.errorLight,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: AppColors.error.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -219,12 +216,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   : () => context.canPop()
                       ? context.pop()
                       : context.go(Routes.login),
-              style:
-                  TextButton.styleFrom(foregroundColor: AppColors.secondary),
+              style: TextButton.styleFrom(foregroundColor: AppColors.accentInk),
               child: Text(s.backToLogin,
                   style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.secondary,
-                      fontWeight: FontWeight.w600)),
+                      color: AppColors.accentInk, fontWeight: FontWeight.w600)),
             ),
           ),
         ],

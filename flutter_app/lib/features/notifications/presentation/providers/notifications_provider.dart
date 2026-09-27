@@ -74,16 +74,16 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     try {
       // Save to repository
       await _repository.save(notification);
-      
+
       // Update state (add at beginning)
       final updatedList = [notification, ...state.notifications];
-      
+
       // Remove duplicates by ID
       final uniqueList = <String, AppNotification>{};
       for (final n in updatedList) {
         uniqueList[n.id] = n;
       }
-      
+
       state = state.copyWith(
         notifications: uniqueList.values.toList()
           ..sort((a, b) => b.receivedAt.compareTo(a.receivedAt)),
@@ -97,14 +97,14 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   Future<void> markAsRead(String notificationId) async {
     try {
       await _repository.markAsRead(notificationId);
-      
+
       final updatedList = state.notifications.map((n) {
         if (n.id == notificationId) {
           return n.copyWith(isRead: true);
         }
         return n;
       }).toList();
-      
+
       state = state.copyWith(notifications: updatedList);
     } catch (e) {
       _debugLog('Error marking notification as read: $e');
@@ -115,11 +115,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   Future<void> markAllAsRead() async {
     try {
       await _repository.markAllAsRead();
-      
-      final updatedList = state.notifications
-          .map((n) => n.copyWith(isRead: true))
-          .toList();
-      
+
+      final updatedList =
+          state.notifications.map((n) => n.copyWith(isRead: true)).toList();
+
       state = state.copyWith(notifications: updatedList);
     } catch (e) {
       _debugLog('Error marking all as read: $e');
@@ -130,11 +129,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   Future<void> deleteNotification(String notificationId) async {
     try {
       await _repository.delete(notificationId);
-      
-      final updatedList = state.notifications
-          .where((n) => n.id != notificationId)
-          .toList();
-      
+
+      final updatedList =
+          state.notifications.where((n) => n.id != notificationId).toList();
+
       state = state.copyWith(notifications: updatedList);
     } catch (e) {
       _debugLog('Error deleting notification: $e');

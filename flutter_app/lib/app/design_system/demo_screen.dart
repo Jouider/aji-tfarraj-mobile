@@ -45,7 +45,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
             _buildColorRow('Success', AppColors.success),
             _buildColorRow('Warning', AppColors.warning),
             _buildColorRow('Error', AppColors.error),
-            
+
             const SizedBox(height: AppSpacing.xl),
 
             // ============================================
@@ -58,9 +58,12 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
             Text('H3 - Card Title', style: AppTypography.h3),
             Text('H4 - Subtitle', style: AppTypography.h4),
             const SizedBox(height: AppSpacing.sm),
-            Text('Body Large - Main content text', style: AppTypography.bodyLarge),
-            Text('Body Medium - Default body text', style: AppTypography.bodyMedium),
-            Text('Body Small - Captions and hints', style: AppTypography.bodySmall),
+            Text('Body Large - Main content text',
+                style: AppTypography.bodyLarge),
+            Text('Body Medium - Default body text',
+                style: AppTypography.bodyMedium),
+            Text('Body Small - Captions and hints',
+                style: AppTypography.bodySmall),
             const SizedBox(height: AppSpacing.sm),
             Text('Label Large', style: AppTypography.labelLarge),
             Text('Label Medium', style: AppTypography.labelMedium),
@@ -73,39 +76,39 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
             // ============================================
             _buildSectionTitle('Buttons'),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppButton(
               text: 'Primary Button',
               onPressed: () => _showSnackbar('Primary pressed!'),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppButtonSecondary(
               text: 'Secondary Button',
               onPressed: () => _showSnackbar('Secondary pressed!'),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppButtonSecondary(
               text: 'Outline Button',
               onPressed: () => _showSnackbar('Outline pressed!'),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppButton(
               text: 'Button with Icon',
               icon: Icons.arrow_forward,
               onPressed: () => _showSnackbar('Icon button pressed!'),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppButton(
               text: 'Loading Button',
               isLoading: true,
               onPressed: () {},
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppButton(
               text: 'Disabled Button',
               onPressed: null,
@@ -118,7 +121,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
             // ============================================
             _buildSectionTitle('Input Fields'),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppInput(
               controller: _textController,
               label: 'Full Name',
@@ -126,7 +129,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               prefixIcon: const Icon(Icons.person_outline),
             ),
             const SizedBox(height: AppSpacing.lg),
-            
+
             AppInput(
               controller: _passwordController,
               label: 'Password',
@@ -135,14 +138,14 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               prefixIcon: const Icon(Icons.lock_outline),
             ),
             const SizedBox(height: AppSpacing.lg),
-            
+
             AppSearchInput(
               controller: _searchController,
               hint: 'Search shows...',
               onChanged: (value) {},
             ),
             const SizedBox(height: AppSpacing.lg),
-            
+
             AppInput(
               controller: _phoneController,
               label: 'Phone Number',
@@ -151,7 +154,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               prefixIcon: const Icon(Icons.phone_outlined),
             ),
             const SizedBox(height: AppSpacing.lg),
-            
+
             AppInput(
               controller: TextEditingController(),
               label: 'Error State',
@@ -166,7 +169,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
             // ============================================
             _buildSectionTitle('Status Badges'),
             const SizedBox(height: AppSpacing.md),
-            
+
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
@@ -187,7 +190,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
             // ============================================
             _buildSectionTitle('Cards'),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,7 +205,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            
+
             AppCard(
               onTap: () => _showSnackbar('Card tapped!'),
               child: Row(
@@ -238,10 +241,10 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
             // ============================================
             _buildSectionTitle('State Widgets'),
             const SizedBox(height: AppSpacing.md),
-            
+
             const LoadingState(),
             const SizedBox(height: AppSpacing.lg),
-            
+
             SizedBox(
               height: 280,
               child: EmptyState(

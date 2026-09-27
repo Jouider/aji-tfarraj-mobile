@@ -71,7 +71,8 @@ class ShowsQueryParams {
   }
 
   /// Check if any filters are applied
-  bool get hasFilters => city != null || channel != null || (search != null && search!.isNotEmpty);
+  bool get hasFilters =>
+      city != null || channel != null || (search != null && search!.isNotEmpty);
 
   /// Create a reset copy (page 1, keep other params)
   ShowsQueryParams resetPagination() => copyWith(page: 1);
@@ -96,7 +97,8 @@ class ShowsQueryParams {
       search.hashCode;
 
   @override
-  String toString() => 'ShowsQueryParams(page: $page, city: $city, channel: $channel, search: $search)';
+  String toString() =>
+      'ShowsQueryParams(page: $page, city: $city, channel: $channel, search: $search)';
 }
 
 /// Paginated response for shows
@@ -123,7 +125,7 @@ class ShowsRepository {
   ShowsRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Fetch shows with server-side filtering and pagination
-  /// 
+  ///
   /// Supports:
   /// - `page`: Page number (default: 1)
   /// - `perPage`: Items per page (default: 10, max: 50)
@@ -148,7 +150,8 @@ class ShowsRepository {
   }
 
   /// Fetch shows using ShowsQueryParams object
-  Future<PaginatedShowsResponse> fetchShowsWithParams(ShowsQueryParams params) async {
+  Future<PaginatedShowsResponse> fetchShowsWithParams(
+      ShowsQueryParams params) async {
     try {
       final response = await _apiClient.get(
         AppConfig.shows,
@@ -343,7 +346,7 @@ class ShowsListNotifier extends Notifier<ShowsListState> {
   /// Load initial page (resets pagination completely)
   Future<void> loadInitial({ShowsQueryParams? params}) async {
     final queryParams = (params ?? state.queryParams).resetPagination();
-    
+
     // Reset state: clear items, page=1, hasMore=true
     state = ShowsListState(
       items: const [], // Clear existing items
@@ -352,7 +355,7 @@ class ShowsListNotifier extends Notifier<ShowsListState> {
       isLoading: true,
       queryParams: queryParams,
     );
-    
+
     try {
       final repository = ref.read(showsRepositoryProvider);
       final response = await repository.fetchShowsWithParams(queryParams);
@@ -373,14 +376,14 @@ class ShowsListNotifier extends Notifier<ShowsListState> {
   /// Load next page (pagination) - uses same query params
   Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
-    
+
     state = state.copyWith(isLoadingMore: true);
-    
+
     try {
       final repository = ref.read(showsRepositoryProvider);
       final nextParams = state.queryParams.copyWith(page: state.page + 1);
       final response = await repository.fetchShowsWithParams(nextParams);
-      
+
       state = state.copyWith(
         items: [...state.items, ...response.shows],
         page: response.currentPage,
@@ -431,13 +434,13 @@ class ShowsListNotifier extends Notifier<ShowsListState> {
   /// Prevents API spam on every keystroke
   void setSearchDebounced(String? search) {
     final trimmed = search?.trim();
-    
+
     // Cancel any existing timer
     _searchDebounceTimer?.cancel();
-    
+
     // If search is the same, don't do anything
     if (trimmed == state.queryParams.search) return;
-    
+
     // Start new debounce timer
     _searchDebounceTimer = Timer(kSearchDebounceDuration, () {
       _executeSearch(trimmed);
@@ -476,7 +479,8 @@ class ShowsListNotifier extends Notifier<ShowsListState> {
 }
 
 /// Provider for paginated shows list
-final showsListProvider = NotifierProvider<ShowsListNotifier, ShowsListState>(() {
+final showsListProvider =
+    NotifierProvider<ShowsListNotifier, ShowsListState>(() {
   return ShowsListNotifier();
 });
 
@@ -502,12 +506,16 @@ class ShowsFilterState {
   }) {
     return ShowsFilterState(
       selectedCity: clearCity ? null : (selectedCity ?? this.selectedCity),
-      selectedChannel: clearChannel ? null : (selectedChannel ?? this.selectedChannel),
+      selectedChannel:
+          clearChannel ? null : (selectedChannel ?? this.selectedChannel),
       searchQuery: clearSearch ? null : (searchQuery ?? this.searchQuery),
     );
   }
 
-  bool get hasFilters => selectedCity != null || selectedChannel != null || (searchQuery != null && searchQuery!.isNotEmpty);
+  bool get hasFilters =>
+      selectedCity != null ||
+      selectedChannel != null ||
+      (searchQuery != null && searchQuery!.isNotEmpty);
 }
 
 /// Notifier for filter state (backward compatibility)
@@ -522,21 +530,24 @@ class ShowsFilterNotifier extends Notifier<ShowsFilterState> {
   }
 
   void setChannel(String? channel) {
-    state = state.copyWith(selectedChannel: channel, clearChannel: channel == null);
+    state =
+        state.copyWith(selectedChannel: channel, clearChannel: channel == null);
     // Trigger server-side filter
     ref.read(showsListProvider.notifier).setChannel(channel);
   }
 
   /// Set search with debouncing (for TextField onChange)
   void setSearchDebounced(String? search) {
-    state = state.copyWith(searchQuery: search, clearSearch: search == null || search.isEmpty);
+    state = state.copyWith(
+        searchQuery: search, clearSearch: search == null || search.isEmpty);
     // Trigger debounced server-side filter
     ref.read(showsListProvider.notifier).setSearchDebounced(search);
   }
 
   /// Set search immediately (for submit actions)
   void setSearchImmediate(String? search) {
-    state = state.copyWith(searchQuery: search, clearSearch: search == null || search.isEmpty);
+    state = state.copyWith(
+        searchQuery: search, clearSearch: search == null || search.isEmpty);
     // Trigger immediate server-side filter
     ref.read(showsListProvider.notifier).setSearchImmediate(search);
   }
@@ -554,7 +565,8 @@ class ShowsFilterNotifier extends Notifier<ShowsFilterState> {
 }
 
 /// Provider for filter state
-final showsFilterProvider = NotifierProvider<ShowsFilterNotifier, ShowsFilterState>(() {
+final showsFilterProvider =
+    NotifierProvider<ShowsFilterNotifier, ShowsFilterState>(() {
   return ShowsFilterNotifier();
 });
 

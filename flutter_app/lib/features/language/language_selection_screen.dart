@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -16,7 +17,8 @@ class LanguageSelectionScreen extends ConsumerStatefulWidget {
       _LanguageSelectionScreenState();
 }
 
-class _LanguageSelectionScreenState extends ConsumerState<LanguageSelectionScreen>
+class _LanguageSelectionScreenState
+    extends ConsumerState<LanguageSelectionScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fade;
@@ -61,15 +63,9 @@ class _LanguageSelectionScreenState extends ConsumerState<LanguageSelectionScree
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Spacer(),
-                  // Logo — use white variant on dark background
-                  Center(
-                    child: Image.asset(
-                      Theme.of(context).brightness == Brightness.dark
-                          ? 'assets/images/ajitfarraj_logo/white_fr_logo.png'
-                          : 'assets/images/ajitfarraj_logo/black_fr_logo.png',
-                      width: 180,
-                    ),
-                  ),
+                  // Le logotype complet : c'est l'écran de bienvenue, il a
+                  // toute la place, et rien ne lui dispute l'attention.
+                  const Center(child: AppLogo(width: 210)),
                   const SizedBox(height: AppSpacing.xxxl),
                   // Bilingual prompt
                   Text(
@@ -135,33 +131,33 @@ class _LanguageButton extends StatelessWidget {
       label: label,
       button: true,
       child: Material(
-      color: AppColors.backgroundGrey,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      child: InkWell(
-        onTap: onTap,
+        color: AppColors.backgroundGrey,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(flag, style: const TextStyle(fontSize: 20)),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                label,
-                style: AppTypography.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w600,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(flag, style: const TextStyle(fontSize: 20)),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  label,
+                  style: AppTypography.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }

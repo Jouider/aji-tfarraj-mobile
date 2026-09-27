@@ -663,7 +663,6 @@ class NavTabsCopyAr {
   String get profile => 'حسابي';
 }
 
-
 /// Casting strings in Moroccan Arabic.
 class CastingCopyAr implements CastingCopy {
   const CastingCopyAr();
@@ -727,7 +726,6 @@ class CastingCopyAr implements CastingCopy {
         ],
       );
 
-
   CastingPoseCopy get portraitSmile => const CastingPoseCopy(
         label: 'صورة بالضحكة',
         hint: 'نفس الإطار، ضحكة طبيعية',
@@ -774,7 +772,8 @@ class CastingCopyAr implements CastingCopy {
   String get statusUnknown => 'كيتعالج';
 
   String get adultsOnly => 'الكاستينغ غير للكبار (18 عام وفوق).';
-  String get birthdayRequired => 'دخّل تاريخ الازدياد ديالك باش تدخل للكاستينغ.';
+  String get birthdayRequired =>
+      'دخّل تاريخ الازدياد ديالك باش تدخل للكاستينغ.';
   String get completeProfile => 'كمّل البروفايل';
   String get loadError => 'ما تقدرش نجيبو الكاستينغ.';
   String get photoError => 'ما تقدرش نصيفطو الصورة.';
@@ -1095,8 +1094,7 @@ class HowItWorksCopyAr {
 
   // Client track — how to use the app
   String get clientHeadline => 'احجز مكانك في 5 خطوات';
-  String get clientSubtitle =>
-      'احضر مجانًا تصوير برامجك المفضلة.';
+  String get clientSubtitle => 'احضر مجانًا تصوير برامجك المفضلة.';
   List<HowToStep> get clientSteps => const [
         HowToStep(
           title: 'استكشف البرامج',
@@ -1108,8 +1106,7 @@ class HowItWorksCopyAr {
         ),
         HowToStep(
           title: 'انتظر التأكيد',
-          body:
-              'فريقنا كيتواصل معاك لتأكيد حضورك. كتوصلك إشعارات في كل مرحلة.',
+          body: 'فريقنا كيتواصل معاك لتأكيد حضورك. كتوصلك إشعارات في كل مرحلة.',
         ),
         HowToStep(
           title: 'استلم تذكرتك',
@@ -1128,8 +1125,7 @@ class HowItWorksCopyAr {
   List<HowToStep> get parrainSteps => const [
         HowToStep(
           title: 'احصل على رابطك',
-          body:
-              'افتح برنامجًا وأنشئ رابط الإحالة الخاص بك من زر المشاركة.',
+          body: 'افتح برنامجًا وأنشئ رابط الإحالة الخاص بك من زر المشاركة.',
         ),
         HowToStep(
           title: 'شاركه مع معارفك',
@@ -1138,13 +1134,11 @@ class HowItWorksCopyAr {
         ),
         HowToStep(
           title: 'كيحجزو أماكنهم',
-          body:
-              'كل شخص كيحجز عبر رابطك كيترتبط تلقائيًا بحسابك.',
+          body: 'كل شخص كيحجز عبر رابطك كيترتبط تلقائيًا بحسابك.',
         ),
         HowToStep(
           title: 'تابع نتائجك مباشرة',
-          body:
-              'شوف النقرات والحجوزات ديال كل رابط في «إحالاتي».',
+          body: 'شوف النقرات والحجوزات ديال كل رابط في «إحالاتي».',
         ),
         HowToStep(
           title: 'اربح مقابلك',
@@ -1203,16 +1197,12 @@ class ReservationDetailCopyAr {
   String get appBarTitle => 'حجزي';
 
   // Status messages
-  String get msgPending =>
-      'طلبك قيد المعالجة. سيتم إخطارك فور الموافقة عليه.';
-  String get msgApproved =>
-      'تم تأكيد حجزك! يمكنك الاطلاع على تذكرتك أدناه.';
-  String get msgRejected =>
-      'تم رفض طلبك. يمكنك تقديم طلب جديد.';
+  String get msgPending => 'طلبك قيد المعالجة. سيتم إخطارك فور الموافقة عليه.';
+  String get msgApproved => 'تم تأكيد حجزك! يمكنك الاطلاع على تذكرتك أدناه.';
+  String get msgRejected => 'تم رفض طلبك. يمكنك تقديم طلب جديد.';
   String get msgCheckedIn => 'لقد حضرت هذا البرنامج. شكراً!';
   String get msgCancelled => 'لقد ألغيت هذا الحجز.';
-  String get msgExpired =>
-      'انتهت صلاحية هذا الحجز. يمكنك حجز برنامج آخر.';
+  String get msgExpired => 'انتهت صلاحية هذا الحجز. يمكنك حجز برنامج آخر.';
 
   // Section labels
   String get sectionShow => 'البرنامج';
@@ -1295,15 +1285,13 @@ class SupportCopyAr {
 
   // Create screen
   String get infoBannerTitle => 'معلومة مفيدة';
-  String get infoBannerBody =>
-      'سيتصل بك فريقنا على الرقم المرتبط بحسابك. '
+  String get infoBannerBody => 'سيتصل بك فريقنا على الرقم المرتبط بحسابك. '
       'صف مشكلتك بالتفصيل لتسريع المعالجة.';
   String get subjectLabel => 'الموضوع *';
   String get subjectHint => 'مثال: مشكلة في حجزي...';
   String get subjectRequired => 'الموضوع مطلوب';
   String get messageLabel => 'الوصف *';
-  String get messageHint =>
-      'صف مشكلتك بالتفصيل...\nاذكر رقم الحجز إن وجد.';
+  String get messageHint => 'صف مشكلتك بالتفصيل...\nاذكر رقم الحجز إن وجد.';
   String get submitButton => 'إرسال طلبي';
 
   // Confirmation screen
@@ -1529,5 +1517,6 @@ class DepartureCopyAr implements DepartureCopy {
       '${count > 1 ? 'طرد سابق ×$count' : 'طرد سابق'}'
       '${date != null ? ' — نهار $date' : ''}'
       '${show != null && show.isNotEmpty ? ' ($show)' : ''}';
-  String doorAlreadyLeft(String time, String reason) => 'الخروج: $time · $reason';
+  String doorAlreadyLeft(String time, String reason) =>
+      'الخروج: $time · $reason';
 }

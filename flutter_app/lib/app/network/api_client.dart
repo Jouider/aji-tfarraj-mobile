@@ -40,7 +40,7 @@ class ApiClient {
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
         }
-        
+
         // Debug logging
         if (kDebugMode) {
           print('┌─────────────────────────────────────────');
@@ -50,7 +50,7 @@ class ApiClient {
           }
           print('└─────────────────────────────────────────');
         }
-        
+
         handler.next(options);
       },
       onResponse: (response, handler) {
@@ -144,7 +144,8 @@ class ApiClient {
 
     if (kDebugMode) {
       print('┌─────────────────────────────────────────');
-      print('│ 🔁 Retry ${attempt + 1}/$_maxRetries after ${delay.inMilliseconds}ms');
+      print(
+          '│ 🔁 Retry ${attempt + 1}/$_maxRetries after ${delay.inMilliseconds}ms');
       print('│ 🔗 ${opts.uri}');
       print('└─────────────────────────────────────────');
     }
@@ -414,7 +415,8 @@ class ApiException implements Exception {
         message = 'La connexion a expiré. Veuillez réessayer.';
         break;
       case DioExceptionType.connectionError:
-        message = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
+        message =
+            'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
         break;
       case DioExceptionType.badResponse:
         if (error.response?.statusCode == 429) {
@@ -474,9 +476,11 @@ class ApiException implements Exception {
   /// [s] is the app `Strings` object (passed as dynamic to avoid an import cycle).
   String userMessage(dynamic s) {
     if (isUnauthenticated) return s.unauthorized as String; // session expired
-    if (isRateLimited) return message; // fromDioError already built the 429 text
+    if (isRateLimited)
+      return message; // fromDioError already built the 429 text
     if (code == 'PARSE_ERROR' || isServerError) return s.genericError as String;
-    if (statusCode == null) return s.networkError as String; // real network/timeout
+    if (statusCode == null)
+      return s.networkError as String; // real network/timeout
     return message; // server-provided message (422 / 409 / 400 …)
   }
 

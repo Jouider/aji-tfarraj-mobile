@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/loaders.dart';
@@ -81,7 +82,7 @@ class ReferralLandingScreen extends ConsumerWidget {
                     ),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                     border: Border.all(
-                      color: AppColors.secondary.withValues(alpha: 0.3),
+                      color: AppColors.accentInk.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -145,17 +146,16 @@ class ReferralLandingScreen extends ConsumerWidget {
                 // Show title + channel
                 if (show.channel != null) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.secondary.withValues(alpha: 0.15),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSm),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     ),
                     child: Text(
                       show.channel!,
                       style: AppTypography.labelSmall
-                          .copyWith(color: AppColors.secondary),
+                          .copyWith(color: AppColors.accentInk),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
@@ -209,15 +209,9 @@ class ReferralLandingScreen extends ConsumerWidget {
           ),
           decoration: BoxDecoration(
             color: AppColors.backgroundLight,
-            border: Border(
-                top: BorderSide(color: AppColors.border, width: 0.5)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
-              ),
-            ],
+            border:
+                Border(top: BorderSide(color: AppColors.border, width: 0.5)),
+            boxShadow: AppShadows.card,
           ),
           child: SafeArea(
             top: false,
@@ -253,9 +247,8 @@ class ReferralLandingScreen extends ConsumerWidget {
 
                         // Persist the destination so the router can return
                         // here after a login redirect instead of going home.
-                        ref
-                            .read(pendingNavigationProvider.notifier)
-                            .state = route;
+                        ref.read(pendingNavigationProvider.notifier).state =
+                            route;
                         context.go(route);
                       },
                 style: FilledButton.styleFrom(
@@ -264,8 +257,7 @@ class ReferralLandingScreen extends ConsumerWidget {
                   disabledBackgroundColor:
                       AppColors.secondary.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusMd),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   ),
                 ),
                 child: Text(
@@ -304,8 +296,7 @@ class ReferralLandingScreen extends ConsumerWidget {
           children: [
             Icon(Icons.link_off, size: 64, color: AppColors.textLight),
             const SizedBox(height: AppSpacing.lg),
-            Text(message,
-                style: AppTypography.h4, textAlign: TextAlign.center),
+            Text(message, style: AppTypography.h4, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.xl),
             TextButton(
               onPressed: () => context.go(Routes.home),
@@ -355,8 +346,8 @@ class _DetailRow extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style:
-                AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodyMedium
+                .copyWith(color: AppColors.textSecondary),
           ),
         ),
       ],

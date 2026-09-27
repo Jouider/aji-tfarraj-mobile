@@ -215,8 +215,7 @@ class CpReferredUser {
         name: j['name'] as String? ?? '—',
         visits: (j['visits'] as num?)?.toInt() ?? 0,
         totalEarned: (j['total_earned'] as num?)?.toInt() ?? 0,
-        nextDiscountPercent:
-            (j['next_discount_percent'] as num?)?.toInt() ?? 0,
+        nextDiscountPercent: (j['next_discount_percent'] as num?)?.toInt() ?? 0,
       );
 }
 

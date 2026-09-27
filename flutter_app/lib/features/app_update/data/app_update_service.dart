@@ -26,8 +26,7 @@ class AppVersionConfig {
       latestVersion: (json['latest_version'] ?? json['latest'] ?? '') as String,
       minVersion: (json['min_version'] ?? json['minimum_version']) as String?,
       iosUrl: (json['ios_url'] ?? json['ios_store_url']) as String?,
-      androidUrl:
-          (json['android_url'] ?? json['android_store_url']) as String?,
+      androidUrl: (json['android_url'] ?? json['android_store_url']) as String?,
     );
   }
 }

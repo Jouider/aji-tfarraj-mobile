@@ -78,8 +78,8 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDisabled = onPressed == null || isLoading;
-    final height = size == AppButtonSize.large 
-        ? AppSpacing.buttonHeight 
+    final height = size == AppButtonSize.large
+        ? AppSpacing.buttonHeight
         : AppSpacing.buttonHeightSm;
 
     return SizedBox(
@@ -162,8 +162,8 @@ class _PrimaryButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.backgroundWhite,
+        backgroundColor: AppColors.primaryAction,
+        foregroundColor: AppColors.onPrimary,
         disabledBackgroundColor: AppColors.disabled,
         disabledForegroundColor: AppColors.textLight,
         elevation: 0,
@@ -171,7 +171,8 @@ class _PrimaryButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         padding: EdgeInsets.symmetric(
-          horizontal: size == AppButtonSize.large ? AppSpacing.xl : AppSpacing.lg,
+          horizontal:
+              size == AppButtonSize.large ? AppSpacing.xl : AppSpacing.lg,
         ),
       ),
       child: _ButtonContent(
@@ -223,7 +224,8 @@ class _SecondaryButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         padding: EdgeInsets.symmetric(
-          horizontal: size == AppButtonSize.large ? AppSpacing.xl : AppSpacing.lg,
+          horizontal:
+              size == AppButtonSize.large ? AppSpacing.xl : AppSpacing.lg,
         ),
       ),
       child: _ButtonContent(
@@ -276,7 +278,8 @@ class _OutlineButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         padding: EdgeInsets.symmetric(
-          horizontal: size == AppButtonSize.large ? AppSpacing.xl : AppSpacing.lg,
+          horizontal:
+              size == AppButtonSize.large ? AppSpacing.xl : AppSpacing.lg,
         ),
       ),
       child: _ButtonContent(
@@ -326,7 +329,8 @@ class _TextButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         padding: EdgeInsets.symmetric(
-          horizontal: size == AppButtonSize.large ? AppSpacing.lg : AppSpacing.md,
+          horizontal:
+              size == AppButtonSize.large ? AppSpacing.lg : AppSpacing.md,
         ),
       ),
       child: _ButtonContent(
@@ -380,9 +384,8 @@ class _ButtonContent extends StatelessWidget {
       );
     }
 
-    final iconSize = size == AppButtonSize.large 
-        ? AppSpacing.iconMd 
-        : AppSpacing.iconSm;
+    final iconSize =
+        size == AppButtonSize.large ? AppSpacing.iconMd : AppSpacing.iconSm;
 
     return Row(
       mainAxisSize: MainAxisSize.min,

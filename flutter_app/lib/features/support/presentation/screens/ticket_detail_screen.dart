@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
@@ -17,8 +18,7 @@ class TicketDetailScreen extends ConsumerStatefulWidget {
   const TicketDetailScreen({super.key, required this.ticketId});
 
   @override
-  ConsumerState<TicketDetailScreen> createState() =>
-      _TicketDetailScreenState();
+  ConsumerState<TicketDetailScreen> createState() => _TicketDetailScreenState();
 }
 
 class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen> {
@@ -117,17 +117,14 @@ class _DetailContent extends StatelessWidget {
         children: [
           TicketStatusBanner(status: ticket.status, s: s),
           const SizedBox(height: AppSpacing.xl),
-
           _SectionLabel(s.supportDetailSubjectSection),
           const SizedBox(height: AppSpacing.sm),
           _SubjectCard(subject: ticket.subject),
           const SizedBox(height: AppSpacing.xl),
-
           _SectionLabel(s.supportDetailMessageSection),
           const SizedBox(height: AppSpacing.sm),
           _MessageCard(message: ticket.message),
           const SizedBox(height: AppSpacing.xl),
-
           _SectionLabel(s.supportDetailMetaSection),
           const SizedBox(height: AppSpacing.sm),
           _MetadataCard(
@@ -137,11 +134,7 @@ class _DetailContent extends StatelessWidget {
             s: s,
           ),
           const SizedBox(height: AppSpacing.xl),
-
-          isClosed
-              ? _ClosedInfoBox(s: s)
-              : _PendingInfoBox(s: s),
-
+          isClosed ? _ClosedInfoBox(s: s) : _PendingInfoBox(s: s),
           const SizedBox(height: AppSpacing.xxl),
         ],
       ),
@@ -203,13 +196,7 @@ class _SubjectCard extends StatelessWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       child: Text(
         subject,
@@ -241,13 +228,7 @@ class _MessageCard extends StatelessWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -293,13 +274,7 @@ class _MetadataCard extends StatelessWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         children: [
@@ -307,8 +282,8 @@ class _MetadataCard extends StatelessWidget {
             icon: Icons.confirmation_number_outlined,
             label: s.supportMetaTicketNumber,
             value: '#$id',
-            valueStyle: const TextStyle(
-              color: AppColors.secondary,
+            valueStyle: TextStyle(
+              color: AppColors.accentInk,
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),
@@ -361,7 +336,7 @@ class _MetaRow extends StatelessWidget {
               color: AppColors.secondary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 18, color: AppColors.secondary),
+            child: Icon(icon, size: 18, color: AppColors.accentInk),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -406,8 +381,7 @@ class _PendingInfoBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.warningLight,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(
-            color: AppColors.secondary.withValues(alpha: 0.30)),
+        border: Border.all(color: AppColors.secondary.withValues(alpha: 0.30)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -476,9 +450,7 @@ class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
 
   const _ErrorView(
-      {required this.message,
-      required this.retryLabel,
-      required this.onRetry});
+      {required this.message, required this.retryLabel, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -488,8 +460,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline,
-                size: 64, color: AppColors.error),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: AppSpacing.lg),
             Text(
               message,

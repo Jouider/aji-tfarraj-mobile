@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
@@ -58,8 +59,7 @@ class _TicketConfirmationScreenState
   Animation<Offset> _slideInterval(double begin, double end) =>
       Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(
         CurvedAnimation(
-            parent: _ctrl,
-            curve: Interval(begin, end, curve: Curves.easeOut)),
+            parent: _ctrl, curve: Interval(begin, end, curve: Curves.easeOut)),
       );
 
   @override
@@ -82,31 +82,25 @@ class _TicketConfirmationScreenState
           child: Column(
             children: [
               const SizedBox(height: 40),
-
               _Animated(
                 opacity: _heroOpacity,
                 slide: _heroSlide,
                 child: _ConfirmationHero(s: s),
               ),
-
               const SizedBox(height: 28),
-
               _Animated(
                 opacity: _cardOpacity,
                 slide: _cardSlide,
-                child: _SummaryCard(ticket: widget.ticket, s: s, locale: locale),
+                child:
+                    _SummaryCard(ticket: widget.ticket, s: s, locale: locale),
               ),
-
               const SizedBox(height: 28),
-
               _Animated(
                 opacity: _stepsOpacity,
                 slide: _stepsSlide,
                 child: _NextSteps(s: s),
               ),
-
               const SizedBox(height: 32),
-
               _Animated(
                 opacity: _stepsOpacity,
                 slide: _stepsSlide,
@@ -123,7 +117,6 @@ class _TicketConfirmationScreenState
                       Navigator.of(context).popUntil((r) => r.isFirst),
                 ),
               ),
-
               const SizedBox(height: 24),
             ],
           ),
@@ -250,8 +243,8 @@ class _ConfirmationHeroState extends State<_ConfirmationHero>
           decoration: BoxDecoration(
             color: AppColors.warningLight,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-                color: AppColors.secondary.withValues(alpha: 0.35)),
+            border:
+                Border.all(color: AppColors.secondary.withValues(alpha: 0.35)),
             boxShadow: [
               BoxShadow(
                 color: AppColors.secondary.withValues(alpha: 0.12),
@@ -306,13 +299,7 @@ class _SummaryCard extends StatelessWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,8 +317,8 @@ class _SummaryCard extends StatelessWidget {
           _SummaryRow(
             label: s.supportSummaryTicket,
             value: '#${ticket.id}',
-            valueStyle: const TextStyle(
-              color: AppColors.secondary,
+            valueStyle: TextStyle(
+              color: AppColors.accentInk,
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),
@@ -420,8 +407,7 @@ class _NextSteps extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            const Icon(Icons.info_outline,
-                color: AppColors.primary, size: 20),
+            const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
             const SizedBox(width: 8),
             Text(
               s.supportStepsTitle,
@@ -447,8 +433,7 @@ class _NextSteps extends StatelessWidget {
         widgets.add(
           Padding(
             padding: const EdgeInsets.only(left: 29.5),
-            child:
-                Container(width: 1, height: 20, color: AppColors.border),
+            child: Container(width: 1, height: 20, color: AppColors.border),
           ),
         );
       }
@@ -561,7 +546,7 @@ class _ActionButtons extends StatelessWidget {
               ),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: AppColors.primaryAction,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
               padding: EdgeInsets.zero,
@@ -574,8 +559,7 @@ class _ActionButtons extends StatelessWidget {
           height: 54,
           child: OutlinedButton.icon(
             onPressed: onHome,
-            icon: Icon(Icons.home_outlined,
-                size: 18, color: AppColors.primary),
+            icon: Icon(Icons.home_outlined, size: 18, color: AppColors.primary),
             label: Text(
               s.supportBtnBackHome,
               style: TextStyle(

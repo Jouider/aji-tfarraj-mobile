@@ -21,8 +21,7 @@ class BookingInfoCard extends StatelessWidget {
         // FIX: warningLight bg (subtle warm tint) + secondary 25% border + radius 14
         color: AppColors.warningLight,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-            color: AppColors.secondary.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.secondary.withValues(alpha: 0.25)),
         // FIX: No shadow — info card feels flat/calm
       ),
       child: Row(

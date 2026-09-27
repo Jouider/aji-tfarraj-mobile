@@ -18,7 +18,7 @@ class PointsTotalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.primaryAction,
       child: Column(
         children: [
           const Icon(

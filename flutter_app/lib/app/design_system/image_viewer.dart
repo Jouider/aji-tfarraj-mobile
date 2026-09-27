@@ -77,9 +77,8 @@ class _FullScreenImage extends StatelessWidget {
             child: InteractiveViewer(
               minScale: 1,
               maxScale: 4,
-              child: heroTag != null
-                  ? Hero(tag: heroTag!, child: image)
-                  : image,
+              child:
+                  heroTag != null ? Hero(tag: heroTag!, child: image) : image,
             ),
           ),
           Positioned(
@@ -97,8 +96,7 @@ class _FullScreenImage extends StatelessWidget {
                     color: Colors.black.withValues(alpha: 0.45),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.close,
-                      color: Colors.white, size: 22),
+                  child: const Icon(Icons.close, color: Colors.white, size: 22),
                 ),
               ),
             ),

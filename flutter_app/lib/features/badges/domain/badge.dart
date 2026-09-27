@@ -159,7 +159,8 @@ class UserBadges {
 /// labels/colors/emojis still come from the API.
 const Map<String, int> _tierMins = {
   // attendance
-  'nouveau': 0, 'bronze': 1, 'argent': 6, 'or': 21, 'platine': 51, 'diamant': 81,
+  'nouveau': 0, 'bronze': 1, 'argent': 6, 'or': 21, 'platine': 51,
+  'diamant': 81,
   // charge public
   'n1': 0, 'n2': 11, 'n3': 51, 'n4': 101, 'n5': 201,
 };

@@ -114,8 +114,8 @@ class _ConfirmationHeroState extends ConsumerState<ConfirmationHero>
           decoration: BoxDecoration(
             color: AppColors.warningLight,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-                color: AppColors.secondary.withValues(alpha: 0.35)),
+            border:
+                Border.all(color: AppColors.secondary.withValues(alpha: 0.35)),
             boxShadow: [
               BoxShadow(
                 color: AppColors.secondary.withValues(alpha: 0.12),

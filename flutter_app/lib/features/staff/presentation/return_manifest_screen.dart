@@ -56,7 +56,8 @@ class _ReturnManifestScreenState extends ConsumerState<ReturnManifestScreen> {
             IconButton(
               tooltip: s.staffManifestRefresh,
               icon: const Icon(Icons.refresh),
-              onPressed: () => ref.invalidate(returnManifestProvider(_episodeId!)),
+              onPressed: () =>
+                  ref.invalidate(returnManifestProvider(_episodeId!)),
             ),
         ],
       ),
@@ -298,8 +299,7 @@ class _Totals extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           box(s.staffManifestWaiting, manifest.riders,
-              AppColors.secondary.withValues(alpha: 0.12),
-              AppColors.secondary),
+              AppColors.secondary.withValues(alpha: 0.12), AppColors.secondary),
           const SizedBox(width: AppSpacing.sm),
           box(s.staffManifestOwnMeans, manifest.ownMeans,
               AppColors.backgroundWhite, AppColors.textPrimary),
@@ -371,7 +371,9 @@ class _PointCardState extends State<_PointCard> {
         color: AppColors.backgroundWhite,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         border: Border.all(
-          color: point.served ? AppColors.border : AppColors.error.withValues(alpha: 0.4),
+          color: point.served
+              ? AppColors.border
+              : AppColors.error.withValues(alpha: 0.4),
         ),
       ),
       child: Column(
@@ -398,7 +400,8 @@ class _PointCardState extends State<_PointCard> {
                                 : AppColors.textPrimary,
                           ),
                         ),
-                        if (point.landmark != null && point.landmark!.isNotEmpty)
+                        if (point.landmark != null &&
+                            point.landmark!.isNotEmpty)
                           Text(point.landmark!,
                               style: AppTypography.caption
                                   .copyWith(color: AppColors.textMuted)),
@@ -438,8 +441,8 @@ class _PointCardState extends State<_PointCard> {
           ),
           if (_open)
             Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, 0,
-                  AppSpacing.md, AppSpacing.md),
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
               child: Column(
                 children: [
                   Divider(height: 1, color: AppColors.border),
@@ -460,7 +463,7 @@ class _PointCardState extends State<_PointCard> {
                             Text('×${passenger.seats}',
                                 style: AppTypography.bodySmall.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.secondary)),
+                                    color: AppColors.accentInk)),
                         ],
                       ),
                     ),
@@ -572,15 +575,15 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
             ),
             const SizedBox(height: AppSpacing.lg),
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf_outlined,
-                  color: AppColors.secondary),
+              leading: Icon(Icons.picture_as_pdf_outlined,
+                  color: AppColors.accentInk),
               title: Text(s.staffManifestSharePdf,
                   style: AppTypography.bodyMedium),
               onTap: () => Navigator.of(sheetContext).pop(_ShareChoice.pdf),
             ),
             ListTile(
-              leading: const Icon(Icons.chat_bubble_outline,
-                  color: AppColors.secondary),
+              leading:
+                  Icon(Icons.chat_bubble_outline, color: AppColors.accentInk),
               title: Text(s.staffManifestShareText,
                   style: AppTypography.bodyMedium),
               onTap: () => Navigator.of(sheetContext).pop(_ShareChoice.text),

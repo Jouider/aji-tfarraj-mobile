@@ -16,7 +16,11 @@ class NextStepsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
 
-    final steps = [s.reservationResultStep1, s.reservationResultStep2, s.reservationResultStep3];
+    final steps = [
+      s.reservationResultStep1,
+      s.reservationResultStep2,
+      s.reservationResultStep3
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

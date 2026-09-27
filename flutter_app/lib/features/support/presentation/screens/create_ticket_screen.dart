@@ -14,8 +14,7 @@ class CreateTicketScreen extends ConsumerStatefulWidget {
   const CreateTicketScreen({super.key});
 
   @override
-  ConsumerState<CreateTicketScreen> createState() =>
-      _CreateTicketScreenState();
+  ConsumerState<CreateTicketScreen> createState() => _CreateTicketScreenState();
 }
 
 class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
@@ -216,8 +215,7 @@ class _InfoBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.warningLight,
         borderRadius: BorderRadius.circular(14),
-        border:
-            Border.all(color: AppColors.secondary.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.secondary.withValues(alpha: 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,8 +314,8 @@ class _FocusableTextFieldState extends State<_FocusableTextField> {
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(
-        () => setState(() => _isFocused = _focusNode.hasFocus));
+    _focusNode
+        .addListener(() => setState(() => _isFocused = _focusNode.hasFocus));
   }
 
   @override
@@ -443,8 +441,8 @@ class _SubmitButton extends StatelessWidget {
           backgroundColor: active ? AppColors.primary : AppColors.border,
           disabledBackgroundColor: AppColors.border,
           disabledForegroundColor: AppColors.textMuted,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           padding: EdgeInsets.zero,
         ),
       ),

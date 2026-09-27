@@ -17,8 +17,7 @@ class ChargePublicRepository {
   /// by-show / payments yet).
   Future<CpDashboard> fetchDashboard() async {
     try {
-      final response =
-          await _apiClient.get(AppConfig.chargePublicDashboard);
+      final response = await _apiClient.get(AppConfig.chargePublicDashboard);
       return CpDashboard.fromRich(_asMap(response.data));
     } on DioException catch (e) {
       final code = e.response?.statusCode;
@@ -51,8 +50,7 @@ class ChargePublicRepository {
   }
 }
 
-final chargePublicRepositoryProvider =
-    Provider<ChargePublicRepository>((ref) {
+final chargePublicRepositoryProvider = Provider<ChargePublicRepository>((ref) {
   return ChargePublicRepository(ref.watch(apiClientProvider));
 });
 

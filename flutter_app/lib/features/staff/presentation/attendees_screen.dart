@@ -174,7 +174,8 @@ class _AttendeesBodyState extends ConsumerState<_AttendeesBody> {
                   Text(
                     [
                       // Isolated, so a Latin title keeps its place in an Arabic line.
-                      if (data.showTitle.isNotEmpty) '\u2068${data.showTitle}\u2069',
+                      if (data.showTitle.isNotEmpty)
+                        '\u2068${data.showTitle}\u2069',
                       c.counts(data.presentCount, data.leftCount),
                     ].join(' · '),
                     style: AppTypography.bodySmall
@@ -403,8 +404,9 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
       _error = null;
     });
     try {
-      final updated =
-          await ref.read(staffRepositoryProvider).undoDeparture(widget.attendee);
+      final updated = await ref
+          .read(staffRepositoryProvider)
+          .undoDeparture(widget.attendee);
       if (mounted) Navigator.of(context).pop(updated);
     } catch (e) {
       _fail(e);
@@ -486,7 +488,8 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
         Text(c.sheetTitle, style: AppTypography.h3),
         const SizedBox(height: AppSpacing.xs),
         Text(c.reasonQuestion,
-            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
+            style:
+                AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
@@ -500,8 +503,7 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
                         ? AppColors.error
                         : AppColors.primary)
                     .withValues(alpha: 0.18),
-                onSelected:
-                    _saving ? null : (_) => setState(() => _reason = r),
+                onSelected: _saving ? null : (_) => setState(() => _reason = r),
               ),
           ],
         ),
@@ -570,7 +572,8 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
           onPressed: _saving ? null : _undo,
           icon: const Icon(Icons.undo),
           label: Text(c.undo),
-          style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+          style:
+              OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
         ),
       ];
 }

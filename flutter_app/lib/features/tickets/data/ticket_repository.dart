@@ -47,12 +47,12 @@ class TicketRepository {
   Future<TicketsFetchResult> fetchAllTicketsWithCache() async {
     try {
       final tickets = await _fetchAllTicketsFromNetwork();
-      
+
       // Cache successful response
       if (tickets.isNotEmpty) {
         await _cacheTickets(tickets);
       }
-      
+
       return TicketsFetchResult(tickets: tickets, isOffline: false);
     } on DioException catch (e) {
       // On network error, try to load from cache
@@ -62,12 +62,12 @@ class TicketRepository {
           return TicketsFetchResult(tickets: cachedTickets, isOffline: true);
         }
       }
-      
+
       // Handle 404 as no tickets (not an error)
       if (e.response?.statusCode == 404) {
         return const TicketsFetchResult(tickets: [], isOffline: false);
       }
-      
+
       throw ApiException.fromDioError(e);
     } catch (e) {
       // Try cache on any error
@@ -107,7 +107,8 @@ class TicketRepository {
     try {
       final reservationTickets = await _fetchTicketsFromReservations();
       allTickets.addAll(reservationTickets);
-      _debugLog('Fetched ${reservationTickets.length} tickets from reservations');
+      _debugLog(
+          'Fetched ${reservationTickets.length} tickets from reservations');
     } on DioException catch (e) {
       if (_isNetworkError(e)) sawNetworkError = true;
       _debugLog('Failed to fetch tickets from reservations: $e');
@@ -127,12 +128,13 @@ class TicketRepository {
 
     // 3. Deduplicate and sort
     final mergedTickets = _deduplicateAndSortTickets(allTickets);
-    
+
     // Debug log final result
     _debugLog('=== TICKET MERGE RESULT ===');
     _debugLog('Total tickets after merge: ${mergedTickets.length}');
     for (final ticket in mergedTickets) {
-      _debugLog('  - ID: ${ticket.id}, Code: ${ticket.ticketCode}, Show: ${ticket.show?.title ?? "N/A"}');
+      _debugLog(
+          '  - ID: ${ticket.id}, Code: ${ticket.ticketCode}, Show: ${ticket.show?.title ?? "N/A"}');
     }
     _debugLog('===========================');
 
@@ -142,36 +144,36 @@ class TicketRepository {
   /// Fetch latest ticket from /api/me/ticket endpoint
   Future<Ticket?> _fetchLatestTicketFromNetwork() async {
     final response = await _apiClient.get(AppConfig.myTicket);
-    
+
     if (response.data == null) {
       return null;
     }
-    
+
     final data = response.data;
-    
+
     // Handle wrapped response: { data: {...} } or { data: [...] }
     if (data is Map<String, dynamic> && data.containsKey('data')) {
       final ticketData = data['data'];
       if (ticketData == null) {
         return null;
       }
-      
+
       // Handle list response: { data: [...] }
       if (ticketData is List) {
         if (ticketData.isEmpty) return null;
         return Ticket.fromJson(ticketData.first as Map<String, dynamic>);
       }
-      
+
       // Handle single object: { data: {...} }
       return Ticket.fromJson(ticketData as Map<String, dynamic>);
     }
-    
+
     // Handle direct list response: [...]
     if (data is List) {
       if (data.isEmpty) return null;
       return Ticket.fromJson(data.first as Map<String, dynamic>);
     }
-    
+
     // Handle direct object response
     return Ticket.fromJson(data as Map<String, dynamic>);
   }
@@ -198,7 +200,7 @@ class TicketRepository {
     // First pass: extract embedded tickets and collect IDs for detail fetching
     for (final resJson in reservationsData) {
       final reservation = Reservation.fromJson(resJson as Map<String, dynamic>);
-      
+
       // Only process eligible statuses
       if (!_ticketEligibleStatuses.contains(reservation.status)) {
         continue;
@@ -211,7 +213,8 @@ class TicketRepository {
       } else {
         // Ticket not embedded, need to fetch detail
         reservationIdsToFetch.add(reservation.id);
-        _debugLog('Reservation ${reservation.id} has no embedded ticket, will fetch detail');
+        _debugLog(
+            'Reservation ${reservation.id} has no embedded ticket, will fetch detail');
       }
     }
 
@@ -219,8 +222,9 @@ class TicketRepository {
     if (reservationIdsToFetch.isNotEmpty) {
       final idsToFetch = reservationIdsToFetch.take(_maxDetailFetches).toList();
       _debugLog('Fetching details for ${idsToFetch.length} reservations...');
-      
-      final detailTickets = await _fetchTicketsFromReservationDetails(idsToFetch);
+
+      final detailTickets =
+          await _fetchTicketsFromReservationDetails(idsToFetch);
       tickets.addAll(detailTickets);
     }
 
@@ -228,7 +232,8 @@ class TicketRepository {
   }
 
   /// Fetch tickets by getting reservation details concurrently
-  Future<List<Ticket>> _fetchTicketsFromReservationDetails(List<int> reservationIds) async {
+  Future<List<Ticket>> _fetchTicketsFromReservationDetails(
+      List<int> reservationIds) async {
     final List<Ticket> tickets = [];
 
     // Fetch all details concurrently
@@ -238,7 +243,8 @@ class TicketRepository {
     for (final reservation in results) {
       if (reservation != null && reservation.ticket != null) {
         tickets.add(reservation.ticket!);
-        _debugLog('Extracted ticket ${reservation.ticket!.ticketCode} from reservation ${reservation.id}');
+        _debugLog(
+            'Extracted ticket ${reservation.ticket!.ticketCode} from reservation ${reservation.id}');
       }
     }
 
@@ -252,7 +258,9 @@ class TicketRepository {
       final data = response.data;
 
       // Handle wrapped response: { data: {...} }
-      if (data is Map<String, dynamic> && data.containsKey('data') && data['data'] is Map) {
+      if (data is Map<String, dynamic> &&
+          data.containsKey('data') &&
+          data['data'] is Map) {
         return Reservation.fromJson(data['data'] as Map<String, dynamic>);
       }
 
@@ -275,7 +283,8 @@ class TicketRepository {
       final key = ticket.ticketCode;
       // Keep the one with more complete data (prefer with reservation info)
       if (!uniqueTickets.containsKey(key) ||
-          (ticket.reservationInfo != null && uniqueTickets[key]?.reservationInfo == null)) {
+          (ticket.reservationInfo != null &&
+              uniqueTickets[key]?.reservationInfo == null)) {
         uniqueTickets[key] = ticket;
       }
     }
@@ -383,9 +392,9 @@ class TicketsState {
   int get ticketCount => tickets.length;
 
   /// Get current ticket based on page
-  Ticket? get currentTicket => 
-      tickets.isNotEmpty && currentPage < tickets.length 
-          ? tickets[currentPage] 
+  Ticket? get currentTicket =>
+      tickets.isNotEmpty && currentPage < tickets.length
+          ? tickets[currentPage]
           : null;
 
   TicketsState copyWith({
@@ -428,14 +437,14 @@ class MyTicketsNotifier extends AsyncNotifier<TicketsState> {
     } else {
       state = const AsyncLoading();
     }
-    
+
     try {
       final newState = await _fetchMyTickets();
       // Preserve current page if still valid
-      final preservedPage = currentState != null && 
-          currentState.currentPage < newState.tickets.length
-              ? currentState.currentPage
-              : 0;
+      final preservedPage = currentState != null &&
+              currentState.currentPage < newState.tickets.length
+          ? currentState.currentPage
+          : 0;
       state = AsyncData(newState.copyWith(currentPage: preservedPage));
     } catch (e, stack) {
       // If we have cached data, show it with error indicator
@@ -453,14 +462,17 @@ class MyTicketsNotifier extends AsyncNotifier<TicketsState> {
   /// Update current page (for swiper)
   void setCurrentPage(int page) {
     final currentState = state.valueOrNull;
-    if (currentState != null && page >= 0 && page < currentState.tickets.length) {
+    if (currentState != null &&
+        page >= 0 &&
+        page < currentState.tickets.length) {
       state = AsyncData(currentState.copyWith(currentPage: page));
     }
   }
 }
 
 /// Provider for user's tickets (multiple)
-final myTicketsProvider = AsyncNotifierProvider<MyTicketsNotifier, TicketsState>(() {
+final myTicketsProvider =
+    AsyncNotifierProvider<MyTicketsNotifier, TicketsState>(() {
   return MyTicketsNotifier();
 });
 
@@ -498,8 +510,9 @@ class TicketState {
 final myTicketProvider = Provider<AsyncValue<TicketState>>((ref) {
   final ticketsAsync = ref.watch(myTicketsProvider);
   return ticketsAsync.whenData((ticketsState) => TicketState(
-    ticket: ticketsState.tickets.isNotEmpty ? ticketsState.tickets.first : null,
-    isOffline: ticketsState.isOffline,
-    isRefreshing: ticketsState.isRefreshing,
-  ));
+        ticket:
+            ticketsState.tickets.isNotEmpty ? ticketsState.tickets.first : null,
+        isOffline: ticketsState.isOffline,
+        isRefreshing: ticketsState.isRefreshing,
+      ));
 });

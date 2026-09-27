@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
+import 'package:aji_tfarraj/app/app_bar_actions.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
@@ -97,23 +101,21 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text(
-          s.browseTitle,
-          style: AppTypography.h4.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => context.pop(),
-        ),
+        title: AppBarBrandTitle(s.browseTitle),
+        centerTitle: false,
+        titleSpacing: AppSpacing.lg,
+        // Pas de chevron : c'est la racine d'un onglet, il n'y a rien à
+        // dépiler. Il appelait `context.pop()` dans le vide.
+        automaticallyImplyLeading: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
           child: Container(height: 0.5, color: AppColors.border),
         ),
         actions: [
+          // Pas de support ici : c'est la barre la plus chargée de l'app —
+          // logo, titre, et le filtre qui appartient à cet écran. Le support
+          // reste à un geste depuis le profil.
+          const AppBarActions(showSupport: false),
           // Filter icon with active indicator
           Stack(
             alignment: Alignment.center,
@@ -209,10 +211,11 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(showsListProvider.notifier).refresh(),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       backgroundColor: AppColors.backgroundGrey,
       child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg),
         itemCount: grouped.length,
         itemBuilder: (context, index) {
           final studioName = grouped.keys.elementAt(index);
@@ -276,17 +279,21 @@ class _SearchBar extends StatelessWidget {
           focusNode: focusNode,
           onChanged: onChanged,
           textInputAction: TextInputAction.search,
-          style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
+          style:
+              AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: s.browseSearchHint,
-            hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textLight),
-            prefixIcon: Icon(Icons.search, color: AppColors.textMuted, size: 22),
+            hintStyle:
+                AppTypography.bodyMedium.copyWith(color: AppColors.textLight),
+            prefixIcon:
+                Icon(Icons.search, color: AppColors.textMuted, size: 22),
             suffixIcon: ListenableBuilder(
               listenable: controller,
               builder: (_, __) => controller.text.isEmpty
                   ? const SizedBox.shrink()
                   : IconButton(
-                      icon: Icon(Icons.close, color: AppColors.textMuted, size: 20),
+                      icon: Icon(Icons.close,
+                          color: AppColors.textMuted, size: 20),
                       onPressed: onClear,
                     ),
             ),
@@ -306,7 +313,7 @@ class _SearchBar extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+              borderSide: BorderSide(color: AppColors.accentInk, width: 1.5),
             ),
           ),
         ),
@@ -387,25 +394,20 @@ class _CityChip extends StatelessWidget {
           vertical: 6,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.secondary : AppColors.backgroundLight,
+          color:
+              isSelected ? AppColors.chipSelected : AppColors.backgroundLight,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
-            color: isSelected ? AppColors.secondary : AppColors.border,
+            color: isSelected ? AppColors.chipSelected : AppColors.border,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.secondary.withValues(alpha: 0.30),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
+          // Pas de halo. Un filtre n'irradie pas.
         ),
         child: Text(
           label,
           style: AppTypography.labelSmall.copyWith(
-            color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
+            color: isSelected
+                ? AppColors.chipSelectedInk
+                : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
@@ -424,7 +426,11 @@ class _StudioSection extends StatelessWidget {
   final List<Show> shows;
   final bool isAr;
 
-  const _StudioSection({required this.s, required this.studioName, required this.shows, required this.isAr});
+  const _StudioSection(
+      {required this.s,
+      required this.studioName,
+      required this.shows,
+      required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -487,7 +493,8 @@ class _BrowseShowCard extends StatelessWidget {
   final Show show;
   final bool isAr;
 
-  const _BrowseShowCard({required this.s, required this.show, required this.isAr});
+  const _BrowseShowCard(
+      {required this.s, required this.show, required this.isAr});
 
   @override
   Widget build(BuildContext context) {
@@ -510,13 +517,7 @@ class _BrowseShowCard extends StatelessWidget {
           color: AppColors.cardDarkElevated,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: AppShadows.card,
         ),
         child: Row(
           children: [
@@ -533,8 +534,9 @@ class _BrowseShowCard extends StatelessWidget {
                     ? Image.network(
                         show.imageUrl!,
                         fit: BoxFit.cover,
-                        loadingBuilder: (_, child, progress) =>
-                            progress == null ? child : Container(color: AppColors.backgroundWhite),
+                        loadingBuilder: (_, child, progress) => progress == null
+                            ? child
+                            : Container(color: AppColors.backgroundWhite),
                         errorBuilder: (_, __, ___) => Container(
                           color: AppColors.backgroundWhite,
                           child: Icon(Icons.tv,
@@ -579,23 +581,14 @@ class _BrowseShowCard extends StatelessWidget {
                         ),
                         if (show.channel != null) ...[
                           const SizedBox(width: AppSpacing.sm),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              show.channel!,
-                              style: AppTypography.caption.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 10,
-                              ),
-                            ),
+                          // Sur la carte, pas sur l'affiche : la surface
+                          // derrière est plate et connue, donc pas de verre —
+                          // ce serait une pastille teintée qui se prend pour
+                          // une fenêtre. L'orange plein, lui, réclamait le
+                          // geste alors qu'une chaîne ne se touche pas.
+                          ChannelBadge(
+                            label: show.channel!,
+                            tone: GlassTone.onPage,
                           ),
                         ],
                       ],
@@ -606,8 +599,12 @@ class _BrowseShowCard extends StatelessWidget {
                     // Date
                     Row(
                       children: [
+                        // Gris, pas doré : ces icônes ne disent rien que le
+                        // texte à côté ne dise déjà. En or, elles mettaient
+                        // huit marques de couleur par écran au service d'une
+                        // décoration.
                         Icon(Icons.calendar_today_outlined,
-                            size: 12, color: AppColors.secondary),
+                            size: 12, color: AppColors.textMuted),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -628,7 +625,7 @@ class _BrowseShowCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined,
-                            size: 12, color: AppColors.secondary),
+                            size: 12, color: AppColors.textMuted),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
@@ -668,12 +665,13 @@ class _BrowseShowCard extends StatelessWidget {
                               horizontal: 8,
                               vertical: 4,
                             ),
+                            // Fond teinté et encre dorée : deux traitements
+                            // pour un chiffre, c'est déjà assez. Le liseré
+                            // en ajoutait un troisième.
                             decoration: BoxDecoration(
-                              color: AppColors.secondary.withValues(alpha: 0.15),
+                              color:
+                                  AppColors.secondary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: AppColors.secondary.withValues(alpha: 0.30),
-                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -704,9 +702,12 @@ class _BrowseShowCard extends StatelessWidget {
             // Chevron
             Padding(
               padding: const EdgeInsets.only(right: AppSpacing.sm),
+              // La ligne entière est tapable : ce chevron est un rappel,
+              // pas une information. En orange, il avait le même poids que
+              // le nombre de places.
               child: Icon(
                 Icons.chevron_right,
-                color: AppColors.primary.withValues(alpha: 0.60),
+                color: AppColors.textLight,
                 size: 16,
               ),
             ),
@@ -778,43 +779,13 @@ class _FilterSheet extends StatelessWidget {
                 runSpacing: AppSpacing.sm,
                 children: channels.map((ch) {
                   final isSelected = selectedChannel == ch;
-                  return GestureDetector(
+                  // La même puce que la barre de villes : c'était la même
+                  // décoration recopiée, et deux copies finissent toujours
+                  // par diverger.
+                  return _CityChip(
+                    label: ch,
+                    isSelected: isSelected,
                     onTap: () => onChannelSelected(isSelected ? null : ch),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.secondary
-                            : AppColors.backgroundLight,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusFull),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.secondary
-                              : AppColors.border,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: AppColors.secondary.withValues(alpha: 0.30),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Text(
-                        ch,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        ),
-                      ),
-                    ),
                   );
                 }).toList(),
               ),

@@ -30,8 +30,7 @@ class City {
     final name = (json['city'] ?? json['province']) as String;
     final rawDistricts =
         (json['districts'] ?? json['cities']) as List<dynamic>? ?? [];
-    final rawDistrictsAr =
-        (json['districts_ar']) as List<dynamic>? ?? [];
+    final rawDistrictsAr = (json['districts_ar']) as List<dynamic>? ?? [];
     return City(
       name: name,
       nameAr: json['city_ar'] as String?,

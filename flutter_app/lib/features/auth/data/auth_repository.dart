@@ -107,7 +107,7 @@ class AuthRepository {
         error: 'No token available',
       );
     }
-    
+
     // Add token to request since authDio doesn't have interceptor
     final response = await _dio.get(
       '/api/auth/me',
@@ -127,7 +127,7 @@ class AuthRepository {
   /// Calls backend logout endpoint best-effort, but ALWAYS clears token locally
   Future<void> logout() async {
     final token = await _tokenStorage.readToken();
-    
+
     // Best-effort backend logout call
     if (token != null && token.isNotEmpty) {
       try {
@@ -141,7 +141,7 @@ class AuthRepository {
         // Ignore errors on logout - always clear token locally
       }
     }
-    
+
     // ALWAYS clear token locally regardless of backend response
     await _tokenStorage.clearToken();
   }
@@ -397,7 +397,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final TokenStorage _tokenStorage;
   final Ref _ref;
 
-  AuthNotifier(this._repository, this._tokenStorage, this._ref) : super(const AuthState()) {
+  AuthNotifier(this._repository, this._tokenStorage, this._ref)
+      : super(const AuthState()) {
     _checkAuthStatus();
   }
 
@@ -418,7 +419,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         try {
           final refreshed = await _repository.refreshToken();
           await _ref.read(authStateProvider.notifier).setToken(refreshed.token);
-          state = AuthState(status: AuthStatus.authenticated, user: refreshed.user);
+          state =
+              AuthState(status: AuthStatus.authenticated, user: refreshed.user);
           _registerDeviceToken();
           return;
         } on DioException catch (e) {
@@ -473,33 +475,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String password,
   }) async {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
-    
+
     try {
       final authResponse = await _repository.login(
         email: email,
         password: password,
       );
-      
+
       // Notify the token-based auth provider that router listens to
       await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
-      
+
       state = AuthState(
         status: AuthStatus.authenticated,
         user: authResponse.user,
       );
-      
+
       // Register device for push notifications after successful login
       _registerDeviceToken();
     } on DioException catch (e) {
       String message;
-      
+
       // Handle different error types with friendly messages
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.sendTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
         message = 'La connexion a expiré. Veuillez réessayer.';
       } else if (e.type == DioExceptionType.connectionError) {
-        message = 'Impossible de se connecter. Vérifiez votre connexion internet.';
+        message =
+            'Impossible de se connecter. Vérifiez votre connexion internet.';
       } else if (e.response?.statusCode == 401) {
         message = 'Email ou mot de passe incorrect.';
       } else if (e.response?.statusCode == 422) {
@@ -516,9 +519,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
         message = seconds != null
             ? 'Trop de tentatives. Réessayez dans $seconds secondes.'
             : 'Trop de tentatives. Veuillez réessayer plus tard.';
-      } else if (e.response?.statusCode != null && e.response!.statusCode! >= 500) {
+      } else if (e.response?.statusCode != null &&
+          e.response!.statusCode! >= 500) {
         message = 'Erreur serveur. Veuillez réessayer plus tard.';
-      } else if (e.response?.data is Map && e.response?.data['message'] != null) {
+      } else if (e.response?.data is Map &&
+          e.response?.data['message'] != null) {
         message = e.response?.data['message'];
       } else {
         message = 'Erreur de connexion. Veuillez réessayer.';
@@ -540,7 +545,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String passwordConfirmation,
   }) async {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
-    
+
     try {
       final authResponse = await _repository.register(
         name: name,
@@ -548,15 +553,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
         password: password,
         passwordConfirmation: passwordConfirmation,
       );
-      
+
       // Notify the token-based auth provider that router listens to
       await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
-      
+
       state = AuthState(
         status: AuthStatus.authenticated,
         user: authResponse.user,
       );
-      
+
       // Register device for push notifications after successful registration
       _registerDeviceToken();
     } on DioException catch (e) {
@@ -584,14 +589,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Logout
   Future<void> logout() async {
     state = state.copyWith(status: AuthStatus.loading);
-    
+
     // Clear push token first (unregister from backend)
     try {
       await _ref.read(pushTokenProvider.notifier).clearToken();
     } catch (_) {
       // Don't fail logout if push token clearing fails
     }
-    
+
     await _repository.logout();
 
     // Notify the token-based auth provider that router listens to
@@ -632,7 +637,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final authResponse = await _repository.loginWithGoogle();
       await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
-      state = AuthState(status: AuthStatus.authenticated, user: authResponse.user);
+      state =
+          AuthState(status: AuthStatus.authenticated, user: authResponse.user);
       _registerDeviceToken();
       await refreshUser();
     } on DioException catch (e) {
@@ -645,8 +651,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           ? (e.response!.data as Map)['message'] as String? ??
               'Connexion Google échouée. Réessayez.'
           : e.message ?? 'Connexion Google échouée. Réessayez.';
-      state = AuthState(
-          status: AuthStatus.unauthenticated, errorMessage: message);
+      state =
+          AuthState(status: AuthStatus.unauthenticated, errorMessage: message);
       rethrow;
     } catch (e) {
       // Catch-all — ensures state is ALWAYS reset so spinner never hangs.
@@ -665,7 +671,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final authResponse = await _repository.loginWithApple();
       await _ref.read(authStateProvider.notifier).setToken(authResponse.token);
-      state = AuthState(status: AuthStatus.authenticated, user: authResponse.user);
+      state =
+          AuthState(status: AuthStatus.authenticated, user: authResponse.user);
       _registerDeviceToken();
       await refreshUser();
     } on DioException catch (e) {
@@ -677,8 +684,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           ? (e.response!.data as Map)['message'] as String? ??
               'Erreur de connexion'
           : 'Erreur de connexion';
-      state = AuthState(
-          status: AuthStatus.unauthenticated, errorMessage: message);
+      state =
+          AuthState(status: AuthStatus.unauthenticated, errorMessage: message);
       rethrow;
     }
   }
@@ -707,12 +714,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Set an explicit error message (used by the UI layer for unexpected errors).
   void setError(String message) {
-    state = AuthState(status: AuthStatus.unauthenticated, errorMessage: message);
+    state =
+        AuthState(status: AuthStatus.unauthenticated, errorMessage: message);
   }
 }
 
 /// Provider for auth state (login/register UI state)
-final loginAuthStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final loginAuthStateProvider =
+    StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   final tokenStorage = ref.watch(tokenStorageProvider);
   return AuthNotifier(repository, tokenStorage, ref);

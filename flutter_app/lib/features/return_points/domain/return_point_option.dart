@@ -26,6 +26,56 @@ class ReturnPointOption {
   String localizedName(bool isAr) =>
       (isAr && nameAr != null && nameAr!.isNotEmpty) ? nameAr! : name;
 
+  /// L'arrêt répond-il à ce qu'on tape ?
+  ///
+  /// Cherche dans les deux langues et dans le repère, pas seulement dans le
+  /// nom affiché : un scanner marocain tape « ain » aussi bien que « عين »,
+  /// et le membre se souvient souvent du repère — « la pharmacie » — plutôt
+  /// que du nom officiel de l'arrêt.
+  ///
+  /// Les accents sont ignorés : « témara » doit trouver « Temara ».
+  bool matches(String query) {
+    final needle = _fold(query);
+    if (needle.isEmpty) return true;
+
+    return [name, nameAr, landmark]
+        .whereType<String>()
+        .any((field) => _fold(field).contains(needle));
+  }
+
+  static const _accents = {
+    'à': 'a',
+    'â': 'a',
+    'ä': 'a',
+    'á': 'a',
+    'é': 'e',
+    'è': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'î': 'i',
+    'ï': 'i',
+    'í': 'i',
+    'ô': 'o',
+    'ö': 'o',
+    'ó': 'o',
+    'ù': 'u',
+    'û': 'u',
+    'ü': 'u',
+    'ú': 'u',
+    'ç': 'c',
+  };
+
+  static String _fold(String value) {
+    final lower = value.toLowerCase().trim();
+    final buffer = StringBuffer();
+    for (final rune in lower.runes) {
+      final char = String.fromCharCode(rune);
+      buffer.write(_accents[char] ?? char);
+    }
+
+    return buffer.toString();
+  }
+
   factory ReturnPointOption.fromJson(Map<String, dynamic> json) =>
       ReturnPointOption(
         id: json['id'] as int,

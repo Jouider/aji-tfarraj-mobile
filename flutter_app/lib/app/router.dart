@@ -178,7 +178,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         // Exclude photo and phone fields — these are optional until reservation
         // (phone verification enforcement happens server-side via 409 PROFILE_INCOMPLETE)
         const optionalFields = {
-          'avatar', 'avatar_url', 'live_photo_captured_at',
+          'avatar',
+          'avatar_url',
+          'live_photo_captured_at',
           'phone_verified_at',
         };
         final missingRequired = user?.missingProfileFields
@@ -404,8 +406,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           // The episode usually comes from the ticket just scanned; without it
           // the screen asks which recording.
-          final episodeId = int.tryParse(
-              state.uri.queryParameters['episode'] ?? '');
+          final episodeId =
+              int.tryParse(state.uri.queryParameters['episode'] ?? '');
           return ReturnManifestScreen(episodeId: episodeId);
         },
       ),
@@ -427,8 +429,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.howItWorks,
         name: 'howItWorks',
         builder: (context, state) => HowItWorksScreen(
-          initialTrack:
-              state.extra is HowToTrack ? state.extra as HowToTrack : HowToTrack.client,
+          initialTrack: state.extra is HowToTrack
+              ? state.extra as HowToTrack
+              : HowToTrack.client,
         ),
       ),
       GoRoute(
