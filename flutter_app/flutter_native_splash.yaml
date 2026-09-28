@@ -1,21 +1,26 @@
 flutter_native_splash:
-  # White background to match the logo PNGs (neither has transparency)
-  color: "#FFFFFF"
-  color_dark: "#FFFFFF"
+  # L'écran natif doit être indiscernable de l'écran Dart qui lui succède,
+  # sinon on voit un logo remplacer l'autre — c'est ce qui se passait : deux
+  # secondes d'ancien logo sur blanc, puis un fondu vers le nouveau.
+  #
+  # Mêmes fonds que `AppColors.backgroundWhite`, même logotype, même taille
+  # (240 points de large, soit 960 px : l'outil traite la source comme du
+  # @4x et en sort un @3x aux trois quarts).
+  color: "#FAFAFA"
+  color_dark: "#08080A"
 
-  image: assets/images/ajitfarraj_logo/black_fr_logo_splash.png
-  image_dark: assets/images/ajitfarraj_logo/black_fr_logo_splash.png
+  image: assets/splash/lockup_light.png
+  image_dark: assets/splash/lockup_dark.png
 
-  # Display logo at its native size — prevents it filling the full screen
   ios_content_mode: center
   android_gravity: center
 
   fullscreen: false
 
   android_12:
-    color: "#FFFFFF"
-    color_dark: "#FFFFFF"
-    image: assets/images/ajitfarraj_logo/black_fr_logo_splash.png
-    image_dark: assets/images/ajitfarraj_logo/black_fr_logo_splash.png
-    icon_background_color: "#FFFFFF"
-    icon_background_color_dark: "#FFFFFF"
+    color: "#FAFAFA"
+    color_dark: "#08080A"
+    image: assets/splash/lockup_light.png
+    image_dark: assets/splash/lockup_dark.png
+    icon_background_color: "#FAFAFA"
+    icon_background_color_dark: "#08080A"

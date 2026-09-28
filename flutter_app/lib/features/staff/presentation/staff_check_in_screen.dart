@@ -57,8 +57,7 @@ class _StaffCheckInScreenState extends ConsumerState<StaffCheckInScreen>
 
     // The recording currently being scanned, so the shuttle sheet opens on the
     // right one instead of asking a question the app can already answer.
-    final scannedEpisodeId =
-        ref.watch(staffCheckInProvider).preview?.episodeId;
+    final scannedEpisodeId = ref.watch(staffCheckInProvider).preview?.episodeId;
 
     return Scaffold(
       appBar: AppBar(
@@ -90,14 +89,20 @@ class _StaffCheckInScreenState extends ConsumerState<StaffCheckInScreen>
             ? TabBar(
                 controller: _tabController,
                 tabs: [
-                  Tab(icon: const Icon(Icons.qr_code_scanner), text: s.staffTabScanQr),
-                  Tab(icon: const Icon(Icons.keyboard), text: s.staffTabManualCode),
+                  Tab(
+                      icon: const Icon(Icons.qr_code_scanner),
+                      text: s.staffTabScanQr),
+                  Tab(
+                      icon: const Icon(Icons.keyboard),
+                      text: s.staffTabManualCode),
                 ],
               )
             : null,
       ),
       body: user == null || !user.isStaffOrAdmin
-          ? _ForbiddenView(message: s.staffAccessDenied, subtitle: s.staffAccessDeniedSubtitle)
+          ? _ForbiddenView(
+              message: s.staffAccessDenied,
+              subtitle: s.staffAccessDeniedSubtitle)
           : TabBarView(
               controller: _tabController,
               children: [
@@ -273,17 +278,25 @@ class _ViewfinderPainter extends CustomPainter {
     const len = 24.0;
     final r = rect;
     // Top-left
-    canvas.drawLine(Offset(r.left, r.top + len), Offset(r.left, r.top), bracketPaint);
-    canvas.drawLine(Offset(r.left, r.top), Offset(r.left + len, r.top), bracketPaint);
+    canvas.drawLine(
+        Offset(r.left, r.top + len), Offset(r.left, r.top), bracketPaint);
+    canvas.drawLine(
+        Offset(r.left, r.top), Offset(r.left + len, r.top), bracketPaint);
     // Top-right
-    canvas.drawLine(Offset(r.right - len, r.top), Offset(r.right, r.top), bracketPaint);
-    canvas.drawLine(Offset(r.right, r.top), Offset(r.right, r.top + len), bracketPaint);
+    canvas.drawLine(
+        Offset(r.right - len, r.top), Offset(r.right, r.top), bracketPaint);
+    canvas.drawLine(
+        Offset(r.right, r.top), Offset(r.right, r.top + len), bracketPaint);
     // Bottom-left
-    canvas.drawLine(Offset(r.left, r.bottom - len), Offset(r.left, r.bottom), bracketPaint);
-    canvas.drawLine(Offset(r.left, r.bottom), Offset(r.left + len, r.bottom), bracketPaint);
+    canvas.drawLine(
+        Offset(r.left, r.bottom - len), Offset(r.left, r.bottom), bracketPaint);
+    canvas.drawLine(
+        Offset(r.left, r.bottom), Offset(r.left + len, r.bottom), bracketPaint);
     // Bottom-right
-    canvas.drawLine(Offset(r.right - len, r.bottom), Offset(r.right, r.bottom), bracketPaint);
-    canvas.drawLine(Offset(r.right, r.bottom), Offset(r.right, r.bottom - len), bracketPaint);
+    canvas.drawLine(Offset(r.right - len, r.bottom), Offset(r.right, r.bottom),
+        bracketPaint);
+    canvas.drawLine(Offset(r.right, r.bottom), Offset(r.right, r.bottom - len),
+        bracketPaint);
   }
 
   @override
@@ -352,8 +365,8 @@ class _ManualCodeTab extends ConsumerWidget {
             style: AppTypography.bodyLarge,
             decoration: InputDecoration(
               hintText: s.staffManualPlaceholder,
-              hintStyle: AppTypography.bodyLarge
-                  .copyWith(color: AppColors.textMuted),
+              hintStyle:
+                  AppTypography.bodyLarge.copyWith(color: AppColors.textMuted),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
@@ -367,8 +380,8 @@ class _ManualCodeTab extends ConsumerWidget {
             child: ElevatedButton(
               onPressed: isLoading ? null : () => _submit(ref, s),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primaryAction,
+                foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
@@ -379,12 +392,12 @@ class _ManualCodeTab extends ConsumerWidget {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                       ),
                     )
                   : Text(s.staffValidateButton,
                       style: AppTypography.labelLarge
-                          .copyWith(color: Colors.white)),
+                          .copyWith(color: AppColors.onPrimary)),
             ),
           ),
         ],
@@ -453,8 +466,8 @@ class _CheckInResultCard extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.successLight.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              border: Border.all(
-                  color: AppColors.success.withValues(alpha: 0.4)),
+              border:
+                  Border.all(color: AppColors.success.withValues(alpha: 0.4)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -499,8 +512,8 @@ class _CheckInResultCard extends ConsumerWidget {
               icon: const Icon(Icons.qr_code_scanner, size: 20),
               label: Text(s.staffScanAnother),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primaryAction,
+                foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
@@ -577,8 +590,8 @@ class _ErrorCard extends ConsumerWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               '${s.staffCheckedInAt}: ${dateFormat.format(alreadyCheckedInAt!)}',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textMuted),
+              style:
+                  AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
               textAlign: TextAlign.center,
             ),
           ],
@@ -590,8 +603,8 @@ class _ErrorCard extends ConsumerWidget {
             child: ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primaryAction,
+                foregroundColor: AppColors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),

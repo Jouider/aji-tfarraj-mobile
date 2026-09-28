@@ -96,7 +96,9 @@ class _BookBanner extends ConsumerWidget {
 
     if (code == 'MINOR_NOT_ELIGIBLE' || code == 'BIRTHDAY_REQUIRED') {
       return _Banner(
-        icon: code == 'BIRTHDAY_REQUIRED' ? Icons.cake_outlined : Icons.lock_outline,
+        icon: code == 'BIRTHDAY_REQUIRED'
+            ? Icons.cake_outlined
+            : Icons.lock_outline,
         text: code == 'BIRTHDAY_REQUIRED'
             ? s.casting.birthdayRequired
             : s.casting.adultsOnly,
@@ -288,7 +290,10 @@ class ApplicationBadge extends ConsumerWidget {
 
     final (label, colour) = switch (status) {
       ApplicationStatus.pending => (c.statusPending, AppColors.textMuted),
-      ApplicationStatus.shortlisted => (c.statusShortlisted, AppColors.secondary),
+      ApplicationStatus.shortlisted => (
+          c.statusShortlisted,
+          AppColors.secondary
+        ),
       ApplicationStatus.accepted => (c.statusAccepted, AppColors.success),
       ApplicationStatus.rejected => (c.statusRejected, AppColors.error),
       ApplicationStatus.unknown => (c.statusUnknown, AppColors.textMuted),
@@ -300,8 +305,7 @@ class ApplicationBadge extends ConsumerWidget {
         color: colour.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(label,
-          style: AppTypography.caption.copyWith(color: colour)),
+      child: Text(label, style: AppTypography.caption.copyWith(color: colour)),
     );
   }
 }

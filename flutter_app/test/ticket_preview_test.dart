@@ -59,8 +59,8 @@ void main() {
 
   group('refusals', () {
     test('a wrong date carries the reason, so staff know what to say', () {
-      final past = TicketPreview.fromJson(
-          payload(status: 'wrong_date', reason: 'past'));
+      final past =
+          TicketPreview.fromJson(payload(status: 'wrong_date', reason: 'past'));
       final future = TicketPreview.fromJson(
           payload(status: 'wrong_date', reason: 'future'));
 
@@ -149,7 +149,12 @@ void main() {
       final p = payload();
       p['return_points'] = points ??
           [
-            {'id': 3, 'name': 'Ain Sebaa', 'name_ar': null, 'landmark': 'devant la gare'},
+            {
+              'id': 3,
+              'name': 'Ain Sebaa',
+              'name_ar': null,
+              'landmark': 'devant la gare'
+            },
             {'id': 4, 'name': 'Maarif', 'name_ar': null, 'landmark': null},
           ];
       (p['reservation'] as Map<String, dynamic>)['return_point'] = chosen;
@@ -218,6 +223,7 @@ void main() {
   group('le retour, avant de valider', () {
     Map<String, dynamic> withShuttle({
       bool answered = false,
+      bool? confirmed,
       int? chosen,
       bool shuttle = true,
     }) {
@@ -225,6 +231,8 @@ void main() {
         'id': 5933,
         'seats': 1,
         'return_point_answered': answered,
+        // `null` simule un serveur qui ne connaît pas encore le champ.
+        if (confirmed != null) 'return_point_confirmed': confirmed,
         if (chosen != null) 'return_point': {'id': chosen, 'name': 'Casa-Port'},
       });
       json['return_points'] = shuttle
@@ -245,27 +253,54 @@ void main() {
       expect(p.awaitsReturnPoint, isTrue);
     });
 
-    test('un arrêt choisi en réservant règle la question', () {
-      final p = TicketPreview.fromJson(withShuttle(answered: true, chosen: 1));
+    /// C'est la demande du staff : le membre a annoncé un arrêt en
+    /// réservant, mais la porte doit quand même le relire avec lui — les
+    /// gens changent d'avis entre le clic et le trottoir.
+    test('annoncé en réservant ne vaut pas confirmé à la porte', () {
+      final p = TicketPreview.fromJson(
+          withShuttle(answered: true, confirmed: false, chosen: 1));
 
       expect(p.chosenReturnPointId, 1);
+      expect(p.hasDeclaredReturnPoint, isTrue,
+          reason:
+              'de quoi le proposer au scanner au lieu de le lui faire chercher');
+      expect(p.awaitsReturnPoint, isTrue);
+    });
+
+    test('une fois relu à la porte, la question est close', () {
+      final p = TicketPreview.fromJson(
+          withShuttle(answered: true, confirmed: true, chosen: 1));
+
+      expect(p.hasDeclaredReturnPoint, isFalse);
       expect(p.awaitsReturnPoint, isFalse);
     });
 
     /// « Repart par ses propres moyens » est une réponse : aucun arrêt, mais
     /// la question est réglée.
     test('« repart seul » est une réponse, même sans arrêt', () {
-      final p = TicketPreview.fromJson(withShuttle(answered: true));
+      final p =
+          TicketPreview.fromJson(withShuttle(answered: true, confirmed: true));
 
       expect(p.chosenReturnPointId, isNull);
       expect(p.awaitsReturnPoint, isFalse);
+    });
+
+    /// Un serveur pas encore déployé n'envoie pas `return_point_confirmed` :
+    /// la porte doit alors se comporter comme avant, pas bloquer toutes les
+    /// entrées du soir.
+    test('sans le champ, on retombe sur l\'ancien comportement', () {
+      expect(
+          TicketPreview.fromJson(withShuttle(answered: true)).awaitsReturnPoint,
+          isFalse);
+      expect(TicketPreview.fromJson(withShuttle()).awaitsReturnPoint, isTrue);
     });
 
     test('sans navette, la question ne se pose pas', () {
       final p = TicketPreview.fromJson(withShuttle(shuttle: false));
 
       expect(p.asksReturnPoint, isFalse);
-      expect(p.awaitsReturnPoint, isFalse, reason: 'rien ne doit bloquer la porte');
+      expect(p.awaitsReturnPoint, isFalse,
+          reason: 'rien ne doit bloquer la porte');
     });
 
     test('choisir à la porte règle la question sur-le-champ', () {

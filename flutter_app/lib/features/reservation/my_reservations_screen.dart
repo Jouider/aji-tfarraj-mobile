@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/app_bar_actions.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
@@ -71,15 +74,10 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
       backgroundColor: AppColors.backgroundLight,
       // FIX: App bar — backgroundWhite, centered title, w700 18px, no back arrow
       appBar: AppBar(
-        title: Text(
-          s.myReservationsTitle,
-          style: AppTypography.h4.copyWith(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        centerTitle: true,
+        title: AppBarBrandTitle(s.myReservationsTitle),
+        actions: const [AppBarActions()],
+        centerTitle: false,
+        titleSpacing: AppSpacing.lg,
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -120,7 +118,10 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: AppColors.primary,
+        // Le même jeton que l'onglet actif de la barre du bas : « où je
+        // suis » ne se dit pas en orange en haut et en or en bas. L'encre
+        // suit la page — l'or sur le sombre, le rouge orangé sur le clair.
+        labelColor: AppColors.accentInk,
         unselectedLabelColor: AppColors.textMuted,
         labelStyle:
             AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700),
@@ -128,7 +129,7 @@ class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen>
             AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w400),
         dividerColor: Colors.transparent,
         indicator: UnderlineTabIndicator(
-          borderSide: const BorderSide(color: AppColors.primary, width: 3),
+          borderSide: BorderSide(color: AppColors.accentInk, width: 3),
           borderRadius: BorderRadius.circular(2),
         ),
         tabs: [
@@ -333,7 +334,14 @@ class _ReservationsList extends ConsumerWidget {
       onRefresh: onRefresh,
       color: AppColors.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        // Le contenu file sous la barre d'onglets en verre : sans cette
+        // réserve, la dernière carte reste inatteignable.
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg + MediaQuery.of(context).padding.bottom,
+        ),
         itemCount: reservations.length,
         itemBuilder: (context, index) {
           return Padding(
@@ -373,13 +381,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -423,7 +425,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                           Row(
                             children: [
                               Icon(Icons.calendar_today_outlined,
-                                  size: 13, color: AppColors.secondary),
+                                  size: 13, color: AppColors.accentInk),
                               const SizedBox(width: AppSpacing.xs),
                               Expanded(
                                 child: Text(
@@ -447,7 +449,7 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                           Row(
                             children: [
                               Icon(Icons.location_on_outlined,
-                                  size: 13, color: AppColors.secondary),
+                                  size: 13, color: AppColors.accentInk),
                               const SizedBox(width: AppSpacing.xs),
                               Text(
                                 reservation.show!.city,

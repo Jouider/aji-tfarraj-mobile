@@ -141,7 +141,8 @@ class ReviewPrompter {
   int get _promptsThisYear {
     final startedRaw = _prefs.getString(_kYearStartedAt);
     final started = startedRaw == null ? null : DateTime.tryParse(startedRaw);
-    if (started == null || _now().difference(started) > const Duration(days: 365)) {
+    if (started == null ||
+        _now().difference(started) > const Duration(days: 365)) {
       return 0;
     }
     return _prefs.getInt(_kPromptsThisYear) ?? 0;
@@ -153,11 +154,13 @@ class ReviewPrompter {
     final started = startedRaw == null ? null : DateTime.tryParse(startedRaw);
 
     // A fresh year starts with this prompt when the last one is over a year old.
-    if (started == null || now.difference(started) > const Duration(days: 365)) {
+    if (started == null ||
+        now.difference(started) > const Duration(days: 365)) {
       await _prefs.setString(_kYearStartedAt, now.toIso8601String());
       await _prefs.setInt(_kPromptsThisYear, 1);
     } else {
-      await _prefs.setInt(_kPromptsThisYear, (_prefs.getInt(_kPromptsThisYear) ?? 0) + 1);
+      await _prefs.setInt(
+          _kPromptsThisYear, (_prefs.getInt(_kPromptsThisYear) ?? 0) + 1);
     }
 
     await _prefs.setString(_kLastPromptAt, now.toIso8601String());

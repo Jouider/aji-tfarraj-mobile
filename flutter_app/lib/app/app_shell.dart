@@ -1,7 +1,10 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
 /// App Shell with Bottom Navigation Bar — preserves tab state via StatefulShellRoute.
@@ -17,6 +20,9 @@ class AppShell extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
+      // Le contenu passe SOUS la barre : une pilule qui flotte au-dessus d'une
+      // bande vide ne flotte pas, elle est posée sur un socle.
+      extendBody: true,
       body: navigationShell,
       // FIX: Bottom Navigation Bar — pill active indicator, secondary color
       bottomNavigationBar: _AppNavBar(
@@ -90,24 +96,50 @@ class _AppNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
-        border: Border(
-          top: BorderSide(color: AppColors.border, width: 0.5),
+    final bottom = MediaQuery.of(context).padding.bottom;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(12, 6, 12, bottom > 0 ? bottom : 12),
+      // L'ombre se pose AVANT le ClipRRect : ce qui est coupé ne projette
+      // rien. En thème clair, c'est elle qui décolle une pilule blanche d'une
+      // page blanche.
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: AppShadows.glass,
         ),
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: List.generate(items.length, (index) {
-              return _NavItem(
-                data: items[index],
-                isActive: currentIndex == index,
-                onTap: () => onTap(index),
-              );
-            }),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          // Le verre : le contenu de la page se devine derrière la barre au
+          // lieu de s'arrêter net. Le flou se recalcule à chaque image —
+          // c'est le geste le plus cher de l'interface, et la raison pour
+          // laquelle le rayon reste modéré.
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              height: 62,
+              decoration: BoxDecoration(
+                // Un voile teinté, pas du verre nu : le flou seul laisse
+                // passer les couleurs d'une affiche et les libellés s'y
+                // noient. C'est ce que fait WhatsApp.
+                //
+                // Et il suit le thème. Le voile noir posé sur une page
+                // blanche ne faisait pas du verre, il faisait une plaque
+                // grise sale.
+                color: AppColors.glassSurface,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: AppColors.glassBorder),
+              ),
+              child: Row(
+                children: List.generate(items.length, (index) {
+                  return _NavItem(
+                    data: items[index],
+                    isActive: currentIndex == index,
+                    onTap: () => onTap(index),
+                  );
+                }),
+              ),
+            ),
           ),
         ),
       ),
@@ -128,46 +160,55 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const activeColor = AppColors.secondary;
-    final inactiveColor = AppColors.textMuted;
-    final color = isActive ? activeColor : inactiveColor;
+    // Plus clair qu'ailleurs dans l'app : ce texte repose sur du verre, donc
+    // sur ce qui défile derrière, et le gris discret n'y survit pas.
+    //
+    // `glassAccent` n'est pas toujours l'or de la charte : sur du verre blanc
+    // il s'efface, et c'est l'orange sombre des boutons qui prend le relais.
+    final color = isActive ? AppColors.glassAccent : AppColors.textSecondary;
 
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // FIX: Active pill indicator — secondary at 12% opacity, radius 20
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.secondary.withValues(alpha: 0.12)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                isActive ? data.activeIcon : data.icon,
-                size: 22,
-                color: color,
-              ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+          // La capsule de l'onglet actif : un verre plus clair posé sur le
+          // verre. Elle englobe l'icône ET le libellé, et reste dans la barre
+          // — rien ne saute, rien ne dépasse.
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              color: isActive ? AppColors.glassHighlight : Colors.transparent,
+              // Complètement arrondie, comme la pilule qui la contient : un
+              // rectangle radouci au milieu d'une barre en stade jurait.
+              // La moitié de la hauteur utile (62 − 12 de marge) = 25.
+              borderRadius: BorderRadius.circular(25),
             ),
-            const SizedBox(height: 2),
-            Text(
-              data.label,
-              style: TextStyle(
-                fontSize: isActive ? 10.0 : 9.5,
-                fontWeight:
-                    isActive ? FontWeight.w600 : FontWeight.w400,
-                color: color,
-                height: 1.0,
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isActive ? data.activeIcon : data.icon,
+                  size: 21,
+                  color: color,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  data.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                    color: color,
+                    height: 1.0,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

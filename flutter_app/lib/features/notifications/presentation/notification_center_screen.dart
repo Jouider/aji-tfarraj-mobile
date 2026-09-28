@@ -120,7 +120,7 @@ class NotificationCenterScreen extends ConsumerWidget {
     // Notifications list
     return RefreshIndicator(
       onRefresh: () => ref.read(notificationsProvider.notifier).refresh(),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       child: ListView.builder(
         padding: const EdgeInsets.all(AppSpacing.lg),
         itemCount: state.notifications.length,
@@ -130,8 +130,10 @@ class NotificationCenterScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: NotificationCard(
               notification: notification,
-              onTap: () => _onNotificationTap(context, ref, notification, router),
-              onDismiss: () => _onNotificationDismiss(context, ref, notification),
+              onTap: () =>
+                  _onNotificationTap(context, ref, notification, router),
+              onDismiss: () =>
+                  _onNotificationDismiss(context, ref, notification),
             ),
           );
         },
@@ -158,7 +160,9 @@ class NotificationCenterScreen extends ConsumerWidget {
     AppNotification notification,
   ) {
     final s = ref.read(stringsProvider);
-    ref.read(notificationsProvider.notifier).deleteNotification(notification.id);
+    ref
+        .read(notificationsProvider.notifier)
+        .deleteNotification(notification.id);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -167,7 +171,9 @@ class NotificationCenterScreen extends ConsumerWidget {
         action: SnackBarAction(
           label: s.cancel,
           onPressed: () {
-            ref.read(notificationsProvider.notifier).addNotification(notification);
+            ref
+                .read(notificationsProvider.notifier)
+                .addNotification(notification);
           },
         ),
       ),

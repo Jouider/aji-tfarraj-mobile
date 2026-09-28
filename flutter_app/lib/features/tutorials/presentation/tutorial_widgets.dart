@@ -76,8 +76,7 @@ Future<void> openTutorial(
   // Les clips de l'espace chargé public ne concernent que ceux qui y entrent.
   final isChargePublic =
       ref.read(loginAuthStateProvider).user?.canUseChargePublicMode ?? false;
-  final offered =
-      only ?? TutorialTopic.offeredTo(chargePublic: isChargePublic);
+  final offered = only ?? TutorialTopic.offeredTo(chargePublic: isChargePublic);
 
   final all = [
     for (final t in offered)
@@ -120,13 +119,18 @@ class TutorialHelpAction extends ConsumerWidget {
   /// siens, sans mélanger les tutoriels du mode public.
   final List<TutorialTopic>? only;
 
-  /// The icon colour; defaults to the text colour.
+  /// La couleur de l'icône. Laissée nulle, elle suit l'`IconTheme` ambiant —
+  /// ce qui est presque toujours ce qu'on veut.
+  ///
+  /// Elle retombait avant sur `textPrimary`, qui est noir en thème clair :
+  /// posé sur le voile sombre du héros, le « ? » devenait invisible. Une
+  /// icône de barre n'a pas à décider de sa couleur, la barre le fait.
   final Color? color;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
-      icon: Icon(Icons.help_outline, color: color ?? AppColors.textPrimary),
+      icon: Icon(Icons.help_outline, color: color),
       tooltip: ref.watch(stringsProvider).tutorialWatch,
       onPressed: () => openTutorial(context, ref, topic, only),
     );
@@ -176,7 +180,7 @@ class TutorialOfferBanner extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Material(
-        color: AppColors.secondary.withValues(alpha: 0.12),
+        color: AppColors.accentInk.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -212,7 +216,7 @@ class TutorialOfferBanner extends ConsumerWidget {
                       Text(
                         duration.isEmpty ? watch : '$watch · $duration',
                         style: AppTypography.labelSmall.copyWith(
-                            color: AppColors.secondary,
+                            color: AppColors.accentInk,
                             fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -262,8 +266,8 @@ class TutorialHowToLink extends ConsumerWidget {
         icon: const Icon(Icons.play_circle_outline, size: 18),
         label: Text(
           duration.isEmpty ? s.tutorialHowTo : '${s.tutorialHowTo} · $duration',
-          style: AppTypography.labelMedium.copyWith(
-              color: AppColors.error, fontWeight: FontWeight.w600),
+          style: AppTypography.labelMedium
+              .copyWith(color: AppColors.error, fontWeight: FontWeight.w600),
         ),
       ),
     );

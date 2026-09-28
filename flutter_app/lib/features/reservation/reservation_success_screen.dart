@@ -88,7 +88,8 @@ class _ReservationSuccessScreenState
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: AppColors.success.withValues(alpha: 0.3),
+                                  color:
+                                      AppColors.success.withValues(alpha: 0.3),
                                   width: 2,
                                 ),
                               ),
@@ -105,7 +106,8 @@ class _ReservationSuccessScreenState
                               shape: BoxShape.circle,
                               color: AppColors.successLight,
                               border: Border.all(
-                                color: AppColors.success.withValues(alpha: 0.25),
+                                color:
+                                    AppColors.success.withValues(alpha: 0.25),
                                 width: 1.5,
                               ),
                             ),

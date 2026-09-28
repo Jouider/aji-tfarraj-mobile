@@ -73,8 +73,8 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(titles[_index],
-                    style: AppTypography.h4.copyWith(
-                        fontWeight: FontWeight.w700, fontSize: 17)),
+                    style: AppTypography.h4
+                        .copyWith(fontWeight: FontWeight.w700, fontSize: 17)),
                 Text(cp.spaceSubtitle,
                     style: AppTypography.labelSmall
                         .copyWith(color: AppColors.textMuted, fontSize: 11)),
@@ -129,7 +129,7 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
                 onRetry: () => ref.invalidate(cpDashboardProvider),
               ),
               data: (dash) => RefreshIndicator(
-                color: AppColors.secondary,
+                color: AppColors.accentInk,
                 onRefresh: () async => ref.invalidate(cpDashboardProvider),
                 child: switch (_index) {
                   0 => _AccueilTab(
@@ -352,7 +352,9 @@ class _AccueilTab extends StatelessWidget {
               actionLabel: cp.seeAll,
               onAction: onSeeGuests),
           const SizedBox(height: AppSpacing.sm),
-          ...dash.referredUsers.take(3).map((u) => _ReferredRow(user: u, cp: cp)),
+          ...dash.referredUsers
+              .take(3)
+              .map((u) => _ReferredRow(user: u, cp: cp)),
         ],
         const SizedBox(height: AppSpacing.xxl),
       ],
@@ -410,8 +412,7 @@ class _BalanceCard extends StatelessWidget {
                 value: (stats.paid / stats.earnings).clamp(0.0, 1.0),
                 minHeight: 6,
                 backgroundColor: AppColors.success.withValues(alpha: 0.18),
-                valueColor:
-                    const AlwaysStoppedAnimation(AppColors.successDark),
+                valueColor: const AlwaysStoppedAnimation(AppColors.successDark),
               ),
             ),
             const SizedBox(height: 8),
@@ -543,7 +544,8 @@ class _KpiTile extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             label,
-            style: AppTypography.labelSmall.copyWith(color: AppColors.textMuted),
+            style:
+                AppTypography.labelSmall.copyWith(color: AppColors.textMuted),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -684,9 +686,8 @@ class _GuestTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials = guest.name.trim().isNotEmpty
-        ? guest.name.trim()[0].toUpperCase()
-        : '?';
+    final initials =
+        guest.name.trim().isNotEmpty ? guest.name.trim()[0].toUpperCase() : '?';
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -716,7 +717,8 @@ class _GuestTile extends StatelessWidget {
                 Text(guest.name,
                     style: AppTypography.bodyMedium
                         .copyWith(fontWeight: FontWeight.w500)),
-                Text('${guest.show}${guest.date != null ? ' · ${guest.date}' : ''}',
+                Text(
+                    '${guest.show}${guest.date != null ? ' · ${guest.date}' : ''}',
                     style: AppTypography.labelSmall
                         .copyWith(color: AppColors.textMuted)),
               ],
@@ -999,7 +1001,8 @@ void _showEpisodeBreakdown(
 /// add up to it.
 @visibleForTesting // public only so a widget test can open it without a charge public login
 class CpEpisodeBreakdownSheet extends StatelessWidget {
-  const CpEpisodeBreakdownSheet({super.key, required this.row, required this.cp});
+  const CpEpisodeBreakdownSheet(
+      {super.key, required this.row, required this.cp});
 
   final CpShowRow row;
   final ChargePublicCopy cp;
@@ -1078,8 +1081,8 @@ class CpEpisodeBreakdownSheet extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(
                     AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.lg),
                 itemCount: row.episodes.length,
-                itemBuilder: (_, i) =>
-                    _EpisodeRow(episode: row.episodes[i], showTitle: row.showTitle, cp: cp),
+                itemBuilder: (_, i) => _EpisodeRow(
+                    episode: row.episodes[i], showTitle: row.showTitle, cp: cp),
               ),
             ),
           ],
@@ -1152,8 +1155,8 @@ class _EpisodeRowState extends State<_EpisodeRow> {
                         color: AppColors.secondary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.event_outlined,
-                          size: 18, color: AppColors.secondary),
+                      child: Icon(Icons.event_outlined,
+                          size: 18, color: AppColors.accentInk),
                     ),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
@@ -1208,7 +1211,8 @@ class _EpisodeRowState extends State<_EpisodeRow> {
               child: _open
                   ? Column(
                       children: [
-                        Divider(height: 1, thickness: 1, color: AppColors.border),
+                        Divider(
+                            height: 1, thickness: 1, color: AppColors.border),
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.md,
@@ -1271,7 +1275,7 @@ class _EpisodeGuestLine extends StatelessWidget {
             onForegroundImageError: avatar != null ? (_, __) {} : null,
             child: Text(initial,
                 style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.secondary, fontWeight: FontWeight.w600)),
+                    color: AppColors.accentInk, fontWeight: FontWeight.w600)),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -1293,8 +1297,7 @@ class _EpisodeGuestLine extends StatelessWidget {
                 color: guest.attended
                     ? AppColors.successDark
                     : AppColors.textMuted,
-                fontWeight:
-                    guest.attended ? FontWeight.w600 : FontWeight.w400),
+                fontWeight: guest.attended ? FontWeight.w600 : FontWeight.w400),
           ),
         ],
       ),
@@ -1414,8 +1417,8 @@ class _PartialBanner extends StatelessWidget {
           Expanded(
             child: Text(
               cp.detailSoon,
-              style: AppTypography.labelSmall
-                  .copyWith(color: AppColors.warning),
+              style:
+                  AppTypography.labelSmall.copyWith(color: AppColors.warning),
             ),
           ),
         ],

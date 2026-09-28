@@ -10,6 +10,8 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/glass.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/design_system/states.dart';
@@ -151,12 +153,14 @@ class _ShowDetailContent extends ConsumerWidget {
                   child: _EpisodesSection(show: show, showId: showId),
                 ),
               ),
-            if (show.localizedDescription(isAr) != null && show.localizedDescription(isAr)!.isNotEmpty)
+            if (show.localizedDescription(isAr) != null &&
+                show.localizedDescription(isAr)!.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
-                  child: _DescriptionCard(description: show.localizedDescription(isAr)!),
+                  child: _DescriptionCard(
+                      description: show.localizedDescription(isAr)!),
                 ),
               ),
             SliverToBoxAdapter(
@@ -173,7 +177,13 @@ class _ShowDetailContent extends ConsumerWidget {
                 child: _RulesCard(),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            // De quoi lire la dernière carte : la barre « Réserver » plus
+            // l'encombrement de la barre d'onglets, que MediaQuery nous donne.
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 92 + MediaQuery.of(context).padding.bottom,
+              ),
+            ),
           ],
         ),
 
@@ -230,7 +240,8 @@ class _HeroSection extends StatefulWidget {
   State<_HeroSection> createState() => _HeroSectionState();
 }
 
-class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver {
+class _HeroSectionState extends State<_HeroSection>
+    with WidgetsBindingObserver {
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   bool _isPlaying = false;
@@ -354,19 +365,22 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
                 ? Image.network(
                     show.imageUrl!,
                     fit: BoxFit.cover,
-                    loadingBuilder: (_, child, progress) =>
-                        progress == null ? child : Container(color: AppColors.backgroundGrey),
+                    loadingBuilder: (_, child, progress) => progress == null
+                        ? child
+                        : Container(color: AppColors.backgroundGrey),
                     errorBuilder: (_, __, ___) => Container(
                       color: AppColors.backgroundGrey,
                       child: Center(
-                        child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
+                        child: Icon(Icons.tv,
+                            size: 64, color: AppColors.textLight),
                       ),
                     ),
                   )
                 : Container(
                     color: AppColors.backgroundGrey,
                     child: Center(
-                      child: Icon(Icons.tv, size: 64, color: AppColors.textLight),
+                      child:
+                          Icon(Icons.tv, size: 64, color: AppColors.textLight),
                     ),
                   ),
 
@@ -381,27 +395,26 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
               ),
             ),
 
-            // FIX: Hero gradient — 50% coverage, 4-stop smooth, theme-aware
-            Builder(builder: (context) {
-              final isDark = Theme.of(context).brightness == Brightness.dark;
-              final bottomColor =
-                  isDark ? const Color(0xFF0C0C0C) : const Color(0xFFFAFAFA);
-              return DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.center,
-                    colors: [
-                      bottomColor,
-                      bottomColor.withValues(alpha: 0.80),
-                      bottomColor.withValues(alpha: 0.30),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.33, 0.66, 1.0],
-                  ),
+            // Le voile de lisibilité — SOMBRE dans les deux thèmes, pour la
+            // même raison qu'à l'accueil : une affiche n'a pas de thème, et
+            // l'encre blanche écrite dessus a besoin d'un voile sombre des
+            // deux côtés. En clair, ce dégradé finissait en blanc et le titre
+            // blanc disparaissait avec lui.
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.center,
+                  colors: [
+                    Color(0xFF000000),
+                    Color(0xCC000000),
+                    Color(0x4D000000),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.33, 0.66, 1.0],
                 ),
-              );
-            }),
+              ),
+            ),
 
             // Play button — center (only when video available)
             if (show.videoUrl != null)
@@ -470,28 +483,8 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
             Positioned(
               top: MediaQuery.of(context).padding.top + AppSpacing.sm,
               right: AppSpacing.md,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.tv_rounded,
-                        size: 13, color: AppColors.secondaryLight),
-                    const SizedBox(width: 4),
-                    Text(
-                      show.localizedChannel(isAr) ?? show.channel!,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
+              child: ChannelBadge(
+                label: show.localizedChannel(isAr) ?? show.channel!,
               ),
             ),
 
@@ -506,9 +499,7 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
                 // FIX: Hero title — 22px w700, text shadow, Cairo for AR
                 Text(
                   show.localizedTitle(widget.isAr),
-                  style: (widget.isAr
-                          ? AppTypography.h1Ar
-                          : AppTypography.h1)
+                  style: (widget.isAr ? AppTypography.h1Ar : AppTypography.h1)
                       .copyWith(
                     color: Colors.white,
                     fontSize: 22,
@@ -529,27 +520,32 @@ class _HeroSectionState extends State<_HeroSection> with WidgetsBindingObserver 
                 Row(
                   children: [
                     Icon(Icons.calendar_today_outlined,
-                        size: 13, color: AppColors.secondary),
+                        size: 13, color: AppColors.accentInkOnPhoto),
                     const SizedBox(width: 5),
                     Text(
                       show.localizedDate(isAr) ??
                           (show.startsAt != null
-                              ? fallbackDateFormat.format(show.startsAt!.toLocal())
+                              ? fallbackDateFormat
+                                  .format(show.startsAt!.toLocal())
                               : dateTbc),
                       style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        // Blanc, comme le titre : le voile derrière est
+                        // sombre dans les deux thèmes.
+                        color: AppColors.inkOnPhotoMuted,
                         fontSize: 13,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.lg),
                     Icon(Icons.location_on_outlined,
-                        size: 13, color: AppColors.secondary),
+                        size: 13, color: AppColors.accentInkOnPhoto),
                     const SizedBox(width: 5),
                     Flexible(
                       child: Text(
                         show.nextEpisode?.localizedCity(isAr) ?? show.city,
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                          // Blanc, comme le titre : le voile derrière est
+                          // sombre dans les deux thèmes.
+                          color: AppColors.inkOnPhotoMuted,
                           fontSize: 13,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -589,13 +585,7 @@ class _SeatsCard extends ConsumerWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         children: [
@@ -729,8 +719,8 @@ class _DescriptionCardState extends ConsumerState<_DescriptionCard> {
         children: [
           Row(
             children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 16, color: AppColors.secondary),
+              Icon(Icons.info_outline_rounded,
+                  size: 16, color: AppColors.accentInk),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 s.showDetailAbout,
@@ -749,8 +739,7 @@ class _DescriptionCardState extends ConsumerState<_DescriptionCard> {
               height: 1.6,
             ),
             maxLines: _expanded ? null : 3,
-            overflow:
-                _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
           ),
           if (widget.description.length > 120) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -759,7 +748,7 @@ class _DescriptionCardState extends ConsumerState<_DescriptionCard> {
               child: Text(
                 _expanded ? s.showDetailSeeLess : s.showDetailSeeMore,
                 style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.secondary,
+                  color: AppColors.accentInk,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -847,8 +836,7 @@ class _DetailsCard extends ConsumerWidget {
                     horizontal: AppSpacing.sm, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.backgroundWhite,
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusFull),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                   border: Border.all(color: AppColors.border),
                 ),
                 child: Row(
@@ -883,9 +871,8 @@ class _DetailsCard extends ConsumerWidget {
             _DetailRow(
               icon: Icons.star_rounded,
               label: s.showDetailLoyaltyPointsLabel,
-              value: s.showDetailLoyaltyPointsValue(
-                  show.effectiveRewardPoints),
-              valueColor: AppColors.secondary,
+              value: s.showDetailLoyaltyPointsValue(show.effectiveRewardPoints),
+              valueColor: AppColors.accentInk,
               isLast: true,
             ),
           ],
@@ -932,7 +919,7 @@ class _DetailRow extends StatelessWidget {
               color: AppColors.backgroundWhite,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            child: Icon(icon, color: AppColors.secondary, size: 18),
+            child: Icon(icon, color: AppColors.accentInk, size: 18),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -1015,11 +1002,10 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
                     height: 36,
                     decoration: BoxDecoration(
                       color: AppColors.backgroundWhite,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     ),
-                    child: const Icon(Icons.shield_outlined,
-                        color: AppColors.secondary, size: 18),
+                    child: Icon(Icons.shield_outlined,
+                        color: AppColors.accentInk, size: 18),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
@@ -1067,8 +1053,7 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
                         final i = entry.key;
                         final rule = entry.value;
                         return Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSpacing.md),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -1084,7 +1069,7 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
                                   child: Text(
                                     '${i + 1}',
                                     style: AppTypography.caption.copyWith(
-                                      color: AppColors.secondary,
+                                      color: AppColors.accentInk,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -1093,13 +1078,11 @@ class _RulesCardState extends ConsumerState<_RulesCard> {
                               const SizedBox(width: AppSpacing.md),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       rule.title,
-                                      style:
-                                          AppTypography.labelMedium.copyWith(
+                                      style: AppTypography.labelMedium.copyWith(
                                         color: AppColors.textPrimary,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -1169,7 +1152,8 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
           : null;
       await Share.share(
         s.referralShareMessage(
-            widget.show.localizedTitle(ref.read(isRtlProvider)), link.referralLink),
+            widget.show.localizedTitle(ref.read(isRtlProvider)),
+            link.referralLink),
         sharePositionOrigin: origin,
       );
     } catch (e) {
@@ -1194,7 +1178,15 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
     final dateUnconfirmed =
         episode != null ? episode.startsAt == null : show.startsAt == null;
 
-    // FIX: Bottom bar — backgroundLight, 12px h-padding, 8px v-padding
+    // La barre se pose SUR la barre d'onglets : elle réserve sa hauteur une
+    // fois, et une seule.
+    //
+    // `padding.bottom` ne vaut plus 34 ici. Le shell laisse le contenu filer
+    // sous la barre d'onglets en verre (`extendBody`), et Flutter compte alors
+    // l'encombrement de cette barre dans l'inset — 102 sur un iPhone 17. Cet
+    // écran l'appliquait deux fois, en marge puis en `SafeArea` : deux fois
+    // rien tant que l'inset valait zéro, mais 200 points de vide dès que le
+    // contenu est passé sous la barre.
     return Container(
       padding: EdgeInsets.fromLTRB(
         12,
@@ -1206,153 +1198,148 @@ class _StickyReserveCTAState extends ConsumerState<_StickyReserveCTA> {
         color: AppColors.backgroundLight,
         border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
       ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            // Reward points badge
-            if (!isSoldOut && (episode?.rewardPoints ?? show.rewardPoints) != null) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withValues(alpha: 0.12),
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusMd),
-                  border: Border.all(
-                      color: AppColors.secondary.withValues(alpha: 0.3)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.star_rounded,
-                        color: AppColors.secondary, size: 18),
-                    const SizedBox(height: 2),
-                    Text(
-                      '+${episode?.effectiveRewardPoints ?? show.effectiveRewardPoints}',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.secondary,
-                        fontWeight: FontWeight.w700,
-                      ),
+      child: Row(
+        children: [
+          // Reward points badge
+          if (!isSoldOut &&
+              (episode?.rewardPoints ?? show.rewardPoints) != null) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(
+                    color: AppColors.secondary.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.star_rounded,
+                      color: AppColors.accentInk, size: 18),
+                  const SizedBox(height: 2),
+                  Text(
+                    '+${episode?.effectiveRewardPoints ?? show.effectiveRewardPoints}',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.accentInk,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppSpacing.md),
-            ],
+            ),
+            const SizedBox(width: AppSpacing.md),
+          ],
 
-            // Main button
-            Expanded(
-              child: SizedBox(
-                height: 52,
-                child: isSoldOut
-                    ? OutlinedButton.icon(
-                        onPressed: null,
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                              color: AppColors.border, width: 1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusMd),
-                          ),
-                        ),
-                        icon: Icon(Icons.event_busy_outlined,
-                            size: 18, color: AppColors.textLight),
-                        label: Text(
-                          s.showDetailSoldOutCta,
-                          style: AppTypography.buttonLarge
-                              .copyWith(color: AppColors.textLight),
-                        ),
-                      )
-                    : dateUnconfirmed
-                    // Date not confirmed — disabled until the show is scheduled.
-                    ? OutlinedButton.icon(
-                        onPressed: null,
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.border, width: 1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusMd),
-                          ),
-                        ),
-                        icon: Icon(Icons.schedule,
-                            size: 18, color: AppColors.textLight),
-                        label: Text(
-                          s.homeDateTbc,
-                          style: AppTypography.buttonLarge
-                              .copyWith(color: AppColors.textLight),
-                        ),
-                      )
-                    // FIX: Main CTA — primary bg, white, radius 14, shadow
-                    : Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  AppColors.primary.withValues(alpha: 0.30),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: FilledButton.icon(
-                          onPressed: widget.onReserve,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            minimumSize:
-                                const Size(double.infinity, 52),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          icon: const Icon(
-                            Icons.confirmation_number_outlined,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                          label: Text(
-                            s.showDetailReserveNow,
-                            style: AppTypography.buttonLarge.copyWith(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+          // Main button
+          Expanded(
+            child: SizedBox(
+              height: 52,
+              child: isSoldOut
+                  ? OutlinedButton.icon(
+                      onPressed: null,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: AppColors.border, width: 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd),
                         ),
                       ),
-              ),
-            ),
-
-            // FIX: Share button — backgroundGrey bg, textSecondary icon, radius 12
-            const SizedBox(width: 12),
-            GestureDetector(
-              onTap: _isSharing ? null : _shareShow,
-              child: Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundGrey,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: _isSharing
-                    ? Center(
-                        child: SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.textMuted,
+                      icon: Icon(Icons.event_busy_outlined,
+                          size: 18, color: AppColors.textLight),
+                      label: Text(
+                        s.showDetailSoldOutCta,
+                        style: AppTypography.buttonLarge
+                            .copyWith(color: AppColors.textLight),
+                      ),
+                    )
+                  : dateUnconfirmed
+                      // Date not confirmed — disabled until the show is scheduled.
+                      ? OutlinedButton.icon(
+                          onPressed: null,
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: AppColors.border, width: 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppSpacing.radiusMd),
+                            ),
+                          ),
+                          icon: Icon(Icons.schedule,
+                              size: 18, color: AppColors.textLight),
+                          label: Text(
+                            s.homeDateTbc,
+                            style: AppTypography.buttonLarge
+                                .copyWith(color: AppColors.textLight),
+                          ),
+                        )
+                      // FIX: Main CTA — primary bg, white, radius 14, shadow
+                      : Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.30),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: FilledButton.icon(
+                            onPressed: widget.onReserve,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primaryAction,
+                              foregroundColor: AppColors.onPrimary,
+                              minimumSize: const Size(double.infinity, 52),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.confirmation_number_outlined,
+                              size: 18,
+                              color: AppColors.onPrimary,
+                            ),
+                            label: Text(
+                              s.showDetailReserveNow,
+                              style: AppTypography.buttonLarge.copyWith(
+                                color: AppColors.onPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ),
-                      )
-                    : Icon(Icons.share_outlined,
-                        size: 20, color: AppColors.textSecondary),
-              ),
             ),
-          ],
-        ),
+          ),
+
+          // FIX: Share button — backgroundGrey bg, textSecondary icon, radius 12
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: _isSharing ? null : _shareShow,
+            child: Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundGrey,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: _isSharing
+                  ? Center(
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    )
+                  : Icon(Icons.share_outlined,
+                      size: 20, color: AppColors.textSecondary),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1376,7 +1363,8 @@ class _EpisodesSection extends ConsumerWidget {
     // Split into upcoming and past.
     // Episodes with no startsAt (unscheduled) go in upcoming — shown with "Coming Soon".
     final upcoming = show.episodes
-        .where((e) => e.startsAt == null || (e.startsAt!.isAfter(now) && e.isActive))
+        .where((e) =>
+            e.startsAt == null || (e.startsAt!.isAfter(now) && e.isActive))
         .toList()
       ..sort((a, b) {
         // Unscheduled episodes sort to the end of upcoming
@@ -1385,7 +1373,8 @@ class _EpisodesSection extends ConsumerWidget {
         return aDate.compareTo(bDate);
       });
     final past = show.episodes
-        .where((e) => e.startsAt != null && (!e.startsAt!.isAfter(now) || !e.isActive))
+        .where((e) =>
+            e.startsAt != null && (!e.startsAt!.isAfter(now) || !e.isActive))
         .toList()
       ..sort((a, b) => b.startsAt!.compareTo(a.startsAt!));
 
@@ -1395,8 +1384,8 @@ class _EpisodesSection extends ConsumerWidget {
         // FIX: Episodes header — secondary icon, split title/count styling
         Row(
           children: [
-            const Icon(Icons.video_library_outlined,
-                size: 18, color: AppColors.secondary),
+            Icon(Icons.video_library_outlined,
+                size: 18, color: AppColors.accentInk),
             const SizedBox(width: AppSpacing.sm),
             RichText(
               text: TextSpan(
@@ -1523,13 +1512,13 @@ class _EpisodeShareButtonState extends ConsumerState<_EpisodeShareButton> {
                 Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
           ),
           child: _sharing
-              ? const Padding(
+              ? Padding(
                   padding: EdgeInsets.all(9),
                   child: CircularProgressIndicator(
-                      strokeWidth: 2, color: AppColors.secondary),
+                      strokeWidth: 2, color: AppColors.accentInk),
                 )
-              : const Icon(Icons.share_outlined,
-                  size: 18, color: AppColors.secondary),
+              : Icon(Icons.share_outlined,
+                  size: 18, color: AppColors.accentInk),
         ),
       ),
     );
@@ -1556,7 +1545,8 @@ class _EpisodeCard extends ConsumerWidget {
     final isSoldOut = episode.isSoldOut;
     final episodeDateStr = episode.localizedDate(isAr) ??
         (episode.startsAt != null
-            ? DateFormat('EEE d MMM • HH:mm', 'fr_FR').format(episode.startsAt!.toLocal())
+            ? DateFormat('EEE d MMM • HH:mm', 'fr_FR')
+                .format(episode.startsAt!.toLocal())
             : s.homeDateTbc);
 
     // FIX: Episode card — cardDarkElevated, radius 16, shadow, padding 14
@@ -1612,8 +1602,9 @@ class _EpisodeCard extends ConsumerWidget {
                       child: Text(
                         episodeDateStr,
                         style: AppTypography.caption.copyWith(
-                          color:
-                              isPast ? AppColors.textLight : AppColors.textMuted,
+                          color: isPast
+                              ? AppColors.textLight
+                              : AppColors.textMuted,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1636,8 +1627,9 @@ class _EpisodeCard extends ConsumerWidget {
                             ? '${episode.localizedStudio(isAr)}, ${episode.localizedCity(isAr)}'
                             : episode.localizedCity(isAr),
                         style: AppTypography.caption.copyWith(
-                          color:
-                              isPast ? AppColors.textLight : AppColors.textMuted,
+                          color: isPast
+                              ? AppColors.textLight
+                              : AppColors.textMuted,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1667,8 +1659,8 @@ class _EpisodeCard extends ConsumerWidget {
               ),
               child: Text(
                 s.pastEpisodeLabel,
-                style: AppTypography.caption
-                    .copyWith(color: AppColors.textLight),
+                style:
+                    AppTypography.caption.copyWith(color: AppColors.textLight),
               ),
             )
           else if (isSoldOut)
@@ -1681,8 +1673,8 @@ class _EpisodeCard extends ConsumerWidget {
               ),
               child: Text(
                 s.episodeSoldOut,
-                style: AppTypography.caption
-                    .copyWith(color: AppColors.error, fontWeight: FontWeight.w600),
+                style: AppTypography.caption.copyWith(
+                    color: AppColors.error, fontWeight: FontWeight.w600),
               ),
             )
           else
@@ -1695,7 +1687,7 @@ class _EpisodeCard extends ConsumerWidget {
                   Text(
                     s.episodeAvailableSeats(episode.availableSeats),
                     style: AppTypography.caption.copyWith(
-                      color: AppColors.secondary,
+                      color: AppColors.accentInk,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -1733,41 +1725,41 @@ class _EpisodeCard extends ConsumerWidget {
                   else
                     // FIX: Episode reserve button — primary bg, white, shadow
                     Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.25),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: FilledButton(
+                        onPressed: () => context.go(Routes.episodeReserve(
+                            showId, episode.id.toString())),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primaryAction,
+                          foregroundColor: AppColors.onPrimary,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                      ],
-                    ),
-                    child: FilledButton(
-                      onPressed: () => context.go(Routes.episodeReserve(
-                          showId, episode.id.toString())),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        child: Text(
+                          s.reserveEpisode,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.onPrimary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      child: Text(
-                        s.reserveEpisode,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
                     ),
-                  ),
                 ],
               ),
             ),

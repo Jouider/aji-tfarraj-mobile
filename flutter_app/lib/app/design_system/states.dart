@@ -187,7 +187,8 @@ class ErrorState extends StatelessWidget {
   /// Network error
   factory ErrorState.network({VoidCallback? onRetry}) => ErrorState(
         icon: Icons.wifi_off_outlined,
-        message: 'Impossible de se connecter au serveur.\nVeuillez vérifier votre connexion internet.',
+        message:
+            'Impossible de se connecter au serveur.\nVeuillez vérifier votre connexion internet.',
         retryText: 'Réessayer',
         onRetry: onRetry,
       );

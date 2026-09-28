@@ -55,9 +55,7 @@ class SeatsAvailabilityBanner extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            isSoldOut
-                ? Icons.event_busy_outlined
-                : Icons.event_seat_outlined,
+            isSoldOut ? Icons.event_busy_outlined : Icons.event_seat_outlined,
             color: iconColor,
             size: 20,
           ),

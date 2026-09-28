@@ -196,7 +196,6 @@ class ReferralAttributionService {
   }
 }
 
-final referralAttributionServiceProvider =
-    Provider<ReferralAttributionService>(
+final referralAttributionServiceProvider = Provider<ReferralAttributionService>(
   (ref) => ReferralAttributionService(ref),
 );

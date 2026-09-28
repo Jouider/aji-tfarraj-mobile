@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
@@ -53,13 +54,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final logo = locale == AppLocale.ar
-        ? (isDark
-            ? 'assets/images/ajitfarraj_logo/white_ar_logo.png'
-            : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
-        : (isDark
-            ? 'assets/images/ajitfarraj_logo/white_fr_logo.png'
-            : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -69,10 +63,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                logo,
-                width: 220,
-              ),
+              const AppLogo(width: 240),
               const SizedBox(height: 56),
               SizedBox(
                 width: 24,

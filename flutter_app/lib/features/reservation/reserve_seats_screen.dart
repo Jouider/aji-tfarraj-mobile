@@ -38,8 +38,7 @@ class ReserveSeatsScreen extends ConsumerStatefulWidget {
   const ReserveSeatsScreen({super.key, required this.showId, this.episodeId});
 
   @override
-  ConsumerState<ReserveSeatsScreen> createState() =>
-      _ReserveSeatsScreenState();
+  ConsumerState<ReserveSeatsScreen> createState() => _ReserveSeatsScreenState();
 }
 
 class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
@@ -50,6 +49,12 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
   /// studio. Null veut dire « je rentre par mes propres moyens » — la porte
   /// repose la question de toute façon.
   int? _returnPointId;
+
+  /// La question du retour a-t-elle reçu une réponse ?
+  ///
+  /// Séparé de [_returnPointId] parce que `null` y veut dire « je rentre par
+  /// mes propres moyens » — une réponse, pas une absence de réponse.
+  bool _returnAnswered = false;
   String? _errorMessage;
   final _referralCodeController = TextEditingController();
   bool _referralInitiallyExpanded = false;
@@ -90,8 +95,7 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final showAsync =
-        ref.watch(showDetailProvider(int.parse(widget.showId)));
+    final showAsync = ref.watch(showDetailProvider(int.parse(widget.showId)));
     final s = ref.watch(stringsProvider);
 
     return Scaffold(
@@ -110,8 +114,7 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: AppColors.textPrimary, size: 22),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 22),
           onPressed: () => context.go(Routes.showDetail(widget.showId)),
         ),
         actions: const [
@@ -128,8 +131,8 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
         error: (error, stack) => ErrorState(
           message: error.toString(),
           retryText: s.retry,
-          onRetry: () => ref
-              .refresh(showDetailProvider(int.parse(widget.showId))),
+          onRetry: () =>
+              ref.refresh(showDetailProvider(int.parse(widget.showId))),
         ),
         data: (show) => _buildContent(context, show, s),
       ),
@@ -200,16 +203,25 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
                   ReturnPointField(
                     points: episode.returnPoints,
                     selectedId: _returnPointId,
+                    answered: _returnAnswered,
                     isArabic: ref.watch(localeProvider) == AppLocale.ar,
                     strings: s,
                     enabled: !_isLoading,
-                    onChoose: (id) => setState(() => _returnPointId = id),
+                    onChoose: (id) => setState(() {
+                      _returnPointId = id;
+                      _returnAnswered = true;
+                    }),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    s.returnPointChangeable,
-                    style: AppTypography.caption
-                        .copyWith(color: AppColors.textMuted),
+                    _returnAnswered
+                        ? s.returnPointChangeable
+                        : s.returnPointRequired,
+                    style: AppTypography.caption.copyWith(
+                      color: _returnAnswered
+                          ? AppColors.textMuted
+                          : AppColors.accentInk,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
@@ -222,7 +234,9 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
                 ),
               ],
 
-              const SizedBox(height: 120),
+              // La case « j'accepte » doit rester atteignable au-dessus de la
+              // barre de confirmation, barre d'onglets comprise.
+              SizedBox(height: 140 + MediaQuery.of(context).padding.bottom),
             ],
           ),
         ),
@@ -235,7 +249,9 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
           child: BookingBottomBar(
             isLoading: _isLoading,
             isSoldOut: isSoldOut,
-            agreedToTerms: _agreedToTerms,
+            // Deux conditions, pas une : la case des conditions, et le
+            // choix du retour quand une navette roule ce soir-là.
+            canConfirm: _agreedToTerms && _returnSettled(episode),
             onConfirm: () => _submitReservation(context),
             s: s,
           ),
@@ -243,6 +259,13 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
       ],
     );
   }
+
+  /// La question du retour est-elle réglée ?
+  ///
+  /// Vraie d'office quand aucune navette ne roule : on ne bloque pas sur une
+  /// question qu'on n'a pas posée.
+  bool _returnSettled(Episode? episode) =>
+      (episode?.returnPoints.isEmpty ?? true) || _returnAnswered;
 
   Future<void> _submitReservation(BuildContext context) async {
     final router = GoRouter.of(context);
@@ -271,15 +294,14 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
 
     try {
       final referralCode = _referralCodeController.text.trim();
-      final reservation = await ref
-          .read(myReservationsProvider.notifier)
-          .createReservation(
-            episodeId: episodeId,
-            referralCode: referralCode.isNotEmpty ? referralCode : null,
-            returnPointId: _returnPointId,
-            // La question n'a été posée que si une navette roule ce soir-là.
-            returnPointAsked: episode?.returnPoints.isNotEmpty ?? false,
-          );
+      final reservation =
+          await ref.read(myReservationsProvider.notifier).createReservation(
+                episodeId: episodeId,
+                referralCode: referralCode.isNotEmpty ? referralCode : null,
+                returnPointId: _returnPointId,
+                // La question n'a été posée que si une navette roule ce soir-là.
+                returnPointAsked: episode?.returnPoints.isNotEmpty ?? false,
+              );
 
       // Attribution consumed — clear both the in-memory and the persisted code
       // so a future organic reservation isn't wrongly attributed to the CP.
@@ -328,8 +350,7 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: AppColors.surfaceOverlay,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(s.profileIncompleteWarning, style: AppTypography.h3),
         content: Text(s.profileIncompleteMessage,
             style: AppTypography.bodyMedium
@@ -390,22 +411,20 @@ class _ErrorBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.errorLight,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border:
-            Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.error_outline,
-                  color: AppColors.error, size: 20),
+              const Icon(Icons.error_outline, color: AppColors.error, size: 20),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   message,
-                  style: AppTypography.bodySmall
-                      .copyWith(color: AppColors.error),
+                  style:
+                      AppTypography.bodySmall.copyWith(color: AppColors.error),
                 ),
               ),
             ],
@@ -440,9 +459,7 @@ class _ReserveSkeleton extends StatelessWidget {
             child: Row(
               children: [
                 const SkeletonLoader(
-                    width: 80,
-                    height: 80,
-                    borderRadius: AppSpacing.radiusMd),
+                    width: 80, height: 80, borderRadius: AppSpacing.radiusMd),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
@@ -450,8 +467,7 @@ class _ReserveSkeleton extends StatelessWidget {
                     children: [
                       SkeletonLoader.text(width: 80, height: 16),
                       const SizedBox(height: AppSpacing.xs),
-                      SkeletonLoader.text(
-                          width: double.infinity, height: 20),
+                      SkeletonLoader.text(width: double.infinity, height: 20),
                       const SizedBox(height: AppSpacing.sm),
                       SkeletonLoader.text(width: 150, height: 14),
                       const SizedBox(height: AppSpacing.xs),

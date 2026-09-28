@@ -1,7 +1,7 @@
 name: aji_tfarraj
 description: Aji Tfarraj Mobile App - TV Show Reservation System
 publish_to: 'none'
-version: 1.1.16+52
+version: 1.1.17+53
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -27,8 +27,6 @@ dependencies:
   intl: ^0.20.2
   # QR Code generation
   qr_flutter: ^4.1.0
-  # Typography - Inter (FR) & Cairo (AR)
-  google_fonts: ^6.1.0
   url_launcher: ^6.3.2
   # Native rating prompt (App Store / Play), quota-limited by the stores themselves
   in_app_review: ^2.0.12
@@ -109,10 +107,15 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/web-app-manifest-512x512.png"
+  # Le carré est plein et sans coins arrondis : iOS applique son propre
+  # masque, et une icône déjà arrondie s'y verrait deux fois.
+  image_path: "assets/icon/app_icon.png"
+  # Android découpe l'avant-plan en cercle : le symbole y est réduit à 66 %
+  # pour ne pas se faire rogner les angles.
+  adaptive_icon_background: "assets/icon/adaptive_background.png"
+  adaptive_icon_foreground: "assets/icon/adaptive_foreground.png"
   min_sdk_android: 21
   remove_alpha_channel: true
-  background_color: "#FFFFFF"
 
 flutter:
   uses-material-design: true
@@ -120,6 +123,30 @@ flutter:
   assets:
     - assets/images/
     - assets/images/ajitfarraj_logo/
-    # Latin + Arabic subset of Cairo (OFL), embedded in the shuttle manifest
-    # PDF — the built-in PDF fonts have no Arabic glyphs at all.
+    # Les .ttf de Cairo restent aussi déclarés en assets : l'export PDF du
+    # manifeste les lit par chemin (rootBundle.load), pas par famille.
     - assets/fonts/
+
+  # Cairo, embarqué dans l'app — jamais téléchargé.
+  #
+  # Avant, google_fonts allait chercher Inter et Cairo chez Google au premier
+  # affichage : sur un réseau lent l'app démarrait dans la police du système
+  # puis changeait de police sous les yeux du membre, et hors ligne elle
+  # n'avait jamais la bonne. C'est ce que fait Airbnb, Spotify ou Netflix :
+  # la police de la marque est dans le binaire.
+  #
+  # Quatre coupes, générées depuis la police variable amont (OFL) et réduites
+  # au latin + arabe : ~82 Ko chacune. Ce sont les quatre graisses que la
+  # charte utilise réellement — 400 pour le corps arabe, 600 pour les titres
+  # arabes, 700 pour les titres de carte, 800 pour les grands titres.
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Cairo-ExtraBold.ttf
+          weight: 800

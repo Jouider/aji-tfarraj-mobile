@@ -71,7 +71,6 @@ Future<String?> showPoseGuide(
               ),
               const SizedBox(height: AppSpacing.md),
               _PoseDemo(pose: pose, caption: s.casting.poseDemoCaption),
-
               for (var i = 0; i < copy.steps.length; i++)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -88,7 +87,7 @@ Future<String?> showPoseGuide(
                         ),
                         child: Text('${i + 1}',
                             style: AppTypography.caption
-                                .copyWith(color: AppColors.secondary)),
+                                .copyWith(color: AppColors.accentInk)),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
@@ -98,7 +97,6 @@ Future<String?> showPoseGuide(
                     ],
                   ),
                 ),
-
               const SizedBox(height: AppSpacing.sm),
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -119,7 +117,6 @@ Future<String?> showPoseGuide(
                   ],
                 ),
               ),
-
               const SizedBox(height: AppSpacing.lg),
               SizedBox(
                 width: double.infinity,
@@ -252,7 +249,8 @@ class _PoseDemoState extends ConsumerState<_PoseDemo> {
                   height: height,
                   color: Colors.black,
                   child: AspectRatio(
-                    aspectRatio: ready ? controller.value.aspectRatio : 9 / 19.5,
+                    aspectRatio:
+                        ready ? controller.value.aspectRatio : 9 / 19.5,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [

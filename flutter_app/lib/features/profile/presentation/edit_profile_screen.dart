@@ -89,14 +89,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   /// The account as it will be stored: the bare username, or '' to clear it.
   /// The field validators have already refused anything unsavable.
   String _socialValue(SocialPlatform platform) =>
-      SocialHandles.normalize(platform, _socialControllers[platform]!.text) ?? '';
+      SocialHandles.normalize(platform, _socialControllers[platform]!.text) ??
+      '';
 
   Future<void> _save() async {
     // Hard guard — cities must be loaded and city/district must be selected
     final citiesAsync = ref.read(citiesProvider);
     if (!citiesAsync.hasValue) {
-      setState(() =>
-          _errorMessage = 'Veuillez patienter le chargement des villes.');
+      setState(
+          () => _errorMessage = 'Veuillez patienter le chargement des villes.');
       return;
     }
     if (_selectedCity == null) {
@@ -116,8 +117,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     // with it empty, the backend keeps it in missing_profile_fields, and the
     // router silently bounces back here — the reported "sign-up loop".
     if (_dateOfBirth == null) {
-      setState(() =>
-          _errorMessage = ref.read(stringsProvider).dateOfBirthRequired);
+      setState(
+          () => _errorMessage = ref.read(stringsProvider).dateOfBirthRequired);
       return;
     }
 
@@ -129,32 +130,38 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     });
     try {
       final phone = _phoneController.text.trim();
-      final updatedUser = await ref.read(profileRepositoryProvider).updateProfile(
-            firstName: _firstNameController.text.trim(),
-            lastName: _lastNameController.text.trim(),
-            cityName: _selectedCity,
-            district: _selectedDistrict,
-            phoneCountryCode: phone.isNotEmpty ? _countryCode : null,
-            phoneNumber: phone.isNotEmpty ? phone : null,
-            dateOfBirth: _dateOfBirth,
-            gender: _gender,
-            // Always sent, so emptying a field removes the account.
-            instagram: _socialValue(SocialPlatform.instagram),
-            tiktok: _socialValue(SocialPlatform.tiktok),
-            snapchat: _socialValue(SocialPlatform.snapchat),
-            facebook: _socialValue(SocialPlatform.facebook),
-          );
-      debugPrint('[EditProfile] PATCH user: profileComplete=${updatedUser.profileComplete}, missing=${updatedUser.missingProfileFields}');
+      final updatedUser =
+          await ref.read(profileRepositoryProvider).updateProfile(
+                firstName: _firstNameController.text.trim(),
+                lastName: _lastNameController.text.trim(),
+                cityName: _selectedCity,
+                district: _selectedDistrict,
+                phoneCountryCode: phone.isNotEmpty ? _countryCode : null,
+                phoneNumber: phone.isNotEmpty ? phone : null,
+                dateOfBirth: _dateOfBirth,
+                gender: _gender,
+                // Always sent, so emptying a field removes the account.
+                instagram: _socialValue(SocialPlatform.instagram),
+                tiktok: _socialValue(SocialPlatform.tiktok),
+                snapchat: _socialValue(SocialPlatform.snapchat),
+                facebook: _socialValue(SocialPlatform.facebook),
+              );
+      debugPrint(
+          '[EditProfile] PATCH user: profileComplete=${updatedUser.profileComplete}, missing=${updatedUser.missingProfileFields}');
       ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
       await ref.read(loginAuthStateProvider.notifier).refreshUser();
       final refreshedUser = ref.read(loginAuthStateProvider).user;
-      debugPrint('[EditProfile] Refreshed user: profileComplete=${refreshedUser?.profileComplete}, missing=${refreshedUser?.missingProfileFields}');
+      debugPrint(
+          '[EditProfile] Refreshed user: profileComplete=${refreshedUser?.profileComplete}, missing=${refreshedUser?.missingProfileFields}');
       // Safety net against a silent redirect loop: if the server STILL reports a
       // required field missing (one the form couldn't satisfy), the global router
       // would immediately bounce us back to this screen. Show a clear message and
       // stay, instead of a misleading "saved" followed by the loop.
       const optionalFields = {
-        'avatar', 'avatar_url', 'live_photo_captured_at', 'phone_verified_at',
+        'avatar',
+        'avatar_url',
+        'live_photo_captured_at',
+        'phone_verified_at',
       };
       final stillMissingRequired = refreshedUser != null &&
           !refreshedUser.profileComplete &&
@@ -163,8 +170,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               .isNotEmpty;
       if (stillMissingRequired) {
         if (mounted) {
-          setState(() => _errorMessage =
-              ref.read(stringsProvider).profileStillIncomplete);
+          setState(() =>
+              _errorMessage = ref.read(stringsProvider).profileStillIncomplete);
         }
         return;
       }
@@ -218,9 +225,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     setState(() => _isAvatarLoading = true);
 
     try {
-      final updatedUser = await ref
-          .read(profileRepositoryProvider)
-          .uploadAvatar(File(path));
+      final updatedUser =
+          await ref.read(profileRepositoryProvider).uploadAvatar(File(path));
       ref.read(loginAuthStateProvider.notifier).updateUser(updatedUser);
     } on ApiException catch (e) {
       if (mounted) {
@@ -311,7 +317,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _showAvatarSheet();
       return;
     }
-    showFullScreenImage(context, imageUrl: url, heroTag: avatarHeroTag(url, scope: 'edit-profile'));
+    showFullScreenImage(context,
+        imageUrl: url, heroTag: avatarHeroTag(url, scope: 'edit-profile'));
   }
 
   void _showAvatarSheet() {
@@ -321,8 +328,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       context: context,
       backgroundColor: AppColors.surfaceOverlay,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusXl)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
       ),
       builder: (ctx) => SafeArea(
         child: Column(
@@ -347,12 +354,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   color: AppColors.secondary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
-                child: const Icon(Icons.camera_alt_outlined,
-                    size: 18, color: AppColors.secondary),
+                child: Icon(Icons.camera_alt_outlined,
+                    size: 18, color: AppColors.accentInk),
               ),
               title: Text(s.takePhoto,
-                  style: AppTypography.bodyMedium
-                      .copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w500)),
+                  style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500)),
               onTap: _pickAvatar,
             ),
             if (user?.avatarUrl != null)
@@ -368,8 +376,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       size: 18, color: AppColors.error),
                 ),
                 title: Text(s.removePhoto,
-                    style: AppTypography.bodyMedium
-                        .copyWith(color: AppColors.error, fontWeight: FontWeight.w500)),
+                    style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.error, fontWeight: FontWeight.w500)),
                 onTap: _deleteAvatar,
               ),
             const SizedBox(height: AppSpacing.md),
@@ -438,7 +446,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         child: Text(
                           'OK',
                           style: AppTypography.bodyMedium
-                              .copyWith(color: AppColors.secondary),
+                              .copyWith(color: AppColors.accentInk),
                         ),
                       ),
                     ],
@@ -482,9 +490,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             if (selDay > d) selDay = d;
                           }),
                           children: [
-                            'Janvier', 'Février', 'Mars', 'Avril', 'Mai',
-                            'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre',
-                            'Novembre', 'Décembre',
+                            'Janvier',
+                            'Février',
+                            'Mars',
+                            'Avril',
+                            'Mai',
+                            'Juin',
+                            'Juillet',
+                            'Août',
+                            'Septembre',
+                            'Octobre',
+                            'Novembre',
+                            'Décembre',
                           ]
                               .map((m) => Center(
                                     child: Text(
@@ -535,11 +552,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
-      prefixIcon: Icon(icon, size: 20, color: AppColors.secondary),
+      prefixIcon: Icon(icon, size: 20, color: AppColors.accentInk),
       filled: true,
       fillColor: AppColors.backgroundGrey,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         borderSide: BorderSide.none,
@@ -550,7 +566,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        borderSide: const BorderSide(color: AppColors.secondary, width: 1.5),
+        borderSide: BorderSide(color: AppColors.accentInk, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -680,8 +696,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: AppColors.errorLight,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusLg),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                     border: Border.all(
                         color: AppColors.error.withValues(alpha: 0.30)),
                   ),
@@ -729,9 +744,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 textCapitalization: TextCapitalization.words,
                 decoration:
                     _fieldDecoration(s.lastNameLabel, Icons.badge_outlined),
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? s.lastNameRequired
-                    : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? s.lastNameRequired : null,
               ),
               const SizedBox(height: AppSpacing.md),
 
@@ -773,8 +787,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                    child: const LinearProgressIndicator(
-                        color: AppColors.secondary,
+                    child: LinearProgressIndicator(
+                        color: AppColors.accentInk,
                         backgroundColor: Colors.transparent),
                   ),
                 ),
@@ -830,9 +844,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                 .map((d) => DropdownMenuItem(
                                       value: d,
                                       child: Text(
-                                          selected?.localizedDistrict(d, isAr) ?? d,
-                                          style: AppTypography.bodyMedium.copyWith(
-                                              color: AppColors.textPrimary)),
+                                          selected?.localizedDistrict(
+                                                  d, isAr) ??
+                                              d,
+                                          style: AppTypography.bodyMedium
+                                              .copyWith(
+                                                  color:
+                                                      AppColors.textPrimary)),
                                     ))
                                 .toList(),
                             onChanged: (_isLoading || districts.isEmpty)
@@ -900,8 +918,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   child: FilledButton(
                     onPressed: _isLoading ? null : _save,
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.primaryAction,
+                      foregroundColor: AppColors.onPrimary,
                       disabledBackgroundColor:
                           AppColors.primary.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
@@ -913,7 +931,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
+                                strokeWidth: 2, color: AppColors.onPrimary),
                           )
                         : Text(s.saveChanges,
                             style: AppTypography.buttonLarge
@@ -990,29 +1008,31 @@ class _AvatarHero extends ConsumerWidget {
                     child: isLoading
                         ? Container(
                             color: AppColors.backgroundGrey,
-                            child: const Center(
+                            child: Center(
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: AppColors.secondary),
+                                  strokeWidth: 2.5, color: AppColors.accentInk),
                             ),
                           )
                         : (user?.avatarUrl != null
                             ? Hero(
-                                tag: avatarHeroTag(user!.avatarUrl!, scope: 'edit-profile'),
+                                tag: avatarHeroTag(user!.avatarUrl!,
+                                    scope: 'edit-profile'),
                                 child: Image.network(
-                                user!.avatarUrl!,
-                                width: 104,
-                                height: 104,
-                                fit: BoxFit.cover,
-                                // Bound the decoded bitmap so a large source
-                                // image can't OOM the render (displayed at 104).
-                                cacheWidth: 312,
-                                cacheHeight: 312,
-                                loadingBuilder: (_, child, progress) =>
-                                    progress == null ? child : _AvatarPlaceholder(),
-                                errorBuilder: (_, __, ___) =>
-                                    _AvatarPlaceholder(),
-                              ),
+                                  user!.avatarUrl!,
+                                  width: 104,
+                                  height: 104,
+                                  fit: BoxFit.cover,
+                                  // Bound the decoded bitmap so a large source
+                                  // image can't OOM the render (displayed at 104).
+                                  cacheWidth: 312,
+                                  cacheHeight: 312,
+                                  loadingBuilder: (_, child, progress) =>
+                                      progress == null
+                                          ? child
+                                          : _AvatarPlaceholder(),
+                                  errorBuilder: (_, __, ___) =>
+                                      _AvatarPlaceholder(),
+                                ),
                               )
                             : _AvatarPlaceholder()),
                   ),
@@ -1046,8 +1066,8 @@ class _AvatarHero extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.camera_alt,
-                        size: 18, color: Colors.white),
+                    child: Icon(Icons.camera_alt,
+                        size: 18, color: AppColors.onSecondary),
                   ),
                 ),
               ),
@@ -1216,8 +1236,7 @@ class _GenderOption extends StatelessWidget {
               ),
               if (selected) ...[
                 const SizedBox(width: 6),
-                const Icon(Icons.check_circle,
-                    size: 16, color: AppColors.secondary),
+                Icon(Icons.check_circle, size: 16, color: AppColors.accentInk),
               ],
             ],
           ),
@@ -1257,8 +1276,7 @@ class _PhoneSection extends ConsumerWidget {
             // Country code chip — matches field style
             Container(
               height: AppSpacing.inputHeight,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               decoration: BoxDecoration(
                 color: AppColors.backgroundGrey,
                 border: Border.all(color: AppColors.border),
@@ -1314,14 +1332,12 @@ class _CitiesRetryWidget extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.wifi_off_outlined,
-              color: AppColors.error, size: 18),
+          const Icon(Icons.wifi_off_outlined, color: AppColors.error, size: 18),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               'Impossible de charger les villes.',
-              style:
-                  AppTypography.bodySmall.copyWith(color: AppColors.error),
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           ),
           TextButton(
@@ -1329,7 +1345,7 @@ class _CitiesRetryWidget extends ConsumerWidget {
             child: Text(
               s.resDetailRetry,
               style: AppTypography.labelMedium
-                  .copyWith(color: AppColors.secondary),
+                  .copyWith(color: AppColors.accentInk),
             ),
           ),
         ],
@@ -1414,7 +1430,8 @@ class _SocialField extends ConsumerWidget {
       valueListenable: controller,
       builder: (context, value, _) {
         final handle = SocialHandles.normalize(platform, value.text);
-        final canOpen = handle != null && SocialHandles.isValid(platform, handle);
+        final canOpen =
+            handle != null && SocialHandles.isValid(platform, handle);
 
         return TextFormField(
           controller: controller,

@@ -35,7 +35,7 @@ class ReferralStatsScreen extends ConsumerWidget {
           if (user?.isReferrerOrStaff ?? false)
             IconButton(
               icon: const Icon(Icons.help_outline),
-              color: AppColors.secondary,
+              color: AppColors.accentInk,
               tooltip: s.howItWorksTitle,
               onPressed: () => context.push(
                 Routes.howItWorks,
@@ -54,11 +54,11 @@ class ReferralStatsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref,
-      ReferralStats stats, dynamic s, dynamic user) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, ReferralStats stats,
+      dynamic s, dynamic user) {
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(myReferralStatsProvider),
-      color: AppColors.secondary,
+      color: AppColors.accentInk,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -115,8 +115,8 @@ class ReferralStatsScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     s.referralInviteFriendsEarnPoints,
-                    style: AppTypography.bodySmall
-                        .copyWith(color: Colors.white60),
+                    style:
+                        AppTypography.bodySmall.copyWith(color: Colors.white60),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -133,7 +133,7 @@ class ReferralStatsScreen extends ConsumerWidget {
                   label: s.referralTotalInvited,
                   value: stats.totalInvited.toString(),
                   icon: Icons.person_add_outlined,
-                  color: AppColors.secondary,
+                  color: AppColors.accentInk,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -164,7 +164,7 @@ class ReferralStatsScreen extends ConsumerWidget {
                   label: s.referralPointsEarned,
                   value: '${stats.totalPoints}',
                   icon: Icons.star_outlined,
-                  color: AppColors.secondary,
+                  color: AppColors.accentInk,
                 ),
               ),
             ],
@@ -174,10 +174,8 @@ class ReferralStatsScreen extends ConsumerWidget {
           // My Links tile
           ListTile(
             leading: Icon(Icons.link, color: AppColors.textSecondary),
-            title:
-                Text(s.referralMyLinks, style: AppTypography.bodyMedium),
-            trailing: Icon(Icons.chevron_right,
-                color: AppColors.textMuted),
+            title: Text(s.referralMyLinks, style: AppTypography.bodyMedium),
+            trailing: Icon(Icons.chevron_right, color: AppColors.textMuted),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               side: BorderSide(color: AppColors.border),
@@ -200,24 +198,20 @@ class ReferralStatsScreen extends ConsumerWidget {
           const Row(
             children: [
               Expanded(
-                  child:
-                      SkeletonLoader(width: double.infinity, height: 100)),
+                  child: SkeletonLoader(width: double.infinity, height: 100)),
               SizedBox(width: AppSpacing.md),
               Expanded(
-                  child:
-                      SkeletonLoader(width: double.infinity, height: 100)),
+                  child: SkeletonLoader(width: double.infinity, height: 100)),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
           const Row(
             children: [
               Expanded(
-                  child:
-                      SkeletonLoader(width: double.infinity, height: 100)),
+                  child: SkeletonLoader(width: double.infinity, height: 100)),
               SizedBox(width: AppSpacing.md),
               Expanded(
-                  child:
-                      SkeletonLoader(width: double.infinity, height: 100)),
+                  child: SkeletonLoader(width: double.infinity, height: 100)),
             ],
           ),
         ],

@@ -294,8 +294,8 @@ class _TutorialSheetState extends ConsumerState<TutorialSheet> {
                     child: FilledButton(
                       onPressed: () => closeTutorialSheet(context),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.primaryAction,
+                        foregroundColor: AppColors.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius:
                               BorderRadius.circular(AppSpacing.radiusMd),
@@ -304,7 +304,8 @@ class _TutorialSheetState extends ConsumerState<TutorialSheet> {
                       child: Text(
                         s.howItWorksGotIt,
                         style: AppTypography.labelLarge.copyWith(
-                            color: Colors.white, fontWeight: FontWeight.w700),
+                            color: AppColors.onPrimary,
+                            fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
@@ -376,8 +377,7 @@ class _Player extends StatelessWidget {
                                   const SizedBox.shrink(),
                             ),
                           ),
-                        const CircularProgressIndicator(
-                            color: AppColors.secondary),
+                        CircularProgressIndicator(color: AppColors.accentInk),
                       ],
                     )
                   : LayoutBuilder(

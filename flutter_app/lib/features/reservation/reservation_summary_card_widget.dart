@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
@@ -20,16 +21,16 @@ class ReservationSummaryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
     final isAr = ref.watch(isRtlProvider);
-    final dateFormat = DateFormat(
-        'dd MMMM yyyy à HH:mm', isAr ? 'ar' : 'fr_FR');
+    final dateFormat =
+        DateFormat('dd MMMM yyyy à HH:mm', isAr ? 'ar' : 'fr_FR');
 
     final detailRows = <_DetailRow>[
       _DetailRow(
         icon: Icons.confirmation_number_outlined,
-        iconColor: AppColors.secondary,
+        iconColor: AppColors.accentInk,
         label: s.reservationResultNumberLabel,
         value: '#${reservation.id}',
-        valueColor: AppColors.secondary,
+        valueColor: AppColors.accentInk,
         valueFontSize: 15,
         valueFontWeight: FontWeight.w700,
       ),
@@ -43,10 +44,9 @@ class ReservationSummaryCard extends ConsumerWidget {
       if (reservation.show?.startsAt != null)
         _DetailRow(
           icon: Icons.calendar_today_outlined,
-          iconColor: AppColors.secondary,
+          iconColor: AppColors.accentInk,
           label: s.reservationResultDateLabel,
-          value: dateFormat
-              .format(reservation.show!.startsAt!.toLocal()),
+          value: dateFormat.format(reservation.show!.startsAt!.toLocal()),
         ),
       if (reservation.expiresAt != null)
         _DetailRow(
@@ -64,13 +64,7 @@ class ReservationSummaryCard extends ConsumerWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         children: [
@@ -174,8 +168,8 @@ class _DetailRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg, vertical: 12),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 12),
       child: Row(
         children: [
           Icon(row.icon, color: row.iconColor, size: 18),

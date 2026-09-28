@@ -266,8 +266,7 @@ class _PoseCaptureScreenState extends ConsumerState<PoseCaptureScreen>
         fit: StackFit.expand,
         children: [
           if (_initializing)
-            const Center(
-                child: CircularProgressIndicator(color: AppColors.secondary))
+            Center(child: CircularProgressIndicator(color: AppColors.accentInk))
           else if (_cameraError || !ready)
             _CameraProblem(
               message: _permissionDenied
@@ -303,7 +302,7 @@ class _PoseCaptureScreenState extends ConsumerState<PoseCaptureScreen>
               children: [
                 Text(copy.label,
                     style: AppTypography.labelMedium
-                        .copyWith(color: AppColors.secondary)),
+                        .copyWith(color: AppColors.accentInk)),
                 const SizedBox(height: 2),
                 Text(copy.hint,
                     style: AppTypography.bodySmall
@@ -347,8 +346,7 @@ class _PoseCaptureScreenState extends ConsumerState<PoseCaptureScreen>
 
 /// Picks the instructions for a pose. Kept in one place so a pose added later
 /// fails to compile here rather than showing an empty guide at the shoot.
-CastingPoseCopy poseCopy(CastingCopy copy, CastingPose pose) =>
-    switch (pose) {
+CastingPoseCopy poseCopy(CastingCopy copy, CastingPose pose) => switch (pose) {
       CastingPose.fullFront => copy.fullFront,
       CastingPose.fullProfile => copy.fullProfile,
       CastingPose.portrait => copy.portrait,
@@ -375,8 +373,7 @@ class _CameraProblem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(message,
-                style:
-                    AppTypography.bodyMedium.copyWith(color: Colors.white70),
+                style: AppTypography.bodyMedium.copyWith(color: Colors.white70),
                 textAlign: TextAlign.center),
             if (showSettings) ...[
               const SizedBox(height: AppSpacing.md),

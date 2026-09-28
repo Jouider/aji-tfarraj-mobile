@@ -111,8 +111,7 @@ class _FaceCaptureScreenState extends ConsumerState<FaceCaptureScreen>
       // Bake EXIF orientation (front-camera photos are rotated) so ML Kit can
       // detect the face and the uploaded avatar isn't stored sideways.
       final path = await normalizeCapturedImage(file.path);
-      final verdict =
-          await ref.read(faceDetectionServiceProvider).check(path);
+      final verdict = await ref.read(faceDetectionServiceProvider).check(path);
       if (!mounted) return;
 
       // Exhaustive on purpose: a verdict added later will not compile until
@@ -171,8 +170,7 @@ class _FaceCaptureScreenState extends ConsumerState<FaceCaptureScreen>
         fit: StackFit.expand,
         children: [
           if (_initializing)
-            const Center(
-                child: CircularProgressIndicator(color: AppColors.secondary))
+            Center(child: CircularProgressIndicator(color: AppColors.accentInk))
           else if (_cameraError || !ready)
             Center(
               child: Padding(
@@ -311,7 +309,8 @@ class _OvalFramePainter extends CustomPainter {
       ..addRect(Offset.zero & size)
       ..addOval(oval)
       ..fillType = PathFillType.evenOdd;
-    canvas.drawPath(scrim, Paint()..color = Colors.black.withValues(alpha: 0.55));
+    canvas.drawPath(
+        scrim, Paint()..color = Colors.black.withValues(alpha: 0.55));
 
     canvas.drawOval(
       oval,

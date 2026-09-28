@@ -39,7 +39,7 @@ class NotificationRepository {
 
       // Sort by receivedAt descending (newest first)
       notifications.sort((a, b) => b.receivedAt.compareTo(a.receivedAt));
-      
+
       return notifications;
     } catch (e) {
       _debugLog('Error loading notifications: $e');
@@ -52,9 +52,10 @@ class NotificationRepository {
   Future<void> save(AppNotification notification) async {
     try {
       final notifications = await loadAll();
-      
+
       // Check if notification already exists (by ID)
-      final existingIndex = notifications.indexWhere((n) => n.id == notification.id);
+      final existingIndex =
+          notifications.indexWhere((n) => n.id == notification.id);
       if (existingIndex >= 0) {
         // Update existing notification
         notifications[existingIndex] = notification;
@@ -65,7 +66,7 @@ class NotificationRepository {
 
       // Trim to max limit (keep newest)
       final trimmedList = notifications.take(_maxStoredNotifications).toList();
-      
+
       await _saveAll(trimmedList);
     } catch (e) {
       _debugLog('Error saving notification: $e');
@@ -76,9 +77,10 @@ class NotificationRepository {
   Future<void> saveAll(List<AppNotification> newNotifications) async {
     try {
       final notifications = await loadAll();
-      
+
       for (final notification in newNotifications) {
-        final existingIndex = notifications.indexWhere((n) => n.id == notification.id);
+        final existingIndex =
+            notifications.indexWhere((n) => n.id == notification.id);
         if (existingIndex >= 0) {
           notifications[existingIndex] = notification;
         } else {
@@ -88,10 +90,10 @@ class NotificationRepository {
 
       // Sort by receivedAt descending
       notifications.sort((a, b) => b.receivedAt.compareTo(a.receivedAt));
-      
+
       // Trim to max limit
       final trimmedList = notifications.take(_maxStoredNotifications).toList();
-      
+
       await _saveAll(trimmedList);
     } catch (e) {
       _debugLog('Error saving notifications: $e');
@@ -103,7 +105,7 @@ class NotificationRepository {
     try {
       final notifications = await loadAll();
       final index = notifications.indexWhere((n) => n.id == notificationId);
-      
+
       if (index >= 0) {
         notifications[index] = notifications[index].copyWith(isRead: true);
         await _saveAll(notifications);
@@ -117,9 +119,8 @@ class NotificationRepository {
   Future<void> markAllAsRead() async {
     try {
       final notifications = await loadAll();
-      final updatedNotifications = notifications
-          .map((n) => n.copyWith(isRead: true))
-          .toList();
+      final updatedNotifications =
+          notifications.map((n) => n.copyWith(isRead: true)).toList();
       await _saveAll(updatedNotifications);
     } catch (e) {
       _debugLog('Error marking all notifications as read: $e');

@@ -31,8 +31,7 @@ class RewardsScreen extends ConsumerWidget {
           const TutorialHelpAction(topic: TutorialTopic.rewards),
           TextButton.icon(
             onPressed: () => context.push(Routes.myRewards),
-            icon: Icon(Icons.history, size: 18,
-                color: AppColors.textSecondary),
+            icon: Icon(Icons.history, size: 18, color: AppColors.textSecondary),
             label: Text(
               strings.myRewardsTitle,
               style: AppTypography.labelSmall
@@ -57,7 +56,7 @@ class RewardsScreen extends ConsumerWidget {
           }
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(rewardsListProvider),
-            color: AppColors.secondary,
+            color: AppColors.accentInk,
             child: ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: rewards.length,

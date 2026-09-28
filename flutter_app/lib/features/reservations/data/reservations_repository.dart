@@ -8,7 +8,8 @@ import 'package:aji_tfarraj/features/reservations/domain/reservation.dart';
 class ReservationsRepository {
   final ApiClient _apiClient;
 
-  ReservationsRepository({required ApiClient apiClient}) : _apiClient = apiClient;
+  ReservationsRepository({required ApiClient apiClient})
+      : _apiClient = apiClient;
 
   /// Fetch all reservations for the authenticated user
   /// Handles both paginated { data: [...] } and legacy array responses
@@ -66,12 +67,14 @@ class ReservationsRepository {
         },
       );
       final data = response.data;
-      
+
       // Handle wrapped response: { data: {...} }
-      if (data is Map<String, dynamic> && data.containsKey('data') && data['data'] is Map) {
+      if (data is Map<String, dynamic> &&
+          data.containsKey('data') &&
+          data['data'] is Map) {
         return Reservation.fromJson(data['data'] as Map<String, dynamic>);
       }
-      
+
       return Reservation.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -85,12 +88,14 @@ class ReservationsRepository {
     try {
       final response = await _apiClient.get(AppConfig.reservationDetail(id));
       final data = response.data;
-      
+
       // Handle wrapped response: { data: {...} }
-      if (data is Map<String, dynamic> && data.containsKey('data') && data['data'] is Map) {
+      if (data is Map<String, dynamic> &&
+          data.containsKey('data') &&
+          data['data'] is Map) {
         return Reservation.fromJson(data['data'] as Map<String, dynamic>);
       }
-      
+
       return Reservation.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);

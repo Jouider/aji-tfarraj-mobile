@@ -126,8 +126,8 @@ class _ReferralCodeInputState extends State<ReferralCodeInput> {
           if (_isExpanded) ...[
             Divider(height: 1, thickness: 1, color: borderColor),
             Padding(
-              padding: const EdgeInsets.only(
-                  left: 16, right: 16, top: 2, bottom: 2),
+              padding:
+                  const EdgeInsets.only(left: 16, right: 16, top: 2, bottom: 2),
               child: TextField(
                 controller: widget.controller,
                 focusNode: _focusNode,

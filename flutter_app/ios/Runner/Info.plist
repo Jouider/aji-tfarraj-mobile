@@ -1,121 +1,121 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleDisplayName</key>
-	<string>Aji Tfarraj</string>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>aji_tfarraj</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>$(FLUTTER_BUILD_NAME)</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d</string>
-			</array>
-		</dict>
-	</array>
-	<key>CFBundleVersion</key>
-	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<key>GIDClientID</key>
-	<string>600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d.apps.googleusercontent.com</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil et scanner les QR codes.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil.</string>
-	<key>GADApplicationIdentifier</key>
-	<!-- ⚠️ Identifiant de TEST de Google (voir AndroidManifest.xml et
+	<dict>
+		<key>CADisableMinimumFrameDurationOnPhone</key>
+		<true/>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>CFBundleDisplayName</key>
+		<string>Aji Tfarraj</string>
+		<key>CFBundleExecutable</key>
+		<string>$(EXECUTABLE_NAME)</string>
+		<key>CFBundleIdentifier</key>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
+		<key>CFBundleName</key>
+		<string>aji_tfarraj</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>CFBundleShortVersionString</key>
+		<string>$(FLUTTER_BUILD_NAME)</string>
+		<key>CFBundleSignature</key>
+		<string>????</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d</string>
+				</array>
+			</dict>
+		</array>
+		<key>CFBundleVersion</key>
+		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>GIDClientID</key>
+		<string>600996591716-5av5qjhfakmdlea96q0scpvcj208ki3d.apps.googleusercontent.com</string>
+		<key>LSRequiresIPhoneOS</key>
+		<true/>
+		<key>NSCameraUsageDescription</key>
+		<string>Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil et scanner les QR codes.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil.</string>
+		<key>GADApplicationIdentifier</key>
+		<!-- ⚠️ Identifiant de TEST de Google (voir AndroidManifest.xml et
 	     docs/publicite.md) : à remplacer par celui du compte AdMob avant la
 	     mise en production. -->
-	<string>ca-app-pub-3940256099942544~1458002511</string>
-	<!-- Pas de clé d'autorisation de suivi (ATT) ici, volontairement.
+		<string>ca-app-pub-3940256099942544~1458002511</string>
+		<!-- Pas de clé d'autorisation de suivi (ATT) ici, volontairement.
 	     Sa seule présence fait refuser la soumission tant qu'App Privacy ne
 	     déclare pas le suivi — et déclarer un suivi qui n'existe pas afficherait
 	     « Données utilisées pour vous suivre » sur la fiche App Store pour rien :
 	     la publicité est éteinte côté serveur et les identifiants AdMob sont ceux
 	     de test. À remettre, avec la déclaration App Privacy, dans la version qui
 	     allume vraiment la publicité. Voir docs/publicite.md. -->
-	<key>SKAdNetworkItems</key>
-	<!-- Réseaux autorisés à mesurer une installation venue d'une publicité.
+		<key>SKAdNetworkItems</key>
+		<!-- Réseaux autorisés à mesurer une installation venue d'une publicité.
 	     Google d'abord ; la liste complète des réseaux de médiation est
 	     publiée par AdMob et se colle ici le jour où la médiation est
 	     activée. -->
-	<array>
-		<dict>
-			<key>SKAdNetworkIdentifier</key>
-			<string>cstr6suwn9.skadnetwork</string>
-		</dict>
-	</array>
-	<key>NSFaceIDUsageDescription</key>
-	<string>Utilisez Face ID pour déverrouiller l'application et protéger vos billets.</string>
-	<!-- Allow Railway media domain: TLS 1.3 uses CHACHA20-POLY1305 which is not
+		<array>
+			<dict>
+				<key>SKAdNetworkIdentifier</key>
+				<string>cstr6suwn9.skadnetwork</string>
+			</dict>
+		</array>
+		<key>NSFaceIDUsageDescription</key>
+		<string>Utilisez Face ID pour déverrouiller l'application et protéger vos billets.</string>
+		<!-- Allow Railway media domain: TLS 1.3 uses CHACHA20-POLY1305 which is not
 	     in the legacy ATS cipher whitelist. NSExceptionRequiresForwardSecrecy=false
 	     relaxes the cipher requirement while keeping the connection HTTPS-only. -->
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<false/>
-		<key>NSExceptionDomains</key>
+		<key>NSAppTransportSecurity</key>
 		<dict>
-			<key>up.railway.app</key>
+			<key>NSAllowsArbitraryLoads</key>
+			<false/>
+			<key>NSExceptionDomains</key>
 			<dict>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-				<key>NSExceptionRequiresForwardSecrecy</key>
-				<false/>
-				<key>NSExceptionMinimumTLSVersion</key>
-				<string>TLSv1.2</string>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<false/>
+				<key>up.railway.app</key>
+				<dict>
+					<key>NSIncludesSubdomains</key>
+					<true/>
+					<key>NSExceptionRequiresForwardSecrecy</key>
+					<false/>
+					<key>NSExceptionMinimumTLSVersion</key>
+					<string>TLSv1.2</string>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<false/>
+				</dict>
 			</dict>
 		</dict>
+		<key>UIApplicationSupportsIndirectInputEvents</key>
+		<true/>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
+		<key>FlutterDeepLinkingEnabled</key>
+		<true/>
+		<key>UILaunchStoryboardName</key>
+		<string>LaunchScreen</string>
+		<key>UIMainStoryboardFile</key>
+		<string>Main</string>
+		<key>UIStatusBarHidden</key>
+		<false/>
+		<key>UISupportedInterfaceOrientations</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<key>UISupportedInterfaceOrientations~ipad</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationPortraitUpsideDown</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
 	</dict>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
-	<key>FlutterDeepLinkingEnabled</key>
-	<true/>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>UIStatusBarHidden</key>
-	<false/>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-</dict>
 </plist>

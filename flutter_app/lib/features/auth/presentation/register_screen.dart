@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
@@ -42,9 +43,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final s = ref.watch(stringsProvider);
     final locale = ref.watch(localeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final logo = locale == AppLocale.ar
-        ? (isDark ? 'assets/images/ajitfarraj_logo/white_ar_logo.png' : 'assets/images/ajitfarraj_logo/black_ar_logo.png')
-        : (isDark ? 'assets/images/ajitfarraj_logo/white_fr_logo.png' : 'assets/images/ajitfarraj_logo/black_fr_logo.png');
 
     ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
       if (next.isAuthenticated) context.go(Routes.home);
@@ -66,7 +64,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo
-                Center(child: Image.asset(logo, width: 120)),
+                Center(child: const AppLogo(width: 170)),
                 const SizedBox(height: AppSpacing.xl),
 
                 // Title
@@ -173,13 +171,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         color: AppColors.textMuted,
                         size: AppSpacing.iconMd,
                       ),
-                      onPressed: () => setState(
-                          () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                      onPressed: () => setState(() =>
+                          _obscureConfirmPassword = !_obscureConfirmPassword),
                     ),
                   ),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return s.confirmPasswordRequired;
-                    if (v != _passwordController.text) return s.passwordMismatch;
+                    if (v == null || v.isEmpty)
+                      return s.confirmPasswordRequired;
+                    if (v != _passwordController.text)
+                      return s.passwordMismatch;
                     return null;
                   },
                   onFieldSubmitted: (_) => _submit(),
@@ -231,14 +231,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     TextButton(
                       onPressed: () => context.go(Routes.authLanding),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.accentInk,
                         padding: const EdgeInsets.only(left: AppSpacing.xs),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
                         s.loginLink,
                         style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.secondary,
+                          color: AppColors.accentInk,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

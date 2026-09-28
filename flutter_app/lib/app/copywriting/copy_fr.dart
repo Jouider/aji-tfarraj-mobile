@@ -168,7 +168,8 @@ class AppGateCopyFr {
   String get biometricUnlockSubtitle =>
       'Authentifiez-vous pour accéder à vos billets et à votre profil.';
   String get biometricUnlockButton => 'Déverrouiller';
-  String get biometricReason => 'Confirmez votre identité pour déverrouiller Aji Tfarraj';
+  String get biometricReason =>
+      'Confirmez votre identité pour déverrouiller Aji Tfarraj';
   String get biometricUnavailable =>
       'Aucune méthode biométrique n\'est configurée sur cet appareil.';
   String get biometricEnableFailed =>
@@ -182,14 +183,12 @@ class RewardsCopyFr {
   String get rewardsTitle => 'Récompenses';
   String get myRewardsTitle => 'Mes demandes';
   String get collectReward => 'Obtenir';
-  String get rewardRequestSent =>
-      'Demande envoyée. En attente d\'approbation.';
+  String get rewardRequestSent => 'Demande envoyée. En attente d\'approbation.';
   String get pendingLabel => 'En attente';
   String get approvedLabel => 'Approuvé';
   String get rejectedLabel => 'Refusé';
   String get insufficientPoints => 'Vous n\'avez pas assez de points.';
-  String get duplicatePending =>
-      'Vous avez déjà demandé cette récompense.';
+  String get duplicatePending => 'Vous avez déjà demandé cette récompense.';
   String get rewardInactive => 'Cette récompense n\'est plus disponible.';
   String get noRewardsYet => 'Aucune récompense disponible.';
   String get noMyRewardsYet => 'Aucune demande pour le moment.';
@@ -354,8 +353,10 @@ class AuthCopyFr {
   String get emailRequired => 'Veuillez entrer votre email';
   String get emailInvalid => 'Veuillez entrer un email valide';
   String get passwordRequired => 'Veuillez entrer votre mot de passe';
-  String get passwordMin => 'Le mot de passe doit contenir au moins 8 caractères';
-  String get passwordWeak => 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule et 1 chiffre.';
+  String get passwordMin =>
+      'Le mot de passe doit contenir au moins 8 caractères';
+  String get passwordWeak =>
+      'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule et 1 chiffre.';
   String get nameRequired => 'Veuillez entrer votre nom';
   String get nameMin => 'Le nom doit contenir au moins 2 caractères';
   String get confirmPasswordRequired => 'Veuillez confirmer votre mot de passe';
@@ -429,7 +430,8 @@ class ProfileCopyFr {
   String get editSectionPersonal => 'Informations personnelles';
   String get editSectionLocation => 'Localisation';
   String get editSectionContact => 'Contact';
-  String get incompleteWarning => 'Complétez votre profil pour pouvoir réserver';
+  String get incompleteWarning =>
+      'Complétez votre profil pour pouvoir réserver';
   String get incompleteMessage =>
       'Veuillez renseigner votre prénom, nom, ville, quartier et vérifier votre numéro de téléphone avant de réserver.';
   String get completeProfileButton => 'Compléter mon profil';
@@ -468,7 +470,8 @@ class ProfileCopyFr {
   String get phoneNotVerified => 'Numéro non vérifié';
   String get phoneNumberInvalid => 'Veuillez entrer un numéro valide.';
   String get verifyPhoneButton => 'Vérifier mon numéro';
-  String get phoneAlreadyUsed => 'Ce numéro est déjà utilisé par un autre compte.';
+  String get phoneAlreadyUsed =>
+      'Ce numéro est déjà utilisé par un autre compte.';
 
   // Date of birth
   String get dateOfBirthLabel => 'Date de naissance';
@@ -496,7 +499,8 @@ class ProfileCopyFr {
   String get otpVerifiedSuccess => 'Numéro vérifié avec succès.';
   String get otpInvalidCode => 'Code invalide ou expiré.';
   String get otpSendFailed => "Impossible d'envoyer le code pour le moment.";
-  String get otpVerifyFailed => 'Impossible de vérifier le code pour le moment.';
+  String get otpVerifyFailed =>
+      'Impossible de vérifier le code pour le moment.';
 }
 
 /// Home screen copy in French
@@ -595,7 +599,8 @@ class BrowseCopyFr {
   String get title => 'Explorer';
   String get filterTooltip => 'Filtres';
   String get noResults => 'Aucun résultat';
-  String get noResultsDesc => 'Aucune émission ne correspond à votre recherche.';
+  String get noResultsDesc =>
+      'Aucune émission ne correspond à votre recherche.';
   String get clearFilters => 'Effacer les filtres';
   String get searchHint => 'Rechercher une émission...';
   String get allCities => 'Toutes';
@@ -640,7 +645,8 @@ class MyReservationsCopyFr {
   String get emptyPending => 'Aucune réservation en attente';
   String get emptyPendingSubtitle => 'Vos demandes en cours apparaîtront ici';
   String get emptyApproved => 'Aucune réservation approuvée';
-  String get emptyApprovedSubtitle => 'Vos réservations confirmées apparaîtront ici';
+  String get emptyApprovedSubtitle =>
+      'Vos réservations confirmées apparaîtront ici';
   String get emptyPast => 'Aucune réservation passée';
   String get emptyPastSubtitle => 'Votre historique apparaîtra ici';
 
@@ -653,9 +659,12 @@ class MyReservationsCopyFr {
 
   // Snackbars
   String get cancelSuccess => 'Réservation annulée';
-  String get cancelErrorForbidden => 'Vous ne pouvez pas annuler cette réservation.';
-  String get cancelErrorConflict => 'Cette réservation ne peut plus être annulée.';
-  String get cancelErrorGeneric => 'Une erreur est survenue. Veuillez réessayer.';
+  String get cancelErrorForbidden =>
+      'Vous ne pouvez pas annuler cette réservation.';
+  String get cancelErrorConflict =>
+      'Cette réservation ne peut plus être annulée.';
+  String get cancelErrorGeneric =>
+      'Une erreur est survenue. Veuillez réessayer.';
 
   // Card banners
   String get expiredBanner => 'Réservation expirée';
@@ -859,7 +868,6 @@ class ConditionsCopyFr {
       ];
 }
 
-
 /// Casting strings in French.
 class CastingCopyFr implements CastingCopy {
   const CastingCopyFr();
@@ -879,7 +887,8 @@ class CastingCopyFr implements CastingCopy {
   String get bookRetake => 'Reprendre';
   String get bookDelete => 'Supprimer';
   String get bookTake => 'Prendre la photo';
-  String get poseDemoCaption => 'Regardez la démonstration, puis faites pareil.';
+  String get poseDemoCaption =>
+      'Regardez la démonstration, puis faites pareil.';
 
   // ── Avant de photographier ──
   String get rulesTitle => 'Avant de commencer';
@@ -925,7 +934,6 @@ class CastingCopyFr implements CastingCopy {
           'Dégagez les cheveux du visage.',
         ],
       );
-
 
   CastingPoseCopy get portraitSmile => const CastingPoseCopy(
         label: 'Portrait souriant',
@@ -998,16 +1006,20 @@ class CastingCopyFr implements CastingCopy {
   // ── Vérifier une photo casting ──
   String get poseNoPerson => 'Personne n\'est visible sur la photo.';
   String get poseHeadCut => 'La tête semble coupée : reculez un peu.';
-  String get poseFeetCut => 'On ne voit pas les pieds : reculez jusqu\'à ce qu\'ils soient dans le cadre.';
-  String get poseNotFacing => 'Vous ne semblez pas de face : mettez-vous bien face à l\'objectif.';
-  String get poseNotSideways => 'Vous ne semblez pas de profil : tournez-vous complètement sur le côté.';
+  String get poseFeetCut =>
+      'On ne voit pas les pieds : reculez jusqu\'à ce qu\'ils soient dans le cadre.';
+  String get poseNotFacing =>
+      'Vous ne semblez pas de face : mettez-vous bien face à l\'objectif.';
+  String get poseNotSideways =>
+      'Vous ne semblez pas de profil : tournez-vous complètement sur le côté.';
   String get portraitNotSmiling => 'Souriez franchement pour cette photo.';
   String get adviceTitle => 'Cette photo n\'est peut-être pas conforme';
   String get adviceKeep => 'Garder quand même';
 
   // ── Vérifié en studio ──
   String get studioVerifiedTitle => 'Book vérifié en studio';
-  String studioVerifiedOn(String date) => 'Photographié par notre équipe le $date';
+  String studioVerifiedOn(String date) =>
+      'Photographié par notre équipe le $date';
 }
 
 /// Staff check-in strings in French
@@ -1027,8 +1039,7 @@ class StaffCopyFr {
   String get accessDeniedSubtitle =>
       'Vous n\'avez pas les droits pour accéder à cette section.';
   String get sessionExpired => 'Session expirée. Reconnectez-vous.';
-  String get networkError =>
-      'Impossible de vérifier le billet pour le moment.';
+  String get networkError => 'Impossible de vérifier le billet pour le moment.';
   String get scanAnother => 'Scanner un autre billet';
 
   /// Second step of the door flow: the scanner has looked, now admits.
@@ -1118,8 +1129,7 @@ class ReferralCopyFr {
       'Réserve ta place gratuitement ici : $link';
   String get noLinksYet => 'Aucun lien partagé';
   String get noReferralsYet => 'Aucun parrainage pour le moment';
-  String get inviteFriendsEarnPoints =>
-      'Invite tes amis et gagne des points !';
+  String get inviteFriendsEarnPoints => 'Invite tes amis et gagne des points !';
   String get profileTileLabel => 'Parrainage';
   String get statsTitle => 'Mes parrainages';
   String get linksTitle => 'Mes liens';
@@ -1633,7 +1643,8 @@ class DepartureCopyFr implements DepartureCopy {
   String counts(int present, int left) =>
       '$present présent${present > 1 ? 's' : ''} · $left sortie${left > 1 ? 's' : ''}';
   String get empty => "Personne n'a encore été pointé";
-  String get emptySubtitle => "Les personnes scannées à l'entrée apparaîtront ici.";
+  String get emptySubtitle =>
+      "Les personnes scannées à l'entrée apparaîtront ici.";
   String get noMatch => 'Personne ne correspond à cette recherche.';
   String get walkIn => 'Sans compte';
   String broughtBy(String name) => 'Chargé public : $name';
@@ -1677,5 +1688,6 @@ class DepartureCopyFr implements DepartureCopy {
       '${count > 1 ? '$count exclusions précédentes' : 'Exclusion précédente'}'
       '${date != null ? ' — le $date' : ''}'
       '${show != null && show.isNotEmpty ? ' ($show)' : ''}';
-  String doorAlreadyLeft(String time, String reason) => 'Sortie à $time · $reason';
+  String doorAlreadyLeft(String time, String reason) =>
+      'Sortie à $time · $reason';
 }

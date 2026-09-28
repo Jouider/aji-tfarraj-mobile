@@ -62,8 +62,7 @@ class DirectionalIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveIcon =
-        isRtl(context) ? (rtlIcon ?? ltrIcon) : ltrIcon;
+    final effectiveIcon = isRtl(context) ? (rtlIcon ?? ltrIcon) : ltrIcon;
     return Icon(
       effectiveIcon,
       size: size,
@@ -150,8 +149,7 @@ class AppBorderRadius {
         end: Radius.circular(end),
       );
 
-  static BorderRadius circular(double radius) =>
-      BorderRadius.circular(radius);
+  static BorderRadius circular(double radius) => BorderRadius.circular(radius);
 
   static BorderRadius all(double radius) =>
       BorderRadius.all(Radius.circular(radius));

@@ -8,10 +8,10 @@ import 'package:aji_tfarraj/app/push/device_repository.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 
 /// Push Token Provider - Manages FCM token state and backend registration
-/// 
+///
 /// Backend endpoint (PRODUCTION):
 /// POST /api/devices/register
-/// 
+///
 /// This provider MUST be initialized:
 /// - After successful login
 /// - After successful registration
@@ -41,7 +41,8 @@ class PushTokenState {
       token: token ?? this.token,
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      isRegisteredWithBackend: isRegisteredWithBackend ?? this.isRegisteredWithBackend,
+      isRegisteredWithBackend:
+          isRegisteredWithBackend ?? this.isRegisteredWithBackend,
     );
   }
 
@@ -74,13 +75,13 @@ class PushTokenNotifier extends StateNotifier<PushTokenState> {
       } else {
         token = await FirebaseMessaging.instance.getToken();
       }
-      
+
       if (token != null) {
         _debugLog('FCM Token obtained: ${token.substring(0, 20)}...');
       } else {
         _debugLog('FCM Token is null - push notifications may not work');
       }
-      
+
       state = state.copyWith(
         token: token,
         isLoading: false,
@@ -109,14 +110,15 @@ class PushTokenNotifier extends StateNotifier<PushTokenState> {
       try {
         // Check if APNs token is available
         final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-        
+
         if (apnsToken != null) {
           _debugLog('APNs token available (attempt $attempt)');
           return await FirebaseMessaging.instance.getToken();
         }
-        
-        _debugLog('APNs token not yet available (attempt $attempt/$maxRetries), waiting...');
-        
+
+        _debugLog(
+            'APNs token not yet available (attempt $attempt/$maxRetries), waiting...');
+
         // Wait before retrying (increasing delay)
         await Future.delayed(Duration(seconds: attempt));
       } catch (e) {
@@ -125,7 +127,7 @@ class PushTokenNotifier extends StateNotifier<PushTokenState> {
         await Future.delayed(Duration(seconds: attempt));
       }
     }
-    
+
     // Final attempt without APNs check
     _debugLog('Final attempt to get FCM token without APNs check');
     return await FirebaseMessaging.instance.getToken();
@@ -134,7 +136,8 @@ class PushTokenNotifier extends StateNotifier<PushTokenState> {
   /// Setup listener for FCM token refresh
   void _setupTokenRefreshListener() {
     _tokenRefreshSubscription?.cancel();
-    _tokenRefreshSubscription = FirebaseMessaging.instance.onTokenRefresh.listen(
+    _tokenRefreshSubscription =
+        FirebaseMessaging.instance.onTokenRefresh.listen(
       (newToken) async {
         _debugLog('FCM Token refreshed');
         state = state.copyWith(token: newToken, isRegisteredWithBackend: false);
@@ -185,10 +188,10 @@ class PushTokenNotifier extends StateNotifier<PushTokenState> {
       // Delete existing token and get a new one
       await FirebaseMessaging.instance.deleteToken();
       final newToken = await FirebaseMessaging.instance.getToken();
-      
+
       _debugLog('FCM Token refreshed manually');
       state = state.copyWith(token: newToken, isRegisteredWithBackend: false);
-      
+
       // Re-register with backend
       if (newToken != null) {
         await registerTokenWithBackend(newToken);
@@ -202,20 +205,20 @@ class PushTokenNotifier extends StateNotifier<PushTokenState> {
   Future<void> clearToken() async {
     try {
       final currentToken = state.token;
-      
+
       // Unregister from backend first
       if (currentToken != null) {
         await _deviceRepository.unregisterDevice(currentToken);
       }
-      
+
       // Cancel token refresh listener
       _tokenRefreshSubscription?.cancel();
       _tokenRefreshSubscription = null;
-      
+
       // Then delete FCM token
       await FirebaseMessaging.instance.deleteToken();
       state = const PushTokenState();
-      
+
       _debugLog('Token cleared and unregistered');
     } catch (e) {
       _debugLog('Error clearing FCM token: $e');

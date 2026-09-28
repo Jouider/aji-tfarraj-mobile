@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
@@ -37,13 +38,7 @@ class BookingShowSummaryCard extends ConsumerWidget {
         color: AppColors.cardDarkElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1A1A1A).withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,8 +67,8 @@ class BookingShowSummaryCard extends ConsumerWidget {
                 // FIX: Channel badge — primary 85% bg, white text, radius 20, 4×10 padding
                 if (show.channel != null) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(20),
@@ -107,14 +102,14 @@ class BookingShowSummaryCard extends ConsumerWidget {
                   const SizedBox(height: 3),
                   Row(
                     children: [
-                      const Icon(Icons.videocam_outlined,
-                          size: 13, color: AppColors.secondary),
+                      Icon(Icons.videocam_outlined,
+                          size: 13, color: AppColors.accentInk),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           episode!.label,
                           style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.secondary,
+                            color: AppColors.accentInk,
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
@@ -130,8 +125,8 @@ class BookingShowSummaryCard extends ConsumerWidget {
                 // FIX: Date row — secondary calendar icon 16px, textSecondary 13px
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today_outlined,
-                        size: 16, color: AppColors.secondary),
+                    Icon(Icons.calendar_today_outlined,
+                        size: 16, color: AppColors.accentInk),
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(
@@ -152,8 +147,8 @@ class BookingShowSummaryCard extends ConsumerWidget {
                 // FIX: Location row — secondary pin icon 16px, textSecondary 13px
                 Row(
                   children: [
-                    const Icon(Icons.location_on_outlined,
-                        size: 16, color: AppColors.secondary),
+                    Icon(Icons.location_on_outlined,
+                        size: 16, color: AppColors.accentInk),
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(

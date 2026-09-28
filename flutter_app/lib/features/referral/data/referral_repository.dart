@@ -12,7 +12,8 @@ class ReferralRepository {
   ReferralRepository(this._apiClient);
 
   /// Generate (or retrieve existing) magic link for a show
-  Future<ReferralLink> generateLink({required int showId, int? episodeId}) async {
+  Future<ReferralLink> generateLink(
+      {required int showId, int? episodeId}) async {
     try {
       final response = await _apiClient.post(
         AppConfig.myReferralLinks,
@@ -65,8 +66,7 @@ class ReferralRepository {
   Future<ResolvedReferral> resolveLink(String token) async {
     try {
       final dio = Dio(BaseOptions(baseUrl: AppConfig.currentBaseUrl));
-      final response =
-          await dio.get(AppConfig.resolveReferralLink(token));
+      final response = await dio.get(AppConfig.resolveReferralLink(token));
       final data = response.data;
       if (data is Map<String, dynamic> && data.containsKey('data')) {
         return ResolvedReferral.fromJson(data['data'] as Map<String, dynamic>);

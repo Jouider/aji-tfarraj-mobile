@@ -37,7 +37,10 @@ class _CastingBookScreenState extends ConsumerState<CastingBookScreen> {
           .uploadPhoto(pose: pose, photoPath: path);
       ref.invalidate(castingBookProvider);
     } catch (e) {
-      if (mounted) _toast(e is ApiException ? e.message : ref.read(stringsProvider).casting.photoError);
+      if (mounted)
+        _toast(e is ApiException
+            ? e.message
+            : ref.read(stringsProvider).casting.photoError);
     } finally {
       if (mounted) setState(() => _uploading = null);
     }
@@ -49,7 +52,10 @@ class _CastingBookScreenState extends ConsumerState<CastingBookScreen> {
       await ref.read(castingRepositoryProvider).deletePhoto(pose);
       ref.invalidate(castingBookProvider);
     } catch (e) {
-      if (mounted) _toast(e is ApiException ? e.message : ref.read(stringsProvider).casting.photoError);
+      if (mounted)
+        _toast(e is ApiException
+            ? e.message
+            : ref.read(stringsProvider).casting.photoError);
     } finally {
       if (mounted) setState(() => _uploading = null);
     }
@@ -77,8 +83,8 @@ class _CastingBookScreenState extends ConsumerState<CastingBookScreen> {
         data: (data) => RefreshIndicator(
           onRefresh: () async => ref.invalidate(castingBookProvider),
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg,
-                AppSpacing.lg, AppSpacing.xxl),
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl),
             children: [
               // First thing on the page: it is what the member is proudest of.
               if (data.studioVerified) ...[
@@ -158,8 +164,10 @@ class _RulesCard extends StatelessWidget {
                     child: SizedBox(
                       width: 4,
                       height: 4,
-                      child: DecoratedBox(decoration: BoxDecoration(
-                        color: AppColors.secondary, shape: BoxShape.circle)),
+                      child: DecoratedBox(
+                          decoration: BoxDecoration(
+                              color: AppColors.secondary,
+                              shape: BoxShape.circle)),
                     ),
                   ),
                   Expanded(
@@ -301,7 +309,7 @@ class _PoseSlot extends ConsumerWidget {
                     if (pose.isRequired && url == null)
                       Text(s.casting.bookRequired,
                           style: AppTypography.caption
-                              .copyWith(color: AppColors.secondary)),
+                              .copyWith(color: AppColors.accentInk)),
                   ],
                 ),
                 const SizedBox(height: 2),
@@ -321,7 +329,7 @@ class _PoseSlot extends ConsumerWidget {
                       child: Text(
                         url == null ? s.casting.bookTake : s.casting.bookRetake,
                         style: AppTypography.bodySmall
-                            .copyWith(color: AppColors.secondary),
+                            .copyWith(color: AppColors.accentInk),
                       ),
                     ),
                     if (url != null) ...[
@@ -414,7 +422,8 @@ class _MeasurementsState extends ConsumerState<_Measurements> {
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
 
-    Widget field(TextEditingController c, String label, {bool numeric = true}) =>
+    Widget field(TextEditingController c, String label,
+            {bool numeric = true}) =>
         Expanded(
           child: TextField(
             controller: c,
@@ -442,8 +451,8 @@ class _MeasurementsState extends ConsumerState<_Measurements> {
           Text(s.casting.measurementsTitle, style: AppTypography.labelMedium),
           const SizedBox(height: 2),
           Text(s.casting.measurementsIntro,
-              style: AppTypography.caption
-                  .copyWith(color: AppColors.textMuted)),
+              style:
+                  AppTypography.caption.copyWith(color: AppColors.textMuted)),
           const SizedBox(height: AppSpacing.md),
           Row(children: [
             field(_height, s.casting.height),
@@ -526,7 +535,7 @@ class _StudioBadge extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.star_rounded, color: AppColors.secondary, size: 30),
+          Icon(Icons.star_rounded, color: AppColors.accentInk, size: 30),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(

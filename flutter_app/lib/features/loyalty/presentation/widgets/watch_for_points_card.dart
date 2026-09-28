@@ -46,9 +46,9 @@ class WatchForPointsCard extends StatelessWidget {
               color: AppColors.secondary.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.play_circle_outline,
-              color: AppColors.secondary,
+              color: AppColors.accentInk,
               size: 26,
             ),
           ),
