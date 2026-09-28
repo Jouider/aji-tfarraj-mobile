@@ -340,7 +340,7 @@ class _ReservationsList extends ConsumerWidget {
           AppSpacing.lg,
           AppSpacing.lg,
           AppSpacing.lg,
-          AppSpacing.lg + MediaQuery.of(context).padding.bottom,
+          AppSpacing.lg + AppSpacing.navBarClearance(context),
         ),
         itemCount: reservations.length,
         itemBuilder: (context, index) {

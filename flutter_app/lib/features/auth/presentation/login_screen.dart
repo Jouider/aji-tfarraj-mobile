@@ -40,8 +40,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(loginAuthStateProvider);
     final s = ref.watch(stringsProvider);
-    final locale = ref.watch(localeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final isAnyLoading = authState.isLoading || _loadingProvider != null;
 

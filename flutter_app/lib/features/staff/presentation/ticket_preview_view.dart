@@ -667,7 +667,7 @@ class _ReturnPointPickerState extends ConsumerState<_ReturnPointPicker> {
             ),
           if (error != null) ...[
             const SizedBox(height: AppSpacing.sm),
-            Text(error!,
+            Text(error,
                 style: AppTypography.bodySmall
                     .copyWith(color: AppColors.errorDark)),
           ],

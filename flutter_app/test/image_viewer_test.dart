@@ -7,19 +7,6 @@ import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
 /// them, so it must open, be zoomable, and always be dismissible — a full-screen
 /// overlay with no way out would trap the user.
 void main() {
-  Widget host(VoidCallback onTap) => MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => Center(
-              child: GestureDetector(
-                onTap: onTap,
-                child: const Text('open'),
-              ),
-            ),
-          ),
-        ),
-      );
-
   group('avatarHeroTag', () {
     test('is stable for the same image', () {
       expect(avatarHeroTag('https://x/a.jpg'), avatarHeroTag('https://x/a.jpg'));

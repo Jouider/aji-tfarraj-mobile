@@ -29,6 +29,7 @@ void main() {
   _glassTests();
   _accentInkTests();
   _shadowTests();
+  _premiumTests();
 
   group('ink on the gold call-to-action', () {
     test('is readable, and by a wide margin', () {
@@ -324,6 +325,60 @@ void _shadowTests() {
             'sous la rangée de cartes.',
       );
       expect(light, lessThanOrEqualTo(0.12));
+    });
+  });
+
+  tearDown(() => AppColors.updateBrightness(Brightness.dark));
+}
+
+/// La carte noire à filet doré, celle qui remplace l'aplat jaune.
+///
+/// Elle n'existe que parce que l'or, en GRANDE surface, n'accepte que l'encre
+/// noire : le blanc n'y mesure que 2,1:1. Ces tests vérifient que le
+/// renversement tient sa promesse — le blanc et l'or se lisent tous deux sur
+/// le noir — et, surtout, que la carte reste la même dans les deux thèmes.
+void _premiumTests() {
+  group('la carte premium', () {
+    // Le dégradé va du haut relevé au fond : l'encre doit tenir aux DEUX
+    // bouts, pas seulement sur la moyenne.
+    final grounds = {
+      'son fond': AppColors.premiumSurface,
+      'son haut relevé': AppColors.premiumSurfaceRaised,
+    };
+
+    grounds.forEach((where, ground) {
+      test('le titre blanc se lit sur $where', () {
+        expect(contrast(AppColors.inkOnPhoto, ground),
+            greaterThanOrEqualTo(4.5));
+      });
+
+      test('l\'accent doré se lit sur $where', () {
+        expect(contrast(AppColors.secondary, ground),
+            greaterThanOrEqualTo(4.5));
+      });
+    });
+
+    test('elle ne change pas avec le thème', () {
+      // C'est un OBJET, pas une surface de page : si elle suivait le thème,
+      // elle redeviendrait une carte claire en thème clair et le filet doré
+      // n'aurait plus rien à border.
+      AppColors.updateBrightness(Brightness.dark);
+      final dark = AppColors.premiumSurface;
+      AppColors.updateBrightness(Brightness.light);
+
+      expect(AppColors.premiumSurface, dark);
+    });
+
+    /// L'erreur exacte que cette carte répare.
+    test('le blanc ne tenait pas sur l\'aplat doré qu\'elle remplace', () {
+      expect(contrast(AppColors.inkOnPhoto, AppColors.secondary), lessThan(3));
+    });
+
+    test('et le même or, posé sur le noir, passe largement', () {
+      expect(
+        contrast(AppColors.secondary, AppColors.premiumSurface),
+        greaterThan(contrast(AppColors.inkOnPhoto, AppColors.secondary)),
+      );
     });
   });
 
