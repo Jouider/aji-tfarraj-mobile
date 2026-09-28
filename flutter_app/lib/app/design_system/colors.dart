@@ -241,10 +241,10 @@ class AppColors {
   /// orange, il la refroidissait, et un filet doré sur un fond bleuté se lit
   /// comme une erreur de teinte. Ce noir-ci part du même côté du cercle
   /// chromatique que l'or qu'il porte.
-  static const Color premiumSurface = Color(0xFF16130F);
+  static const Color premiumSurface = Color(0xFF131110);
 
   /// Le haut de son dégradé — la carte n'est pas un aplat mort.
-  static const Color premiumSurfaceRaised = Color(0xFF2B241A);
+  static const Color premiumSurfaceRaised = Color(0xFF211C15);
 
   /// Son filet, et la teinte de ses pastilles.
   static Color get premiumBorder => secondary.withValues(alpha: 0.42);
