@@ -171,4 +171,31 @@ class AppSpacing {
 
   /// Get BorderRadius.circular
   static BorderRadius circular(double radius) => BorderRadius.circular(radius);
+
+  // ============================================
+  // Dégagement de la barre d'onglets
+  // ============================================
+
+  /// Ce qu'il faut laisser sous le dernier élément d'un écran à onglets.
+  ///
+  /// Le shell pose sa barre d'onglets PAR-DESSUS le contenu (`extendBody:
+  /// true`) pour que les affiches défilent sous le verre. En échange, tout ce
+  /// qui descend jusqu'en bas passe derrière elle — un bouton « Enregistrer »
+  /// en fin de formulaire devient intouchable, et rien à la lecture du code ne
+  /// le laisse deviner.
+  ///
+  /// Flutter donne déjà la bonne valeur : avec `extendBody`, le corps reçoit
+  ///
+  ///   bottom = max(padding.bottom, bottomWidgetsHeight)   // scaffold.dart
+  ///
+  /// soit l'encombrement de la barre (6 + 62 + l'indicateur d'accueil), ou
+  /// l'indicateur seul hors du shell. Cette méthode ne fait que nommer cette
+  /// lecture, parce que quatre écrans l'avaient réécrite de quatre façons et
+  /// que trois autres l'avaient oubliée.
+  ///
+  /// À ajouter au bas d'un `padding` de liste, jamais dans un `SafeArea` qui
+  /// lirait la même valeur : l'appliquer deux fois creuse une bande vide de
+  /// 200 points au-dessus de la barre.
+  static double navBarClearance(BuildContext context) =>
+      MediaQuery.of(context).padding.bottom;
 }

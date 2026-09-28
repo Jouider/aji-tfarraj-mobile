@@ -53,6 +53,20 @@ class AppShadows {
         ),
       ];
 
+  /// Sous une carte « premium » — la seule ombre qui ne suit PAS le thème.
+  ///
+  /// [card] s'allège en thème clair parce qu'une carte claire sur une page
+  /// claire n'a qu'un décrochement à marquer. Celle-ci est noire dans les deux
+  /// thèmes : posée sur une page blanche, c'est un objet sombre qui projette,
+  /// et 8 % ne le porteraient pas. Elle garde donc la même densité partout.
+  static List<BoxShadow> get premium => [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.45),
+          blurRadius: 18,
+          offset: const Offset(0, 6),
+        ),
+      ];
+
   /// Sous le bouton principal : le halo de la marque, réservé à l'action.
   static List<BoxShadow> get action => [
         BoxShadow(

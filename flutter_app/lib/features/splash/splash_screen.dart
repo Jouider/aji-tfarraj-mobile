@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
-import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/features/notifications/data/notification_repository.dart'
     show sharedPreferencesProvider;
@@ -52,8 +51,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final locale = ref.watch(localeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,

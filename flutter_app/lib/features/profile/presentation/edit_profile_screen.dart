@@ -632,7 +632,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        // Le dégagement en bas, sinon « Enregistrer » finit sous la barre
+        // d'onglets : il se voit, il ne se touche pas.
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg + AppSpacing.navBarClearance(context),
+        ),
         child: Form(
           key: _formKey,
           child: Column(

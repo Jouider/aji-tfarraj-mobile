@@ -221,6 +221,35 @@ class AppColors {
   static const Color inkOnPhotoMuted = Color(0xE0FFFFFF); // blanc 88 %
 
   // ============================================
+  // Le noir « premium »
+  // ============================================
+
+  /// Le fond d'une carte qui annonce un accès privilégié.
+  ///
+  /// Sombre dans LES DEUX thèmes, comme [inkOnPhoto] : ce n'est pas une
+  /// surface de page qui suivrait le thème, c'est un objet — une carte noire
+  /// à filet doré. En thème clair, c'est justement son contraste avec la page
+  /// qui la distingue du reste.
+  ///
+  /// Elle remplace l'aplat doré : l'or en GRANDE surface impose l'encre
+  /// noire (le blanc n'y mesure que 2,1:1), et une carte noir-sur-jaune se lit
+  /// comme un avertissement, pas comme une faveur. Posé en filet et en icône
+  /// sur ce noir, le même or redevient ce qu'il doit être.
+  /// Un noir CHAUD, et non le gris-bleu des surfaces de page.
+  ///
+  /// Le premier essai tirait sur le violet (R38 G34 B48) : posé sous la carte
+  /// orange, il la refroidissait, et un filet doré sur un fond bleuté se lit
+  /// comme une erreur de teinte. Ce noir-ci part du même côté du cercle
+  /// chromatique que l'or qu'il porte.
+  static const Color premiumSurface = Color(0xFF131110);
+
+  /// Le haut de son dégradé — la carte n'est pas un aplat mort.
+  static const Color premiumSurfaceRaised = Color(0xFF211C15);
+
+  /// Son filet, et la teinte de ses pastilles.
+  static Color get premiumBorder => secondary.withValues(alpha: 0.42);
+
+  // ============================================
   // Puces de filtre
   // ============================================
 

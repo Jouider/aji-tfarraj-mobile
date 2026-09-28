@@ -72,7 +72,14 @@ class ReservationDetailScreen extends ConsumerWidget {
           final timeFormat = DateFormat('HH:mm');
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            // Les actions ferment cet écran : sans dégagement, « Annuler ma
+            // réservation » se retrouve derrière la barre d'onglets.
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg + AppSpacing.navBarClearance(context),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -630,7 +637,7 @@ class _ActionButtons extends ConsumerWidget {
     final s = ref.watch(stringsProvider);
     return Column(
       children: [
-        // Approved → view ticket (gold CTA)
+        // Approved → view ticket (orange CTA)
         if (statusHelper.isApproved) ...[
           _ActionButton(
             label: s.resDetailBtnViewTicket,
@@ -653,7 +660,7 @@ class _ActionButtons extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
         ],
 
-        // Expired / rejected → discover shows (gold CTA)
+        // Expired / rejected → discover shows (orange CTA)
         if (statusHelper.isExpired || statusHelper.isRejected) ...[
           _ActionButton(
             label: s.resDetailBtnDiscoverShows,
@@ -703,7 +710,13 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedColor = color ?? AppColors.secondary;
+    // L'orange d'action, pas l'or.
+    //
+    // L'or imposait l'encre noire — le blanc n'y mesure que 2,1:1 —, et un
+    // gros bouton noir-sur-jaune se lit comme un avertissement là où il
+    // annonce un billet validé. L'orange de la charte porte le blanc à 4,6:1
+    // et dit la même chose que tous les autres boutons de l'app.
+    final resolvedColor = color ?? AppColors.primaryAction;
 
     if (filled) {
       return SizedBox(

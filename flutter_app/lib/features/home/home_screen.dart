@@ -387,8 +387,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
 
-          // FIX: Bottom padding — 16px before bottom nav
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+          // 16 points ne suffisaient pas : la barre d'onglets est POSÉE sur le
+          // contenu, elle en mange une centaine.
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: AppSpacing.lg + AppSpacing.navBarClearance(context),
+            ),
+          ),
         ],
       ),
     );

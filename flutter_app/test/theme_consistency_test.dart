@@ -103,6 +103,54 @@ void main() {
     );
   });
 
+  test('tout écran du shell dégage la barre d\'onglets', () {
+    // Le shell pose la barre d'onglets PAR-DESSUS le contenu
+    // (`extendBody: true`), pour que les affiches défilent sous le verre. En
+    // échange, tout écran d'onglet doit réserver sa centaine de points en bas,
+    // sinon son dernier élément passe derrière elle.
+    //
+    // C'est invisible en relecture, et ça s'est produit trois fois : le bouton
+    // « Enregistrer » du profil, les actions d'une réservation et la dernière
+    // affiche de l'accueil étaient tous sous la barre. Ce dernier portait même
+    // le commentaire « FIX: Bottom padding — 16px before bottom nav », seize
+    // points là où il en fallait cent deux.
+    //
+    // Deux façons légitimes de s'en acquitter : appeler
+    // `AppSpacing.navBarClearance`, ou lire l'inset soi-même pour une barre
+    // collée en bas. N'en faire aucune est le bug.
+    const shellScreens = [
+      'lib/features/home/home_screen.dart',
+      'lib/features/show/show_detail_screen.dart',
+      'lib/features/reservation/reserve_seats_screen.dart',
+      'lib/features/reservation/reservation_detail_screen.dart',
+      'lib/features/reservation/my_reservations_screen.dart',
+      'lib/features/profile/presentation/edit_profile_screen.dart',
+      'lib/features/profile/profile_screen.dart',
+      'lib/features/shows/presentation/shows_browse_screen.dart',
+      'lib/features/ticket/ticket_screen.dart',
+    ];
+
+    final offenders = <String>[];
+    for (final path in shellScreens) {
+      final file = File(path);
+      expect(file.existsSync(), isTrue,
+          reason: '$path a bougé — mettez cette liste à jour.');
+
+      final src = file.readAsStringSync();
+      if (!src.contains('navBarClearance') && !src.contains('padding.bottom')) {
+        offenders.add(path);
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason: "Écran d'onglet sans dégagement en bas — ajoutez "
+          'AppSpacing.navBarClearance(context) au bas de son padding :\n'
+          '  ${offenders.join('\n  ')}',
+    );
+  });
+
   test('aucune famille de police hors du fichier typographie', () {
     // Cairo se demande par AppTypography, jamais à la main : c'est comme ça
     // qu'on se retrouve avec une graisse non embarquée, que Flutter remplace

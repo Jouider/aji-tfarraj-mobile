@@ -9,7 +9,6 @@ import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
-import 'package:aji_tfarraj/app/localization/app_locale.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/auth/token_storage.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
@@ -30,8 +29,6 @@ class _AuthLandingScreenState extends ConsumerState<AuthLandingScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
-    final locale = ref.watch(localeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Navigate to home once authenticated
     ref.listen<AuthState>(loginAuthStateProvider, (_, next) {

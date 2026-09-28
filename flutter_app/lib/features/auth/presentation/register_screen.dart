@@ -41,8 +41,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(loginAuthStateProvider);
     final s = ref.watch(stringsProvider);
-    final locale = ref.watch(localeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     ref.listen<AuthState>(loginAuthStateProvider, (_, next) {
       if (next.isAuthenticated) context.go(Routes.home);

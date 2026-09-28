@@ -215,7 +215,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
       backgroundColor: AppColors.backgroundGrey,
       child: ListView.builder(
         padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg),
+            bottom: AppSpacing.navBarClearance(context) + AppSpacing.lg),
         itemCount: grouped.length,
         itemBuilder: (context, index) {
           final studioName = grouped.keys.elementAt(index);

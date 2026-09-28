@@ -288,7 +288,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           AppSpacing.lg,
           AppSpacing.xl,
           AppSpacing.lg,
-          AppSpacing.xl + MediaQuery.of(context).padding.bottom,
+          AppSpacing.xl + AppSpacing.navBarClearance(context),
         ),
         children: [
           // Incomplete profile warning
@@ -350,6 +350,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               icon: Icons.workspace_premium_outlined,
               color: AppColors.secondary,
               colorDark: AppColors.secondaryDark,
+              tone: _SpaceTone.premium,
               onTap: () {
                 ref.read(cpModeProvider.notifier).setEnabled(true);
                 context.go(Routes.chargePublic);
@@ -570,6 +571,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 /// Une porte vers un espace à part — casting, mode chargé public. Assez
 /// visible pour ne pas se perdre au milieu des réglages, et de la couleur de
 /// l'espace qu'elle ouvre.
+/// Les deux langages d'une carte d'accès.
+enum _SpaceTone {
+  /// L'aplat de la marque : l'orange, encre blanche. Pour ce qui est ouvert
+  /// à tout le monde.
+  brand,
+
+  /// Le noir à filet doré. Pour ce qui est accordé.
+  ///
+  /// L'or en grande surface obligeait l'encre noire — le blanc n'y tient pas,
+  /// 2,1:1 —, et une carte noir-sur-jaune se lit comme un panneau de danger.
+  /// Renversé, le même or fait exactement le contraire : il ne porte plus
+  /// rien, il souligne.
+  premium,
+}
+
 class _SpaceCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -577,6 +593,7 @@ class _SpaceCard extends StatelessWidget {
   final Color color;
   final Color colorDark;
   final VoidCallback onTap;
+  final _SpaceTone tone;
 
   const _SpaceCard({
     required this.title,
@@ -585,10 +602,18 @@ class _SpaceCard extends StatelessWidget {
     required this.color,
     required this.colorDark,
     required this.onTap,
+    this.tone = _SpaceTone.brand,
   });
 
   @override
   Widget build(BuildContext context) {
+    final premium = tone == _SpaceTone.premium;
+
+    // Sur le noir, l'accent est l'or et l'encre est blanche. Sur l'aplat de
+    // marque, les deux se déduisent du fond.
+    final ink = premium ? AppColors.inkOnPhoto : AppColors.inkOn(color);
+    final accent = premium ? color : ink;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -596,18 +621,30 @@ class _SpaceCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [color, colorDark],
+            colors: premium
+                ? const [
+                    AppColors.premiumSurfaceRaised,
+                    AppColors.premiumSurface,
+                  ]
+                : [color, colorDark],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.3),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          // Le filet doré ne sert que la carte noire : c'est lui qui dit
+          // « privilège » à la place de l'aplat.
+          border: premium ? Border.all(color: AppColors.premiumBorder) : null,
+          // Une carte noire n'a pas de halo de couleur : elle porte l'ombre
+          // d'un objet posé, pas la lueur d'un néon.
+          boxShadow: premium
+              ? AppShadows.premium
+              : [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.3),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
         ),
         child: Row(
           children: [
@@ -615,10 +652,13 @@ class _SpaceCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.inkOn(color).withValues(alpha: 0.18),
+                color: accent.withValues(alpha: premium ? 0.14 : 0.18),
                 borderRadius: BorderRadius.circular(12),
+                border: premium
+                    ? Border.all(color: accent.withValues(alpha: 0.35))
+                    : null,
               ),
-              child: Icon(icon, color: AppColors.inkOn(color), size: 24),
+              child: Icon(icon, color: accent, size: 24),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -630,7 +670,7 @@ class _SpaceCard extends StatelessWidget {
                     style: TextStyle(
                       // L'or ne porte pas le blanc : 2,1:1. L'encre suit
                       // l'aplat de la carte, elle ne le précède pas.
-                      color: AppColors.inkOn(color),
+                      color: ink,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -639,8 +679,7 @@ class _SpaceCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                        color: AppColors.inkOn(color).withValues(alpha: 0.78),
-                        fontSize: 12),
+                        color: ink.withValues(alpha: 0.78), fontSize: 12),
                   ),
                 ],
               ),
@@ -649,7 +688,7 @@ class _SpaceCard extends StatelessWidget {
               Directionality.of(context) == TextDirection.rtl
                   ? Icons.arrow_back_ios
                   : Icons.arrow_forward_ios,
-              color: AppColors.inkOn(color),
+              color: premium ? accent : ink,
               size: 16,
             ),
           ],
@@ -728,17 +767,26 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    // Aligné à gauche, et non centré.
+    //
+    // Le bloc d'identité était la seule île centrée d'une page entièrement
+    // alignée à gauche : sous lui, « MON BADGE », les cartes et les réglages
+    // repartaient tous du même bord. L'œil lisait donc deux mises en page
+    // superposées, et c'est cela qui « tombait à côté » — pas la photo.
+    //
+    // Sur une ligne, la photo ouvre la page comme le logo ouvre la barre, le
+    // nom se lit à hauteur des yeux, et une centaine de points de hauteur
+    // rentrent dans l'écran au lieu de se perdre en marge.
+    return Row(
       children: [
-        // Avatar with gradient ring.
-        // Tapping the PHOTO enlarges it — that is what someone wants when they
-        // tap their own picture. Changing it stays on the pencil badge below,
-        // which is the explicit affordance for it.
+        // Toucher la PHOTO l'agrandit — c'est ce qu'on attend en touchant son
+        // propre portrait. La changer reste sur le crayon, qui est
+        // l'affordance explicite.
         GestureDetector(
           onTap: () {
             final url = user?.avatarUrl;
             if (url == null || url.isEmpty) {
-              // Nothing to enlarge yet — send them where they can add one.
+              // Rien à agrandir : on l'envoie là où il peut en mettre une.
               onEditTap();
               return;
             }
@@ -748,30 +796,26 @@ class _ProfileHeader extends StatelessWidget {
           child: Stack(
             alignment: Alignment.bottomRight,
             children: [
-              // Gradient ring (96px = 80 image + 3px ring + 2px gap × 2 sides)
+              // Un filet de 2 points, sans halo.
+              //
+              // L'anneau faisait 5 points de dégradé plus une lueur orange de
+              // 20 : à ce format, ce n'est plus un cadre, c'est un néon. Le
+              // portrait est le sujet ; la marque n'a qu'à le border.
               Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
+                width: 76,
+                height: 76,
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [AppColors.primary, AppColors.secondary],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.25),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
                 ),
                 child: Center(
-                  // Gap: 2px on each side → 96 - (3+2)*2 = 86px
                   child: Container(
-                    width: 86,
-                    height: 86,
+                    width: 68,
+                    height: 68,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.backgroundWhite,
@@ -783,13 +827,14 @@ class _ProfileHeader extends StatelessWidget {
                                   scope: 'profile'),
                               child: Image.network(
                                 user!.avatarUrl!,
-                                width: 86,
-                                height: 86,
+                                width: 68,
+                                height: 68,
                                 fit: BoxFit.cover,
-                                // Bound decoded bitmap so a large avatar can't OOM.
-                                // Only cap width — capping both distorts non-square
-                                // photos (the decode ignores aspect ratio).
-                                cacheWidth: 258,
+                                // Borne la taille décodée pour qu'un grand
+                                // portrait ne fasse pas sauter la mémoire.
+                                // Seule la largeur est bornée : brider les
+                                // deux déforme les photos non carrées.
+                                cacheWidth: 204,
                                 loadingBuilder: (_, child, progress) =>
                                     progress == null
                                         ? child
@@ -803,35 +848,31 @@ class _ProfileHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              // Edit badge. The circle you see is 32px, but the tap area is a
-              // full 48px corner: at 28px with only the 13px pencil tappable,
-              // most taps missed it, landed on the photo and enlarged it.
+              // Le crayon. Le disque visible fait 26 points, la cible en fait
+              // 44 : à 28 avec seuls 13 points de crayon touchables, la
+              // plupart des appuis manquaient et agrandissaient la photo.
               GestureDetector(
                 onTap: onEditTap,
                 behavior: HitTestBehavior.opaque,
                 child: SizedBox(
-                  width: 48,
-                  height: 48,
+                  width: 44,
+                  height: 44,
                   child: Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: 26,
+                      height: 26,
                       decoration: BoxDecoration(
-                        color: AppColors.secondary,
+                        // L'orange d'action plutôt que l'or : le blanc y tient
+                        // (4,6:1), et c'est la couleur de tout ce qui se
+                        // touche ailleurs dans l'app.
+                        color: AppColors.primaryAction,
                         shape: BoxShape.circle,
                         border: Border.all(
                             color: AppColors.backgroundWhite, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.secondary.withValues(alpha: 0.3),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: Icon(Icons.edit,
-                          size: 16, color: AppColors.onSecondary),
+                          size: 13, color: AppColors.onPrimary),
                     ),
                   ),
                 ),
@@ -839,28 +880,36 @@ class _ProfileHeader extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        // Name
-        Text(
-          user?.displayName ?? s.unknownUser,
-          style: AppTypography.h3.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                user?.displayName ?? s.unknownUser,
+                style: AppTypography.h3.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (user?.email != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  user!.email,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textMuted,
+                    fontSize: 13,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
           ),
-          textAlign: TextAlign.center,
         ),
-        // Email
-        if (user?.email != null) ...[
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            user!.email,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textMuted,
-              fontSize: 13,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ],
     );
   }
