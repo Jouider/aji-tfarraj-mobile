@@ -16,6 +16,7 @@ import 'package:aji_tfarraj/features/badges/domain/badge.dart';
 import 'package:aji_tfarraj/features/badges/presentation/level_badge_card.dart';
 import 'package:aji_tfarraj/features/charge_public/data/charge_public_repository.dart';
 import 'package:aji_tfarraj/features/charge_public/domain/cp_dashboard.dart';
+import 'package:aji_tfarraj/features/charge_public/presentation/wafacash_section.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_mode_provider.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_share_screen.dart';
 import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
@@ -25,14 +26,18 @@ import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dar
 /// (Accueil / Partager / Invités / Gains). Entered from Profile; leave via the
 /// header. Fully localized FR + AR (RTL handled by the app's Directionality).
 class ChargePublicShell extends ConsumerStatefulWidget {
-  const ChargePublicShell({super.key});
+  const ChargePublicShell({super.key, this.initialTab});
+
+  /// `gains` ouvre directement l'onglet des gains — là où un push Wafacash
+  /// doit mener. Tout autre valeur, ou rien, ouvre l'accueil.
+  final String? initialTab;
 
   @override
   ConsumerState<ChargePublicShell> createState() => _ChargePublicShellState();
 }
 
 class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
-  int _index = 0;
+  late int _index = widget.initialTab == 'gains' ? 3 : 0;
 
   void _exitToPublicMode() {
     ref.read(cpModeProvider.notifier).setEnabled(false);
@@ -130,7 +135,11 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
               ),
               data: (dash) => RefreshIndicator(
                 color: AppColors.accentInk,
-                onRefresh: () async => ref.invalidate(cpDashboardProvider),
+                onRefresh: () async {
+                  ref.invalidate(cpDashboardProvider);
+                  // Les retraits aussi : un code peut être arrivé entre-temps.
+                  ref.invalidate(wafacashProvider);
+                },
                 child: switch (_index) {
                   0 => _AccueilTab(
                       dash: dash,
@@ -797,6 +806,13 @@ class _GainsTab extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
         _BalanceCard(stats: s, cp: cp),
+        // Retirer ce solde, juste sous lui. Invisible tant que le staff n'a
+        // pas ouvert les retraits Wafacash.
+        Consumer(
+          builder: (_, ref, __) => WafacashSection(
+            onChanged: () => ref.invalidate(cpDashboardProvider),
+          ),
+        ),
         const SizedBox(height: AppSpacing.lg),
         Row(
           children: [

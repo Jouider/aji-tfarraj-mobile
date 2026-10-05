@@ -69,6 +69,11 @@ class AppConfig {
   // Charge public ("Mode Chargé Public") dashboard — CP-only
   static const String chargePublicDashboard = '/api/me/charge-public/dashboard';
 
+  /// Retraits Wafacash du chargé public.
+  static const String wafacash = '/api/me/wafacash';
+  static const String wafacashIdentity = '/api/me/wafacash/identity';
+  static const String wafacashWithdrawals = '/api/me/wafacash/withdrawals';
+
   // Support Tickets
   static const String supportTickets = '/api/support/tickets';
   static const String mySupportTickets = '/api/me/support-tickets';

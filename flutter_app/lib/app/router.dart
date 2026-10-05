@@ -437,7 +437,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.chargePublic,
         name: 'chargePublic',
-        builder: (context, state) => const ChargePublicShell(),
+        builder: (context, state) => ChargePublicShell(
+          initialTab: state.uri.queryParameters['tab'],
+        ),
       ),
       GoRoute(
         path: Routes.rewards,

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
+import 'package:aji_tfarraj/features/charge_public/domain/wafacash.dart';
 import 'package:aji_tfarraj/features/charge_public/domain/cp_dashboard.dart';
 
 class ChargePublicRepository {
@@ -49,6 +50,74 @@ class ChargePublicRepository {
     return const {};
   }
 }
+
+/// Les retraits Wafacash. Chaque appel renvoie l'état complet à jour : l'écran
+/// n'a jamais à recoller des morceaux.
+class WafacashRepository {
+  final ApiClient _apiClient;
+
+  WafacashRepository(this._apiClient);
+
+  Future<WafacashOverview> fetch() =>
+      _call(() => _apiClient.get<Map<String, dynamic>>(AppConfig.wafacash));
+
+  Future<WafacashOverview> submitIdentity({
+    required String legalName,
+    required String cinNumber,
+    required String frontPath,
+    required String backPath,
+  }) async {
+    final form = FormData.fromMap({
+      'legal_name': legalName.trim(),
+      'cin_number': cinNumber.trim(),
+      'front': await MultipartFile.fromFile(frontPath, filename: 'cin-recto.jpg'),
+      'back': await MultipartFile.fromFile(backPath, filename: 'cin-verso.jpg'),
+    });
+
+    return _call(() => _apiClient.post<Map<String, dynamic>>(
+          AppConfig.wafacashIdentity,
+          data: form,
+        ));
+  }
+
+  Future<WafacashOverview> request(int amount) =>
+      _call(() => _apiClient.post<Map<String, dynamic>>(
+            AppConfig.wafacashWithdrawals,
+            data: {'amount': amount},
+          ));
+
+  Future<WafacashOverview> cancel(int withdrawalId) =>
+      _call(() => _apiClient.post<Map<String, dynamic>>(
+            '${AppConfig.wafacashWithdrawals}/$withdrawalId/cancel',
+          ));
+
+  Future<WafacashOverview> markCollected(int withdrawalId) =>
+      _call(() => _apiClient.post<Map<String, dynamic>>(
+            '${AppConfig.wafacashWithdrawals}/$withdrawalId/collected',
+          ));
+
+  Future<WafacashOverview> _call(
+      Future<Response<Map<String, dynamic>>> Function() send) async {
+    try {
+      final response = await send();
+      return WafacashOverview.fromJson(response.data ?? const {});
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+}
+
+final wafacashRepositoryProvider = Provider<WafacashRepository>((ref) {
+  return WafacashRepository(ref.watch(apiClientProvider));
+});
+
+/// L'état des retraits. Une erreur (serveur ancien, réseau) masque simplement
+/// la carte : l'onglet Gains doit rester utilisable sans elle.
+final wafacashProvider = FutureProvider.autoDispose<WafacashOverview>((ref) {
+  return ref.watch(wafacashRepositoryProvider).fetch();
+});
 
 final chargePublicRepositoryProvider = Provider<ChargePublicRepository>((ref) {
   return ChargePublicRepository(ref.watch(apiClientProvider));
