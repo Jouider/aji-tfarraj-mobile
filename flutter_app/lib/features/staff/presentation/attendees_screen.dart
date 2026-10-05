@@ -493,10 +493,13 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
       _error = null;
     });
     try {
-      await ref.read(staffRepositoryProvider).setReturnPoint(
-            reservationId: a.id,
-            pointId: picked.id,
-          );
+      final repo = ref.read(staffRepositoryProvider);
+      // Same gesture, two endpoints: a member's reservation, or a walk-in.
+      if (a.kind == AttendeeKind.walkIn) {
+        await repo.setWalkInReturnPoint(walkInId: a.id, pointId: picked.id);
+      } else {
+        await repo.setReturnPoint(reservationId: a.id, pointId: picked.id);
+      }
       final point = widget.returnPoints
           .where((p) => p.id == picked.id)
           .firstOrNull;

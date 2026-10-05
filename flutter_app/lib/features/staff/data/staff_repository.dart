@@ -98,6 +98,23 @@ class StaffRepository {
     }
   }
 
+  /// A walk-in's stop — no phone, no ticket, but a seat in the shuttle.
+  Future<void> setWalkInReturnPoint({
+    required int walkInId,
+    required int? pointId,
+  }) async {
+    try {
+      await _apiClient.patch<Map<String, dynamic>>(
+        '/api/staff/walk-ins/$walkInId/return-point',
+        data: {'return_point_id': pointId},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
   /// Replace the attendee's photo from the door. Returns the new avatar URL.
   Future<String?> replaceAttendeePhoto({
     required int attendeeId,
