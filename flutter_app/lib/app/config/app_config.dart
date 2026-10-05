@@ -69,6 +69,11 @@ class AppConfig {
   // Charge public ("Mode Chargé Public") dashboard — CP-only
   static const String chargePublicDashboard = '/api/me/charge-public/dashboard';
 
+  /// Retraits Cash Plus du chargé public.
+  static const String cashPlus = '/api/me/cashplus';
+  static const String cashPlusIdentity = '/api/me/cashplus/identity';
+  static const String cashPlusWithdrawals = '/api/me/cashplus/withdrawals';
+
   // Support Tickets
   static const String supportTickets = '/api/support/tickets';
   static const String mySupportTickets = '/api/me/support-tickets';

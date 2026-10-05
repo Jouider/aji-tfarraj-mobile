@@ -4,6 +4,7 @@ import 'package:aji_tfarraj/app/copywriting/copy_fr.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_ar.dart';
 import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/departure_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/cash_plus_copy.dart';
 
 /// Localized strings accessor
 /// Maps keys to FR/AR strings using existing copywriting
@@ -1432,6 +1433,11 @@ class AppStrings {
   /// "Présents" and departures (staff, admin, scanner).
   DepartureCopy get departures =>
       locale == AppLocale.fr ? CopyFr.departures : CopyAr.departures;
+
+  /// Cash Plus withdrawals, in the charge public's space.
+  CashPlusCopy get cashPlus => locale == AppLocale.fr
+      ? const CashPlusCopyFr()
+      : const CashPlusCopyAr();
 
   // ============================================
   // Staff Check-in

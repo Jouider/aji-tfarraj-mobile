@@ -40,9 +40,9 @@
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>NSCameraUsageDescription</key>
-		<string>Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil et scanner les QR codes.</string>
+		<string>Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil, scanner les QR codes et photographier votre pièce d'identité pour les retraits Cash Plus.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil.</string>
+		<string>Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil ou choisir une photo de votre pièce d'identité pour les retraits Cash Plus.</string>
 		<key>GADApplicationIdentifier</key>
 		<!-- ⚠️ Identifiant de TEST de Google (voir AndroidManifest.xml et
 	     docs/publicite.md) : à remplacer par celui du compte AdMob avant la

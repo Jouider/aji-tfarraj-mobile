@@ -83,6 +83,11 @@ class PushRouter {
         return Routes.ticket;
       }
 
+      // Un serveur qui n'enverrait pas de deep_link : on sait quand même où aller.
+      if (type == 'cashplus') {
+        return '${Routes.chargePublic}?tab=gains';
+      }
+
       return Routes.home;
     } catch (e) {
       _debugLog('Error getting route from data: $e');
@@ -178,6 +183,9 @@ class PushRouter {
       '/r/',
       '/referral-stats',
       '/referral-links',
+      // L'espace du chargé public : « Ton argent est prêt » doit ouvrir le
+      // code, pas l'accueil.
+      '/charge-public',
     ];
 
     // Check if route matches any valid prefix

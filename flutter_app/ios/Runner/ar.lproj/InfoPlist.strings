@@ -1,4 +1,6 @@
-/* Arabic permission strings for iOS permission dialogs */
+/* Arabic permission strings for iOS permission dialogs.
+   Each use of the camera and the library must be named: App Review rejects a
+   purpose string that doesn't cover what the permission is used for. */
 
-NSPhotoLibraryUsageDescription = "نحتاج إلى الوصول إلى معرضك لتغيير صورة ملفك الشخصي.";
-NSCameraUsageDescription = "نحتاج إلى الوصول إلى كاميرتك لالتقاط صورة ملفك الشخصي.";
+NSPhotoLibraryUsageDescription = "نحتاج إلى الوصول إلى معرضك لتغيير صورة ملفك الشخصي أو اختيار صورة لبطاقة تعريفك من أجل السحب عبر كاش بلوس.";
+NSCameraUsageDescription = "نحتاج إلى الوصول إلى كاميرتك لالتقاط صورة ملفك الشخصي ومسح رموز QR وتصوير بطاقة تعريفك من أجل السحب عبر كاش بلوس.";
