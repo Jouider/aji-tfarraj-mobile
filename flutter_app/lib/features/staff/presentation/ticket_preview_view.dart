@@ -605,9 +605,11 @@ class _ReturnPointPickerState extends ConsumerState<_ReturnPointPicker> {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            preview.hasDeclaredReturnPoint
-                ? s.returnPointConfirmAtDoor
-                : s.staffReturnPointQuestion,
+            preview.checkedInAt != null
+                ? s.returnPointChangeAfterEntry
+                : preview.hasDeclaredReturnPoint
+                    ? s.returnPointConfirmAtDoor
+                    : s.staffReturnPointQuestion,
             style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
           ),
           // Ce que la personne avait annoncé en réservant, rappelé en

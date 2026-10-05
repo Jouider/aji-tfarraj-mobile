@@ -1690,4 +1690,23 @@ class DepartureCopyFr implements DepartureCopy {
       '${show != null && show.isNotEmpty ? ' ($show)' : ''}';
   String doorAlreadyLeft(String time, String reason) =>
       'Sortie à $time · $reason';
+
+  @override
+  String get returnTitle => 'Point de retour';
+  @override
+  String get returnNone => 'Par ses propres moyens';
+  @override
+  String get returnNotAnswered => 'Pas encore demandé';
+  @override
+  String get returnChange => 'Changer';
+  @override
+  String get returnPickTitle => 'Nouveau point de retour';
+  @override
+  String get returnSearchHint => 'Chercher un arrêt';
+  @override
+  String get returnNoMatch => 'Aucun arrêt ne correspond';
+  @override
+  String returnChangedAt(String time) => 'Changé à $time';
+  @override
+  String returnSaved(String point) => 'Point de retour : $point';
 }

@@ -11,6 +11,8 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/staff/data/staff_repository.dart';
 import 'package:aji_tfarraj/features/staff/domain/attendee.dart';
+import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_point_choice.dart';
 import 'package:aji_tfarraj/features/staff/presentation/return_manifest_screen.dart'
     show StaffEpisodePicker;
 
@@ -91,14 +93,16 @@ class _AttendeesBodyState extends ConsumerState<_AttendeesBody> {
     super.dispose();
   }
 
-  Future<void> _open(Attendee attendee) async {
+  Future<void> _open(
+      Attendee attendee, List<ReturnPointOption> returnPoints) async {
     final updated = await showModalBottomSheet<Attendee>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
       backgroundColor: AppColors.backgroundWhite,
-      builder: (_) => DepartureSheet(attendee: attendee),
+      builder: (_) =>
+          DepartureSheet(attendee: attendee, returnPoints: returnPoints),
     );
     if (updated == null || !mounted) return;
 
@@ -107,9 +111,17 @@ class _AttendeesBodyState extends ConsumerState<_AttendeesBody> {
       _changed.add(updated);
     });
 
+    // The sheet does two unrelated things; the message must name the right one.
     final c = ref.read(stringsProvider).departures;
+    final movedPoint = updated.hasLeft == attendee.hasLeft &&
+        (updated.returnPointId != attendee.returnPointId ||
+            updated.returnPointAnswered != attendee.returnPointAnswered);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(updated.hasLeft ? c.recorded : c.undone),
+      content: Text(movedPoint
+          ? c.returnSaved(updated.returnPointName ?? c.returnNone)
+          : updated.hasLeft
+              ? c.recorded
+              : c.undone),
       behavior: SnackBarBehavior.floating,
     ));
   }
@@ -213,7 +225,8 @@ class _AttendeesBodyState extends ConsumerState<_AttendeesBody> {
                                 const SizedBox(height: AppSpacing.sm),
                             itemBuilder: (_, i) => _AttendeeTile(
                               attendee: results[i],
-                              onTap: () => _open(results[i]),
+                              onTap: () =>
+                                  _open(results[i], data.returnPoints),
                             ),
                           ),
               ),
@@ -293,7 +306,9 @@ class _AttendeeTile extends ConsumerWidget {
                       style: AppTypography.bodySmall
                           .copyWith(color: AppColors.textMuted),
                     ),
-                    if (departure != null || attendee.wasExcludedBefore) ...[
+                    if (departure != null ||
+                        attendee.wasExcludedBefore ||
+                        attendee.returnPointChangedAt != null) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Wrap(
                         spacing: AppSpacing.xs,
@@ -313,6 +328,15 @@ class _AttendeeTile extends ConsumerWidget {
                               icon: Icons.report_gmailerrorred_outlined,
                               label: c.excludedBefore(attendee.pastExclusions),
                               color: AppColors.error,
+                            ),
+                          // Moved after coming in: if the driver's sheet was
+                          // already handed over, this is the line that changed.
+                          if (attendee.returnPointChangedAt != null)
+                            _Tag(
+                              icon: Icons.directions_bus_outlined,
+                              label:
+                                  '${attendee.returnPointName ?? c.returnNone} · ${c.returnChangedAt(_time(attendee.returnPointChangedAt!))}',
+                              color: AppColors.accentInk,
                             ),
                         ],
                       ),
@@ -336,9 +360,16 @@ class _AttendeeTile extends ConsumerWidget {
 /// Photo and name come first, so the scanner checks it is the right person
 /// before taking their evening away.
 class DepartureSheet extends ConsumerStatefulWidget {
-  const DepartureSheet({super.key, required this.attendee});
+  const DepartureSheet({
+    super.key,
+    required this.attendee,
+    this.returnPoints = const [],
+  });
 
   final Attendee attendee;
+
+  /// The stops served tonight. Empty: no shuttle, so no return point to offer.
+  final List<ReturnPointOption> returnPoints;
 
   @override
   ConsumerState<DepartureSheet> createState() => _DepartureSheetState();
@@ -413,6 +444,68 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
     }
   }
 
+  /// The person is already inside and came back to change where they get
+  /// dropped. Picked here rather than by rescanning: in the middle of a
+  /// recording, the ticket is rarely at hand.
+  Future<void> _changeReturnPoint() async {
+    final c = ref.read(stringsProvider).departures;
+    final isAr = ref.read(isRtlProvider);
+    final a = widget.attendee;
+
+    final picked = await showModalBottomSheet<_PickedPoint>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: AppColors.backgroundWhite,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          bottom: MediaQuery.viewInsetsOf(ctx).bottom + AppSpacing.lg,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(c.returnPickTitle, style: AppTypography.h3),
+              const SizedBox(height: AppSpacing.md),
+              ReturnPointChoice(
+                points: widget.returnPoints,
+                selectedId: a.returnPointId,
+                answered: a.returnPointAnswered,
+                isArabic: isAr,
+                noneLabel: c.returnNone,
+                searchHint: c.returnSearchHint,
+                noMatchLabel: c.returnNoMatch,
+                onChoose: (id) => Navigator.of(ctx).pop(_PickedPoint(id)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      await ref.read(staffRepositoryProvider).setReturnPoint(
+            reservationId: a.id,
+            pointId: picked.id,
+          );
+      final point = widget.returnPoints
+          .where((p) => p.id == picked.id)
+          .firstOrNull;
+      if (mounted) Navigator.of(context).pop(a.withReturnPoint(point));
+    } catch (e) {
+      _fail(e);
+    }
+  }
+
   void _fail(Object e) {
     if (!mounted) return;
     setState(() {
@@ -465,6 +558,15 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
                   label: c.excludedBefore(a.pastExclusions),
                   color: AppColors.error,
                 ),
+              ),
+            ],
+            if (a.canChangeReturnPoint && widget.returnPoints.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.lg),
+              _ReturnPointRow(
+                attendee: a,
+                copy: c,
+                enabled: !_saving,
+                onChange: _changeReturnPoint,
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
@@ -576,6 +678,75 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
               OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
         ),
       ];
+}
+
+// ─── Return point ────────────────────────────────────────────────────────────
+
+/// What the picker hands back. A wrapper because null is a real answer — "own
+/// means" — and must not be confused with the sheet being dismissed.
+class _PickedPoint {
+  const _PickedPoint(this.id);
+  final int? id;
+}
+
+/// Where they get dropped tonight, with a way to change it.
+class _ReturnPointRow extends StatelessWidget {
+  const _ReturnPointRow({
+    required this.attendee,
+    required this.copy,
+    required this.enabled,
+    required this.onChange,
+  });
+
+  final Attendee attendee;
+  final DepartureCopy copy;
+  final bool enabled;
+  final VoidCallback onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    final current = !attendee.returnPointAnswered
+        ? copy.returnNotAnswered
+        : attendee.returnPointName ?? copy.returnNone;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundGrey,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.directions_bus_outlined,
+              size: 20, color: AppColors.accentInk),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(copy.returnTitle,
+                    style: AppTypography.caption
+                        .copyWith(color: AppColors.textMuted)),
+                Text(current, style: AppTypography.labelMedium),
+                if (attendee.returnPointChangedAt != null)
+                  Text(
+                    copy.returnChangedAt(
+                        _time(attendee.returnPointChangedAt!)),
+                    style: AppTypography.caption
+                        .copyWith(color: AppColors.textMuted),
+                  ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: enabled ? onChange : null,
+            child: Text(copy.returnChange),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ─── Small pieces ────────────────────────────────────────────────────────────
