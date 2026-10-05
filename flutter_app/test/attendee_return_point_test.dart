@@ -77,11 +77,10 @@ void main() {
     expect(apres.returnPointAnswered, isTrue);
   });
 
-  test('membres et walk-ins encore présents peuvent changer, pas les partis', () {
+  test('seuls les détenteurs d\'un billet encore présents peuvent changer', () {
     expect(Attendee.fromJson(ligne()).canChangeReturnPoint, isTrue);
-    // Un walk-in n'a ni téléphone ni billet, mais une place dans la navette.
     expect(Attendee.fromJson(ligne(kind: 'walk_in')).canChangeReturnPoint,
-        isTrue);
+        isFalse);
     expect(
       Attendee.fromJson(ligne(departure: {
         'at': '2026-10-05T21:00:00Z',

@@ -127,9 +127,8 @@ class Attendee {
 
   bool get hasLeft => departure != null;
 
-  /// Members and walk-ins alike ride the shuttle; someone who already left
-  /// does not.
-  bool get canChangeReturnPoint => !hasLeft;
+  /// Only ticket holders have a return point: walk-ins have none in the data.
+  bool get canChangeReturnPoint => kind == AttendeeKind.reservation && !hasLeft;
 
   /// The same person, now dropped at [point] (null: own means).
   Attendee withReturnPoint(ReturnPointOption? point) => Attendee(
