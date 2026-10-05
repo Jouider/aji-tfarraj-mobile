@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
-import 'package:aji_tfarraj/app/copywriting/cash_plus_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
 import 'package:aji_tfarraj/app/design_system/buttons.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -11,24 +11,24 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/charge_public/data/charge_public_repository.dart';
-import 'package:aji_tfarraj/features/charge_public/domain/cash_plus.dart';
-import 'package:aji_tfarraj/features/charge_public/presentation/cash_plus_identity_screen.dart';
+import 'package:aji_tfarraj/features/charge_public/domain/wafacash.dart';
+import 'package:aji_tfarraj/features/charge_public/presentation/wafacash_identity_screen.dart';
 
-/// Retirer ses gains via Cash Plus, dans l'onglet « Gains ».
+/// Retirer ses gains via Wafacash, dans l'onglet « Gains ».
 ///
 /// Rien ne s'affiche tant que le staff n'a pas ouvert les retraits — ni si le
 /// serveur ne connaît pas encore cette fonction : l'onglet doit rester
 /// utilisable sans elle.
-class CashPlusSection extends ConsumerWidget {
-  const CashPlusSection({super.key, required this.onChanged});
+class WafacashSection extends ConsumerWidget {
+  const WafacashSection({super.key, required this.onChanged});
 
   /// Une demande change le solde affiché plus haut : l'onglet se recharge.
   final VoidCallback onChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(cashPlusProvider);
-    final c = ref.watch(stringsProvider).cashPlus;
+    final state = ref.watch(wafacashProvider);
+    final c = ref.watch(stringsProvider).wafacash;
 
     return state.maybeWhen(
       data: (o) {
@@ -68,8 +68,8 @@ class _WithdrawCard extends ConsumerWidget {
     required this.onChanged,
   });
 
-  final CashPlusOverview overview;
-  final CashPlusCopy copy;
+  final WafacashOverview overview;
+  final WafacashCopy copy;
   final VoidCallback onChanged;
 
   Future<void> _start(BuildContext context, WidgetRef ref) async {
@@ -77,9 +77,9 @@ class _WithdrawCard extends ConsumerWidget {
 
     // Pas encore d'identité, ou refusée : l'envoyer d'abord, une fois.
     if (identity == null ||
-        identity.status == CashPlusIdentityStatus.rejected) {
+        identity.status == WafacashIdentityStatus.rejected) {
       final sent = await Navigator.of(context).push<bool>(MaterialPageRoute(
-        builder: (_) => CashPlusIdentityScreen(initialName: identity?.legalName),
+        builder: (_) => WafacashIdentityScreen(initialName: identity?.legalName),
       ));
       if (sent == true) onChanged();
       return;
@@ -101,8 +101,8 @@ class _WithdrawCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final identity = overview.identity;
-    final pending = identity?.status == CashPlusIdentityStatus.pending;
-    final rejected = identity?.status == CashPlusIdentityStatus.rejected;
+    final pending = identity?.status == WafacashIdentityStatus.pending;
+    final rejected = identity?.status == WafacashIdentityStatus.rejected;
     final verified = identity?.isVerified ?? false;
 
     return _Card(
@@ -164,7 +164,7 @@ class _WithdrawCard extends ConsumerWidget {
 class _WithdrawSheet extends ConsumerStatefulWidget {
   const _WithdrawSheet({required this.overview});
 
-  final CashPlusOverview overview;
+  final WafacashOverview overview;
 
   @override
   ConsumerState<_WithdrawSheet> createState() => _WithdrawSheetState();
@@ -185,7 +185,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
   int get _value => int.tryParse(_amount.text.trim()) ?? 0;
 
   /// Ce qui empêche de demander ce montant, ou null.
-  String? _problem(CashPlusCopy c) {
+  String? _problem(WafacashCopy c) {
     final o = widget.overview;
     final v = _value;
     if (v < o.minAmount) return c.belowMin(c.money(o.minAmount));
@@ -198,14 +198,14 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
   }
 
   Future<void> _confirm() async {
-    final c = ref.read(stringsProvider).cashPlus;
+    final c = ref.read(stringsProvider).wafacash;
     setState(() {
       _sending = true;
       _error = null;
     });
     try {
-      await ref.read(cashPlusRepositoryProvider).request(_value);
-      ref.invalidate(cashPlusProvider);
+      await ref.read(wafacashRepositoryProvider).request(_value);
+      ref.invalidate(wafacashProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(c.requested),
@@ -223,7 +223,7 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final c = ref.watch(stringsProvider).cashPlus;
+    final c = ref.watch(stringsProvider).wafacash;
     final o = widget.overview;
     final quote = o.quote(_value);
     final problem = _problem(c);
@@ -290,6 +290,14 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
                   Text(c.netLine(quote == null ? '—' : c.money(quote.net)),
                       style: AppTypography.h4
                           .copyWith(color: AppColors.successDark)),
+                  // Au bord d'un palier, on débite un peu moins que demandé :
+                  // le dire ici, avant la confirmation, jamais après.
+                  if (quote != null && quote.debitDiffers) ...[
+                    const SizedBox(height: 2),
+                    Text(c.debitedLine(c.money(quote.gross)),
+                        style: AppTypography.bodySmall
+                            .copyWith(color: AppColors.textSecondary)),
+                  ],
                   const SizedBox(height: AppSpacing.xs),
                   Text(c.feeExplainer,
                       style: AppTypography.caption
@@ -325,8 +333,8 @@ class _StatusCard extends ConsumerStatefulWidget {
     required this.onChanged,
   });
 
-  final CashPlusWithdrawal withdrawal;
-  final CashPlusCopy copy;
+  final WafacashWithdrawal withdrawal;
+  final WafacashCopy copy;
   final VoidCallback onChanged;
 
   @override
@@ -340,7 +348,7 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
     setState(() => _busy = true);
     try {
       await action();
-      ref.invalidate(cashPlusProvider);
+      ref.invalidate(wafacashProvider);
       widget.onChanged();
     } catch (e) {
       if (!mounted) return;
@@ -373,21 +381,21 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
     );
     if (sure != true) return;
     await _act(() =>
-        ref.read(cashPlusRepositoryProvider).cancel(widget.withdrawal.id));
+        ref.read(wafacashRepositoryProvider).cancel(widget.withdrawal.id));
   }
 
   @override
   Widget build(BuildContext context) {
     final w = widget.withdrawal;
     final c = widget.copy;
-    final ready = w.status == CashPlusWithdrawalStatus.codeSent;
+    final ready = w.status == WafacashWithdrawalStatus.codeSent;
 
     final (title, hint) = switch (w.status) {
-      CashPlusWithdrawalStatus.processing => (
+      WafacashWithdrawalStatus.processing => (
           c.statusProcessing,
           c.statusProcessingHint
         ),
-      CashPlusWithdrawalStatus.codeSent => (c.statusCodeSent, null),
+      WafacashWithdrawalStatus.codeSent => (c.statusCodeSent, null),
       _ => (c.statusRequested, c.statusRequestedHint),
     };
 
@@ -422,7 +430,7 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
             icon: Icons.check_circle_outline,
             isLoading: _busy,
             onPressed: () => _act(() => ref
-                .read(cashPlusRepositoryProvider)
+                .read(wafacashRepositoryProvider)
                 .markCollected(w.id)),
           ),
         ],
@@ -442,13 +450,13 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
 class _Steps extends StatelessWidget {
   const _Steps({required this.status});
 
-  final CashPlusWithdrawalStatus status;
+  final WafacashWithdrawalStatus status;
 
   @override
   Widget build(BuildContext context) {
     final reached = switch (status) {
-      CashPlusWithdrawalStatus.requested => 1,
-      CashPlusWithdrawalStatus.processing => 2,
+      WafacashWithdrawalStatus.requested => 1,
+      WafacashWithdrawalStatus.processing => 2,
       _ => 3,
     };
 
@@ -478,7 +486,7 @@ class _CodeBox extends StatelessWidget {
   const _CodeBox({required this.code, required this.copy});
 
   final String code;
-  final CashPlusCopy copy;
+  final WafacashCopy copy;
 
   @override
   Widget build(BuildContext context) {
@@ -536,16 +544,16 @@ class _CodeBox extends StatelessWidget {
 class _HistoryRow extends StatelessWidget {
   const _HistoryRow({required this.withdrawal, required this.copy});
 
-  final CashPlusWithdrawal withdrawal;
-  final CashPlusCopy copy;
+  final WafacashWithdrawal withdrawal;
+  final WafacashCopy copy;
 
   @override
   Widget build(BuildContext context) {
     final w = withdrawal;
     final (label, color) = switch (w.status) {
-      CashPlusWithdrawalStatus.collected => (copy.statusCollected, AppColors.successDark),
-      CashPlusWithdrawalStatus.rejected => (copy.statusRejected, AppColors.errorDark),
-      CashPlusWithdrawalStatus.expired => (copy.statusExpired, AppColors.textSecondary),
+      WafacashWithdrawalStatus.collected => (copy.statusCollected, AppColors.successDark),
+      WafacashWithdrawalStatus.rejected => (copy.statusRejected, AppColors.errorDark),
+      WafacashWithdrawalStatus.expired => (copy.statusExpired, AppColors.textSecondary),
       _ => (copy.statusCancelled, AppColors.textMuted),
     };
     final at = w.collectedAt ?? w.closedAt ?? w.requestedAt;
@@ -559,7 +567,7 @@ class _HistoryRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(copy.money(w.netAmount), style: AppTypography.labelMedium),
-                if (w.status == CashPlusWithdrawalStatus.rejected &&
+                if (w.status == WafacashWithdrawalStatus.rejected &&
                     (w.closedReason ?? '').isNotEmpty)
                   Text(w.closedReason!,
                       style: AppTypography.caption

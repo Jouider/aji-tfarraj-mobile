@@ -2,5 +2,5 @@
    Each use of the camera and the library must be named: App Review rejects a
    purpose string that doesn't cover what the permission is used for. */
 
-NSPhotoLibraryUsageDescription = "Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil ou choisir une photo de votre pièce d'identité pour les retraits Cash Plus.";
-NSCameraUsageDescription = "Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil, scanner les QR codes et photographier votre pièce d'identité pour les retraits Cash Plus.";
+NSPhotoLibraryUsageDescription = "Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil ou choisir une photo de votre pièce d'identité pour les retraits Wafacash.";
+NSCameraUsageDescription = "Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil, scanner les QR codes et photographier votre pièce d'identité pour les retraits Wafacash.";

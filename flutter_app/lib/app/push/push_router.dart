@@ -84,7 +84,7 @@ class PushRouter {
       }
 
       // Un serveur qui n'enverrait pas de deep_link : on sait quand même où aller.
-      if (type == 'cashplus') {
+      if (type == 'wafacash') {
         return '${Routes.chargePublic}?tab=gains';
       }
 

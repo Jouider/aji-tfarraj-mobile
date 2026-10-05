@@ -1,51 +1,76 @@
-/// Les retraits Cash Plus du chargé public.
+/// Les retraits Wafacash du chargé public.
 ///
-/// Le chargé public demande un montant ; les frais Cash Plus en sont retirés et
+/// Le chargé public demande un montant ; les frais Wafacash en sont retirés et
 /// il voit le NET avant de confirmer. Le staff fait le transfert au guichet et
 /// saisit le code ; le chargé public le lit ici et retire l'argent avec sa CIN.
 ///
-/// Vient de `GET /api/me/cashplus`. Le serveur reste juge : le calcul des frais
+/// Vient de `GET /api/me/wafacash`. Le serveur reste juge : le calcul des frais
 /// ici sert à l'affichage pendant la saisie, la demande est recalculée là-bas.
 library;
 
 /// Un palier de la grille : « jusqu'à [upTo] DH → [fee] DH de frais ».
-class CashPlusFeeBracket {
+/// Un palier de la grille, sur le montant ENVOYÉ : des frais fixes [fee], ou un
+/// pourcentage [percent] (Wafacash : 0,67 % au-delà de 10 000 DH).
+class WafacashFeeBracket {
   final int upTo;
-  final int fee;
+  final int? fee;
+  final double? percent;
 
-  const CashPlusFeeBracket({required this.upTo, required this.fee});
+  const WafacashFeeBracket({required this.upTo, this.fee, this.percent});
 
-  factory CashPlusFeeBracket.fromJson(Map<String, dynamic> json) =>
-      CashPlusFeeBracket(
+  /// Les frais de ce palier pour un montant envoyé, arrondis au dirham
+  /// supérieur comme le serveur.
+  int feeFor(int sent) => percent != null
+      ? ((sent * percent! * 1000000).round() / 1000000 / 100).ceil()
+      : fee ?? 0;
+
+  factory WafacashFeeBracket.fromJson(Map<String, dynamic> json) =>
+      WafacashFeeBracket(
         upTo: (json['up_to'] as num?)?.toInt() ?? 0,
-        fee: (json['fee'] as num?)?.toInt() ?? 0,
+        fee: (json['fee'] as num?)?.toInt(),
+        percent: (json['percent'] as num?)?.toDouble(),
       );
 }
 
 /// Ce que coûte une demande et ce qu'on retire au guichet.
-class CashPlusQuote {
+class WafacashQuote {
+  /// Ce que le chargé public a tapé.
+  final int requested;
+
+  /// Ce qui part réellement du solde : envoyé + frais. Peut rester quelques
+  /// dirhams sous [requested], au bord d'un palier.
   final int gross;
   final int fee;
+
+  /// Ce qu'il retire au guichet.
   final int net;
 
-  const CashPlusQuote({required this.gross, required this.fee, required this.net});
+  const WafacashQuote({
+    required this.requested,
+    required this.gross,
+    required this.fee,
+    required this.net,
+  });
+
+  /// Le débit diffère de la demande : il faut le dire avant la confirmation.
+  bool get debitDiffers => gross != requested;
 }
 
-enum CashPlusIdentityStatus {
+enum WafacashIdentityStatus {
   pending('pending'),
   verified('verified'),
   rejected('rejected');
 
-  const CashPlusIdentityStatus(this.key);
+  const WafacashIdentityStatus(this.key);
   final String key;
 
-  static CashPlusIdentityStatus fromKey(String? key) =>
+  static WafacashIdentityStatus fromKey(String? key) =>
       values.firstWhere((s) => s.key == key, orElse: () => pending);
 }
 
 /// L'identité envoyée pour les retraits, vérifiée une fois par le staff.
-class CashPlusIdentity {
-  final CashPlusIdentityStatus status;
+class WafacashIdentity {
+  final WafacashIdentityStatus status;
   final String legalName;
 
   /// « AB1234•• » : jamais la CIN entière dans l'app.
@@ -53,7 +78,7 @@ class CashPlusIdentity {
   final String? rejectionReason;
   final DateTime? submittedAt;
 
-  const CashPlusIdentity({
+  const WafacashIdentity({
     required this.status,
     required this.legalName,
     required this.cinMasked,
@@ -61,12 +86,12 @@ class CashPlusIdentity {
     this.submittedAt,
   });
 
-  bool get isVerified => status == CashPlusIdentityStatus.verified;
+  bool get isVerified => status == WafacashIdentityStatus.verified;
 
-  static CashPlusIdentity? fromJson(Object? json) {
+  static WafacashIdentity? fromJson(Object? json) {
     if (json is! Map<String, dynamic>) return null;
-    return CashPlusIdentity(
-      status: CashPlusIdentityStatus.fromKey(json['status'] as String?),
+    return WafacashIdentity(
+      status: WafacashIdentityStatus.fromKey(json['status'] as String?),
       legalName: json['legal_name'] as String? ?? '',
       cinMasked: json['cin_masked'] as String? ?? '',
       rejectionReason: json['rejection_reason'] as String?,
@@ -76,7 +101,7 @@ class CashPlusIdentity {
   }
 }
 
-enum CashPlusWithdrawalStatus {
+enum WafacashWithdrawalStatus {
   requested('requested'),
   processing('processing'),
   codeSent('code_sent'),
@@ -88,25 +113,25 @@ enum CashPlusWithdrawalStatus {
   /// Un statut que ce build ne connaît pas. Affiché sobrement, jamais deviné.
   unknown('');
 
-  const CashPlusWithdrawalStatus(this.key);
+  const WafacashWithdrawalStatus(this.key);
   final String key;
 
-  static CashPlusWithdrawalStatus fromKey(String? key) =>
+  static WafacashWithdrawalStatus fromKey(String? key) =>
       values.firstWhere((s) => s.key == key, orElse: () => unknown);
 
   /// Encore en route : bloque une nouvelle demande.
   bool get isOpen => this == requested || this == processing || this == codeSent;
 }
 
-class CashPlusWithdrawal {
+class WafacashWithdrawal {
   final int id;
-  final CashPlusWithdrawalStatus status;
+  final WafacashWithdrawalStatus status;
   final int grossAmount;
   final int feeAmount;
   final int netAmount;
   final String legalName;
 
-  /// Le code Cash Plus — présent seulement tant qu'il sert.
+  /// Le code Wafacash — présent seulement tant qu'il sert.
   final String? code;
   final String? closedReason;
   final DateTime? requestedAt;
@@ -114,7 +139,7 @@ class CashPlusWithdrawal {
   final DateTime? collectedAt;
   final DateTime? closedAt;
 
-  const CashPlusWithdrawal({
+  const WafacashWithdrawal({
     required this.id,
     required this.status,
     required this.grossAmount,
@@ -129,15 +154,15 @@ class CashPlusWithdrawal {
     this.closedAt,
   });
 
-  bool get canCancel => status == CashPlusWithdrawalStatus.requested;
+  bool get canCancel => status == WafacashWithdrawalStatus.requested;
 
-  factory CashPlusWithdrawal.fromJson(Map<String, dynamic> json) {
+  factory WafacashWithdrawal.fromJson(Map<String, dynamic> json) {
     DateTime? at(String key) =>
         DateTime.tryParse(json[key] as String? ?? '')?.toLocal();
 
-    return CashPlusWithdrawal(
+    return WafacashWithdrawal(
       id: (json['id'] as num).toInt(),
-      status: CashPlusWithdrawalStatus.fromKey(json['status'] as String?),
+      status: WafacashWithdrawalStatus.fromKey(json['status'] as String?),
       grossAmount: (json['gross_amount'] as num?)?.toInt() ?? 0,
       feeAmount: (json['fee_amount'] as num?)?.toInt() ?? 0,
       netAmount: (json['net_amount'] as num?)?.toInt() ?? 0,
@@ -152,7 +177,7 @@ class CashPlusWithdrawal {
   }
 }
 
-class CashPlusBalance {
+class WafacashBalance {
   final int earned;
   final int paid;
 
@@ -160,17 +185,17 @@ class CashPlusBalance {
   final int reserved;
   final int available;
 
-  const CashPlusBalance({
+  const WafacashBalance({
     this.earned = 0,
     this.paid = 0,
     this.reserved = 0,
     this.available = 0,
   });
 
-  factory CashPlusBalance.fromJson(Object? json) {
+  factory WafacashBalance.fromJson(Object? json) {
     final m = json is Map<String, dynamic> ? json : const <String, dynamic>{};
     int n(String k) => (m[k] as num?)?.toInt() ?? 0;
-    return CashPlusBalance(
+    return WafacashBalance(
       earned: n('earned'),
       paid: n('paid'),
       reserved: n('reserved'),
@@ -179,28 +204,28 @@ class CashPlusBalance {
   }
 }
 
-class CashPlusOverview {
+class WafacashOverview {
   /// Le staff a ouvert les retraits ET rempli la grille des frais.
   final bool open;
   final int minAmount;
   final int maxAmount;
-  final List<CashPlusFeeBracket> fees;
-  final CashPlusBalance balance;
-  final CashPlusIdentity? identity;
-  final List<CashPlusWithdrawal> withdrawals;
+  final List<WafacashFeeBracket> fees;
+  final WafacashBalance balance;
+  final WafacashIdentity? identity;
+  final List<WafacashWithdrawal> withdrawals;
 
-  const CashPlusOverview({
+  const WafacashOverview({
     this.open = false,
     this.minAmount = 100,
     this.maxAmount = 5000,
     this.fees = const [],
-    this.balance = const CashPlusBalance(),
+    this.balance = const WafacashBalance(),
     this.identity,
     this.withdrawals = const [],
   });
 
   /// La demande encore en route, s'il y en a une — une seule à la fois.
-  CashPlusWithdrawal? get current =>
+  WafacashWithdrawal? get current =>
       withdrawals.where((w) => w.status.isOpen).firstOrNull;
 
   /// Le plus qu'on puisse demander maintenant.
@@ -210,30 +235,67 @@ class CashPlusOverview {
   /// Assez pour atteindre le minimum : sinon le bouton n'a pas de sens.
   bool get hasEnough => balance.available >= minAmount;
 
-  /// Même règle que le serveur : le premier palier qui couvre le montant.
-  /// Null quand le montant dépasse la grille, ou que les frais l'avaleraient.
-  CashPlusQuote? quote(int gross) {
-    if (gross <= 0) return null;
+  /// Les frais Wafacash pour un montant ENVOYÉ, ou null hors de la grille.
+  int? feeFor(int sent) {
     final sorted = [...fees]..sort((a, b) => a.upTo.compareTo(b.upTo));
-    final palier = sorted.where((b) => gross <= b.upTo).firstOrNull;
-    if (palier == null || palier.fee >= gross) return null;
-    return CashPlusQuote(gross: gross, fee: palier.fee, net: gross - palier.fee);
+    final palier = sorted.where((b) => sent <= b.upTo).firstOrNull;
+    return palier?.feeFor(sent);
   }
 
-  factory CashPlusOverview.fromJson(Map<String, dynamic> json) =>
-      CashPlusOverview(
+  /// La même règle que le serveur : Wafacash facture sur ce qui PART, donc on
+  /// cherche le plus grand envoi N tel que N + frais(N) tienne dans la demande.
+  ///
+  /// Calculer sur la demande surfacturait aux bords : 1 020 DH demandés
+  /// tombaient dans le palier à 47 DH alors que les 983 DH envoyés ne coûtent
+  /// que 37. Null quand les frais avaleraient tout.
+  WafacashQuote? quote(int requested) {
+    if (requested <= 0) return null;
+    final sorted = [...fees]..sort((a, b) => a.upTo.compareTo(b.upTo));
+
+    int? meilleur;
+    var bas = 1;
+    for (final b in sorted) {
+      int n;
+      if (b.percent != null) {
+        n = (requested / (1 + b.percent! / 100)).floor();
+        if (n > b.upTo) n = b.upTo;
+        while (n >= bas && n + b.feeFor(n) > requested) {
+          n--;
+        }
+      } else {
+        n = requested - (b.fee ?? 0);
+        if (n > b.upTo) n = b.upTo;
+      }
+      if (n >= bas && n >= 1 && (meilleur == null || n > meilleur)) {
+        meilleur = n;
+      }
+      bas = b.upTo + 1;
+    }
+
+    if (meilleur == null) return null;
+    final frais = feeFor(meilleur)!;
+    return WafacashQuote(
+      requested: requested,
+      gross: meilleur + frais,
+      fee: frais,
+      net: meilleur,
+    );
+  }
+
+  factory WafacashOverview.fromJson(Map<String, dynamic> json) =>
+      WafacashOverview(
         open: json['open'] as bool? ?? false,
         minAmount: (json['min_amount'] as num?)?.toInt() ?? 100,
         maxAmount: (json['max_amount'] as num?)?.toInt() ?? 5000,
         fees: (json['fees'] as List<dynamic>? ?? const [])
             .whereType<Map<String, dynamic>>()
-            .map(CashPlusFeeBracket.fromJson)
+            .map(WafacashFeeBracket.fromJson)
             .toList(),
-        balance: CashPlusBalance.fromJson(json['balance']),
-        identity: CashPlusIdentity.fromJson(json['identity']),
+        balance: WafacashBalance.fromJson(json['balance']),
+        identity: WafacashIdentity.fromJson(json['identity']),
         withdrawals: (json['withdrawals'] as List<dynamic>? ?? const [])
             .whereType<Map<String, dynamic>>()
-            .map(CashPlusWithdrawal.fromJson)
+            .map(WafacashWithdrawal.fromJson)
             .toList(),
       );
 }

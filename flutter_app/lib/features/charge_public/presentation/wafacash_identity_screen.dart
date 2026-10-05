@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:aji_tfarraj/app/copywriting/cash_plus_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
 import 'package:aji_tfarraj/app/design_system/buttons.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -14,25 +14,25 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/charge_public/data/charge_public_repository.dart';
 
-/// La CIN, envoyée une fois pour les retraits Cash Plus.
+/// La CIN, envoyée une fois pour les retraits Wafacash.
 ///
-/// Cash Plus ne remet l'argent qu'au titulaire de la carte, sur son nom exact :
+/// Wafacash ne remet l'argent qu'au titulaire de la carte, sur son nom exact :
 /// le nom du compte est souvent un surnom, d'où le champ « exactement comme sur
 /// ta CIN ». Le staff vérifie contre les photos avant le premier retrait, et
 /// les suivants s'en servent sans revenir ici.
-class CashPlusIdentityScreen extends ConsumerStatefulWidget {
-  const CashPlusIdentityScreen({super.key, this.initialName});
+class WafacashIdentityScreen extends ConsumerStatefulWidget {
+  const WafacashIdentityScreen({super.key, this.initialName});
 
   /// Le nom déjà envoyé, pour un renvoi après refus.
   final String? initialName;
 
   @override
-  ConsumerState<CashPlusIdentityScreen> createState() =>
-      _CashPlusIdentityScreenState();
+  ConsumerState<WafacashIdentityScreen> createState() =>
+      _WafacashIdentityScreenState();
 }
 
-class _CashPlusIdentityScreenState
-    extends ConsumerState<CashPlusIdentityScreen> {
+class _WafacashIdentityScreenState
+    extends ConsumerState<WafacashIdentityScreen> {
   late final _name = TextEditingController(text: widget.initialName ?? '');
   final _cin = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -53,7 +53,7 @@ class _CashPlusIdentityScreenState
   }
 
   Future<void> _pick(bool front) async {
-    final c = ref.read(stringsProvider).cashPlus;
+    final c = ref.read(stringsProvider).wafacash;
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       showDragHandle: true,
@@ -98,7 +98,7 @@ class _CashPlusIdentityScreenState
   }
 
   Future<void> _submit() async {
-    final c = ref.read(stringsProvider).cashPlus;
+    final c = ref.read(stringsProvider).wafacash;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_front == null || _back == null) {
       setState(() => _error = c.photosRequired);
@@ -110,13 +110,13 @@ class _CashPlusIdentityScreenState
       _error = null;
     });
     try {
-      await ref.read(cashPlusRepositoryProvider).submitIdentity(
+      await ref.read(wafacashRepositoryProvider).submitIdentity(
             legalName: _name.text,
             cinNumber: _cin.text,
             frontPath: _front!.path,
             backPath: _back!.path,
           );
-      ref.invalidate(cashPlusProvider);
+      ref.invalidate(wafacashProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(c.identitySent),
@@ -134,7 +134,7 @@ class _CashPlusIdentityScreenState
 
   @override
   Widget build(BuildContext context) {
-    final c = ref.watch(stringsProvider).cashPlus;
+    final c = ref.watch(stringsProvider).wafacash;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -247,7 +247,7 @@ class _PhotoSlot extends StatelessWidget {
 
   final String label;
   final XFile? file;
-  final CashPlusCopy copy;
+  final WafacashCopy copy;
   final bool enabled;
   final VoidCallback onTap;
 

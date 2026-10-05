@@ -1,9 +1,9 @@
-/// Copy for Cash Plus withdrawals — the charge public asking for their money.
+/// Copy for Wafacash withdrawals — the charge public asking for their money.
 ///
 /// A contract, so French and Arabic cannot drift apart: a string added here and
 /// missing in one language does not compile. Addressed with « tu », like the
 /// rest of the charge public's space.
-abstract class CashPlusCopy {
+abstract class WafacashCopy {
   String money(int amount);
 
   // The card in « Gains »
@@ -42,6 +42,7 @@ abstract class CashPlusCopy {
   String get all;
   String feeLine(String fee);
   String netLine(String net);
+  String debitedLine(String amount);
   String get feeExplainer;
   String get beyondGrid;
   String belowMin(String min);
@@ -76,14 +77,14 @@ abstract class CashPlusCopy {
   String get genericError;
 }
 
-class CashPlusCopyFr implements CashPlusCopy {
-  const CashPlusCopyFr();
+class WafacashCopyFr implements WafacashCopy {
+  const WafacashCopyFr();
 
   @override
   String money(int amount) => '$amount DH';
 
   @override
-  String get cardTitle => 'Retirer via Cash Plus';
+  String get cardTitle => 'Retirer via Wafacash';
   @override
   String cardAvailable(String amount) => 'Disponible : $amount';
   @override
@@ -92,13 +93,13 @@ class CashPlusCopyFr implements CashPlusCopy {
   String cardBelowMin(String min) => 'Retrait possible à partir de $min';
   @override
   String get cardHowItWorks =>
-      'Tu retires en espèces dans n\'importe quelle agence Cash Plus, avec ta CIN.';
+      'Tu retires en espèces dans n\'importe quelle agence Wafacash, avec ta CIN.';
 
   @override
   String get identityTitle => 'Vérifier ton identité';
   @override
   String get identityIntro =>
-      'Une seule fois. Cash Plus ne remet l\'argent qu\'au titulaire de la CIN, sur son nom exact.';
+      'Une seule fois. Wafacash ne remet l\'argent qu\'au titulaire de la CIN, sur son nom exact.';
   @override
   String get identityStart => 'Envoyer ma CIN';
   @override
@@ -149,12 +150,15 @@ class CashPlusCopyFr implements CashPlusCopy {
   @override
   String get all => 'Tout';
   @override
-  String feeLine(String fee) => 'Frais Cash Plus : $fee';
+  String feeLine(String fee) => 'Frais Wafacash : $fee';
   @override
   String netLine(String net) => 'Tu retireras : $net';
   @override
+  String debitedLine(String amount) =>
+      'Débité de ton solde : $amount (le palier suivant coûterait plus cher)';
+  @override
   String get feeExplainer =>
-      'Les frais Cash Plus sont déduits du montant demandé.';
+      'Les frais Wafacash sont déduits du montant demandé.';
   @override
   String get beyondGrid => 'Montant hors de la grille des frais.';
   @override
@@ -171,21 +175,21 @@ class CashPlusCopyFr implements CashPlusCopy {
   @override
   String get statusRequested => 'Demande envoyée';
   @override
-  String get statusRequestedHint => 'L\'équipe va faire le transfert Cash Plus.';
+  String get statusRequestedHint => 'L\'équipe va faire le transfert Wafacash.';
   @override
   String get statusProcessing => 'Transfert en cours';
   @override
   String get statusProcessingHint =>
-      'Un membre de l\'équipe est au guichet Cash Plus.';
+      'Un membre de l\'équipe est au guichet Wafacash.';
   @override
   String get statusCodeSent => 'Ton argent est prêt';
   @override
-  String get codeLabel => 'Code Cash Plus';
+  String get codeLabel => 'Code Wafacash';
   @override
   String get codeCopied => 'Code copié';
   @override
   String codeInstructions(String name) =>
-      'Présente-toi dans une agence Cash Plus avec ta CIN originale et ce code. Le transfert est au nom de $name.';
+      'Présente-toi dans une agence Wafacash avec ta CIN originale et ce code. Le transfert est au nom de $name.';
   @override
   String get iCollected => 'J\'ai retiré l\'argent';
   @override
@@ -200,7 +204,7 @@ class CashPlusCopyFr implements CashPlusCopy {
   String amounts(String gross, String fee, String net) =>
       '$gross demandés · $fee de frais · $net à retirer';
   @override
-  String get historyTitle => 'Mes retraits Cash Plus';
+  String get historyTitle => 'Mes retraits Wafacash';
 
   @override
   String get statusCollected => 'Retiré';
@@ -215,14 +219,14 @@ class CashPlusCopyFr implements CashPlusCopy {
   String get genericError => 'Impossible pour le moment. Réessaie.';
 }
 
-class CashPlusCopyAr implements CashPlusCopy {
-  const CashPlusCopyAr();
+class WafacashCopyAr implements WafacashCopy {
+  const WafacashCopyAr();
 
   @override
   String money(int amount) => '$amount درهم';
 
   @override
-  String get cardTitle => 'اسحب عبر كاش بلوس';
+  String get cardTitle => 'اسحب عبر وفاكاش';
   @override
   String cardAvailable(String amount) => 'المتاح: $amount';
   @override
@@ -231,13 +235,13 @@ class CashPlusCopyAr implements CashPlusCopy {
   String cardBelowMin(String min) => 'السحب ممكن ابتداءً من $min';
   @override
   String get cardHowItWorks =>
-      'كتسحب الفلوس كاش من أي وكالة كاش بلوس، بالبطاقة الوطنية ديالك.';
+      'كتسحب الفلوس كاش من أي وكالة وفاكاش، بالبطاقة الوطنية ديالك.';
 
   @override
   String get identityTitle => 'تحقق من الهوية ديالك';
   @override
   String get identityIntro =>
-      'مرة وحدة برك. كاش بلوس ما كيعطي الفلوس غير لمول البطاقة، بسميتو بالضبط.';
+      'مرة وحدة برك. وفاكاش ما كيعطي الفلوس غير لمول البطاقة، بسميتو بالضبط.';
   @override
   String get identityStart => 'صيفط البطاقة ديالي';
   @override
@@ -286,11 +290,14 @@ class CashPlusCopyAr implements CashPlusCopy {
   @override
   String get all => 'كلشي';
   @override
-  String feeLine(String fee) => 'رسوم كاش بلوس: $fee';
+  String feeLine(String fee) => 'رسوم وفاكاش: $fee';
   @override
   String netLine(String net) => 'غادي تسحب: $net';
   @override
-  String get feeExplainer => 'رسوم كاش بلوس كتنقص من المبلغ اللي طلبتي.';
+  String debitedLine(String amount) =>
+      'غادي يتنقص من الرصيد ديالك: $amount (الشريحة الجاية غالية كثر)';
+  @override
+  String get feeExplainer => 'رسوم وفاكاش كتنقص من المبلغ اللي طلبتي.';
   @override
   String get beyondGrid => 'المبلغ خارج جدول الرسوم.';
   @override
@@ -307,20 +314,20 @@ class CashPlusCopyAr implements CashPlusCopy {
   @override
   String get statusRequested => 'تصيفط الطلب';
   @override
-  String get statusRequestedHint => 'الفريق غادي يدير التحويل ف كاش بلوس.';
+  String get statusRequestedHint => 'الفريق غادي يدير التحويل ف وفاكاش.';
   @override
   String get statusProcessing => 'التحويل جاري';
   @override
-  String get statusProcessingHint => 'واحد من الفريق ف الشباك ديال كاش بلوس.';
+  String get statusProcessingHint => 'واحد من الفريق ف الشباك ديال وفاكاش.';
   @override
   String get statusCodeSent => 'الفلوس ديالك واجدين';
   @override
-  String get codeLabel => 'رمز كاش بلوس';
+  String get codeLabel => 'رمز وفاكاش';
   @override
   String get codeCopied => 'تنسخ الرمز';
   @override
   String codeInstructions(String name) =>
-      'سير لشي وكالة كاش بلوس بالبطاقة الأصلية وهاد الرمز. التحويل باسم $name.';
+      'سير لشي وكالة وفاكاش بالبطاقة الأصلية وهاد الرمز. التحويل باسم $name.';
   @override
   String get iCollected => 'سحبت الفلوس';
   @override
@@ -335,7 +342,7 @@ class CashPlusCopyAr implements CashPlusCopy {
   String amounts(String gross, String fee, String net) =>
       'طلبتي $gross · رسوم $fee · غادي تسحب $net';
   @override
-  String get historyTitle => 'السحوبات ديالي ف كاش بلوس';
+  String get historyTitle => 'السحوبات ديالي ف وفاكاش';
 
   @override
   String get statusCollected => 'تسحب';
