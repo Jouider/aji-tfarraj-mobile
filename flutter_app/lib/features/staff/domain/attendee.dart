@@ -6,6 +6,8 @@
 /// whatever the reason. Only an exclusion is held against them afterwards.
 library;
 
+import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
+
 /// Why someone left before the end.
 enum DepartureReason {
   left('left'),
@@ -95,6 +97,16 @@ class Attendee {
   final int pastExclusions;
   final DateTime? lastExclusionAt;
 
+  /// Where the shuttle drops them, or null for "own means" — read only when
+  /// [returnPointAnswered]: otherwise null just means nobody has asked yet.
+  final int? returnPointId;
+  final String? returnPointName;
+  final bool returnPointAnswered;
+
+  /// Set when they changed their point after coming in. The driver's sheet
+  /// may already have been handed over, so the list says so.
+  final DateTime? returnPointChangedAt;
+
   const Attendee({
     required this.kind,
     required this.id,
@@ -107,9 +119,38 @@ class Attendee {
     this.departure,
     this.pastExclusions = 0,
     this.lastExclusionAt,
+    this.returnPointId,
+    this.returnPointName,
+    this.returnPointAnswered = false,
+    this.returnPointChangedAt,
   });
 
   bool get hasLeft => departure != null;
+
+  /// Only ticket holders have a return point: walk-ins have none in the data.
+  bool get canChangeReturnPoint => kind == AttendeeKind.reservation && !hasLeft;
+
+  /// The same person, now dropped at [point] (null: own means).
+  Attendee withReturnPoint(ReturnPointOption? point) => Attendee(
+        kind: kind,
+        id: id,
+        name: name,
+        photoUrl: photoUrl,
+        ticketCode: ticketCode,
+        checkedInAt: checkedInAt,
+        chargePublic: chargePublic,
+        hasAccount: hasAccount,
+        departure: departure,
+        pastExclusions: pastExclusions,
+        lastExclusionAt: lastExclusionAt,
+        returnPointId: point?.id,
+        returnPointName: point?.name,
+        returnPointAnswered: true,
+        // Only a real move counts — reconfirming the same stop changes nothing.
+        returnPointChangedAt: (returnPointAnswered && point?.id == returnPointId)
+            ? returnPointChangedAt
+            : DateTime.now(),
+      );
 
   bool get wasExcludedBefore => pastExclusions > 0;
 
@@ -131,6 +172,13 @@ class Attendee {
         lastExclusionAt:
             DateTime.tryParse(json['last_exclusion_at'] as String? ?? '')
                 ?.toLocal(),
+        returnPointId: (json['return_point'] as Map<String, dynamic>?)?['id'] as int?,
+        returnPointName:
+            (json['return_point'] as Map<String, dynamic>?)?['name'] as String?,
+        returnPointAnswered: json['return_point_answered'] as bool? ?? false,
+        returnPointChangedAt:
+            DateTime.tryParse(json['return_point_changed_at'] as String? ?? '')
+                ?.toLocal(),
       );
 }
 
@@ -140,11 +188,15 @@ class AttendeeList {
   final DateTime? startsAt;
   final List<Attendee> attendees;
 
+  /// The stops a shuttle serves tonight. Empty: no shuttle, nothing to change.
+  final List<ReturnPointOption> returnPoints;
+
   const AttendeeList({
     required this.showTitle,
     this.episodeTitle,
     this.startsAt,
     this.attendees = const [],
+    this.returnPoints = const [],
   });
 
   int get presentCount => attendees.where((a) => !a.hasLeft).length;
@@ -175,6 +227,7 @@ class AttendeeList {
         showTitle: showTitle,
         episodeTitle: episodeTitle,
         startsAt: startsAt,
+        returnPoints: returnPoints,
         attendees: [
           for (final a in attendees) a.sameAs(updated) ? updated : a,
         ],
@@ -190,6 +243,7 @@ class AttendeeList {
       attendees: (json['attendees'] as List<dynamic>? ?? const [])
           .map((e) => Attendee.fromJson(e as Map<String, dynamic>))
           .toList(),
+      returnPoints: ReturnPointOption.listFrom(episode['return_points']),
     );
   }
 }

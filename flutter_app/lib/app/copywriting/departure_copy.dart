@@ -51,4 +51,16 @@ abstract class DepartureCopy {
   // At the door, on the next visit
   String doorExcludedBefore(int count, String? date, String? show);
   String doorAlreadyLeft(String time, String reason);
+
+  // Return point, changed from the list once the person is inside — without
+  // rescanning: in the middle of a recording, the ticket is rarely at hand.
+  String get returnTitle;
+  String get returnNone;
+  String get returnNotAnswered;
+  String get returnChange;
+  String get returnPickTitle;
+  String get returnSearchHint;
+  String get returnNoMatch;
+  String returnChangedAt(String time);
+  String returnSaved(String point);
 }

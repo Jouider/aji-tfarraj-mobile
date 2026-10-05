@@ -1230,6 +1230,12 @@ class AppStrings {
       ? 'Confirme l\'arrêt avec la personne'
       : 'أكد المحطة مع الشخص';
 
+  /// Billet déjà pointé, rescanné : la personne est entrée et revient changer
+  /// d'arrêt. « Confirme à la porte » n'a plus de sens ici.
+  String get returnPointChangeAfterEntry => locale == AppLocale.fr
+      ? 'Déjà entré : choisis son nouvel arrêt s\'il a changé d\'avis.'
+      : 'دخل ديجا: ختار المحطة الجديدة إلا بدّل رأيو.';
+
   /// Sur le billet et la confirmation.
   String get returnPointChosen => locale == AppLocale.fr ? 'Retour' : 'الرجوع';
 
