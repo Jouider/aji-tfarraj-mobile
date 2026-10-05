@@ -1519,4 +1519,23 @@ class DepartureCopyAr implements DepartureCopy {
       '${show != null && show.isNotEmpty ? ' ($show)' : ''}';
   String doorAlreadyLeft(String time, String reason) =>
       'الخروج: $time · $reason';
+
+  @override
+  String get returnTitle => 'محطة الرجوع';
+  @override
+  String get returnNone => 'بوسائلو الخاصة';
+  @override
+  String get returnNotAnswered => 'مازال ما تسولش';
+  @override
+  String get returnChange => 'بدّل';
+  @override
+  String get returnPickTitle => 'محطة رجوع جديدة';
+  @override
+  String get returnSearchHint => 'قلّب على محطة';
+  @override
+  String get returnNoMatch => 'حتى محطة ما كتطابق';
+  @override
+  String returnChangedAt(String time) => 'تبدّلات ف $time';
+  @override
+  String returnSaved(String point) => 'محطة الرجوع: $point';
 }
