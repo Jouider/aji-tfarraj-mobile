@@ -35,7 +35,8 @@ class WafacashSection extends ConsumerWidget {
         if (!o.open && o.current == null) return const SizedBox.shrink();
 
         final current = o.current;
-        final closed = o.withdrawals.where((w) => !w.status.isOpen).take(5).toList();
+        final closed =
+            o.withdrawals.where((w) => !w.status.isOpen).take(5).toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -79,7 +80,8 @@ class _WithdrawCard extends ConsumerWidget {
     if (identity == null ||
         identity.status == WafacashIdentityStatus.rejected) {
       final sent = await Navigator.of(context).push<bool>(MaterialPageRoute(
-        builder: (_) => WafacashIdentityScreen(initialName: identity?.legalName),
+        builder: (_) =>
+            WafacashIdentityScreen(initialName: identity?.legalName),
       ));
       if (sent == true) onChanged();
       return;
@@ -159,8 +161,8 @@ class _WithdrawCard extends ConsumerWidget {
   }
 }
 
-/// Le montant, et ce qu'il en reste une fois les frais retirés — avant de
-/// confirmer, jamais après.
+/// Le montant à retirer. Les frais de l'agence sont à la charge du chargé
+/// public ; on le dit d'une ligne, sans les chiffrer.
 class _WithdrawSheet extends ConsumerStatefulWidget {
   const _WithdrawSheet({required this.overview});
 
@@ -225,7 +227,6 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
   Widget build(BuildContext context) {
     final c = ref.watch(stringsProvider).wafacash;
     final o = widget.overview;
-    final quote = o.quote(_value);
     final problem = _problem(c);
 
     return Padding(
@@ -257,10 +258,11 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
             Wrap(
               spacing: AppSpacing.sm,
               children: [
-                for (final v in {o.minAmount, 200, 500, o.maxRequestable}
-                    .where((v) => v >= o.minAmount && v <= o.maxRequestable)
-                    .toList()
-                  ..sort())
+                for (final v
+                    in {o.minAmount, 200, 500, o.maxRequestable}
+                        .where((v) => v >= o.minAmount && v <= o.maxRequestable)
+                        .toList()
+                      ..sort())
                   ActionChip(
                     label: Text(v == o.maxRequestable ? c.all : c.money(v)),
                     onPressed: _sending
@@ -273,37 +275,19 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            // Le détail, recalculé à chaque chiffre tapé.
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.backgroundGrey,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(c.feeLine(quote == null ? '—' : c.money(quote.fee)),
-                      style: AppTypography.bodyMedium
-                          .copyWith(color: AppColors.textSecondary)),
-                  const SizedBox(height: 2),
-                  Text(c.netLine(quote == null ? '—' : c.money(quote.net)),
-                      style: AppTypography.h4
-                          .copyWith(color: AppColors.successDark)),
-                  // Au bord d'un palier, on débite un peu moins que demandé :
-                  // le dire ici, avant la confirmation, jamais après.
-                  if (quote != null && quote.debitDiffers) ...[
-                    const SizedBox(height: 2),
-                    Text(c.debitedLine(c.money(quote.gross)),
-                        style: AppTypography.bodySmall
-                            .copyWith(color: AppColors.textSecondary)),
-                  ],
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(c.feeExplainer,
+            // Pas de chiffre : les tarifs sont ceux de Wafacash, pas les
+            // nôtres. Une ligne suffit à dire qui les paie.
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, size: 14, color: AppColors.textMuted),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: Text(c.feesOnYou,
                       style: AppTypography.caption
                           .copyWith(color: AppColors.textMuted)),
-                ],
-              ),
+                ),
+              ],
             ),
             if (problem != null || _error != null) ...[
               const SizedBox(height: AppSpacing.sm),
@@ -353,8 +337,7 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content:
-            Text(e is ApiException ? e.message : widget.copy.genericError),
+        content: Text(e is ApiException ? e.message : widget.copy.genericError),
         behavior: SnackBarBehavior.floating,
       ));
     } finally {
@@ -412,9 +395,12 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
                   .copyWith(color: AppColors.textSecondary)),
         ],
         const SizedBox(height: AppSpacing.sm),
+        // Le montant demandé, sans le détail des frais ; une fois le code
+        // là, ce qu'on lui remettra au guichet — de quoi vérifier sur place.
         Text(
-          c.amounts(c.money(w.grossAmount), c.money(w.feeAmount),
-              c.money(w.netAmount)),
+          ready
+              ? c.toCollect(c.money(w.netAmount))
+              : c.requestedAmount(c.money(w.grossAmount)),
           style: AppTypography.caption.copyWith(color: AppColors.textMuted),
         ),
         if (ready && w.code != null) ...[
@@ -429,9 +415,8 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
             text: c.iCollected,
             icon: Icons.check_circle_outline,
             isLoading: _busy,
-            onPressed: () => _act(() => ref
-                .read(wafacashRepositoryProvider)
-                .markCollected(w.id)),
+            onPressed: () => _act(
+                () => ref.read(wafacashRepositoryProvider).markCollected(w.id)),
           ),
         ],
         if (w.canCancel) ...[
@@ -467,9 +452,8 @@ class _Steps extends StatelessWidget {
             child: Container(
               height: 5,
               decoration: BoxDecoration(
-                color: i <= reached
-                    ? AppColors.primaryAction
-                    : AppColors.border,
+                color:
+                    i <= reached ? AppColors.primaryAction : AppColors.border,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -505,7 +489,8 @@ class _CodeBox extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.backgroundGrey,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          border: Border.all(color: AppColors.primaryAction.withValues(alpha: 0.4)),
+          border:
+              Border.all(color: AppColors.primaryAction.withValues(alpha: 0.4)),
         ),
         child: Row(
           children: [
@@ -551,9 +536,18 @@ class _HistoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final w = withdrawal;
     final (label, color) = switch (w.status) {
-      WafacashWithdrawalStatus.collected => (copy.statusCollected, AppColors.successDark),
-      WafacashWithdrawalStatus.rejected => (copy.statusRejected, AppColors.errorDark),
-      WafacashWithdrawalStatus.expired => (copy.statusExpired, AppColors.textSecondary),
+      WafacashWithdrawalStatus.collected => (
+          copy.statusCollected,
+          AppColors.successDark
+        ),
+      WafacashWithdrawalStatus.rejected => (
+          copy.statusRejected,
+          AppColors.errorDark
+        ),
+      WafacashWithdrawalStatus.expired => (
+          copy.statusExpired,
+          AppColors.textSecondary
+        ),
       _ => (copy.statusCancelled, AppColors.textMuted),
     };
     final at = w.collectedAt ?? w.closedAt ?? w.requestedAt;
@@ -579,8 +573,8 @@ class _HistoryRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(label,
-                  style: AppTypography.caption.copyWith(
-                      color: color, fontWeight: FontWeight.w600)),
+                  style: AppTypography.caption
+                      .copyWith(color: color, fontWeight: FontWeight.w600)),
               if (at != null)
                 Text(DateFormat('dd/MM/yyyy').format(at),
                     style: AppTypography.caption
@@ -639,7 +633,8 @@ class _Notice extends StatelessWidget {
         Icon(icon, size: 18, color: tint),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: Text(text, style: AppTypography.bodySmall.copyWith(color: tint)),
+          child:
+              Text(text, style: AppTypography.bodySmall.copyWith(color: tint)),
         ),
       ],
     );
