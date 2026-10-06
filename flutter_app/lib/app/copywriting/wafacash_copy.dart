@@ -40,10 +40,10 @@ abstract class WafacashCopy {
   String get requestTitle;
   String get amountLabel;
   String get all;
-  String feeLine(String fee);
-  String netLine(String net);
-  String debitedLine(String amount);
-  String get feeExplainer;
+
+  /// The one line about fees: they are Wafacash's, and the charge public's.
+  /// No figure — Wafacash sets its prices, not us.
+  String get feesOnYou;
   String get beyondGrid;
   String belowMin(String min);
   String aboveAvailable(String available);
@@ -65,7 +65,7 @@ abstract class WafacashCopy {
   String get cancelConfirmTitle;
   String get cancelConfirmBody;
   String get keep;
-  String amounts(String gross, String fee, String net);
+  String requestedAmount(String amount);
   String get historyTitle;
 
   /// Closed outcomes, as the history list shows them.
@@ -141,7 +141,8 @@ class WafacashCopyFr implements WafacashCopy {
   @override
   String get photosRequired => 'Ajoute les deux faces de ta CIN.';
   @override
-  String get identitySent => 'CIN envoyée. On te prévient dès qu\'elle est vérifiée.';
+  String get identitySent =>
+      'CIN envoyée. On te prévient dès qu\'elle est vérifiée.';
 
   @override
   String get requestTitle => 'Combien veux-tu retirer ?';
@@ -150,15 +151,8 @@ class WafacashCopyFr implements WafacashCopy {
   @override
   String get all => 'Tout';
   @override
-  String feeLine(String fee) => 'Frais Wafacash : $fee';
-  @override
-  String netLine(String net) => 'Tu retireras : $net';
-  @override
-  String debitedLine(String amount) =>
-      'Débité de ton solde : $amount (le palier suivant coûterait plus cher)';
-  @override
-  String get feeExplainer =>
-      'Les frais Wafacash sont déduits du montant demandé.';
+  String get feesOnYou =>
+      'Les frais de l\'agence Wafacash sont à ta charge, pris sur ce montant.';
   @override
   String get beyondGrid => 'Montant hors de la grille des frais.';
   @override
@@ -201,8 +195,8 @@ class WafacashCopyFr implements WafacashCopy {
   @override
   String get keep => 'Garder';
   @override
-  String amounts(String gross, String fee, String net) =>
-      '$gross demandés · $fee de frais · $net à retirer';
+  String requestedAmount(String amount) =>
+      'Retrait de $amount · frais d\'agence à ta charge';
   @override
   String get historyTitle => 'Mes retraits Wafacash';
 
@@ -290,14 +284,7 @@ class WafacashCopyAr implements WafacashCopy {
   @override
   String get all => 'كلشي';
   @override
-  String feeLine(String fee) => 'رسوم وفاكاش: $fee';
-  @override
-  String netLine(String net) => 'غادي تسحب: $net';
-  @override
-  String debitedLine(String amount) =>
-      'غادي يتنقص من الرصيد ديالك: $amount (الشريحة الجاية غالية كثر)';
-  @override
-  String get feeExplainer => 'رسوم وفاكاش كتنقص من المبلغ اللي طلبتي.';
+  String get feesOnYou => 'مصاريف وكالة وفاكاش على حسابك، كتنقص من هاد المبلغ.';
   @override
   String get beyondGrid => 'المبلغ خارج جدول الرسوم.';
   @override
@@ -339,8 +326,8 @@ class WafacashCopyAr implements WafacashCopy {
   @override
   String get keep => 'خليه';
   @override
-  String amounts(String gross, String fee, String net) =>
-      'طلبتي $gross · رسوم $fee · غادي تسحب $net';
+  String requestedAmount(String amount) =>
+      'سحب $amount · مصاريف الوكالة على حسابك';
   @override
   String get historyTitle => 'السحوبات ديالي ف وفاكاش';
 

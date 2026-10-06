@@ -163,8 +163,8 @@ class _WithdrawCard extends ConsumerWidget {
   }
 }
 
-/// Le montant, et ce qu'il en reste une fois les frais retirés — avant de
-/// confirmer, jamais après.
+/// Le montant à retirer. Les frais de l'agence sont à la charge du chargé
+/// public ; on le dit d'une ligne, sans les chiffrer.
 class _WithdrawSheet extends ConsumerStatefulWidget {
   const _WithdrawSheet({required this.overview});
 
@@ -229,7 +229,6 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
   Widget build(BuildContext context) {
     final c = ref.watch(stringsProvider).wafacash;
     final o = widget.overview;
-    final quote = o.quote(_value);
     final problem = _problem(c);
 
     return Padding(
@@ -278,37 +277,19 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            // Le détail, recalculé à chaque chiffre tapé.
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.backgroundGrey,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(c.feeLine(quote == null ? '—' : c.money(quote.fee)),
-                      style: AppTypography.bodyMedium
-                          .copyWith(color: AppColors.textSecondary)),
-                  const SizedBox(height: 2),
-                  Text(c.netLine(quote == null ? '—' : c.money(quote.net)),
-                      style: AppTypography.h4
-                          .copyWith(color: AppColors.successDark)),
-                  // Au bord d'un palier, on débite un peu moins que demandé :
-                  // le dire ici, avant la confirmation, jamais après.
-                  if (quote != null && quote.debitDiffers) ...[
-                    const SizedBox(height: 2),
-                    Text(c.debitedLine(c.money(quote.gross)),
-                        style: AppTypography.bodySmall
-                            .copyWith(color: AppColors.textSecondary)),
-                  ],
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(c.feeExplainer,
+            // Pas de chiffre : les tarifs sont ceux de Wafacash, pas les
+            // nôtres. Une ligne suffit à dire qui les paie.
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, size: 14, color: AppColors.textMuted),
+                const SizedBox(width: AppSpacing.xs),
+                Expanded(
+                  child: Text(c.feesOnYou,
                       style: AppTypography.caption
                           .copyWith(color: AppColors.textMuted)),
-                ],
-              ),
+                ),
+              ],
             ),
             if (problem != null || _error != null) ...[
               const SizedBox(height: AppSpacing.sm),
@@ -416,9 +397,10 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
                   .copyWith(color: AppColors.textSecondary)),
         ],
         const SizedBox(height: AppSpacing.sm),
+        // Toujours le montant demandé : c'est ce qu'Aji Tfarraj paie. Ce
+        // qu'en garde l'agence, c'est sa règle, pas la nôtre.
         Text(
-          c.amounts(c.money(w.grossAmount), c.money(w.feeAmount),
-              c.money(w.netAmount)),
+          c.requestedAmount(c.money(w.grossAmount)),
           style: AppTypography.caption.copyWith(color: AppColors.textMuted),
         ),
         if (ready && w.code != null) ...[
@@ -578,7 +560,9 @@ class _HistoryRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(copy.money(w.netAmount), style: AppTypography.labelMedium),
+                // Le montant payé par Aji Tfarraj, frais d'agence compris.
+                Text(copy.money(w.grossAmount),
+                    style: AppTypography.labelMedium),
                 if (w.status == WafacashWithdrawalStatus.rejected &&
                     (w.closedReason ?? '').isNotEmpty)
                   Text(w.closedReason!,
