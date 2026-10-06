@@ -35,7 +35,8 @@ class WafacashSection extends ConsumerWidget {
         if (!o.open && o.current == null) return const SizedBox.shrink();
 
         final current = o.current;
-        final closed = o.withdrawals.where((w) => !w.status.isOpen).take(5).toList();
+        final closed =
+            o.withdrawals.where((w) => !w.status.isOpen).take(5).toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -79,7 +80,8 @@ class _WithdrawCard extends ConsumerWidget {
     if (identity == null ||
         identity.status == WafacashIdentityStatus.rejected) {
       final sent = await Navigator.of(context).push<bool>(MaterialPageRoute(
-        builder: (_) => WafacashIdentityScreen(initialName: identity?.legalName),
+        builder: (_) =>
+            WafacashIdentityScreen(initialName: identity?.legalName),
       ));
       if (sent == true) onChanged();
       return;
@@ -88,6 +90,8 @@ class _WithdrawCard extends ConsumerWidget {
     if (!identity.isVerified) return;
 
     final done = await showModalBottomSheet<bool>(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -257,10 +261,11 @@ class _WithdrawSheetState extends ConsumerState<_WithdrawSheet> {
             Wrap(
               spacing: AppSpacing.sm,
               children: [
-                for (final v in {o.minAmount, 200, 500, o.maxRequestable}
-                    .where((v) => v >= o.minAmount && v <= o.maxRequestable)
-                    .toList()
-                  ..sort())
+                for (final v
+                    in {o.minAmount, 200, 500, o.maxRequestable}
+                        .where((v) => v >= o.minAmount && v <= o.maxRequestable)
+                        .toList()
+                      ..sort())
                   ActionChip(
                     label: Text(v == o.maxRequestable ? c.all : c.money(v)),
                     onPressed: _sending
@@ -353,8 +358,7 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content:
-            Text(e is ApiException ? e.message : widget.copy.genericError),
+        content: Text(e is ApiException ? e.message : widget.copy.genericError),
         behavior: SnackBarBehavior.floating,
       ));
     } finally {
@@ -429,9 +433,8 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
             text: c.iCollected,
             icon: Icons.check_circle_outline,
             isLoading: _busy,
-            onPressed: () => _act(() => ref
-                .read(wafacashRepositoryProvider)
-                .markCollected(w.id)),
+            onPressed: () => _act(
+                () => ref.read(wafacashRepositoryProvider).markCollected(w.id)),
           ),
         ],
         if (w.canCancel) ...[
@@ -467,9 +470,8 @@ class _Steps extends StatelessWidget {
             child: Container(
               height: 5,
               decoration: BoxDecoration(
-                color: i <= reached
-                    ? AppColors.primaryAction
-                    : AppColors.border,
+                color:
+                    i <= reached ? AppColors.primaryAction : AppColors.border,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -505,7 +507,8 @@ class _CodeBox extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.backgroundGrey,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          border: Border.all(color: AppColors.primaryAction.withValues(alpha: 0.4)),
+          border:
+              Border.all(color: AppColors.primaryAction.withValues(alpha: 0.4)),
         ),
         child: Row(
           children: [
@@ -551,9 +554,18 @@ class _HistoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final w = withdrawal;
     final (label, color) = switch (w.status) {
-      WafacashWithdrawalStatus.collected => (copy.statusCollected, AppColors.successDark),
-      WafacashWithdrawalStatus.rejected => (copy.statusRejected, AppColors.errorDark),
-      WafacashWithdrawalStatus.expired => (copy.statusExpired, AppColors.textSecondary),
+      WafacashWithdrawalStatus.collected => (
+          copy.statusCollected,
+          AppColors.successDark
+        ),
+      WafacashWithdrawalStatus.rejected => (
+          copy.statusRejected,
+          AppColors.errorDark
+        ),
+      WafacashWithdrawalStatus.expired => (
+          copy.statusExpired,
+          AppColors.textSecondary
+        ),
       _ => (copy.statusCancelled, AppColors.textMuted),
     };
     final at = w.collectedAt ?? w.closedAt ?? w.requestedAt;
@@ -579,8 +591,8 @@ class _HistoryRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(label,
-                  style: AppTypography.caption.copyWith(
-                      color: color, fontWeight: FontWeight.w600)),
+                  style: AppTypography.caption
+                      .copyWith(color: color, fontWeight: FontWeight.w600)),
               if (at != null)
                 Text(DateFormat('dd/MM/yyyy').format(at),
                     style: AppTypography.caption
@@ -639,7 +651,8 @@ class _Notice extends StatelessWidget {
         Icon(icon, size: 18, color: tint),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: Text(text, style: AppTypography.bodySmall.copyWith(color: tint)),
+          child:
+              Text(text, style: AppTypography.bodySmall.copyWith(color: tint)),
         ),
       ],
     );

@@ -7,7 +7,7 @@ import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
-import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
+import 'package:aji_tfarraj/features/support/data/support_service.dart';
 import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
 /// Les trois gestes qu'on doit pouvoir faire depuis n'importe quel onglet :
@@ -33,11 +33,36 @@ class AppBarActions extends ConsumerWidget {
       children: [
         if (showSupport)
           IconButton(
-            icon: const Icon(Icons.headset_mic_outlined),
-            tooltip: ref.watch(stringsProvider).supportListTitle,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SupportTicketsScreen()),
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.headset_mic_outlined),
+                // Une réponse du support pas encore lue : un point, pas un
+                // chiffre — la cloche porte déjà les chiffres.
+                if ((ref.watch(supportUnreadProvider).valueOrNull ?? 0) > 0)
+                  const Positioned(
+                    right: -2,
+                    top: -2,
+                    child: SizedBox(
+                      width: 10,
+                      height: 10,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AppColors.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
+            tooltip: ref.watch(stringsProvider).supportChat.listTitle,
+            // Par le routeur, au-dessus des onglets : une conversation ne
+            // vit pas sous la barre d'onglets flottante.
+            onPressed: () async {
+              await context.push(Routes.support);
+              ref.invalidate(supportUnreadProvider);
+            },
           ),
         const TutorialHelpAction(),
         const NotificationBellButton(),

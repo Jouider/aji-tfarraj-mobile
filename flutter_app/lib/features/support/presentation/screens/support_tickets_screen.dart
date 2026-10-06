@@ -1,15 +1,16 @@
-// FEATURE: Support Tickets - List Screen
+// FEATURE: Support — the client's conversations with the Aji Tfarraj team.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:aji_tfarraj/app/copywriting/support_chat_copy.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/app/design_system/spacing.dart';
 import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
-import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/support/data/support_service.dart';
 import 'package:aji_tfarraj/features/support/domain/support_ticket.dart';
 import 'package:aji_tfarraj/features/support/presentation/screens/create_ticket_screen.dart';
-import 'package:aji_tfarraj/features/support/presentation/screens/ticket_detail_screen.dart';
-import 'package:aji_tfarraj/features/support/presentation/widgets/ticket_card_widget.dart';
+import 'package:aji_tfarraj/features/support/presentation/screens/support_chat_screen.dart';
 
 class SupportTicketsScreen extends ConsumerStatefulWidget {
   const SupportTicketsScreen({super.key});
@@ -20,27 +21,40 @@ class SupportTicketsScreen extends ConsumerStatefulWidget {
 }
 
 class _SupportTicketsScreenState extends ConsumerState<SupportTicketsScreen> {
-  late Future<List<SupportTicket>> _ticketsFuture;
+  late Future<List<SupportTicket>> _tickets;
 
   @override
   void initState() {
     super.initState();
-    _ticketsFuture = _loadTickets();
+    _tickets = _load();
   }
 
-  Future<List<SupportTicket>> _loadTickets() =>
+  Future<List<SupportTicket>> _load() =>
       ref.read(supportServiceProvider).getTickets();
 
-  void _refresh() {
-    final future = _loadTickets();
-    setState(() => _ticketsFuture = future);
+  Future<void> _refresh() async {
+    final next = _load();
+    setState(() => _tickets = next);
+    await next.catchError((_) => <SupportTicket>[]);
+  }
+
+  /// Back from a conversation or a new one: its last message and unread count
+  /// have changed.
+  Future<void> _open(Widget screen) async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+    if (!mounted) return;
+    ref.invalidate(supportUnreadProvider);
+    _refresh();
   }
 
   @override
   Widget build(BuildContext context) {
-    final s = ref.watch(stringsProvider);
+    final copy = ref.watch(stringsProvider).supportChat;
     final locale =
         ref.watch(localeProvider).languageCode == 'ar' ? 'ar' : 'fr_FR';
+
+    // A reply arrived while the list was open.
+    ref.listen(supportPushTickProvider, (_, __) => _refresh());
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -52,10 +66,10 @@ class _SupportTicketsScreenState extends ConsumerState<SupportTicketsScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new,
               size: 20, color: AppColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
-          s.supportListTitle,
+          copy.listTitle,
           style: AppTypography.h4.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -63,70 +77,86 @@ class _SupportTicketsScreenState extends ConsumerState<SupportTicketsScreen> {
           ),
         ),
         centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const CreateTicketScreen()),
-            ),
-            child: Text(
-              s.supportNewButton,
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
-            ),
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
           child: Container(height: 0.5, color: AppColors.border),
         ),
       ),
       body: FutureBuilder<List<SupportTicket>>(
-        future: _ticketsFuture,
+        future: _tickets,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
           if (snapshot.hasError) {
-            return _ErrorState(s: s, onRetry: _refresh);
-          }
-          final tickets = snapshot.data ?? [];
-          if (tickets.isEmpty) {
-            return _EmptyState(
-              s: s,
-              onCreateTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CreateTicketScreen()),
-              ),
+            return _Message(
+              icon: Icons.error_outline,
+              title: copy.loadError,
+              action: copy.retry,
+              onAction: _refresh,
             );
           }
+          final tickets = snapshot.data ?? const [];
+          if (tickets.isEmpty) {
+            return _Message(
+              icon: Icons.forum_outlined,
+              title: copy.emptyTitle,
+              body: copy.emptyBody,
+              action: copy.emptyButton,
+              onAction: () => _open(const CreateTicketScreen()),
+            );
+          }
+
           return RefreshIndicator(
             color: AppColors.primary,
-            onRefresh: () async {
-              final future = _loadTickets();
-              setState(() => _ticketsFuture = future);
-              await future.catchError((_) => <SupportTicket>[]);
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+            onRefresh: _refresh,
+            child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              // Room at the bottom for the button and the home indicator.
+              padding: EdgeInsets.fromLTRB(
+                0,
+                AppSpacing.sm,
+                0,
+                AppSpacing.xxxl +
+                    AppSpacing.xl +
+                    MediaQuery.paddingOf(context).bottom,
+              ),
               itemCount: tickets.length,
-              itemBuilder: (context, index) {
-                final ticket = tickets[index];
-                return TicketCard(
-                  ticket: ticket,
-                  s: s,
-                  locale: locale,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => TicketDetailScreen(ticketId: ticket.id),
-                    ),
-                  ),
-                );
-              },
+              separatorBuilder: (_, __) => Divider(
+                height: 1,
+                indent: AppSpacing.lg + 44 + AppSpacing.md,
+                color: AppColors.border,
+              ),
+              itemBuilder: (context, i) => _ConversationTile(
+                ticket: tickets[i],
+                copy: copy,
+                locale: locale,
+                onTap: () => _open(SupportChatScreen(
+                  ticketId: tickets[i].id,
+                  subject: tickets[i].subject,
+                )),
+              ),
             ),
+          );
+        },
+      ),
+      floatingActionButton: FutureBuilder<List<SupportTicket>>(
+        future: _tickets,
+        builder: (context, snapshot) {
+          // The empty state has its own button: no second one under it.
+          if (!(snapshot.data?.isNotEmpty ?? false)) {
+            return const SizedBox.shrink();
+          }
+          return FloatingActionButton.extended(
+            onPressed: () => _open(const CreateTicketScreen()),
+            backgroundColor: AppColors.primaryAction,
+            foregroundColor: AppColors.onPrimary,
+            elevation: 2,
+            icon: const Icon(Icons.edit_outlined),
+            label: Text(copy.newConversation),
           );
         },
       ),
@@ -134,56 +164,117 @@ class _SupportTicketsScreenState extends ConsumerState<SupportTicketsScreen> {
   }
 }
 
-// ─────────────────────────────────────────────
-// Empty State
-// ─────────────────────────────────────────────
+class _ConversationTile extends StatelessWidget {
+  const _ConversationTile({
+    required this.ticket,
+    required this.copy,
+    required this.locale,
+    required this.onTap,
+  });
 
-class _EmptyState extends StatelessWidget {
-  final AppStrings s;
-  final VoidCallback onCreateTap;
+  final SupportTicket ticket;
+  final SupportChatCopy copy;
+  final String locale;
+  final VoidCallback onTap;
 
-  const _EmptyState({required this.s, required this.onCreateTap});
+  String _when(DateTime at) {
+    final local = at.toLocal();
+    final now = DateTime.now();
+    final sameDay = local.year == now.year &&
+        local.month == now.month &&
+        local.day == now.day;
+    return sameDay
+        ? DateFormat.Hm(locale).format(local)
+        : DateFormat('d MMM', locale).format(local);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    final unread = ticket.unreadCount > 0;
+    final preview = ticket.lastMessage == null
+        ? null
+        : (ticket.lastMessageFromStaff ? '' : copy.you) + ticket.lastMessage!;
+
+    return InkWell(
+      onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.headset_mic_outlined,
-                size: 56, color: AppColors.textMuted),
-            const SizedBox(height: 16),
-            Text(
-              s.supportEmptyTitle,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
               ),
+              child: const Icon(Icons.support_agent,
+                  size: 22, color: AppColors.primary),
             ),
-            const SizedBox(height: 8),
-            Text(
-              s.supportEmptySubtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textMuted, fontSize: 14),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: onCreateTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryAction,
-                foregroundColor: AppColors.onPrimary,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              child: Text(
-                s.supportEmptyButton,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          ticket.subject,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontWeight:
+                                unread ? FontWeight.w700 : FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        _when(ticket.lastActivityAt),
+                        style: AppTypography.caption.copyWith(
+                          color:
+                              unread ? AppColors.primary : AppColors.textMuted,
+                          fontWeight: unread ? FontWeight.w600 : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          preview ?? _status(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: unread
+                                ? AppColors.textPrimary
+                                : AppColors.textSecondary,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                      if (unread) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        _UnreadBadge(count: ticket.unreadCount),
+                      ],
+                    ],
+                  ),
+                  if (ticket.isClosed) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      copy.statusClosed,
+                      style: AppTypography.caption
+                          .copyWith(color: AppColors.textMuted),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
@@ -191,45 +282,99 @@ class _EmptyState extends StatelessWidget {
       ),
     );
   }
+
+  String _status() => switch (ticket.status) {
+        'in_progress' => copy.statusInProgress,
+        'closed' => copy.statusClosed,
+        _ => copy.statusOpen,
+      };
 }
 
-// ─────────────────────────────────────────────
-// Error State
-// ─────────────────────────────────────────────
+class _UnreadBadge extends StatelessWidget {
+  const _UnreadBadge({required this.count});
 
-class _ErrorState extends StatelessWidget {
-  final AppStrings s;
-  final VoidCallback onRetry;
+  final int count;
 
-  const _ErrorState({required this.s, required this.onRetry});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        style: AppTypography.caption.copyWith(
+          color: AppColors.onPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+/// Empty and error states: an icon, a line or two, one button.
+class _Message extends StatelessWidget {
+  const _Message({
+    required this.icon,
+    required this.title,
+    required this.action,
+    required this.onAction,
+    this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? body;
+  final String action;
+  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.error),
-            const SizedBox(height: 16),
+            Icon(icon, size: 56, color: AppColors.textMuted),
+            const SizedBox(height: AppSpacing.lg),
             Text(
-              s.supportErrorMsg,
+              title,
               textAlign: TextAlign.center,
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh, size: 18),
-              label: Text(s.supportRetryButton),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
               ),
+            ),
+            if (body != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                body!,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.xl),
+            FilledButton(
+              onPressed: onAction,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primaryAction,
+                foregroundColor: AppColors.onPrimary,
+                minimumSize: const Size(0, AppSpacing.buttonHeight),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg)),
+              ),
+              child: Text(action,
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
             ),
           ],
         ),

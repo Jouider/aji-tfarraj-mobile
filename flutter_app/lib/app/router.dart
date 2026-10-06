@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/app_shell.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/features/support/presentation/screens/support_chat_screen.dart';
+import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
 import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/splash/splash_screen.dart';
 import 'package:aji_tfarraj/features/language/language_selection_screen.dart';
@@ -433,6 +435,21 @@ final routerProvider = Provider<GoRouter>((ref) {
               ? state.extra as HowToTrack
               : HowToTrack.client,
         ),
+      ),
+      GoRoute(
+        path: Routes.support,
+        name: 'support',
+        builder: (context, state) => const SupportTicketsScreen(),
+      ),
+      GoRoute(
+        path: '${Routes.support}/:id',
+        name: 'supportChat',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          return id == null
+              ? const SupportTicketsScreen()
+              : SupportChatScreen(ticketId: id);
+        },
       ),
       GoRoute(
         path: Routes.chargePublic,

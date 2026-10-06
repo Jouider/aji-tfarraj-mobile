@@ -27,6 +27,8 @@ Future<String?> showPoseGuide(
   final copy = poseCopy(s.casting, pose);
 
   final go = await showModalBottomSheet<bool>(
+    // Au-dessus de la barre d'onglets flottante, pas dessous.
+    useRootNavigator: true,
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.surfaceOverlay,

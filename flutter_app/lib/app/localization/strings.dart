@@ -4,6 +4,7 @@ import 'package:aji_tfarraj/app/copywriting/copy_fr.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_ar.dart';
 import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/departure_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/support_chat_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
 
 /// Localized strings accessor
@@ -1445,6 +1446,11 @@ class AppStrings {
       ? const WafacashCopyFr()
       : const WafacashCopyAr();
 
+  /// The support chat: conversations with the Aji Tfarraj team.
+  SupportChatCopy get supportChat => locale == AppLocale.fr
+      ? const SupportChatCopyFr()
+      : const SupportChatCopyAr();
+
   // ============================================
   // Staff Check-in
   // ============================================
@@ -2316,154 +2322,13 @@ class AppStrings {
   // ============================================
   // Support Tickets
   // ============================================
-  String get supportListTitle => locale == AppLocale.fr
-      ? CopyFr.support.listTitle
-      : CopyAr.support.listTitle;
-  String get supportCreateTitle => locale == AppLocale.fr
-      ? CopyFr.support.createTitle
-      : CopyAr.support.createTitle;
-  String get supportNewButton => locale == AppLocale.fr
-      ? CopyFr.support.newButton
-      : CopyAr.support.newButton;
 
-  String get supportStatusOpen => locale == AppLocale.fr
-      ? CopyFr.support.statusOpen
-      : CopyAr.support.statusOpen;
-  String get supportStatusInProgress => locale == AppLocale.fr
-      ? CopyFr.support.statusInProgress
-      : CopyAr.support.statusInProgress;
-  String get supportStatusClosed => locale == AppLocale.fr
-      ? CopyFr.support.statusClosed
-      : CopyAr.support.statusClosed;
 
-  String get supportBannerOpenTitle => locale == AppLocale.fr
-      ? CopyFr.support.bannerOpenTitle
-      : CopyAr.support.bannerOpenTitle;
-  String get supportBannerOpenMsg => locale == AppLocale.fr
-      ? CopyFr.support.bannerOpenMsg
-      : CopyAr.support.bannerOpenMsg;
-  String get supportBannerInProgressTitle => locale == AppLocale.fr
-      ? CopyFr.support.bannerInProgressTitle
-      : CopyAr.support.bannerInProgressTitle;
-  String get supportBannerInProgressMsg => locale == AppLocale.fr
-      ? CopyFr.support.bannerInProgressMsg
-      : CopyAr.support.bannerInProgressMsg;
-  String get supportBannerClosedTitle => locale == AppLocale.fr
-      ? CopyFr.support.bannerClosedTitle
-      : CopyAr.support.bannerClosedTitle;
-  String get supportBannerClosedMsg => locale == AppLocale.fr
-      ? CopyFr.support.bannerClosedMsg
-      : CopyAr.support.bannerClosedMsg;
 
-  String get supportCardSubtitle => locale == AppLocale.fr
-      ? CopyFr.support.cardSubtitle
-      : CopyAr.support.cardSubtitle;
 
-  String get supportEmptyTitle => locale == AppLocale.fr
-      ? CopyFr.support.emptyTitle
-      : CopyAr.support.emptyTitle;
-  String get supportEmptySubtitle => locale == AppLocale.fr
-      ? CopyFr.support.emptySubtitle
-      : CopyAr.support.emptySubtitle;
-  String get supportEmptyButton => locale == AppLocale.fr
-      ? CopyFr.support.emptyButton
-      : CopyAr.support.emptyButton;
-  String get supportErrorMsg => locale == AppLocale.fr
-      ? CopyFr.support.errorMsg
-      : CopyAr.support.errorMsg;
-  String get supportRetryButton => locale == AppLocale.fr
-      ? CopyFr.support.retryButton
-      : CopyAr.support.retryButton;
 
-  String get supportInfoBannerTitle => locale == AppLocale.fr
-      ? CopyFr.support.infoBannerTitle
-      : CopyAr.support.infoBannerTitle;
-  String get supportInfoBannerBody => locale == AppLocale.fr
-      ? CopyFr.support.infoBannerBody
-      : CopyAr.support.infoBannerBody;
-  String get supportSubjectLabel => locale == AppLocale.fr
-      ? CopyFr.support.subjectLabel
-      : CopyAr.support.subjectLabel;
-  String get supportSubjectHint => locale == AppLocale.fr
-      ? CopyFr.support.subjectHint
-      : CopyAr.support.subjectHint;
-  String get supportSubjectRequired => locale == AppLocale.fr
-      ? CopyFr.support.subjectRequired
-      : CopyAr.support.subjectRequired;
-  String get supportMessageLabel => locale == AppLocale.fr
-      ? CopyFr.support.messageLabel
-      : CopyAr.support.messageLabel;
-  String get supportMessageHint => locale == AppLocale.fr
-      ? CopyFr.support.messageHint
-      : CopyAr.support.messageHint;
-  String get supportSubmitButton => locale == AppLocale.fr
-      ? CopyFr.support.submitButton
-      : CopyAr.support.submitButton;
 
-  String get supportConfirmationTitle => locale == AppLocale.fr
-      ? CopyFr.support.confirmationTitle
-      : CopyAr.support.confirmationTitle;
-  String get supportConfirmationBadge => locale == AppLocale.fr
-      ? CopyFr.support.confirmationBadge
-      : CopyAr.support.confirmationBadge;
-  String get supportSummarySubject => locale == AppLocale.fr
-      ? CopyFr.support.summarySubject
-      : CopyAr.support.summarySubject;
-  String get supportSummaryTicket => locale == AppLocale.fr
-      ? CopyFr.support.summaryTicket
-      : CopyAr.support.summaryTicket;
-  String get supportSummarySubmitted => locale == AppLocale.fr
-      ? CopyFr.support.summarySubmitted
-      : CopyAr.support.summarySubmitted;
-  String get supportStepsTitle => locale == AppLocale.fr
-      ? CopyFr.support.stepsTitle
-      : CopyAr.support.stepsTitle;
-  String get supportStep1 =>
-      locale == AppLocale.fr ? CopyFr.support.step1 : CopyAr.support.step1;
-  String get supportStep2 =>
-      locale == AppLocale.fr ? CopyFr.support.step2 : CopyAr.support.step2;
-  String get supportStep3 =>
-      locale == AppLocale.fr ? CopyFr.support.step3 : CopyAr.support.step3;
-  String get supportBtnViewTickets => locale == AppLocale.fr
-      ? CopyFr.support.btnViewTickets
-      : CopyAr.support.btnViewTickets;
-  String get supportBtnBackHome => locale == AppLocale.fr
-      ? CopyFr.support.btnBackHome
-      : CopyAr.support.btnBackHome;
 
-  String get supportDetailSubjectSection => locale == AppLocale.fr
-      ? CopyFr.support.detailSubjectSection
-      : CopyAr.support.detailSubjectSection;
-  String get supportDetailMessageSection => locale == AppLocale.fr
-      ? CopyFr.support.detailMessageSection
-      : CopyAr.support.detailMessageSection;
-  String get supportDetailMetaSection => locale == AppLocale.fr
-      ? CopyFr.support.detailMetaSection
-      : CopyAr.support.detailMetaSection;
-  String get supportMetaTicketNumber => locale == AppLocale.fr
-      ? CopyFr.support.metaTicketNumber
-      : CopyAr.support.metaTicketNumber;
-  String get supportMetaSubmittedAt => locale == AppLocale.fr
-      ? CopyFr.support.metaSubmittedAt
-      : CopyAr.support.metaSubmittedAt;
-  String get supportMetaUpdatedAt => locale == AppLocale.fr
-      ? CopyFr.support.metaUpdatedAt
-      : CopyAr.support.metaUpdatedAt;
-  String get supportInfoCallPending => locale == AppLocale.fr
-      ? CopyFr.support.infoCallPending
-      : CopyAr.support.infoCallPending;
-  String get supportInfoClosed => locale == AppLocale.fr
-      ? CopyFr.support.infoClosed
-      : CopyAr.support.infoClosed;
-  String get supportDetailError => locale == AppLocale.fr
-      ? CopyFr.support.detailError
-      : CopyAr.support.detailError;
-  String get supportDetailForbidden => locale == AppLocale.fr
-      ? CopyFr.support.detailForbidden
-      : CopyAr.support.detailForbidden;
-  String get supportDetailRetry => locale == AppLocale.fr
-      ? CopyFr.support.detailRetry
-      : CopyAr.support.detailRetry;
 
   String get supportProfileTitle => locale == AppLocale.fr
       ? CopyFr.support.profileTitle

@@ -554,6 +554,8 @@ class _ShareButtonState extends ConsumerState<_ShareButton> {
     final s = ref.read(stringsProvider);
 
     final choice = await showModalBottomSheet<_ShareChoice>(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       backgroundColor: AppColors.surfaceOverlay,
       shape: const RoundedRectangleBorder(

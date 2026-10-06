@@ -15,6 +15,8 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/features/notifications/domain/app_notification.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
+import 'package:aji_tfarraj/features/support/data/support_service.dart'
+    show openSupportTicketProvider, supportPushTickProvider;
 
 /// Background message handler - must be top-level function
 @pragma('vm:entry-point')
@@ -281,6 +283,15 @@ class PushService {
       // Auto-refresh reservations when a reservation notification arrives
       if (notification.type == NotificationType.reservation) {
         _ref?.read(myReservationsProvider.notifier).refresh();
+      }
+
+      // A support reply: whatever shows support asks for it now, instead of
+      // waiting for its next poll. If that very conversation is on screen,
+      // the reply appears in it — a banner on top would say it twice.
+      if (message.data['type'] == 'support_reply') {
+        _ref?.read(supportPushTickProvider.notifier).state++;
+        final open = _ref?.read(openSupportTicketProvider);
+        if (open != null && message.data['ticket_id'] == '$open') return;
       }
 
       // Show foreground UI

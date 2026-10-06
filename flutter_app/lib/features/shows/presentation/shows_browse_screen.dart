@@ -55,6 +55,8 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
   void _openFilterSheet() {
     final s = ref.read(stringsProvider);
     showModalBottomSheet(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       backgroundColor: AppColors.surfaceOverlay,
       shape: const RoundedRectangleBorder(

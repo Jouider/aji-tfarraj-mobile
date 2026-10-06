@@ -1250,78 +1250,8 @@ class ReservationDetailCopyAr {
 class SupportCopyAr {
   const SupportCopyAr();
 
-  // App bar titles
-  String get listTitle => 'الدعم / المساعدة';
-  String get createTitle => 'تذكرة جديدة';
-  String get newButton => 'جديدة';
-
-  // Status badges
-  String get statusOpen => 'قيد الانتظار';
-  String get statusInProgress => 'قيد المعالجة';
-  String get statusClosed => 'تم الحل';
-
-  // Status banner titles & messages
-  String get bannerOpenTitle => 'قيد الانتظار';
-  String get bannerOpenMsg =>
-      'طلبك في قائمة الانتظار.\nسيتواصل معك فريقنا قريباً.';
-  String get bannerInProgressTitle => 'قيد المعالجة';
-  String get bannerInProgressMsg =>
-      'أحد الوكلاء يتولى طلبك.\nسيتم التواصل معك هاتفياً.';
-  String get bannerClosedTitle => 'تم الحل';
-  String get bannerClosedMsg =>
-      'تمت معالجة هذه التذكرة وإغلاقها.\nشكراً على تواصلك معنا.';
-
-  // Card
-  String get cardSubtitle => 'سيتواصل معك فريقنا عبر الهاتف.';
-
-  // Empty state
-  String get emptyTitle => 'لا توجد تذاكر';
-  String get emptySubtitle => 'لم تتواصل مع الدعم بعد.';
-  String get emptyButton => 'إنشاء تذكرة';
-
-  // Error state
-  String get errorMsg => 'تعذر تحميل تذاكرك.';
-  String get retryButton => 'إعادة المحاولة';
-
-  // Create screen
-  String get infoBannerTitle => 'معلومة مفيدة';
-  String get infoBannerBody => 'سيتصل بك فريقنا على الرقم المرتبط بحسابك. '
-      'صف مشكلتك بالتفصيل لتسريع المعالجة.';
-  String get subjectLabel => 'الموضوع *';
-  String get subjectHint => 'مثال: مشكلة في حجزي...';
-  String get subjectRequired => 'الموضوع مطلوب';
-  String get messageLabel => 'الوصف *';
-  String get messageHint => 'صف مشكلتك بالتفصيل...\nاذكر رقم الحجز إن وجد.';
-  String get submitButton => 'إرسال طلبي';
-
-  // Confirmation screen
-  String get confirmationTitle => 'تم إرسال الطلب!';
-  String get confirmationBadge => 'في انتظار المعالجة';
-  String get summarySubject => 'الموضوع';
-  String get summaryTicket => 'التذكرة';
-  String get summarySubmitted => 'أُرسلت في';
-  String get stepsTitle => 'الخطوات التالية';
-  String get step1 => 'تم استلام طلبك بنجاح.';
-  String get step2 => 'سيتصل بك أحد الوكلاء خلال 24–48 ساعة.';
-  String get step3 => 'ستُغلق التذكرة بعد الحل.';
-  String get btnViewTickets => 'عرض تذاكري';
-  String get btnBackHome => 'العودة للرئيسية';
-
-  // Detail screen
-  String get detailSubjectSection => 'الموضوع';
-  String get detailMessageSection => 'رسالتك';
-  String get detailMetaSection => 'التفاصيل';
-  String get metaTicketNumber => 'رقم التذكرة';
-  String get metaSubmittedAt => 'تاريخ الإرسال';
-  String get metaUpdatedAt => 'آخر تحديث';
-  String get infoCallPending =>
-      'ستتلقى اتصالاً من فريقنا.\nتأكد من أن رقمك محدّث.';
-  String get infoClosed => 'هذه التذكرة مغلقة.';
-  String get detailError => 'خطأ في التحميل';
-  String get detailForbidden => 'غير مصرح بالوصول';
-  String get detailRetry => 'إعادة المحاولة';
-
-  // Profile entry point
+  // Profile entry point. The support screens themselves speak through
+  // SupportChatCopy.
   String get profileTitle => 'الدعم / المساعدة';
   String get profileSubtitle => 'تواصل مع فريقنا';
 }

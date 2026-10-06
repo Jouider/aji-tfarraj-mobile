@@ -127,59 +127,71 @@ class ReturnPointField extends StatelessWidget {
 
   Future<void> _open(BuildContext context) async {
     await showModalBottomSheet<void>(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.backgroundLight,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2),
+      // La feuille suit le clavier (la recherche tape dedans), et s'arrête
+      // sous la barre d'état même avec beaucoup d'arrêts.
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(sheetContext).bottom),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.85),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(strings.returnPointQuestion, style: AppTypography.h4),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                strings.returnPointHint,
-                style: AppTypography.bodySmall
-                    .copyWith(color: AppColors.textMuted),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              // Beaucoup d'arrêts : la liste défile dans la feuille, pas la
-              // page de réservation.
-              Flexible(
-                child: SingleChildScrollView(
-                  child: ReturnPointChoice(
-                    points: points,
-                    selectedId: selectedId,
-                    answered: answered,
-                    isArabic: isArabic,
-                    noneLabel: strings.returnPointNone,
-                    searchHint: strings.returnPointSearch,
-                    noMatchLabel: strings.returnPointNoMatch,
-                    onChoose: (id) {
-                      onChoose(id);
-                      Navigator.of(sheetContext).pop();
-                    },
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(strings.returnPointQuestion, style: AppTypography.h4),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    strings.returnPointHint,
+                    style: AppTypography.bodySmall
+                        .copyWith(color: AppColors.textMuted),
                   ),
-                ),
+                  const SizedBox(height: AppSpacing.lg),
+                  // Beaucoup d'arrêts : seuls les arrêts défilent, la
+                  // recherche reste en haut de la feuille.
+                  Flexible(
+                    child: ReturnPointChoice(
+                      scrollable: true,
+                      points: points,
+                      selectedId: selectedId,
+                      answered: answered,
+                      isArabic: isArabic,
+                      noneLabel: strings.returnPointNone,
+                      searchHint: strings.returnPointSearch,
+                      noMatchLabel: strings.returnPointNoMatch,
+                      onChoose: (id) {
+                        onChoose(id);
+                        Navigator.of(sheetContext).pop();
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
