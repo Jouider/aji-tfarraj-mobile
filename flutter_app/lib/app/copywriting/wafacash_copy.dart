@@ -66,7 +66,6 @@ abstract class WafacashCopy {
   String get cancelConfirmBody;
   String get keep;
   String requestedAmount(String amount);
-  String toCollect(String net);
   String get historyTitle;
 
   /// Closed outcomes, as the history list shows them.
@@ -199,8 +198,6 @@ class WafacashCopyFr implements WafacashCopy {
   String requestedAmount(String amount) =>
       'Retrait de $amount · frais d\'agence à ta charge';
   @override
-  String toCollect(String net) => 'À retirer à l\'agence : $net';
-  @override
   String get historyTitle => 'Mes retraits Wafacash';
 
   @override
@@ -331,8 +328,6 @@ class WafacashCopyAr implements WafacashCopy {
   @override
   String requestedAmount(String amount) =>
       'سحب $amount · مصاريف الوكالة على حسابك';
-  @override
-  String toCollect(String net) => 'غادي تسحب من الوكالة: $net';
   @override
   String get historyTitle => 'السحوبات ديالي ف وفاكاش';
 

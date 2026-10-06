@@ -395,12 +395,10 @@ class _StatusCardState extends ConsumerState<_StatusCard> {
                   .copyWith(color: AppColors.textSecondary)),
         ],
         const SizedBox(height: AppSpacing.sm),
-        // Le montant demandé, sans le détail des frais ; une fois le code
-        // là, ce qu'on lui remettra au guichet — de quoi vérifier sur place.
+        // Toujours le montant demandé : c'est ce qu'Aji Tfarraj paie. Ce
+        // qu'en garde l'agence, c'est sa règle, pas la nôtre.
         Text(
-          ready
-              ? c.toCollect(c.money(w.netAmount))
-              : c.requestedAmount(c.money(w.grossAmount)),
+          c.requestedAmount(c.money(w.grossAmount)),
           style: AppTypography.caption.copyWith(color: AppColors.textMuted),
         ),
         if (ready && w.code != null) ...[
@@ -560,7 +558,9 @@ class _HistoryRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(copy.money(w.netAmount), style: AppTypography.labelMedium),
+                // Le montant payé par Aji Tfarraj, frais d'agence compris.
+                Text(copy.money(w.grossAmount),
+                    style: AppTypography.labelMedium),
                 if (w.status == WafacashWithdrawalStatus.rejected &&
                     (w.closedReason ?? '').isNotEmpty)
                   Text(w.closedReason!,
