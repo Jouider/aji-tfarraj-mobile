@@ -215,6 +215,11 @@ class AppColors {
   /// Le corollaire de [glassOnPhoto] : un jeton de texte qui suit le thème
   /// (`textPrimary`, `textSecondary`…) n'a rien à faire sur une photo. En
   /// thème clair il devient sombre, et il disparaît dans le voile.
+  /// Le noir de la vidéo de lancement, et de l'écran natif qui la précède :
+  /// le même, au pixel près, pour que le passage de l'un à l'autre ne se
+  /// voie pas. Il ne suit pas le thème — la vidéo non plus.
+  static const Color splashBackground = Color(0xFF000000);
+
   static const Color inkOnPhoto = Color(0xFFFFFFFF);
 
   /// Sa variante secondaire — une date, un lieu, un décompte.

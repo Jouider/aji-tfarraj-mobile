@@ -37,9 +37,9 @@ void main() {
     expect(find.byType(AjiTfarrajApp), findsOneWidget);
     expect(find.byType(MaterialApp), findsOneWidget);
 
-    // The splash screen schedules a delayed navigation (Future.delayed). Flush
-    // it so no Timer is left pending when the test tears down. (Can't use
-    // pumpAndSettle here — the splash's CircularProgressIndicator never settles.)
-    await tester.pump(const Duration(seconds: 3));
+    // The splash plays a video; the test VM has no video player, so it moves
+    // on at once. Its safety timers are cancelled when it leaves — pump past
+    // them anyway so no Timer is left pending when the test tears down.
+    await tester.pump(const Duration(seconds: 7));
   });
 }

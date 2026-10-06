@@ -126,6 +126,9 @@ flutter:
     # Les .ttf de Cairo restent aussi déclarés en assets : l'export PDF du
     # manifeste les lit par chemin (rootBundle.load), pas par famille.
     - assets/fonts/
+    # La vidéo de lancement (3 s, muette). Les PNG du dossier ne servent qu'à
+    # flutter_native_splash : on ne les embarque pas.
+    - assets/splash/splash.mp4
 
   # Cairo, embarqué dans l'app — jamais téléchargé.
   #
