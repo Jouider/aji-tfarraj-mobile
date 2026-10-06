@@ -1,26 +1,21 @@
 flutter_native_splash:
-  # L'écran natif doit être indiscernable de l'écran Dart qui lui succède,
-  # sinon on voit un logo remplacer l'autre — c'est ce qui se passait : deux
-  # secondes d'ancien logo sur blanc, puis un fondu vers le nouveau.
+  # L'écran natif est le premier plan de la vidéo de lancement : du noir, et
+  # rien d'autre. La vidéo commence sur ce noir et fait apparaître le logo ;
+  # un logo déjà posé ici disparaîtrait pour réapparaître, et un fond blanc
+  # (thème clair) virerait au noir d'un coup.
   #
-  # Mêmes fonds que `AppColors.backgroundWhite`, même logotype, même taille
-  # (240 points de large, soit 960 px : l'outil traite la source comme du
-  # @4x et en sort un @3x aux trois quarts).
-  color: "#FAFAFA"
-  color_dark: "#08080A"
-
-  image: assets/splash/lockup_light.png
-  image_dark: assets/splash/lockup_dark.png
-
-  ios_content_mode: center
-  android_gravity: center
+  # Même noir en clair et en sombre : la vidéo ne suit pas le thème.
+  color: "#000000"
+  color_dark: "#000000"
 
   fullscreen: false
 
+  # Android 12+ impose une icône au centre de son écran de lancement. Elle est
+  # transparente : sinon le logo de l'app s'afficherait une fraction de
+  # seconde, puis s'effacerait quand la vidéo démarre sur du noir.
   android_12:
-    color: "#FAFAFA"
-    color_dark: "#08080A"
-    image: assets/splash/lockup_light.png
-    image_dark: assets/splash/lockup_dark.png
-    icon_background_color: "#FAFAFA"
-    icon_background_color_dark: "#08080A"
+    color: "#000000"
+    color_dark: "#000000"
+    image: assets/splash/android12_blank.png
+    icon_background_color: "#000000"
+    icon_background_color_dark: "#000000"
