@@ -55,6 +55,8 @@ class _WafacashIdentityScreenState
   Future<void> _pick(bool front) async {
     final c = ref.read(stringsProvider).wafacash;
     final source = await showModalBottomSheet<ImageSource>(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       showDragHandle: true,
       backgroundColor: AppColors.backgroundWhite,
@@ -170,8 +172,9 @@ class _WafacashIdentityScreenState
                   labelText: c.cinLabel,
                   hintText: c.cinHint,
                 ),
-                validator: (v) =>
-                    _cinPattern.hasMatch((v ?? '').trim()) ? null : c.cinInvalid,
+                validator: (v) => _cinPattern.hasMatch((v ?? '').trim())
+                    ? null
+                    : c.cinInvalid,
               ),
               const SizedBox(height: AppSpacing.lg),
               Row(
@@ -199,8 +202,8 @@ class _WafacashIdentityScreenState
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(c.photoTip,
-                  style:
-                      AppTypography.caption.copyWith(color: AppColors.textMuted)),
+                  style: AppTypography.caption
+                      .copyWith(color: AppColors.textMuted)),
               if (_error != null) ...[
                 const SizedBox(height: AppSpacing.md),
                 Text(_error!,
@@ -218,7 +221,8 @@ class _WafacashIdentityScreenState
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.lock_outline, size: 16, color: AppColors.textMuted),
+                  Icon(Icons.lock_outline,
+                      size: 16, color: AppColors.textMuted),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(c.privacy,

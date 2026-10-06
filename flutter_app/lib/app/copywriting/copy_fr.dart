@@ -1550,81 +1550,8 @@ class ReservationDetailCopyFr {
 class SupportCopyFr {
   const SupportCopyFr();
 
-  // App bar titles
-  String get listTitle => 'Support / Aide';
-  String get createTitle => 'Nouveau ticket';
-  String get newButton => 'Nouveau';
-
-  // Status badges
-  String get statusOpen => 'En attente';
-  String get statusInProgress => 'En cours';
-  String get statusClosed => 'Résolu';
-
-  // Status banner titles & messages
-  String get bannerOpenTitle => 'En attente';
-  String get bannerOpenMsg =>
-      'Votre demande est en file d\'attente.\nNotre équipe vous contactera bientôt.';
-  String get bannerInProgressTitle => 'En cours de traitement';
-  String get bannerInProgressMsg =>
-      'Un agent s\'occupe de votre demande.\nVous serez contacté par téléphone.';
-  String get bannerClosedTitle => 'Résolu';
-  String get bannerClosedMsg =>
-      'Ce ticket a été traité et clôturé.\nMerci de nous avoir contactés.';
-
-  // Card
-  String get cardSubtitle => 'Notre équipe vous contactera par téléphone.';
-
-  // Empty state
-  String get emptyTitle => 'Aucun ticket';
-  String get emptySubtitle =>
-      'Vous n\'avez pas encore contacté\nnotre support.';
-  String get emptyButton => 'Créer un ticket';
-
-  // Error state
-  String get errorMsg => 'Impossible de charger vos tickets.';
-  String get retryButton => 'Réessayer';
-
-  // Create screen
-  String get infoBannerTitle => 'Bon à savoir';
-  String get infoBannerBody =>
-      'Notre équipe vous rappellera au numéro associé à votre compte. '
-      'Décrivez votre problème en détail pour accélérer le traitement.';
-  String get subjectLabel => 'Sujet *';
-  String get subjectHint => 'Ex: Problème avec ma réservation...';
-  String get subjectRequired => 'Le sujet est requis';
-  String get messageLabel => 'Description *';
-  String get messageHint =>
-      'Décrivez votre problème en détail...\nMentionnez le numéro de réservation si applicable.';
-  String get submitButton => 'Envoyer ma demande';
-
-  // Confirmation screen
-  String get confirmationTitle => 'Demande envoyée !';
-  String get confirmationBadge => 'En attente de traitement';
-  String get summarySubject => 'Sujet';
-  String get summaryTicket => 'Ticket';
-  String get summarySubmitted => 'Soumis le';
-  String get stepsTitle => 'Prochaines étapes';
-  String get step1 => 'Votre demande a bien été reçue.';
-  String get step2 => 'Un agent vous rappellera sous 24–48h.';
-  String get step3 => 'Le ticket sera clôturé une fois résolu.';
-  String get btnViewTickets => 'Voir mes tickets';
-  String get btnBackHome => 'Retour à l\'accueil';
-
-  // Detail screen
-  String get detailSubjectSection => 'Sujet';
-  String get detailMessageSection => 'Votre message';
-  String get detailMetaSection => 'Détails';
-  String get metaTicketNumber => 'Numéro de ticket';
-  String get metaSubmittedAt => 'Date de soumission';
-  String get metaUpdatedAt => 'Dernière mise à jour';
-  String get infoCallPending =>
-      'Vous recevrez un appel de notre équipe.\nAssurez-vous que votre numéro est à jour.';
-  String get infoClosed => 'Ce ticket est clôturé.';
-  String get detailError => 'Erreur de chargement';
-  String get detailForbidden => 'Accès non autorisé';
-  String get detailRetry => 'Réessayer';
-
-  // Profile entry point
+  // Profile entry point. The support screens themselves speak through
+  // SupportChatCopy.
   String get profileTitle => 'Support / Aide';
   String get profileSubtitle => 'Contactez notre équipe';
 }

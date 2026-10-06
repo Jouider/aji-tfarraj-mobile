@@ -96,6 +96,8 @@ class _AttendeesBodyState extends ConsumerState<_AttendeesBody> {
   Future<void> _open(
       Attendee attendee, List<ReturnPointOption> returnPoints) async {
     final updated = await showModalBottomSheet<Attendee>(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -225,8 +227,7 @@ class _AttendeesBodyState extends ConsumerState<_AttendeesBody> {
                                 const SizedBox(height: AppSpacing.sm),
                             itemBuilder: (_, i) => _AttendeeTile(
                               attendee: results[i],
-                              onTap: () =>
-                                  _open(results[i], data.returnPoints),
+                              onTap: () => _open(results[i], data.returnPoints),
                             ),
                           ),
               ),
@@ -453,6 +454,8 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
     final a = widget.attendee;
 
     final picked = await showModalBottomSheet<_PickedPoint>(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -497,9 +500,8 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
             reservationId: a.id,
             pointId: picked.id,
           );
-      final point = widget.returnPoints
-          .where((p) => p.id == picked.id)
-          .firstOrNull;
+      final point =
+          widget.returnPoints.where((p) => p.id == picked.id).firstOrNull;
       if (mounted) Navigator.of(context).pop(a.withReturnPoint(point));
     } catch (e) {
       _fail(e);
@@ -731,8 +733,7 @@ class _ReturnPointRow extends StatelessWidget {
                 Text(current, style: AppTypography.labelMedium),
                 if (attendee.returnPointChangedAt != null)
                   Text(
-                    copy.returnChangedAt(
-                        _time(attendee.returnPointChangedAt!)),
+                    copy.returnChangedAt(_time(attendee.returnPointChangedAt!)),
                     style: AppTypography.caption
                         .copyWith(color: AppColors.textMuted),
                   ),

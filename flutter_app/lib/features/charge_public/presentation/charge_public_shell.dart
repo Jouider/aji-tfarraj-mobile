@@ -999,6 +999,8 @@ void _showEpisodeBreakdown(
   ChargePublicCopy cp,
 ) {
   showModalBottomSheet<void>(
+    // Au-dessus de la barre d'onglets flottante, pas dessous.
+    useRootNavigator: true,
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.surfaceOverlay,

@@ -204,6 +204,8 @@ class _OnSiteRegistrationScreenState
 
   Future<void> _showResult(OnSiteRegistrationResult result) async {
     await showModalBottomSheet<void>(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       isScrollControlled: true,
       isDismissible: false,

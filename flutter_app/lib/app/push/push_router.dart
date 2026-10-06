@@ -186,6 +186,8 @@ class PushRouter {
       // L'espace du chargé public : « Ton argent est prêt » doit ouvrir le
       // code, pas l'accueil.
       '/charge-public',
+      // « Réponse du support » ouvre la conversation.
+      '/support',
     ];
 
     // Check if route matches any valid prefix

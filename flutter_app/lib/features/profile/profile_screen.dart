@@ -18,7 +18,7 @@ import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/auth/domain/user.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:aji_tfarraj/features/loyalty/data/loyalty_repository.dart';
-import 'package:aji_tfarraj/features/support/presentation/screens/support_tickets_screen.dart';
+import 'package:aji_tfarraj/features/support/data/support_service.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_mode_provider.dart';
 import 'package:aji_tfarraj/features/badges/presentation/level_badge_card.dart';
 import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
@@ -504,16 +504,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   subtitle: s.departures.tileSubtitle,
                   onTap: () => context.push(Routes.staffAttendees),
                 ),
-              // FIX: Added support entry point
               _SettingsRow(
                 icon: Icons.headset_mic_outlined,
                 iconColor: AppColors.primary,
                 title: s.supportProfileTitle,
                 subtitle: s.supportProfileSubtitle,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => const SupportTicketsScreen()),
-                ),
+                trailing: _SupportUnreadBadge(
+                    count: ref.watch(supportUnreadProvider).valueOrNull ?? 0),
+                // Au-dessus des onglets : la barre flottante masquait le bas
+                // des écrans du support.
+                onTap: () async {
+                  await context.push(Routes.support);
+                  ref.invalidate(supportUnreadProvider);
+                },
               ),
               _SettingsRow(
                 icon: Icons.help_outline,
@@ -981,6 +984,35 @@ class _SettingsGroup extends StatelessWidget {
 // ─────────────────────────────────────────────
 // Settings Row — single tappable item
 // ─────────────────────────────────────────────
+
+/// Les réponses du support pas encore lues, au bout de la ligne « Support ».
+class _SupportUnreadBadge extends StatelessWidget {
+  const _SupportUnreadBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 0) return const SizedBox.shrink();
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        style: AppTypography.caption.copyWith(
+          color: AppColors.onPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
 
 class _SettingsRow extends StatelessWidget {
   final IconData icon;

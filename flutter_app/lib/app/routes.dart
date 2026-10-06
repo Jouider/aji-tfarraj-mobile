@@ -24,6 +24,10 @@ class Routes {
   // Notifications
   static const notifications = '/notifications';
 
+  /// Support: the conversations, and one of them (opened from its push).
+  static const support = '/support';
+  static String supportChat(int id) => '/support/$id';
+
   // Loyalty
   static const loyalty = '/loyalty';
 

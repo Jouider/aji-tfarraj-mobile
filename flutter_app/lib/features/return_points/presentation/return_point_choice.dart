@@ -27,6 +27,7 @@ class ReturnPointChoice extends StatefulWidget {
     required this.noMatchLabel,
     this.enabled = true,
     this.autofocusSearch = false,
+    this.scrollable = false,
   });
 
   final List<ReturnPointOption> points;
@@ -57,6 +58,13 @@ class ReturnPointChoice extends StatefulWidget {
   final String noneLabel;
 
   final bool enabled;
+
+  /// Dans une feuille : la recherche reste en haut et seuls les arrêts
+  /// défilent. Sinon la recherche partait avec la liste au premier geste, et
+  /// il fallait remonter pour corriger ce qu'on tapait.
+  ///
+  /// Hors feuille, la liste suit le défilement de l'écran qui la contient.
+  final bool scrollable;
 
   @override
   State<ReturnPointChoice> createState() => _ReturnPointChoiceState();
@@ -91,46 +99,68 @@ class _ReturnPointChoiceState extends State<ReturnPointChoice> {
         : widget.points;
     final filtering = searchable && query.trim().isNotEmpty;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (searchable) ...[
-          ReturnPointSearchField(
-            controller: _search,
-            hint: widget.searchHint,
-            autofocus: widget.autofocusSearch,
+    final options = <Widget>[
+      for (final point in shown)
+        _Option(
+          label: point.localizedName(widget.isArabic),
+          sublabel: point.landmark,
+          selected: widget.answered && widget.selectedId == point.id,
+          enabled: widget.enabled,
+          onTap: () => widget.onChoose(point.id),
+        ),
+      if (shown.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+          child: Text(
+            widget.noMatchLabel,
+            textAlign: TextAlign.center,
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
           ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        for (final point in shown)
-          _Option(
-            label: point.localizedName(widget.isArabic),
-            sublabel: point.landmark,
-            selected: widget.answered && widget.selectedId == point.id,
-            enabled: widget.enabled,
-            onTap: () => widget.onChoose(point.id),
-          ),
-        if (shown.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-            child: Text(
-              widget.noMatchLabel,
-              textAlign: TextAlign.center,
-              style:
-                  AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+        ),
+      // « Par mes propres moyens » échappe au filtre : c'est une réponse,
+      // pas un arrêt, et elle doit rester atteignable même quand la
+      // recherche ne renvoie rien.
+      if (!filtering || shown.isEmpty)
+        _Option(
+          label: widget.noneLabel,
+          selected: widget.answered && widget.selectedId == null,
+          enabled: widget.enabled,
+          onTap: () => widget.onChoose(null),
+        ),
+    ];
+
+    final search = [
+      if (searchable) ...[
+        ReturnPointSearchField(
+          controller: _search,
+          hint: widget.searchHint,
+          autofocus: widget.autofocusSearch,
+        ),
+        const SizedBox(height: AppSpacing.md),
+      ],
+    ];
+
+    if (widget.scrollable) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ...search,
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              children: options,
             ),
           ),
-        // « Par mes propres moyens » échappe au filtre : c'est une réponse,
-        // pas un arrêt, et elle doit rester atteignable même quand la
-        // recherche ne renvoie rien.
-        if (!filtering || shown.isEmpty)
-          _Option(
-            label: widget.noneLabel,
-            selected: widget.answered && widget.selectedId == null,
-            enabled: widget.enabled,
-            onTap: () => widget.onChoose(null),
-          ),
-      ],
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [...search, ...options],
     );
   }
 }

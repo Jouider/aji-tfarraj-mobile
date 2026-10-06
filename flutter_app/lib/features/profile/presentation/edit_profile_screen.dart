@@ -325,6 +325,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final s = ref.read(stringsProvider);
     final user = ref.read(loginAuthStateProvider).user;
     showModalBottomSheet(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       backgroundColor: AppColors.surfaceOverlay,
       shape: const RoundedRectangleBorder(
@@ -401,6 +403,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     int daysInMonth(int m, int y) => DateTime(y, m + 1, 0).day;
 
     showModalBottomSheet(
+      // Au-dessus de la barre d'onglets flottante, pas dessous.
+      useRootNavigator: true,
       context: context,
       backgroundColor: AppColors.surfaceOverlay,
       shape: const RoundedRectangleBorder(
