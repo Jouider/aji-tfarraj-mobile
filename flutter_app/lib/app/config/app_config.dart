@@ -73,6 +73,7 @@ class AppConfig {
   static const String wafacash = '/api/me/wafacash';
   static const String wafacashIdentity = '/api/me/wafacash/identity';
   static const String wafacashWithdrawals = '/api/me/wafacash/withdrawals';
+  static const String staffPay = '/api/me/staff-pay';
 
   // Support Tickets
   static const String supportTickets = '/api/support/tickets';

@@ -358,6 +358,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
           ],
+
+          // Ma paie — le staff payé par épisode (superviseur des chargés
+          // publics, chauffeur de salle, équipe technique).
+          if (user != null && user.staffPay) ...[
+            _SpaceCard(
+              title: s.staffPay.profileCardTitle,
+              subtitle: s.staffPay.profileCardSubtitle,
+              icon: Icons.payments_outlined,
+              color: AppColors.success,
+              colorDark: AppColors.successDark,
+              onTap: () => context.push(Routes.staffPay),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           const SizedBox(height: AppSpacing.md),
 
           // ── Préférences ──────────────────────────────

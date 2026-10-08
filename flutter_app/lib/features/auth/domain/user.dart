@@ -32,6 +32,11 @@ class User {
   /// admin-set capability. Drives whether to offer "Mode Chargé Public".
   final bool chargePublicEnabled;
 
+  /// Backend `staff_pay` — un poste payé du staff (superviseur des chargés
+  /// publics, chauffeur de salle, équipe technique) : « Ma paie » et le
+  /// retrait Wafacash.
+  final bool staffPay;
+
   /// Gamification badges (attendance always present; charge_public/staff optional).
   final UserBadges? badges;
 
@@ -63,6 +68,7 @@ class User {
     this.role,
     this.referralCode,
     this.chargePublicEnabled = false,
+    this.staffPay = false,
     this.badges,
     this.instagram,
     this.tiktok,
@@ -104,6 +110,7 @@ class User {
       role: json['role'] as String?,
       referralCode: json['referral_code'] as String?,
       chargePublicEnabled: json['is_charge_public'] as bool? ?? false,
+      staffPay: json['staff_pay'] as bool? ?? false,
       instagram: json['instagram'] as String?,
       tiktok: json['tiktok'] as String?,
       snapchat: json['snapchat'] as String?,
@@ -140,6 +147,7 @@ class User {
       'role': role,
       'referral_code': referralCode,
       'is_charge_public': chargePublicEnabled,
+      'staff_pay': staffPay,
       'badges': badges?.toJson(),
     };
   }
@@ -169,6 +177,7 @@ class User {
     String? role,
     String? referralCode,
     bool? chargePublicEnabled,
+    bool? staffPay,
     UserBadges? badges,
     bool clearAvatar = false,
     bool clearPhoneVerification = false,
@@ -196,6 +205,7 @@ class User {
       role: role ?? this.role,
       referralCode: referralCode ?? this.referralCode,
       chargePublicEnabled: chargePublicEnabled ?? this.chargePublicEnabled,
+      staffPay: staffPay ?? this.staffPay,
       badges: badges ?? this.badges,
       instagram: instagram ?? this.instagram,
       tiktok: tiktok ?? this.tiktok,
