@@ -38,6 +38,7 @@ import 'package:aji_tfarraj/features/profile/presentation/rules_screen.dart';
 import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
 import 'package:aji_tfarraj/features/how_it_works/presentation/how_it_works_screen.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/charge_public_shell.dart';
+import 'package:aji_tfarraj/features/staff_pay/presentation/staff_pay_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/my_rewards_screen.dart';
 
@@ -457,6 +458,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ChargePublicShell(
           initialTab: state.uri.queryParameters['tab'],
         ),
+      ),
+      GoRoute(
+        path: Routes.staffPay,
+        name: 'staffPay',
+        builder: (context, state) => const StaffPayScreen(),
       ),
       GoRoute(
         path: Routes.rewards,

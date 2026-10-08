@@ -74,6 +74,9 @@ class Routes {
   // Mode Chargé Public (full-screen space, outside shell — CP only)
   static const chargePublic = '/charge-public';
 
+  /// « Ma paie » du staff payé (superviseur, chauffeur de salle, technique).
+  static const staffPay = '/staff-pay';
+
   // Referral / Parrainage
   static const referralStats = '/referral-stats';
   static const referralLinks = '/referral-links';

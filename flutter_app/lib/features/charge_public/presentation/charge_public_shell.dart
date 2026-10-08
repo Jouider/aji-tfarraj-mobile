@@ -813,6 +813,24 @@ class _GainsTab extends StatelessWidget {
             onChanged: () => ref.invalidate(cpDashboardProvider),
           ),
         ),
+        // Superviseur ou chauffeur de salle : sa paie du staff est déjà dans
+        // ce solde ; le détail par épisode est dans « Ma paie ».
+        Consumer(builder: (context, ref, __) {
+          final user = ref.watch(loginAuthStateProvider).user;
+          if (user == null || !user.staffPay) return const SizedBox.shrink();
+          final c = ref.watch(stringsProvider).staffPay;
+          return Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                onPressed: () => context.push(Routes.staffPay),
+                icon: const Icon(Icons.payments_outlined, size: 18),
+                label: Text(c.gainsLink),
+              ),
+            ),
+          );
+        }),
         const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
