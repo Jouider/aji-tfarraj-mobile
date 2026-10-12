@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:aji_tfarraj/app/config/app_config.dart';
+import 'package:aji_tfarraj/app/network/api_client.dart' show ApiException;
 import 'package:aji_tfarraj/firebase_options.dart';
 import 'package:aji_tfarraj/app/router.dart';
 import 'package:aji_tfarraj/app/app_gate.dart';
@@ -82,6 +83,13 @@ void main() async {
         options.beforeSend = (event, hint) {
           final exc = event.throwable;
           if (exc is DioException && exc.response?.statusCode == 401) {
+            return null;
+          }
+          // Pas de réseau, délai dépassé : le téléphone, pas un bug. Ces
+          // erreurs-là (2 800 « Impossible de se connecter au serveur ») ont
+          // épuisé le quota Sentry le 21/09 — plus rien d'autre n'arrivait.
+          if (exc is ApiException && exc.isNetwork) return null;
+          if (exc is DioException && ApiException.isNetworkFailure(exc)) {
             return null;
           }
           return event;
@@ -159,8 +167,7 @@ class _AjiTfarrajAppState extends ConsumerState<AjiTfarrajApp> {
     // Resolve actual brightness BEFORE building ThemeData so that
     // AppColors / AppTypography getters return the correct values
     // when AppTheme.lightTheme / darkTheme are evaluated.
-    final platformBrightness =
-        MediaQuery.platformBrightnessOf(context);
+    final platformBrightness = MediaQuery.platformBrightnessOf(context);
     final resolvedBrightness = switch (themeMode) {
       ThemeMode.light => Brightness.light,
       ThemeMode.dark => Brightness.dark,

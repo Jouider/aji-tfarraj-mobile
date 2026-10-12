@@ -209,8 +209,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _pickAvatar() async {
-    Navigator.of(context).pop();
-
     // Custom camera with an oval face-guide frame. It validates that a face is
     // present and returns the captured file path (camera-only live capture —
     // the backend records live_photo_captured_at for identity).
@@ -260,7 +258,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _deleteAvatar() async {
-    Navigator.of(context).pop();
     setState(() => _isAvatarLoading = true);
     try {
       final updatedUser =
@@ -321,10 +318,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         imageUrl: url, heroTag: avatarHeroTag(url, scope: 'edit-profile'));
   }
 
-  void _showAvatarSheet() {
+  /// Le choix « prendre / supprimer », puis l'action — une fois la feuille
+  /// fermée par elle-même.
+  ///
+  /// La feuille vit sur le navigateur RACINE (au-dessus de la barre d'onglets),
+  /// l'écran sur celui de l'onglet Profil. Fermer la feuille avec le `context`
+  /// de l'écran fermait donc l'ÉCRAN : la caméra s'ouvrait quand même, mais la
+  /// photo revenait vers un écran disparu (`!mounted`) et n'était jamais
+  /// envoyée — alors que « Supprimer » passait. C'est ce qui a fait tomber les
+  /// envois de photo avec la 1.1.19 (07/10/2026).
+  Future<void> _showAvatarSheet() async {
     final s = ref.read(stringsProvider);
     final user = ref.read(loginAuthStateProvider).user;
-    showModalBottomSheet(
+    final action = await showModalBottomSheet<_AvatarAction>(
       // Au-dessus de la barre d'onglets flottante, pas dessous.
       useRootNavigator: true,
       context: context,
@@ -363,7 +369,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   style: AppTypography.bodyMedium.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w500)),
-              onTap: _pickAvatar,
+              onTap: () => Navigator.pop(ctx, _AvatarAction.take),
             ),
             if (user?.avatarUrl != null)
               ListTile(
@@ -380,13 +386,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 title: Text(s.removePhoto,
                     style: AppTypography.bodyMedium.copyWith(
                         color: AppColors.error, fontWeight: FontWeight.w500)),
-                onTap: _deleteAvatar,
+                onTap: () => Navigator.pop(ctx, _AvatarAction.remove),
               ),
             const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
     );
+
+    if (!mounted || action == null) return;
+    switch (action) {
+      case _AvatarAction.take:
+        await _pickAvatar();
+      case _AvatarAction.remove:
+        await _deleteAvatar();
+    }
   }
 
   /// Drum-roll (CupertinoPicker) bottom sheet for birth date selection.
@@ -1526,3 +1540,6 @@ class _BrandBadge extends StatelessWidget {
     return SizedBox(width: 48, child: Center(child: glyph));
   }
 }
+
+/// Ce que la feuille de la photo de profil renvoie.
+enum _AvatarAction { take, remove }
