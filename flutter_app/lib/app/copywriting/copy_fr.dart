@@ -1257,6 +1257,10 @@ abstract class ChargePublicCopy {
   String get kpiPending;
   String get kpiPoints;
 
+  /// Le taux de présence de ses invités, et ce qu'il recouvre.
+  String attendance(int rate);
+  String attendanceDetail(int absent, int expected);
+
   String get earningsByShow;
 
   /// The per-episode sheet opened by tapping a show in "Gains par émission".
@@ -1357,6 +1361,12 @@ class ChargePublicCopyFr extends ChargePublicCopy {
   String get kpiAttended => 'Ont assisté';
   @override
   String get kpiPending => 'En attente';
+  @override
+  String attendance(int rate) => 'Présence de tes invités : $rate %';
+  @override
+  String attendanceDetail(int absent, int expected) => absent == 0
+      ? 'Tous présents sur $expected réservations confirmées'
+      : '$absent absent${absent > 1 ? 's' : ''} sur $expected réservations confirmées';
   @override
   String get kpiPoints => 'Mes points';
 
