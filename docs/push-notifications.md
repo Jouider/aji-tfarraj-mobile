@@ -483,3 +483,33 @@ In staging environment, ensure FIREBASE credentials are configured:
 
 - **Mobile Development**: Push notification system implementation
 - **Backend (TODO)**: Device registration endpoints required from Abdellah
+
+---
+
+## Images dans les notifications iOS (1.1.21)
+
+Android affiche l'image d'une notification tout seul. iOS a besoin d'une
+**Notification Service Extension** : `ios/NotificationService/`, cible
+`NotificationService`, bundle `com.ajitfarraj.ajiTfarraj.NotificationService`.
+
+- Le serveur envoie `apns.payload.aps.mutable-content = 1` et
+  `apns.fcm_options.image = <url https>` (backend #418 ; panneau :
+  Communication → Notifications, image JPG/PNG ≤ 1 Mo).
+- L'extension télécharge l'image (https seulement), l'attache (JPEG, PNG,
+  GIF) et rend la notification : vignette, en grand sur un appui long. Sans
+  image, image illisible ou délai iOS écoulé (~30 s), la notification part
+  sans image — jamais perdue.
+- **Écrite en Swift, sans le pod Firebase** : c'est tout ce que fait
+  `populateNotificationContent`. L'extension n'embarque aucun framework (ni
+  `objective_c.framework`) et n'ajoute rien au Podfile.
+- Sa version suit celle de l'app (`FLUTTER_BUILD_NAME` / `NUMBER` via
+  `NotificationService.xcconfig` → `Flutter/Generated.xcconfig`) : App Store
+  Connect refuse une extension dont la version diffère.
+- Signature automatique : le premier build signé enregistre l'identifiant et
+  crée ses profils (Apple ID connecté dans Xcode).
+
+Tester : panneau → Communication → Notifications → une image → « Envoyer un
+test » sur son compte, app fermée puis en arrière-plan.
+
+Ouvrir un écran depuis une notification : `data.deep_link`, par exemple
+`/show/{id}` (autorisé dans `PushRouter`, sur toutes les versions en magasin).
