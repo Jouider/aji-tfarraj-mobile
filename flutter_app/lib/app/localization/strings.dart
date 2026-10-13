@@ -2371,9 +2371,6 @@ class AppStrings {
   String get biometricUnlockTitle => locale == AppLocale.fr
       ? CopyFr.appGate.biometricUnlockTitle
       : CopyAr.appGate.biometricUnlockTitle;
-  String get biometricUnlockSubtitle => locale == AppLocale.fr
-      ? CopyFr.appGate.biometricUnlockSubtitle
-      : CopyAr.appGate.biometricUnlockSubtitle;
   String get biometricUnlockButton => locale == AppLocale.fr
       ? CopyFr.appGate.biometricUnlockButton
       : CopyAr.appGate.biometricUnlockButton;

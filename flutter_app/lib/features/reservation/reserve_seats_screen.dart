@@ -115,7 +115,10 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 22),
-          onPressed: () => context.go(Routes.showDetail(widget.showId)),
+          // Le même retour que le glissement : on revient d'où l'on vient.
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(Routes.showDetail(widget.showId)),
         ),
         actions: const [
           TutorialHelpAction(topic: TutorialTopic.reservationReferral),

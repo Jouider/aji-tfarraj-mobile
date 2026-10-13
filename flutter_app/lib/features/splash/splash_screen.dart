@@ -8,6 +8,8 @@ import 'package:video_player/video_player.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/features/app_lock/data/app_lock_controller.dart';
+import 'package:aji_tfarraj/features/app_lock/presentation/lock_screen.dart';
 import 'package:aji_tfarraj/features/notifications/data/notification_repository.dart'
     show sharedPreferencesProvider;
 
@@ -53,6 +55,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   bool _left = false;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Le plan qui prend le relais si l'app est verrouillée : décodé d'avance,
+    // pour qu'aucune image noire ne s'intercale.
+    precacheImage(LockScreen.cover, context);
+  }
+
+  @override
   void initState() {
     super.initState();
     _timers
@@ -85,6 +95,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // la durée annoncée, et la fin ne serait jamais « atteinte ».
     if (v.position >= v.duration - const Duration(milliseconds: 100)) {
       _ending = true;
+      // Verrouillée : le verrou reprend ce même dernier plan et Face ID
+      // s'ouvre dessus. Pas de fondu au noir avant — on part tout de suite.
+      if (ref.read(appLockProvider).isLocked) return _leave();
       _timers.add(Timer(_hold, () {
         if (!mounted) return;
         setState(() => _fading = true);

@@ -206,10 +206,13 @@ class _ShowDetailContent extends ConsumerWidget {
               if (user != null && !user.profileComplete && missingRequired) {
                 _showProfileIncompleteDialog(context, ref);
               } else if (show.nextEpisode != null) {
-                context.go(Routes.episodeReserve(
+                // push, pas go : go reconstruit la pile en « émission →
+                // réservation », sans l'accueil — revenu sur l'émission, le
+                // glissement retour n'avait plus rien en dessous.
+                context.push(Routes.episodeReserve(
                     showId, show.nextEpisode!.id.toString()));
               } else {
-                context.go(Routes.showReserve(showId));
+                context.push(Routes.showReserve(showId));
               }
             },
           ),
@@ -1736,7 +1739,7 @@ class _EpisodeCard extends ConsumerWidget {
                         ],
                       ),
                       child: FilledButton(
-                        onPressed: () => context.go(Routes.episodeReserve(
+                        onPressed: () => context.push(Routes.episodeReserve(
                             showId, episode.id.toString())),
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primaryAction,

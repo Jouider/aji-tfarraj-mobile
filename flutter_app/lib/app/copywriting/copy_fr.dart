@@ -165,8 +165,6 @@ class AppGateCopyFr {
   String get biometricLockLabel => 'Verrouillage biométrique';
   String get biometricLockSubtitle => 'Face ID / empreinte à l\'ouverture';
   String get biometricUnlockTitle => 'Application verrouillée';
-  String get biometricUnlockSubtitle =>
-      'Authentifiez-vous pour accéder à vos billets et à votre profil.';
   String get biometricUnlockButton => 'Déverrouiller';
   String get biometricReason =>
       'Confirmez votre identité pour déverrouiller Aji Tfarraj';
