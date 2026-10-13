@@ -627,7 +627,7 @@ class _InvitesTab extends StatefulWidget {
 }
 
 class _InvitesTabState extends State<_InvitesTab> {
-  /// all | present | approved | pending | cancelled
+  /// all | present | approved | pending | cancelled | taken
   String _filter = 'all';
 
   /// Does a guest match a filter key?
@@ -658,7 +658,7 @@ class _InvitesTabState extends State<_InvitesTab> {
     final cp = widget.cp;
 
     // Fallback source has no per-guest list yet.
-    if (dash.guests.isEmpty) {
+    if (dash.guests.isEmpty && dash.taken.isEmpty) {
       if (dash.referredUsers.isEmpty) {
         return ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -700,8 +700,15 @@ class _InvitesTabState extends State<_InvitesTab> {
     if (count('cancelled') > 0) {
       chips.add(('cancelled', cp.filterCancelled(count('cancelled'))));
     }
+    // Réservés avec son lien pour un autre chargé public : à part, ils ne
+    // sont pas dans « Tous » — ce ne sont pas ses invités.
+    if (dash.taken.isNotEmpty) {
+      chips.add(('taken', cp.filterTaken(dash.taken.length)));
+    }
 
-    final guests = dash.guests.where((g) => _match(_filter, g)).toList();
+    final guests = _filter == 'taken'
+        ? const <CpGuest>[]
+        : dash.guests.where((g) => _match(_filter, g)).toList();
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -722,9 +729,92 @@ class _InvitesTabState extends State<_InvitesTab> {
           ),
         ),
         const SizedBox(height: AppSpacing.md),
-        ...guests.map((g) => _GuestTile(guest: g, cp: cp)),
+        if (_filter == 'taken') ...[
+          Text(cp.takenExplanation,
+              style: AppTypography.bodySmall
+                  .copyWith(color: AppColors.textSecondary)),
+          const SizedBox(height: AppSpacing.md),
+          ...dash.taken.map((g) => _TakenTile(guest: g, cp: cp)),
+        ] else
+          ...guests.map((g) => _GuestTile(guest: g, cp: cp)),
         const SizedBox(height: AppSpacing.xxl),
       ],
+    );
+  }
+}
+
+/// Quelqu'un qui a réservé avec son lien, mais pour un autre chargé public :
+/// à qui il compte, à la place du gain et du bouton WhatsApp.
+class _TakenTile extends StatelessWidget {
+  final CpTakenGuest guest;
+  final ChargePublicCopy cp;
+  const _TakenTile({required this.guest, required this.cp});
+
+  @override
+  Widget build(BuildContext context) {
+    final initials =
+        guest.name.trim().isNotEmpty ? guest.name.trim()[0].toUpperCase() : '?';
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: AppColors.border,
+            backgroundImage:
+                guest.avatarUrl != null ? NetworkImage(guest.avatarUrl!) : null,
+            child: guest.avatarUrl == null
+                ? Text(initials,
+                    style: AppTypography.labelMedium
+                        .copyWith(color: AppColors.textSecondary))
+                : null,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(guest.name,
+                    style: AppTypography.bodyMedium
+                        .copyWith(fontWeight: FontWeight.w500)),
+                Text(
+                    '${guest.show}${guest.date != null ? ' · ${guest.date}' : ''}',
+                    style: AppTypography.labelSmall
+                        .copyWith(color: AppColors.textMuted)),
+              ],
+            ),
+          ),
+          if (guest.owner != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  cp.takenBy(guest.owner!),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.warningDark,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
