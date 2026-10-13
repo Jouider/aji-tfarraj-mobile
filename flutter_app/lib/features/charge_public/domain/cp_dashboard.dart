@@ -16,6 +16,13 @@ class CpStats {
   final int points;
   final String currency;
 
+  /// Le vrai taux de présence (tournages passés, réservations confirmées),
+  /// en %. Null tant que rien n'est jugé — ou serveur sans ce calcul.
+  /// [notAttended] compte aussi les invités des tournages à venir.
+  final int? attendanceRate;
+  final int absent;
+  final int expected;
+
   const CpStats({
     this.brought = 0,
     this.attended = 0,
@@ -25,6 +32,9 @@ class CpStats {
     this.unpaidBalance = 0,
     this.points = 0,
     this.currency = 'MAD',
+    this.attendanceRate,
+    this.absent = 0,
+    this.expected = 0,
   });
 }
 
@@ -252,6 +262,10 @@ class CpDashboard {
         unpaidBalance: (s['unpaid_balance'] as num?)?.toInt() ?? 0,
         points: (s['total_points'] as num?)?.toInt() ?? 0,
         currency: s['currency'] as String? ?? 'MAD',
+        attendanceRate: ((s['attendance'] as Map?)?['rate'] as num?)?.toInt(),
+        absent: ((s['attendance'] as Map?)?['absent'] as num?)?.toInt() ?? 0,
+        expected:
+            ((s['attendance'] as Map?)?['expected'] as num?)?.toInt() ?? 0,
       ),
       byShow: ((j['by_show'] as List<dynamic>?) ?? [])
           .map((e) => CpShowRow.fromJson(e as Map<String, dynamic>))

@@ -127,4 +127,34 @@ void main() {
       expect(e.guests, hasLength(1));
     });
   });
+
+  group('taux de présence', () {
+    test('lu depuis stats.attendance', () {
+      final d = CpDashboard.fromRich({
+        'stats': {
+          'total_brought': 20,
+          'total_attended': 14,
+          'total_not_attended': 6,
+          'attendance': {
+            'attended': 14,
+            'absent': 3,
+            'expected': 17,
+            'rate': 82
+          },
+        },
+      });
+      expect(d.stats.attendanceRate, 82);
+      expect(d.stats.absent, 3);
+      expect(d.stats.expected, 17);
+      // « En attente » reste ce qu'il était : invités moins présents.
+      expect(d.stats.notAttended, 6);
+    });
+
+    test('absent d\'un vieux serveur : pas de taux, rien d\'affiché', () {
+      final d = CpDashboard.fromRich({
+        'stats': {'total_brought': 3}
+      });
+      expect(d.stats.attendanceRate, isNull);
+    });
+  });
 }

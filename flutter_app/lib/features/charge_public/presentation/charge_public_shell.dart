@@ -340,6 +340,10 @@ class _AccueilTab extends StatelessWidget {
         _BalanceCard(stats: s, cp: cp),
         const SizedBox(height: AppSpacing.lg),
         _KpiGrid(stats: s, cp: cp),
+        if (s.attendanceRate != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _AttendanceLine(stats: s, cp: cp),
+        ],
         if (dash.byShow.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.xl),
           _SectionHeader(title: cp.earningsByShow),
@@ -499,6 +503,51 @@ class _KpiGrid extends StatelessWidget {
               value: '${stats.notAttended}',
               label: cp.kpiPending,
               color: AppColors.warning,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Le vrai taux de présence de ses invités : tournages passés, réservations
+/// confirmées. Vert à 80 % et plus, orange à 60 %, rouge en dessous.
+class _AttendanceLine extends StatelessWidget {
+  final CpStats stats;
+  final ChargePublicCopy cp;
+  const _AttendanceLine({required this.stats, required this.cp});
+
+  @override
+  Widget build(BuildContext context) {
+    final rate = stats.attendanceRate!;
+    final color = rate >= 80
+        ? AppColors.successDark
+        : rate >= 60
+            ? AppColors.warningDark
+            : AppColors.errorDark;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.how_to_reg_outlined, size: 18, color: color),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(cp.attendance(rate),
+                    style: AppTypography.labelLarge.copyWith(color: color)),
+                Text(cp.attendanceDetail(stats.absent, stats.expected),
+                    style: AppTypography.caption
+                        .copyWith(color: AppColors.textSecondary)),
+              ],
             ),
           ),
         ],

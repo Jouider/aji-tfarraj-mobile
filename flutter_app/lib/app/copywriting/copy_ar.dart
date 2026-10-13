@@ -1310,6 +1310,12 @@ class ChargePublicCopyAr extends ChargePublicCopy {
   @override
   String get kpiPending => 'قيد الانتظار';
   @override
+  String attendance(int rate) => 'حضور المدعوين ديالك: $rate٪';
+  @override
+  String attendanceDetail(int absent, int expected) => absent == 0
+      ? 'كلهم حضروا من $expected حجز مؤكد'
+      : '$absent غائب من $expected حجز مؤكد';
+  @override
   String get kpiPoints => 'نقاطي';
 
   @override
