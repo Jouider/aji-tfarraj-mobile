@@ -129,6 +129,8 @@ flutter:
     # La vidéo de lancement (3 s, muette). Les PNG du dossier ne servent qu'à
     # flutter_native_splash : on ne les embarque pas.
     - assets/splash/splash.mp4
+    # Son dernier plan : l'écran verrouillé le prolonge à l'identique.
+    - assets/splash/splash_last.jpg
 
   # Cairo, embarqué dans l'app — jamais téléchargé.
   #

@@ -385,8 +385,10 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
+        // push : on reste dans l'onglet Réservations, et le glissement
+        // retour ramène à la liste. go changeait d'onglet, sans retour.
         onTap: () =>
-            context.go(Routes.reservationDetail(reservation.id.toString())),
+            context.push(Routes.reservationDetail(reservation.id.toString())),
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

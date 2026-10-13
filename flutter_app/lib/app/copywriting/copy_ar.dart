@@ -166,8 +166,6 @@ class AppGateCopyAr {
   String get biometricLockLabel => 'القفل البيومتري';
   String get biometricLockSubtitle => 'Face ID / البصمة عند الفتح';
   String get biometricUnlockTitle => 'التطبيق مقفل';
-  String get biometricUnlockSubtitle =>
-      'تحقّق من هويتك للوصول إلى تذاكرك وملفك الشخصي.';
   String get biometricUnlockButton => 'إلغاء القفل';
   String get biometricReason => 'أكّد هويتك لفتح «أجي تفرّج»';
   String get biometricUnavailable =>
