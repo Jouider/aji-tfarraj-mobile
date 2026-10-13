@@ -62,14 +62,16 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _FilterSheet(
+      // La feuille se ferme avec SON context : elle est sur le navigateur
+      // racine, l'écran sur celui de l'onglet.
+      builder: (sheetContext) => _FilterSheet(
         s: s,
         selectedChannel: _selectedChannel,
         channels: ref.read(showsListProvider).uniqueChannels,
         onChannelSelected: (ch) {
           setState(() => _selectedChannel = ch);
           ref.read(showsFilterProvider.notifier).setChannel(ch);
-          Navigator.pop(context);
+          Navigator.pop(sheetContext);
         },
         onClear: () {
           setState(() {
@@ -78,7 +80,7 @@ class _ShowsBrowseScreenState extends ConsumerState<ShowsBrowseScreen> {
           });
           _searchController.clear();
           ref.read(showsFilterProvider.notifier).clearAll();
-          Navigator.pop(context);
+          Navigator.pop(sheetContext);
         },
       ),
     );

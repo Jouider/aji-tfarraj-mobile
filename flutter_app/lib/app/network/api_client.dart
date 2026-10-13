@@ -395,11 +395,16 @@ class ApiException implements Exception {
   final String? code;
   final Map<String, dynamic>? errors;
 
+  /// Le téléphone n'a pas joint le serveur (pas de réseau, délai dépassé).
+  /// Ni un bug de l'app ni du serveur : jamais envoyé à Sentry.
+  final bool isNetwork;
+
   ApiException({
     required this.message,
     this.statusCode,
     this.code,
     this.errors,
+    this.isNetwork = false,
   });
 
   factory ApiException.fromDioError(DioException error) {
@@ -407,6 +412,7 @@ class ApiException implements Exception {
     int? statusCode = error.response?.statusCode;
     String? code;
     Map<String, dynamic>? errors;
+    final isNetwork = isNetworkFailure(error);
 
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
@@ -443,8 +449,19 @@ class ApiException implements Exception {
       statusCode: statusCode,
       code: code,
       errors: errors,
+      isNetwork: isNetwork,
     );
   }
+
+  /// Pas de réponse du serveur : réseau coupé ou délai dépassé.
+  static bool isNetworkFailure(DioException error) =>
+      error.response == null &&
+      const {
+        DioExceptionType.connectionTimeout,
+        DioExceptionType.sendTimeout,
+        DioExceptionType.receiveTimeout,
+        DioExceptionType.connectionError,
+      }.contains(error.type);
 
   /// Normalize ANY thrown object into an [ApiException].
   /// - already an [ApiException] → returned unchanged

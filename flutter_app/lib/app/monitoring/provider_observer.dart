@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:aji_tfarraj/app/network/api_client.dart';
 
 /// Riverpod observer that captures provider errors and state transitions.
 ///
@@ -17,6 +18,10 @@ class AppProviderObserver extends ProviderObserver {
     StackTrace stackTrace,
     ProviderContainer container,
   ) {
+    // Pas de réseau : l'écran affiche déjà « Réessayer », et ce n'est pas un
+    // bug. Rapportées, ces erreurs avaient épuisé le quota Sentry.
+    if (error is ApiException && error.isNetwork) return;
+
     if (kDebugMode) {
       debugPrint(
         '[ProviderObserver] ${provider.name ?? provider.runtimeType} failed: $error',

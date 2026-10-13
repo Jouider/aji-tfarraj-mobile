@@ -179,4 +179,32 @@ void main() {
       expect(ex.errors, isNull);
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Réseau coupé : jamais envoyé à Sentry
+  // ─────────────────────────────────────────────────────────────────────────
+  group('ApiException.isNetwork', () {
+    for (final type in [
+      DioExceptionType.connectionError,
+      DioExceptionType.connectionTimeout,
+      DioExceptionType.sendTimeout,
+      DioExceptionType.receiveTimeout,
+    ]) {
+      test('$type sans réponse est une coupure réseau', () {
+        final e = _makeDioException(type: type);
+        expect(ApiException.isNetworkFailure(e), isTrue);
+        expect(ApiException.fromDioError(e).isNetwork, isTrue);
+      });
+    }
+
+    test('une erreur serveur n\'en est pas une', () {
+      final e = _makeDioException(
+          type: DioExceptionType.badResponse, statusCode: 500);
+      expect(ApiException.fromDioError(e).isNetwork, isFalse);
+    });
+
+    test('une erreur de lecture non plus', () {
+      expect(ApiException.from(const FormatException('x')).isNetwork, isFalse);
+    });
+  });
 }
