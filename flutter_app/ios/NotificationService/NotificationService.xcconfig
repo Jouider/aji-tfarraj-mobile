@@ -1,0 +1,4 @@
+// La version de l'app (FLUTTER_BUILD_NAME / FLUTTER_BUILD_NUMBER), que
+// `flutter build` écrit dans Generated.xcconfig : l'extension porte la même.
+// Pas Flutter/Release.xcconfig, qui tirerait aussi les réglages des pods.
+#include "../Flutter/Generated.xcconfig"
