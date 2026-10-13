@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:aji_tfarraj/features/charge_public/domain/cp_dashboard.dart';
+import 'package:aji_tfarraj/app/copywriting/copy_fr.dart';
 
 /// A charge public is paid per recording, and asked to see which night paid
 /// what. The per-episode rows come from the server with the same rule as the
@@ -156,5 +157,42 @@ void main() {
       });
       expect(d.stats.attendanceRate, isNull);
     });
+  });
+
+  group('chez un autre chargé public', () {
+    test('lu depuis taken, sans téléphone', () {
+      final d = CpDashboard.fromRich({
+        'stats': {'total_brought': 1},
+        'taken': [
+          {
+            'name': 'Samira Bennani',
+            'avatar_url': null,
+            'show': 'Rachid Show',
+            'date': '20/10/2026',
+            'res_status': 'pending_review',
+            'owner': 'Abdellah Jouider',
+            'reserved_at': '2026-10-13T19:20:00+00:00',
+          },
+        ],
+      });
+      expect(d.taken, hasLength(1));
+      expect(d.taken.single.owner, 'Abdellah Jouider');
+      expect(d.taken.single.show, 'Rachid Show');
+      // Pas dans ses invités : ce n'est pas son public.
+      expect(d.guests, isEmpty);
+    });
+
+    test('un vieux serveur sans taken : liste vide', () {
+      expect(
+          CpDashboard.fromRich({'stats': <String, dynamic>{}}).taken, isEmpty);
+    });
+  });
+
+  test("« Public d'Abdellah », « Public de Youssef »", () {
+    const fr = ChargePublicCopyFr();
+    expect(fr.takenBy('Abdellah Jouider'), "Public d'Abdellah Jouider");
+    expect(fr.takenBy('Youssef Aderghal'), 'Public de Youssef Aderghal');
+    expect(fr.takenBy('Hamid Alaoui'), 'Public de Hamid Alaoui');
+    expect(fr.takenBy('Imane Tazi'), "Public d'Imane Tazi");
   });
 }

@@ -191,6 +191,36 @@ class CpGuest {
       );
 }
 
+/// Réservé avec son lien, mais la personne était déjà le public d'un autre
+/// chargé public ([owner]) : la réservation compte pour lui. Pas de
+/// téléphone — ce n'est pas son public.
+class CpTakenGuest {
+  final String name;
+  final String? avatarUrl;
+  final String show;
+  final String? date;
+  final String? resStatus;
+  final String? owner;
+
+  const CpTakenGuest({
+    required this.name,
+    this.avatarUrl,
+    required this.show,
+    this.date,
+    this.resStatus,
+    this.owner,
+  });
+
+  factory CpTakenGuest.fromJson(Map<String, dynamic> j) => CpTakenGuest(
+        name: j['name'] as String? ?? '—',
+        avatarUrl: j['avatar_url'] as String?,
+        show: j['show'] as String? ?? '—',
+        date: j['date'] as String?,
+        resStatus: j['res_status'] as String?,
+        owner: j['owner'] as String?,
+      );
+}
+
 class CpPayment {
   final int amount;
   final String? note;
@@ -236,6 +266,9 @@ class CpDashboard {
   final List<CpPayment> payments;
   final List<CpReferredUser> referredUsers;
 
+  /// Réservés avec son lien pour un autre chargé public (voir [CpTakenGuest]).
+  final List<CpTakenGuest> taken;
+
   /// True when built from the `/api/me/referrals` fallback (guest list,
   /// by-show and payment history not yet available from the backend).
   final bool isPartial;
@@ -246,6 +279,7 @@ class CpDashboard {
     this.guests = const [],
     this.payments = const [],
     this.referredUsers = const [],
+    this.taken = const [],
     this.isPartial = false,
   });
 
@@ -275,6 +309,9 @@ class CpDashboard {
           .toList(),
       payments: ((j['payments'] as List<dynamic>?) ?? [])
           .map((e) => CpPayment.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      taken: ((j['taken'] as List<dynamic>?) ?? [])
+          .map((e) => CpTakenGuest.fromJson(e as Map<String, dynamic>))
           .toList(),
       isPartial: false,
     );

@@ -1283,6 +1283,11 @@ abstract class ChargePublicCopy {
   String filterPending(int n);
   String filterCancelled(int n);
 
+  /// Réservés avec son lien, mais déjà le public d'un autre chargé public.
+  String filterTaken(int n);
+  String get takenExplanation;
+  String takenBy(String owner);
+
   String get statusPresent;
   String get statusApproved;
   String get statusContacting;
@@ -1403,6 +1408,17 @@ class ChargePublicCopyFr extends ChargePublicCopy {
   String filterPending(int n) => 'En attente ($n)';
   @override
   String filterCancelled(int n) => 'Annulés ($n)';
+  @override
+  String filterTaken(int n) => 'Chez un autre CP ($n)';
+  @override
+  String get takenExplanation =>
+      'Ils ont réservé avec ton lien, mais ils étaient déjà le public d\'un autre chargé public : ces réservations comptent pour lui.';
+  @override
+  String takenBy(String owner) =>
+      // « Public d'Abdellah », « Public de Youssef ».
+      RegExp(r'^[aeiouâàéèêëîïôûü]', caseSensitive: false).hasMatch(owner)
+          ? "Public d'$owner"
+          : 'Public de $owner';
 
   @override
   String get statusPresent => 'Présent';

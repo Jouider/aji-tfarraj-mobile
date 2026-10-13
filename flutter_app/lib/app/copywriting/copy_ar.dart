@@ -1351,6 +1351,13 @@ class ChargePublicCopyAr extends ChargePublicCopy {
   String filterPending(int n) => 'قيد الانتظار ($n)';
   @override
   String filterCancelled(int n) => 'الملغاة ($n)';
+  @override
+  String filterTaken(int n) => 'عند مكلف آخر ($n)';
+  @override
+  String get takenExplanation =>
+      'حجزو بالرابط ديالك، ولكن كانو ديجا من الجمهور ديال مكلف آخر: هاد الحجوزات كتحسب ليه.';
+  @override
+  String takenBy(String owner) => 'جمهور $owner';
 
   @override
   String get statusPresent => 'حاضر';
