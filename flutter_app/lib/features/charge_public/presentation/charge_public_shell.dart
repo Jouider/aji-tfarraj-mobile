@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
+import 'package:aji_tfarraj/app/design_system/primitives/app_logo.dart';
+import 'package:aji_tfarraj/app/design_system/components/glass_nav_bar.dart';
 import 'package:aji_tfarraj/app/routes.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart' show ChargePublicCopy;
 import 'package:aji_tfarraj/app/design_system/colors.dart';
@@ -53,40 +56,16 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
     final titles = [cp.tabHome, cp.tabShare, cp.tabGuests, cp.tabEarnings];
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundWhite,
+      // La barre d'onglets flotte au-dessus du contenu, comme dans l'espace public.
+      extendBody: true,
       appBar: AppBar(
+        // Comme les onglets publics : le logo, le nom de l'onglet, les gestes
+        // au bout. Le bouton « Mode public » dit dans quel espace on est.
         automaticallyImplyLeading: false,
-        backgroundColor: AppColors.backgroundWhite,
-        elevation: 0,
-        scrolledUnderElevation: 0,
+        centerTitle: false,
         titleSpacing: AppSpacing.lg,
-        title: Row(
-          children: [
-            Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Icon(Icons.workspace_premium_outlined,
-                  size: 18, color: AppColors.secondaryDark),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(titles[_index],
-                    style: AppTypography.h4
-                        .copyWith(fontWeight: FontWeight.w700, fontSize: 17)),
-                Text(cp.spaceSubtitle,
-                    style: AppTypography.labelSmall
-                        .copyWith(color: AppColors.textMuted, fontSize: 11)),
-              ],
-            ),
-          ],
-        ),
+        title: AppBarBrandTitle(titles[_index]),
         actions: [
           // Le clip de l'onglet ouvert, et les deux autres à côté en pastilles.
           TutorialHelpAction(
@@ -153,10 +132,27 @@ class _ChargePublicShellState extends ConsumerState<ChargePublicShell> {
                 },
               ),
             ),
-      bottomNavigationBar: _CpNavBar(
+      bottomNavigationBar: GlassNavBar(
         currentIndex: _index,
-        cp: cp,
         onTap: (i) => setState(() => _index = i),
+        items: [
+          GlassNavItem(
+              icon: Icons.home_outlined,
+              activeIcon: Icons.home,
+              label: cp.navHome),
+          GlassNavItem(
+              icon: Icons.share_outlined,
+              activeIcon: Icons.share,
+              label: cp.navShare),
+          GlassNavItem(
+              icon: Icons.people_outline,
+              activeIcon: Icons.people,
+              label: cp.navGuests),
+          GlassNavItem(
+              icon: Icons.account_balance_wallet_outlined,
+              activeIcon: Icons.account_balance_wallet,
+              label: cp.navEarnings),
+        ],
       ),
     );
   }
@@ -200,90 +196,14 @@ String _statusLabel(ChargePublicCopy cp, bool attended, String? resStatus) {
   }
 }
 
-// ─────────────────────────────────────────────
-// Custom bottom nav — pill indicator, matches public shell
-// ─────────────────────────────────────────────
-
-class _CpNavBar extends StatelessWidget {
-  final int currentIndex;
-  final ChargePublicCopy cp;
-  final ValueChanged<int> onTap;
-
-  const _CpNavBar({
-    required this.currentIndex,
-    required this.cp,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      (icon: Icons.home_outlined, active: Icons.home, label: cp.navHome),
-      (icon: Icons.share_outlined, active: Icons.share, label: cp.navShare),
-      (icon: Icons.people_outline, active: Icons.people, label: cp.navGuests),
-      (
-        icon: Icons.account_balance_wallet_outlined,
-        active: Icons.account_balance_wallet,
-        label: cp.navEarnings
-      ),
-    ];
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
-        border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: List.generate(items.length, (i) {
-              final item = items[i];
-              final isActive = currentIndex == i;
-              final color =
-                  isActive ? AppColors.secondary : AppColors.textMuted;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: isActive
-                              ? AppColors.secondary.withValues(alpha: 0.12)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Icon(isActive ? item.active : item.icon,
-                            size: 22, color: color),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          fontSize: isActive ? 10.0 : 9.5,
-                          fontWeight:
-                              isActive ? FontWeight.w600 : FontWeight.w400,
-                          color: color,
-                          height: 1.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ),
+/// La marge d'une liste d'onglet : la place de la barre d'onglets en verre
+/// en bas, sinon le dernier élément reste dessous.
+EdgeInsets _listPadding(BuildContext context) => EdgeInsets.fromLTRB(
+      AppSpacing.lg,
+      AppSpacing.lg,
+      AppSpacing.lg,
+      AppSpacing.lg + AppSpacing.navBarClearance(context),
     );
-  }
-}
 
 // ─────────────────────────────────────────────
 // Accueil
@@ -314,7 +234,8 @@ class _AccueilTab extends StatelessWidget {
         (hour >= 5 && hour < 18) ? cp.greetingMorning : cp.greetingEvening;
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      // Le contenu file sous la barre d'onglets en verre.
+      padding: _listPadding(context),
       children: [
         // Personalised greeting
         Text(
@@ -375,6 +296,8 @@ class _AccueilTab extends StatelessWidget {
   }
 }
 
+/// Le solde : la carte de la marque, en orange de la charte. Le dégradé
+/// d'action (la moitié sombre) parce qu'on écrit en blanc dessus.
 class _BalanceCard extends StatelessWidget {
   final CpStats stats;
   final ChargePublicCopy cp;
@@ -382,13 +305,14 @@ class _BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const onCard = Colors.white;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.successLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
+        gradient: AppColors.actionGradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,34 +322,34 @@ class _BalanceCard extends StatelessWidget {
               Expanded(
                 child: Text(cp.balanceTitle,
                     style: AppTypography.labelMedium
-                        .copyWith(color: AppColors.successDark)),
+                        .copyWith(color: onCard.withValues(alpha: 0.85))),
               ),
               Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.18),
+                  color: onCard.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.account_balance_wallet_outlined,
-                    size: 19, color: AppColors.successDark),
+                    size: 19, color: onCard),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(cp.money(stats.unpaidBalance),
-              style: AppTypography.h1.copyWith(
-                  color: AppColors.successDark, fontWeight: FontWeight.w700)),
+              style: AppTypography.h1
+                  .copyWith(color: onCard, fontWeight: FontWeight.w800)),
           const SizedBox(height: 12),
-          // Paid progress
+          // La part déjà payée de ce qui a été gagné.
           if (stats.earnings > 0) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: (stats.paid / stats.earnings).clamp(0.0, 1.0),
                 minHeight: 6,
-                backgroundColor: AppColors.success.withValues(alpha: 0.18),
-                valueColor: const AlwaysStoppedAnimation(AppColors.successDark),
+                backgroundColor: onCard.withValues(alpha: 0.22),
+                valueColor: const AlwaysStoppedAnimation(onCard),
               ),
             ),
             const SizedBox(height: 8),
@@ -434,11 +358,13 @@ class _BalanceCard extends StatelessWidget {
             children: [
               _MiniStat(
                   icon: Icons.savings_outlined,
-                  label: cp.earnedShort(stats.earnings)),
+                  label: cp.earnedShort(stats.earnings),
+                  color: onCard),
               const SizedBox(width: AppSpacing.lg),
               _MiniStat(
                   icon: Icons.check_circle_outline,
-                  label: cp.paidShort(stats.paid)),
+                  label: cp.paidShort(stats.paid),
+                  color: onCard),
             ],
           ),
         ],
@@ -450,18 +376,19 @@ class _BalanceCard extends StatelessWidget {
 class _MiniStat extends StatelessWidget {
   final IconData icon;
   final String label;
-  const _MiniStat({required this.icon, required this.label});
+  final Color? color;
+  const _MiniStat({required this.icon, required this.label, this.color});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: AppColors.textSecondary),
+        Icon(icon, size: 14, color: color ?? AppColors.textSecondary),
         const SizedBox(width: 4),
         Text(label,
             style: AppTypography.labelSmall
-                .copyWith(color: AppColors.textSecondary)),
+                .copyWith(color: color ?? AppColors.textSecondary)),
       ],
     );
   }
@@ -484,7 +411,7 @@ class _KpiGrid extends StatelessWidget {
               icon: Icons.groups_outlined,
               value: '${stats.brought}',
               label: cp.kpiBrought,
-              color: AppColors.primary,
+              color: AppColors.accentInk,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -493,7 +420,7 @@ class _KpiGrid extends StatelessWidget {
               icon: Icons.check_circle_outline,
               value: '${stats.attended}',
               label: cp.kpiAttended,
-              color: AppColors.success,
+              color: AppColors.accentInk,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -502,7 +429,7 @@ class _KpiGrid extends StatelessWidget {
               icon: Icons.hourglass_empty_rounded,
               value: '${stats.notAttended}',
               label: cp.kpiPending,
-              color: AppColors.warning,
+              color: AppColors.accentInk,
             ),
           ),
         ],
@@ -574,9 +501,11 @@ class _KpiTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
+        // La carte de l'espace public : même surface, même rayon, même ombre.
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,8 +524,9 @@ class _KpiTile extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(value,
-                  style: AppTypography.h2
-                      .copyWith(color: color, fontWeight: FontWeight.w700)),
+                  style: AppTypography.h2.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 6),
@@ -661,7 +591,8 @@ class _InvitesTabState extends State<_InvitesTab> {
     if (dash.guests.isEmpty && dash.taken.isEmpty) {
       if (dash.referredUsers.isEmpty) {
         return ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          // Le contenu file sous la barre d'onglets en verre.
+          padding: _listPadding(context),
           children: [
             const SizedBox(height: 80),
             Center(
@@ -674,7 +605,8 @@ class _InvitesTabState extends State<_InvitesTab> {
         );
       }
       return ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        // Le contenu file sous la barre d'onglets en verre.
+        padding: _listPadding(context),
         children: [
           _PartialBanner(cp: cp),
           const SizedBox(height: AppSpacing.md),
@@ -711,7 +643,8 @@ class _InvitesTabState extends State<_InvitesTab> {
         : dash.guests.where((g) => _match(_filter, g)).toList();
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      // Le contenu file sous la barre d'onglets en verre.
+      padding: _listPadding(context),
       children: [
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -758,9 +691,11 @@ class _TakenTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
+        // La carte de l'espace public : même surface, même rayon, même ombre.
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         children: [
@@ -840,9 +775,11 @@ class _GuestTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
+        // La carte de l'espace public : même surface, même rayon, même ombre.
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         children: [
@@ -942,7 +879,8 @@ class _GainsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = dash.stats;
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      // Le contenu file sous la barre d'onglets en verre.
+      padding: _listPadding(context),
       children: [
         _BalanceCard(stats: s, cp: cp),
         // Retirer ce solde, juste sous lui. Invisible tant que le staff n'a
@@ -1020,9 +958,11 @@ class _GainStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
+        // La carte de l'espace public : même surface, même rayon, même ombre.
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1052,9 +992,11 @@ class _PaymentRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
+        // La carte de l'espace public : même surface, même rayon, même ombre.
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         children: [
@@ -1105,15 +1047,15 @@ class _ShowRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Material(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           onTap: canOpen ? () => _showEpisodeBreakdown(context, row, cp) : null,
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.border),
             ),
             child: Row(
@@ -1491,9 +1433,11 @@ class _ReferredRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
+        // La carte de l'espace public : même surface, même rayon, même ombre.
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         children: [
