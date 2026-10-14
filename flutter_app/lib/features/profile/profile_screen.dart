@@ -120,119 +120,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  /// « Supprimer mon compte » : une feuille où il faut écrire le mot.
+  ///
+  /// Des membres touchaient ce bouton au lieu de « Se déconnecter ». Il est
+  /// maintenant un petit lien, loin de la déconnexion, et la suppression
+  /// demande d'écrire « SUPPRIMER » : un doigt qui glisse ne supprime plus rien.
   Future<void> _handleDeleteAccount() async {
-    // Step 1: initial warning dialog
-    final proceed = await showDialog<bool>(
+    final confirmed = await showModalBottomSheet<bool>(
+          // Au-dessus de la barre d'onglets flottante, pas dessous.
+          useRootNavigator: true,
           context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: AppColors.surfaceOverlay,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                const Icon(Icons.warning_rounded,
-                    color: AppColors.error, size: 22),
-                const SizedBox(width: 8),
-                Text('Supprimer le compte ?', style: AppTypography.h3),
-              ],
-            ),
-            content: Text(
-              'Toutes vos données seront définitivement supprimées : '
-              'réservations, points de fidélité, historique. '
-              'Cette action est irréversible.',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-            ),
-            actionsAlignment: MainAxisAlignment.end,
-            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.backgroundGrey,
-                  foregroundColor: AppColors.textPrimary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                ),
-                child: Text('Annuler', style: AppTypography.labelMedium),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                ),
-                child: Text(
-                  'Continuer',
-                  style:
-                      AppTypography.labelMedium.copyWith(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
+          isScrollControlled: true,
+          useSafeArea: true,
+          showDragHandle: true,
+          backgroundColor: AppColors.surfaceOverlay,
+          builder: (_) => const DeleteAccountSheet(),
         ) ??
         false;
-
-    if (!proceed || !mounted) return;
-
-    // Step 2: final confirmation dialog
-    final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: AppColors.surfaceOverlay,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Text('Confirmer la suppression',
-                style: AppTypography.h3.copyWith(color: AppColors.error)),
-            content: Text(
-              'Voulez-vous vraiment supprimer définitivement votre compte ?',
-              style: AppTypography.bodyMedium
-                  .copyWith(color: AppColors.textSecondary),
-            ),
-            actionsAlignment: MainAxisAlignment.end,
-            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.backgroundGrey,
-                  foregroundColor: AppColors.textPrimary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                ),
-                child: Text('Annuler', style: AppTypography.labelMedium),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                ),
-                child: Text(
-                  'Supprimer définitivement',
-                  style:
-                      AppTypography.labelMedium.copyWith(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-
     if (!confirmed || !mounted) return;
 
     setState(() => _isDeletingAccount = true);
@@ -241,8 +145,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur lors de la suppression. Réessayez.'),
+          SnackBar(
+            content: Text(ref.read(stringsProvider).accountDeletion.error),
             backgroundColor: AppColors.error,
           ),
         );
@@ -567,10 +471,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onTap: _handleLogout,
             label: s.profileLogoutLabel,
           ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Delete account button (required by Apple App Store guideline 5.1.1)
-          _DeleteAccountButton(
+          // Loin de la déconnexion, et discret : on le trouve si on le
+          // cherche (Apple 5.1.1(v)), on ne le touche pas par erreur.
+          const SizedBox(height: AppSpacing.xxxl),
+          _DeleteAccountLink(
+            label: s.accountDeletion.link,
             isLoading: _isDeletingAccount,
             onTap: _handleDeleteAccount,
           ),
@@ -1225,43 +1130,143 @@ class _UnreadBadge extends StatelessWidget {
 // Delete Account Button
 // ─────────────────────────────────────────────
 
-class _DeleteAccountButton extends StatelessWidget {
+/// Un lien gris, petit, sans icône : rien à voir avec « Se déconnecter ».
+class _DeleteAccountLink extends StatelessWidget {
+  final String label;
   final bool isLoading;
   final VoidCallback onTap;
 
-  const _DeleteAccountButton({
+  const _DeleteAccountLink({
+    required this.label,
     required this.isLoading,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: TextButton.icon(
-        onPressed: isLoading ? null : onTap,
-        icon: isLoading
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: AppColors.error),
-              )
-            : const Icon(Icons.delete_forever_outlined,
-                size: 18, color: AppColors.error),
-        label: Text(
-          'Supprimer mon compte',
-          style: AppTypography.labelMedium.copyWith(
-            color: AppColors.error,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.error,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
+    return Center(
+      child: isLoading
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : TextButton(
+              onPressed: onTap,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textMuted,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                label,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textMuted,
+                  decoration: TextDecoration.underline,
+                  decorationColor: AppColors.textMuted,
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+/// La confirmation : ce qui part, ce qui vaut mieux (« Se déconnecter »), et
+/// le mot à écrire. Le bouton rouge ne s'allume qu'une fois le mot écrit.
+@visibleForTesting
+class DeleteAccountSheet extends ConsumerStatefulWidget {
+  const DeleteAccountSheet({super.key});
+
+  @override
+  ConsumerState<DeleteAccountSheet> createState() => DeleteAccountSheetState();
+}
+
+class DeleteAccountSheetState extends ConsumerState<DeleteAccountSheet> {
+  final _word = TextEditingController();
+
+  @override
+  void dispose() {
+    _word.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ref.watch(stringsProvider).accountDeletion;
+    final typed =
+        _word.text.trim().toUpperCase() == c.confirmWord.toUpperCase();
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(c.title, style: AppTypography.h3),
+            const SizedBox(height: AppSpacing.sm),
+            Text(c.body,
+                style: AppTypography.bodyMedium
+                    .copyWith(color: AppColors.textSecondary)),
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundGrey,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.logout, size: 18, color: AppColors.textSecondary),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(c.keeps,
+                        style: AppTypography.bodySmall
+                            .copyWith(color: AppColors.textPrimary)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(c.typeToConfirm(c.confirmWord),
+                style: AppTypography.labelMedium
+                    .copyWith(color: AppColors.textSecondary)),
+            const SizedBox(height: AppSpacing.xs),
+            TextField(
+              controller: _word,
+              autocorrect: false,
+              enableSuggestions: false,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(hintText: c.confirmWord),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              height: 52,
+              child: FilledButton(
+                onPressed: typed ? () => Navigator.pop(context, true) : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                child: Text(c.confirm),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(c.cancel),
+            ),
+          ],
         ),
       ),
     );
