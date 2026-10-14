@@ -18,6 +18,8 @@ import 'package:aji_tfarraj/features/shows/domain/show.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:aji_tfarraj/features/wheel/data/wheel_repository.dart';
+import 'package:aji_tfarraj/features/wheel/presentation/wheel_entry_card.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart'
     show pendingNavigationProvider;
 
@@ -324,7 +326,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ..sort((a, b) => b.reservedSeats.compareTo(a.reservedSeats));
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(showsListProvider.notifier).refresh(),
+      onRefresh: () {
+        ref.invalidate(wheelProvider);
+        return ref.read(showsListProvider.notifier).refresh();
+      },
       color: AppColors.accentInk,
       backgroundColor: AppColors.backgroundGrey,
       child: CustomScrollView(
@@ -334,6 +339,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // has a confirmed date) so the home never opens on a bare header.
           SliverToBoxAdapter(
               child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
+
+          // La roue de la chance, juste sous l'affiche : visible sans
+          // défiler, sans passer devant les émissions. Fermée, elle ne
+          // prend aucune place.
+          const SliverToBoxAdapter(
+            child: WheelEntryCard(
+              padding: EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
+            ),
+          ),
 
           // Upcoming section
           if (prochains.isNotEmpty) ...[

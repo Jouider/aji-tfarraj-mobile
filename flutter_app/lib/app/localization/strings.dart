@@ -7,6 +7,7 @@ import 'package:aji_tfarraj/app/copywriting/departure_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/support_chat_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/staff_pay_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/wheel_copy.dart';
 
 /// Localized strings accessor
 /// Maps keys to FR/AR strings using existing copywriting
@@ -1450,6 +1451,10 @@ class AppStrings {
   StaffPayCopy get staffPay => locale == AppLocale.fr
       ? const StaffPayCopyFr()
       : const StaffPayCopyAr();
+
+  /// La roue de la chance.
+  WheelCopy get wheel =>
+      locale == AppLocale.fr ? const WheelCopyFr() : const WheelCopyAr();
 
   /// The support chat: conversations with the Aji Tfarraj team.
   SupportChatCopy get supportChat => locale == AppLocale.fr
