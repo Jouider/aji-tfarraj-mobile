@@ -41,6 +41,7 @@ import 'package:aji_tfarraj/features/charge_public/presentation/charge_public_sh
 import 'package:aji_tfarraj/features/staff_pay/presentation/staff_pay_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/my_rewards_screen.dart';
+import 'package:aji_tfarraj/features/wheel/presentation/wheel_screen.dart';
 
 import 'package:aji_tfarraj/features/referral/presentation/referral_landing_screen.dart';
 import 'package:aji_tfarraj/features/referral/presentation/referral_stats_screen.dart';
@@ -473,6 +474,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.myRewards,
         name: 'myRewards',
         builder: (context, state) => const MyRewardsScreen(),
+      ),
+      GoRoute(
+        path: Routes.wheel,
+        name: 'wheel',
+        builder: (context, state) => const WheelScreen(),
       ),
 
       // ============================================

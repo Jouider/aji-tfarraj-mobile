@@ -1149,6 +1149,59 @@ GET /api/me/points
 
 ---
 
+### Lucky Wheel (« Roue de la chance »)
+
+Three free spins a day (admin-set), reset at midnight `Africa/Casablanca`. The **server draws every outcome** with the weights the admin sets in *Récompenses → Roue de la chance*; the app only animates the wheel to the slice it is told. The odds stay in the admin panel: the API exposes no weights or percentages. Closed (`enabled: false`) until an admin opens it — the app then shows nothing.
+
+Outcomes: `points` (a `wheel` ledger entry, counts toward Récompenses like any points), `retry` (nothing, the spin is used), `reward` (very rare: a pending reward request at 0 points for staff to validate; limited by a daily stock across all members).
+
+```
+GET /api/me/wheel
+```
+
+🔒 **Requires Authentication**
+
+```json
+{
+  "enabled": true,
+  "daily_spins": 3,
+  "spins_left": 2,
+  "resets_at": "2026-10-14T23:00:00+00:00",
+  "slices": [
+    { "type": "points", "points": 5 }, { "type": "retry", "points": 0 },
+    { "type": "points", "points": 10 }, { "type": "retry", "points": 0 },
+    { "type": "reward", "points": 0 }
+  ],
+  "jackpot": { "id": 4, "title": "Casquette 2M", "title_ar": null, "image_url": "https://…", "available_today": true },
+  "points_balance": 120
+}
+```
+
+`slices` is the drawing order, clockwise from the pointer. `jackpot` is `null` when no active reward is set.
+
+```
+POST /api/me/wheel/spin
+```
+
+🔒 **Requires Authentication** · throttled to 20/min
+
+```json
+{
+  "outcome": "points",
+  "points": 10,
+  "slice": 2,
+  "reward": null,
+  "spins_left": 1,
+  "points_balance": 130
+}
+```
+
+`slice` is the index in `slices` where the wheel must stop. `reward` is `{id, title, title_ar, image_url}` when `outcome` is `reward`.
+
+**Error** `422` — `{ "message": "…", "code": "CLOSED" | "NO_SPINS_LEFT" }`
+
+---
+
 ## Changelog
 
 | Version | Date | Changes |

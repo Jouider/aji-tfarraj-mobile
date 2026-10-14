@@ -21,6 +21,7 @@ import 'package:aji_tfarraj/features/rewards/presentation/widgets/reward_api_car
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart';
 import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
 import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
+import 'package:aji_tfarraj/features/wheel/presentation/wheel_entry_card.dart';
 
 /// Main loyalty / fidelity screen
 class LoyaltyScreen extends ConsumerStatefulWidget {
@@ -79,6 +80,11 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
             subtitle: strings.pointsSubtitle,
           ),
           const SizedBox(height: AppSpacing.lg),
+
+          // La roue de la chance, quand elle est ouverte.
+          const WheelEntryCard(
+            padding: EdgeInsets.only(bottom: AppSpacing.lg),
+          ),
 
           // Regarder une vidéo pour des points — seulement si le serveur le
           // propose et qu'il en reste aujourd'hui.
@@ -205,6 +211,8 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
         return locale == AppLocale.fr ? 'Vidéo regardée' : 'فيديو متشاف';
       case 'referral_revoked':
         return locale == AppLocale.fr ? 'Parrainage retiré' : 'إحالة ملغاة';
+      case 'wheel':
+        return locale == AppLocale.fr ? 'Roue de la chance' : 'عجلة الحظ';
       default:
         return type;
     }

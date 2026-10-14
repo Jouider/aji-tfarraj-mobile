@@ -35,6 +35,9 @@ class Routes {
   static const rewards = '/rewards';
   static const myRewards = '/my-rewards';
 
+  /// La roue de la chance.
+  static const wheel = '/wheel';
+
   // Show routes (inside shell, independent of tabs)
   static const show = '/show';
   static String showDetail(String showId) => '/show/$showId';
