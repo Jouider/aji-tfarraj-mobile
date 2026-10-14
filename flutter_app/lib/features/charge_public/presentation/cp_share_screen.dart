@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:aji_tfarraj/app/design_system/shadows.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_fr.dart' show ChargePublicCopy;
 import 'package:aji_tfarraj/app/design_system/colors.dart';
@@ -65,7 +66,12 @@ class CpShareTab extends ConsumerWidget {
       ),
       data: (rows) => rows.isEmpty
           ? ListView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              // Le contenu file sous la barre d'onglets en verre.
+              padding: EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.lg + AppSpacing.navBarClearance(context)),
               children: [
                 const SizedBox(height: 80),
                 Center(
@@ -117,19 +123,18 @@ class _ShareHeader extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.secondary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.backgroundGrey,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          const Icon(Icons.campaign_outlined,
-              size: 20, color: AppColors.secondaryDark),
+          Icon(Icons.campaign_outlined, size: 20, color: AppColors.accentInk),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               cp.shareHeader,
               style: AppTypography.labelMedium
-                  .copyWith(color: AppColors.secondaryDark),
+                  .copyWith(color: AppColors.textSecondary),
             ),
           ),
         ],
@@ -196,9 +201,11 @@ class _EpisodeShareCardState extends ConsumerState<_EpisodeShareCard> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
+        // La carte de l'espace public : même surface, même rayon, même ombre.
+        color: AppColors.cardDarkElevated,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         children: [
@@ -218,21 +225,24 @@ class _EpisodeShareCardState extends ConsumerState<_EpisodeShareCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    if (dateStr != null) ...[
+                // La date entière, puis les places : sur une ligne, la date
+                // était coupée (« mar. 20 oct. • 12:… »).
+                if (dateStr != null)
+                  Row(
+                    children: [
                       Icon(Icons.event_outlined,
                           size: 13, color: AppColors.textMuted),
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(dateStr,
                             style: AppTypography.labelSmall
-                                .copyWith(color: AppColors.textMuted),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
+                                .copyWith(color: AppColors.textMuted)),
                       ),
-                      const SizedBox(width: 10),
                     ],
+                  ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
                     Icon(
                       soldOut
                           ? Icons.event_busy_outlined
@@ -274,9 +284,11 @@ class _ShareButton extends StatelessWidget {
       child: Container(
         height: 40,
         padding: const EdgeInsets.symmetric(horizontal: 14),
+        // Le bouton d'action de la charte : blanc sur l'orange sombre, qui se
+        // lit (le blanc sur le jaune ne se lisait pas).
         decoration: BoxDecoration(
-          color: AppColors.secondary,
-          borderRadius: BorderRadius.circular(10),
+          gradient: AppColors.actionGradient,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
