@@ -64,3 +64,12 @@ Les règles vivent dans `features/profile/domain/face_check.dart`
 `FaceDetectionService` fait le lien avec le détecteur. Tests :
 `test/face_check_test.dart` — la plupart vérifient ce qui doit **encore être
 accepté**.
+
+## 1.1.19 : la photo n'était plus envoyée
+
+Du 07/10 (1.1.19) au correctif 1.1.20, « Prendre une photo » n'envoyait rien,
+sur iOS comme sur Android : la feuille de la photo, passée au-dessus de la
+barre d'onglets, fermait l'écran au lieu de se fermer elle-même, et la photo
+revenait vers un écran disparu. « Supprimer » passait, lui — d'où 25
+suppressions pour 8 envois par jour côté serveur. La caméra, les plugins et
+Impeller n'y étaient pour rien. Détail et règle : `docs/navigation.md`.

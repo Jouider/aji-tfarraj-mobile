@@ -45,3 +45,13 @@ Données : `CpShowRow.episodes` (`CpEpisodeRow`), lues depuis
 `by_show[].episodes` ; les invités dans `CpEpisodeRow.guests`
 (`CpEpisodeGuest`), lus depuis `episodes[].guests`. Tests :
 `test/cp_dashboard_test.dart`.
+
+## Présence de tes invités (1.1.21)
+
+Sous les trois chiffres de l'accueil : « Présence de tes invités : 82 % » et
+« 3 absents sur 17 réservations confirmées », vert à 80 % et plus, orange à
+60 %, rouge en dessous. Lu depuis `stats.attendance` du tableau de bord : le
+serveur ne compte que les tournages passés et les réservations confirmées
+(voir `docs/charge-public-dashboard.md` du backend). Sans ce champ (ancien
+serveur, rien encore de jugé), la ligne n'apparaît pas. La tuile « En
+attente » ne change pas.
