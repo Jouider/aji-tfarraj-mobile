@@ -1151,7 +1151,7 @@ GET /api/me/points
 
 ### Lucky Wheel (« Roue de la chance »)
 
-Three free spins a day (admin-set), reset at midnight `Africa/Casablanca`. The **server draws every outcome** with the weights the admin sets in *Récompenses → Roue de la chance*; the app only animates the wheel to the slice it is told. Closed (`enabled: false`) until an admin opens it — the app then shows nothing.
+Three free spins a day (admin-set), reset at midnight `Africa/Casablanca`. The **server draws every outcome** with the weights the admin sets in *Récompenses → Roue de la chance*; the app only animates the wheel to the slice it is told. The odds stay in the admin panel: the API exposes no weights or percentages. Closed (`enabled: false`) until an admin opens it — the app then shows nothing.
 
 Outcomes: `points` (a `wheel` ledger entry, counts toward Récompenses like any points), `retry` (nothing, the spin is used), `reward` (very rare: a pending reward request at 0 points for staff to validate; limited by a daily stock across all members).
 
@@ -1172,17 +1172,12 @@ GET /api/me/wheel
     { "type": "points", "points": 10 }, { "type": "retry", "points": 0 },
     { "type": "reward", "points": 0 }
   ],
-  "odds": [
-    { "type": "points", "points": 5, "percent": 40.0 },
-    { "type": "retry", "points": 0, "percent": 24.9 },
-    { "type": "reward", "points": 0, "percent": 0.1 }
-  ],
   "jackpot": { "id": 4, "title": "Casquette 2M", "title_ar": null, "image_url": "https://…", "available_today": true },
   "points_balance": 120
 }
 ```
 
-`slices` is the drawing order, clockwise from the pointer. `odds` is what the « Règles » sheet shows — the same weights the draw uses. `jackpot` is `null` when no active reward is set.
+`slices` is the drawing order, clockwise from the pointer. `jackpot` is `null` when no active reward is set.
 
 ```
 POST /api/me/wheel/spin
