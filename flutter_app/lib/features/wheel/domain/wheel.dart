@@ -30,22 +30,6 @@ class WheelSlice {
       );
 }
 
-/// Une ligne des « Règles » : ce qu'on peut gagner, et ses chances.
-class WheelOdds {
-  const WheelOdds(
-      {required this.type, required this.points, required this.percent});
-
-  final WheelOutcome type;
-  final int points;
-  final double percent;
-
-  factory WheelOdds.fromJson(Map<String, dynamic> json) => WheelOdds(
-        type: WheelOutcome.parse(json['type']),
-        points: _int(json['points']),
-        percent: (json['percent'] as num?)?.toDouble() ?? 0,
-      );
-}
-
 /// La récompense rare de la roue.
 class WheelReward {
   const WheelReward({
@@ -82,7 +66,6 @@ class WheelStatus {
     required this.dailySpins,
     required this.spinsLeft,
     required this.slices,
-    required this.odds,
     required this.pointsBalance,
     this.jackpot,
     this.resetsAt,
@@ -92,7 +75,6 @@ class WheelStatus {
   final int dailySpins;
   final int spinsLeft;
   final List<WheelSlice> slices;
-  final List<WheelOdds> odds;
   final WheelReward? jackpot;
   final int pointsBalance;
 
@@ -113,7 +95,6 @@ class WheelStatus {
         dailySpins: dailySpins,
         spinsLeft: r.spinsLeft,
         slices: slices,
-        odds: odds,
         pointsBalance: r.pointsBalance,
         jackpot: jackpot,
         resetsAt: resetsAt,
@@ -124,7 +105,6 @@ class WheelStatus {
         dailySpins: _int(json['daily_spins'], 3),
         spinsLeft: _int(json['spins_left']),
         slices: _list(json['slices']).map(WheelSlice.fromJson).toList(),
-        odds: _list(json['odds']).map(WheelOdds.fromJson).toList(),
         jackpot: json['jackpot'] is Map<String, dynamic>
             ? WheelReward.fromJson(json['jackpot'] as Map<String, dynamic>)
             : null,

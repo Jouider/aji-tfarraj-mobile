@@ -319,16 +319,6 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
           centerTitle: false,
           title: Text(c.title,
               style: AppTypography.h3.copyWith(color: Colors.white)),
-          actions: [
-            if (status != null && status.playable)
-              TextButton.icon(
-                onPressed: () => showWheelRules(context,
-                    status: status, copy: c, arabic: arabic),
-                style: TextButton.styleFrom(foregroundColor: Colors.white),
-                icon: const Icon(Icons.info_outline_rounded, size: 20),
-                label: Text(c.rules),
-              ),
-          ],
         ),
         body: DecoratedBox(
           // Le projecteur : une lueur dorée derrière la roue.

@@ -27,14 +27,6 @@ abstract class WheelCopy {
   String jackpotOfTheDay(String title);
   String get jackpotGoneToday;
 
-  String get rules;
-  String get rulesTitle;
-  String rulesIntro(int dailySpins);
-  String oddsPoints(int points);
-  String get oddsRetry;
-  String oddsJackpot(String title);
-  String get rulesFootnote;
-
   String winTitle(int points);
   String winBody(int balance);
   String get retryTitle;
@@ -102,26 +94,6 @@ class WheelCopyFr implements WheelCopy {
   @override
   String get jackpotGoneToday =>
       'Le gros lot du jour est déjà parti. Il revient demain.';
-
-  @override
-  String get rules => 'Règles';
-  @override
-  String get rulesTitle => 'Les règles de la roue';
-  @override
-  String rulesIntro(int dailySpins) =>
-      'Tu as $dailySpins essais gratuits par jour, remis à zéro à minuit. '
-      'Le résultat est tiré au hasard par notre serveur, avec ces chances :';
-  @override
-  String oddsPoints(int points) => '$points points';
-  @override
-  String get oddsRetry => 'Réessaie';
-  @override
-  String oddsJackpot(String title) => 'Gros lot : $title';
-  @override
-  String get rulesFootnote =>
-      'Les points gagnés comptent comme les autres : ils débloquent les '
-      'récompenses de la section Récompenses. Le gros lot est limité chaque '
-      'jour ; l\'équipe te contacte pour te le remettre.';
 
   @override
   String winTitle(int points) => 'Bravo ! +$points points';
@@ -209,25 +181,6 @@ class WheelCopyAr implements WheelCopy {
   @override
   String get jackpotGoneToday =>
       'الجائزة الكبرى لهذا اليوم ربحها شخص آخر. تعود غدًا.';
-
-  @override
-  String get rules => 'القواعد';
-  @override
-  String get rulesTitle => 'قواعد العجلة';
-  @override
-  String rulesIntro(int dailySpins) =>
-      'لديك $dailySpins محاولات مجانية في اليوم، تتجدد عند منتصف الليل. '
-      'النتيجة يختارها خادمنا عشوائيًا بهذه الحظوظ:';
-  @override
-  String oddsPoints(int points) => '$points نقطة';
-  @override
-  String get oddsRetry => 'حاول مجددًا';
-  @override
-  String oddsJackpot(String title) => 'الجائزة الكبرى: $title';
-  @override
-  String get rulesFootnote =>
-      'النقاط التي تربحها تُحسب مثل غيرها: تفتح لك مكافآت قسم المكافآت. '
-      'الجائزة الكبرى محدودة كل يوم، والفريق يتصل بك لتسليمها.';
 
   @override
   String winTitle(int points) => 'مبروك! +$points نقطة';

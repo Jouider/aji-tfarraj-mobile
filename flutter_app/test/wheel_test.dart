@@ -43,13 +43,6 @@ void main() {
           {'type': 'points', 'points': 50},
           {'type': 'reward', 'points': 0},
         ],
-        'odds': [
-          {'type': 'points', 'points': 5, 'percent': 50},
-          {'type': 'points', 'points': 10, 'percent': 25},
-          {'type': 'points', 'points': 50, 'percent': 0.5},
-          {'type': 'retry', 'points': 0, 'percent': 24.4},
-          {'type': 'reward', 'points': 0, 'percent': 0.1},
-        ],
         'jackpot': {
           'id': 4,
           'title': 'Casquette 2M',
@@ -73,7 +66,6 @@ void main() {
         WheelOutcome.points,
         WheelOutcome.reward,
       ]);
-      expect(s.odds.last.percent, 0.1);
       expect(s.jackpot!.titleFor(arabic: true), 'قبعة 2M');
       expect(s.pointsBalance, 120);
     });
@@ -121,13 +113,6 @@ void main() {
           }
         }
       }
-    });
-
-    test('les pourcentages s\'écrivent à la française', () {
-      expect(formatPercent(40, arabic: false), '40 %');
-      expect(formatPercent(24.9, arabic: false), '24,9 %');
-      expect(formatPercent(0.25, arabic: false), '0,25 %');
-      expect(formatPercent(0.1, arabic: true), '0.1%');
     });
   });
 
@@ -233,18 +218,13 @@ void main() {
       expect(find.textContaining('Nouveaux essais dans'), findsOneWidget);
     });
 
-    testWidgets('les règles montrent les chances du serveur', (tester) async {
+    testWidgets('les chances ne sont pas montrées aux membres', (tester) async {
       final status = WheelStatus.fromJson(json());
       await pump(tester, const WheelScreen(),
           wheel: () => _FakeWheel(status, null));
 
-      await tester.tap(find.text('Règles'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      expect(find.byType(WheelRulesSheet), findsOneWidget);
-      expect(find.text('0,1 %'), findsOneWidget);
-      expect(find.text('Gros lot : Casquette 2M'), findsOneWidget);
+      expect(find.text('Règles'), findsNothing);
+      expect(find.textContaining('%'), findsNothing);
     });
 
     testWidgets('la carte d\'entrée invite à jouer', (tester) async {
@@ -286,7 +266,6 @@ void main() {
         c.spinsLeft(0),
         c.spinsLeft(1),
         c.nextSpinsIn(const Duration(hours: 2, minutes: 5)),
-        c.rulesIntro(3),
         c.winTitle(10),
         c.retryBody(0),
         c.jackpotBody,
