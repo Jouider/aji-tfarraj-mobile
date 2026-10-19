@@ -41,63 +41,47 @@ Conséquence visible : les points arrivent une ou deux secondes après la fin de
 la vidéo, pas à la seconde même. Le texte affiché le dit (« tes points
 arrivent »), l'écran relit le solde trois secondes plus tard.
 
-## Mise en service — ce qu'il reste à faire
+## Mise en service (19/10/2026, version 1.1.24)
 
-Rien de ce qui suit n'est dans le code : ce sont des comptes et des clés.
+**Fait :**
 
-**1. Ouvrir le compte AdMob** (admob.google.com), déclarer les deux apps
-(iOS et Android), créer par app une unité *interstitielle* et une unité
-*récompensée*.
+| | Android | iOS |
+|---|---|---|
+| App ID (natif) | `ca-app-pub-2833493160230222~8782023439` | `ca-app-pub-2833493160230222~2281948283` |
+| Interstitiel | `ca-app-pub-2833493160230222/9983882282` | `ca-app-pub-2833493160230222/8743697664` |
+| Récompensée | `ca-app-pub-2833493160230222/5797225267` | `ca-app-pub-2833493160230222/4216375278` |
 
-**2. Remplacer les identifiants d'application dans le natif.** Ce sont
-aujourd'hui ceux de **test** de Google — ils affichent des pubs factices et ne
-rapportent rien :
+- App ID dans `AndroidManifest.xml` et `Info.plist` (un `~` ; une unité à la
+  place fait planter l'app au démarrage).
+- Rappel de vérification côté serveur (SSV) posé sur les deux unités
+  récompensées : `https://aji-tfarraj-backend-production.up.railway.app/api/ads/admob-callback`.
+- Android : permission `AD_ID` déclarée.
+- iOS : `NSUserTrackingUsageDescription` (traduite fr/ar) et la demande ATT,
+  faite une fois par `AdMobGateway`, après le consentement, quand le SDK
+  démarre. Le SDK démarre ~3 s après l'ouverture dès que le serveur allume la
+  publicité (`adsWarmUpProvider`, regardé par la coquille) : la question ne
+  tombe jamais au milieu d'une réservation.
 
-- `android/app/src/main/AndroidManifest.xml` → `com.google.android.gms.ads.APPLICATION_ID`
-- `ios/Runner/Info.plist` → `GADApplicationIdentifier`
+**Reste, hors code :**
 
-L'identifiant d'application contient un `~`, l'unité un `/` : les confondre
-fait planter l'app au démarrage.
-
-**3. Brancher la vérification côté serveur.** Dans AdMob, sur **chaque unité
-récompensée** : Paramètres → Vérification côté serveur → URL de rappel :
-
-```
-https://aji-tfarraj-backend-production.up.railway.app/api/ads/admob-callback
-```
-
-Sans cette URL, les vidéos se regardent mais aucun point n'est crédité.
-
-**4. Allumer, côté Railway :**
-
-```
-ADS_ENABLED=true
-ADMOB_IOS_INTERSTITIAL=ca-app-pub-…/…
-ADMOB_IOS_REWARDED=ca-app-pub-…/…
-ADMOB_ANDROID_INTERSTITIAL=ca-app-pub-…/…
-ADMOB_ANDROID_REWARDED=ca-app-pub-…/…
-```
-
-**5. Remettre l'autorisation de suivi (iOS) — et la déclarer.**
-
-`NSUserTrackingUsageDescription` a été **retiré** d'`ios/Runner/Info.plist` en
-1.1.15 : sa seule présence fait refuser la soumission tant qu'App Privacy ne
-déclare pas le suivi, et déclarer un suivi qui n'existe pas affiche « Données
-utilisées pour vous suivre » sur la fiche App Store pour rien.
-
-Le jour où la publicité s'allume, les deux vont ensemble :
-
-- remettre la clé dans `Info.plist` et sa traduction dans les deux
-  `InfoPlist.strings` (voir le commentaire laissé à sa place) ;
-- dans App Store Connect → Confidentialité de l'app, déclarer que
-  l'identifiant publicitaire est utilisé **à des fins de suivi**.
-
-L'un sans l'autre bloque la mise en vente.
-
-**6. Déclarer la publicité sur les deux stores.** Play Console → « Contient des
-annonces » ; App Store Connect → confidentialité (identifiant publicitaire
-utilisé pour la publicité ciblée). Une app qui sert des pubs sans l'avoir
-déclaré est retirée.
+1. **Railway** (service backend) — les unités passent par le serveur, l'app
+   ne reçoit que celles de sa plateforme :
+   ```
+   ADMOB_IOS_INTERSTITIAL=ca-app-pub-2833493160230222/8743697664
+   ADMOB_IOS_REWARDED=ca-app-pub-2833493160230222/4216375278
+   ADMOB_ANDROID_INTERSTITIAL=ca-app-pub-2833493160230222/9983882282
+   ADMOB_ANDROID_REWARDED=ca-app-pub-2833493160230222/5797225267
+   ADS_ENABLED=true
+   ```
+   `ADS_ENABLED=true` **seulement une fois la 1.1.24 publiée** : avant, les
+   versions installées portent l'App ID de test.
+2. **App Store Connect** → Confidentialité de l'app : identifiant
+   publicitaire utilisé **à des fins de suivi** et pour la publicité tierce.
+   Obligatoire avec la clé ATT de la 1.1.24.
+3. **Play Console** → Contenu de l'application → « Contient des annonces » :
+   oui ; formulaire « Identifiant publicitaire » : utilisé pour la publicité.
+4. **app-ads.txt** à la racine du site déclaré sur les deux fiches, avec la
+   ligne donnée par AdMob (`google.com, pub-2833493160230222, DIRECT, f08c47fec0942fa0`).
 
 ### Les réglages qu'on peut bouger sans publier de version
 

@@ -4,3 +4,4 @@
 
 NSPhotoLibraryUsageDescription = "Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil ou choisir une photo de votre pièce d'identité pour les retraits Wafacash.";
 NSCameraUsageDescription = "Nous avons besoin d'accéder à votre caméra pour prendre une photo de profil, scanner les QR codes et photographier votre pièce d'identité pour les retraits Wafacash.";
+NSUserTrackingUsageDescription = "Cela nous permet de vous montrer des publicités plus pertinentes. Aji Tfarraj reste gratuite grâce à elles.";

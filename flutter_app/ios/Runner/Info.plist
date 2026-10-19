@@ -44,17 +44,16 @@
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Nous avons besoin d'accéder à votre galerie pour changer votre photo de profil ou choisir une photo de votre pièce d'identité pour les retraits Wafacash.</string>
 		<key>GADApplicationIdentifier</key>
-		<!-- ⚠️ Identifiant de TEST de Google (voir AndroidManifest.xml et
-	     docs/publicite.md) : à remplacer par celui du compte AdMob avant la
-	     mise en production. -->
-		<string>ca-app-pub-3940256099942544~1458002511</string>
-		<!-- Pas de clé d'autorisation de suivi (ATT) ici, volontairement.
-	     Sa seule présence fait refuser la soumission tant qu'App Privacy ne
-	     déclare pas le suivi — et déclarer un suivi qui n'existe pas afficherait
-	     « Données utilisées pour vous suivre » sur la fiche App Store pour rien :
-	     la publicité est éteinte côté serveur et les identifiants AdMob sont ceux
-	     de test. À remettre, avec la déclaration App Privacy, dans la version qui
-	     allume vraiment la publicité. Voir docs/publicite.md. -->
+		<!-- Identifiant de l'app dans AdMob (un « ~ », pas un « / »). Les unités
+	     viennent du serveur (GET /api/app-config → ads). Voir docs/publicite.md. -->
+		<string>ca-app-pub-2833493160230222~2281948283</string>
+		<!-- L'autorisation de suivi (ATT) : demandée une fois, quelques secondes
+	     après l'ouverture, quand la publicité est allumée côté serveur
+	     (AdMobGateway). Va avec la déclaration « suivi » dans App Store
+	     Connect → Confidentialité de l'app : l'un sans l'autre bloque la
+	     mise en vente. Traduite dans fr.lproj et ar.lproj. -->
+		<key>NSUserTrackingUsageDescription</key>
+		<string>Cela nous permet de vous montrer des publicités plus pertinentes. Aji Tfarraj reste gratuite grâce à elles.</string>
 		<key>SKAdNetworkItems</key>
 		<!-- Réseaux autorisés à mesurer une installation venue d'une publicité.
 	     Google d'abord ; la liste complète des réseaux de médiation est
