@@ -129,3 +129,14 @@ final adsServiceProvider = Provider<AdsService>((ref) {
     prefs: ref.watch(sharedPreferencesProvider),
   );
 });
+
+/// Démarre le SDK (consentement, autorisation de suivi sur iOS) peu après
+/// l'ouverture, dès que le serveur allume la publicité — pour que la question
+/// du suivi ne tombe jamais au milieu d'une réservation. Regardé par la
+/// coquille de l'app.
+final adsWarmUpProvider = Provider<void>((ref) {
+  final config = ref.watch(adsConfigProvider).valueOrNull;
+  if (config == null || config.isOff) return;
+  final gateway = ref.watch(adsGatewayProvider);
+  Future<void>.delayed(const Duration(seconds: 3), gateway.initialize);
+});

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -49,7 +50,22 @@ class AdMobGateway implements AdsGateway {
     // il s'affichera pour un membre en Europe, et le SDK doit le savoir avant
     // de demander la première pub.
     await _gatherConsent();
+    await _askToTrack();
     await MobileAds.instance.initialize();
+  }
+
+  /// iOS : l'autorisation de suivi, une seule fois. Refusée ou pas, les pubs
+  /// s'affichent ; acceptée, elles sont mieux ciblées et rapportent plus.
+  Future<void> _askToTrack() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return;
+    try {
+      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.notDetermined) {
+        await AppTrackingTransparency.requestTrackingAuthorization();
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Ads] suivi : $e');
+    }
   }
 
   Future<void> _gatherConsent() async {

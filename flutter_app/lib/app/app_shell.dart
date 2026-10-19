@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/app/design_system/components/glass_nav_bar.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/features/ads/data/ads_service.dart';
 
 /// App Shell with Bottom Navigation Bar — preserves tab state via StatefulShellRoute.
 /// Tabs: Émissions (0) | Explorer (1) | Réservations (2) | Billet (3) | Profil (4)
@@ -15,6 +16,8 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
+    // La publicité démarre en coulisse dès que le serveur l'allume.
+    ref.watch(adsWarmUpProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
