@@ -83,6 +83,26 @@ arrivent »), l'écran relit le solde trois secondes plus tard.
 4. **app-ads.txt** à la racine du site déclaré sur les deux fiches, avec la
    ligne donnée par AdMob (`google.com, pub-2833493160230222, DIRECT, f08c47fec0942fa0`).
 
+### Tester sur TestFlight sans rien allumer
+
+`ADS_TESTERS=8,36` (ids des comptes, sur Railway) : ces comptes reçoivent la
+publicité **avec les unités de test de Google**, même `ADS_ENABLED=false`.
+Tout le monde d'autre ne voit rien. Les pubs affichent « Test Ad » : c'est
+voulu — taper sur ses propres vraies pubs fait suspendre le compte AdMob.
+
+À vérifier sur la 1.1.24 TestFlight, connecté avec un compte testeur :
+la demande de suivi (iOS) quelques secondes après l'ouverture, la vidéo de
+l'écran Fidélité, l'interstitiel après une réservation (une fois par 30 min).
+Les points d'une vidéo de **test** n'arrivent pas : Google n'appelle le rappel
+signé que pour les vraies unités. Le rappel lui-même se vérifie dans AdMob,
+bouton « Vérifier l'URL » de chaque unité récompensée.
+
+### Le jour de l'allumage
+
+Les versions avant la 1.1.24 portent l'App ID de test : avec les vraies
+unités, leurs pubs échouent. En même temps que `ADS_ENABLED=true`, passer la
+version minimale à 1.1.24 (mise à jour obligatoire) sur Railway.
+
 ### Les réglages qu'on peut bouger sans publier de version
 
 | Variable | Défaut | Effet |
