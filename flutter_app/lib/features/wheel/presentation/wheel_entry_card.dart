@@ -56,7 +56,9 @@ class _WheelEntryCardState extends ConsumerState<WheelEntryCard>
     if (wheel == null || !wheel.playable) return const SizedBox.shrink();
 
     final c = ref.watch(stringsProvider).wheel;
-    final left = wheel.spinsLeftAt(DateTime.now());
+    final now = DateTime.now();
+    final left = wheel.spinsLeftAt(now);
+    final video = wheel.videoUnlocksSpinAt(now);
     final radius = BorderRadius.circular(20);
 
     return Padding(
@@ -101,9 +103,13 @@ class _WheelEntryCardState extends ConsumerState<WheelEntryCard>
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            left > 0 ? c.entrySpinsLeft(left) : c.entryComeBack,
+                            left > 0
+                                ? c.entrySpinsLeft(left)
+                                : video
+                                    ? c.entryVideoSpin
+                                    : c.entryComeBack,
                             style: AppTypography.caption.copyWith(
-                              color: left > 0
+                              color: left > 0 || video
                                   ? WheelPalette.gold
                                   : AppColors.inkOnPhotoMuted,
                             ),
@@ -112,7 +118,7 @@ class _WheelEntryCardState extends ConsumerState<WheelEntryCard>
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    if (left > 0)
+                    if (left > 0 || video)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.lg, vertical: AppSpacing.sm),

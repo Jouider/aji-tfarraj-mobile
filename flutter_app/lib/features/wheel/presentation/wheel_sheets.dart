@@ -11,7 +11,7 @@ import 'package:aji_tfarraj/features/wheel/domain/wheel.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/wheel_painters.dart';
 
 /// Ce que la personne choisit après un tour.
-enum WheelResultAction { close, again, myRewards }
+enum WheelResultAction { close, again, watchVideo, myRewards }
 
 /// Le résultat, une fois la roue arrêtée.
 Future<WheelResultAction?> showWheelResult(
@@ -52,7 +52,12 @@ class WheelResultDialog extends StatelessWidget {
           c.winTitle(result.points),
           c.winBody(result.pointsBalance)
         ),
-      WheelOutcome.retry => (c.retryTitle, c.retryBody(result.spinsLeft)),
+      WheelOutcome.retry => (
+          c.retryTitle,
+          result.videoUnlocksSpin
+              ? c.retryBodyVideo
+              : c.retryBody(result.spinsLeft)
+        ),
       WheelOutcome.reward => (c.jackpotTitle, c.jackpotBody),
     };
 
@@ -116,10 +121,13 @@ class WheelResultDialog extends StatelessWidget {
                     label: c.close,
                     onPressed: () => close(WheelResultAction.close),
                   ),
-                ] else if (result.spinsLeft > 0) ...[
+                ] else if (result.spinsLeft > 0 ||
+                    result.videoUnlocksSpin) ...[
                   _GradientButton(
-                    label: c.again,
-                    onPressed: () => close(WheelResultAction.again),
+                    label: result.spinsLeft > 0 ? c.again : c.watchVideoShort,
+                    onPressed: () => close(result.spinsLeft > 0
+                        ? WheelResultAction.again
+                        : WheelResultAction.watchVideo),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _QuietButton(
