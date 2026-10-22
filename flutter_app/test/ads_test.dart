@@ -28,6 +28,7 @@ class _FakeGateway implements AdsGateway {
   int preloadCalls = 0;
   int rewardedCalls = 0;
   String? lastUserId;
+  String? lastCustomData;
 
   @override
   Future<void> initialize() async {}
@@ -45,9 +46,11 @@ class _FakeGateway implements AdsGateway {
   }
 
   @override
-  Future<bool> showRewarded(String unitId, {required String userId}) async {
+  Future<bool> showRewarded(String unitId,
+      {required String userId, String? customData}) async {
     rewardedCalls++;
     lastUserId = userId;
+    lastCustomData = customData;
     return true;
   }
 }
@@ -219,6 +222,34 @@ void main() {
 
       expect(await ads.showRewarded(userId: 4212), isTrue);
       expect(gateway.lastUserId, '4212');
+      expect(gateway.lastCustomData, isNull,
+          reason: 'sans custom_data, le serveur crédite des points');
+    });
+
+    test('pour la roue : même unité, même membre, custom_data = wheel',
+        () async {
+      final gateway = _FakeGateway();
+      final ads = AdsService(
+        gateway: gateway,
+        config: AdsConfig.fromAppConfig(_serverSays()),
+        prefs: prefs,
+      );
+
+      expect(await ads.showRewardedForWheel(userId: 4212), isTrue);
+      expect(gateway.lastUserId, '4212');
+      expect(gateway.lastCustomData, 'wheel');
+    });
+
+    test('pour la roue, sans unité vidéo, rien ne s\'ouvre', () async {
+      final gateway = _FakeGateway();
+      final ads = AdsService(
+        gateway: gateway,
+        config: AdsConfig.fromAppConfig(_serverSays(rewarded: null)),
+        prefs: prefs,
+      );
+
+      expect(await ads.showRewardedForWheel(userId: 1), isFalse);
+      expect(gateway.rewardedCalls, 0);
     });
 
     test('elle ne suit pas le délai de l\'interstitiel', () async {

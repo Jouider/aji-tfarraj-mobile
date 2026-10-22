@@ -97,6 +97,33 @@ class AdsService {
     }
   }
 
+  /// La vidéo qui débloque un essai de roue.
+  ///
+  /// Même unité et même identifiant que la vidéo à points ; seul `wheel`,
+  /// dans le rappel signé, dit au serveur de débloquer un essai plutôt que
+  /// de créditer des points. Ce n'est pas l'interrupteur des vidéos à points
+  /// qui l'autorise mais la roue elle-même (`ad_spins_enabled`) : il suffit
+  /// ici d'avoir une unité.
+  Future<bool> showRewardedForWheel({required int userId}) async {
+    final unitId = _config.rewardedUnitId;
+
+    if (unitId == null || _busy) return false;
+
+    _busy = true;
+    try {
+      return await _gateway.showRewarded(
+        unitId,
+        userId: userId.toString(),
+        customData: wheelCustomData,
+      );
+    } finally {
+      _busy = false;
+    }
+  }
+
+  /// Ce que le serveur attend dans `custom_data` pour une vidéo de la roue.
+  static const wheelCustomData = 'wheel';
+
   bool _cooldownElapsed(Duration cooldown) {
     if (cooldown == Duration.zero) return true;
 

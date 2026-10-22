@@ -29,7 +29,11 @@ abstract class AdsGateway {
   /// Charge et montre une vidéo récompensée. Rend true si le membre est allé
   /// au bout. Les points, eux, ne sont crédités que par le rappel signé que
   /// Google envoie au serveur — jamais par ce booléen.
-  Future<bool> showRewarded(String unitId, {required String userId});
+  ///
+  /// [customData] repart dans ce rappel et dit au serveur à quoi sert la
+  /// vidéo : rien pour des points, `wheel` pour un essai de roue.
+  Future<bool> showRewarded(String unitId,
+      {required String userId, String? customData});
 }
 
 /// L'implémentation réelle.
@@ -172,7 +176,8 @@ class AdMobGateway implements AdsGateway {
   }
 
   @override
-  Future<bool> showRewarded(String unitId, {required String userId}) async {
+  Future<bool> showRewarded(String unitId,
+      {required String userId, String? customData}) async {
     await initialize();
 
     final finished = Completer<bool>();
@@ -186,7 +191,10 @@ class AdMobGateway implements AdsGateway {
           // C'est cet identifiant que le serveur retrouvera dans le rappel
           // signé : sans lui, personne ne sait à qui créditer les points.
           await ad.setServerSideOptions(
-            ServerSideVerificationOptions(userId: userId),
+            ServerSideVerificationOptions(
+              userId: userId,
+              customData: customData,
+            ),
           );
 
           ad.fullScreenContentCallback = FullScreenContentCallback(
@@ -237,6 +245,7 @@ class SilentAdsGateway implements AdsGateway {
       false;
 
   @override
-  Future<bool> showRewarded(String unitId, {required String userId}) async =>
+  Future<bool> showRewarded(String unitId,
+          {required String userId, String? customData}) async =>
       false;
 }

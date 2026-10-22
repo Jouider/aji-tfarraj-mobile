@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -340,6 +340,14 @@ class _BalanceCard extends StatelessWidget {
           Text(cp.money(stats.unpaidBalance),
               style: AppTypography.h1
                   .copyWith(color: onCard, fontWeight: FontWeight.w800)),
+          // Négatif : une sortie notée après un retrait déjà payé. Les gains
+          // suivants le rattrapent.
+          if (stats.unpaidBalance < 0) ...[
+            const SizedBox(height: 2),
+            Text(cp.negativeBalanceNote,
+                style: AppTypography.bodySmall
+                    .copyWith(color: onCard.withValues(alpha: 0.9))),
+          ],
           const SizedBox(height: 12),
           // La part déjà payée de ce qui a été gagné.
           if (stats.earnings > 0) ...[
@@ -759,6 +767,23 @@ class _GuestTile extends StatelessWidget {
   final ChargePublicCopy cp;
   const _GuestTile({required this.guest, required this.cp});
 
+  /// « 📞 Contacté 2× · dernier : 21/10 18:40 · Confirmé », ou « Pas encore
+  /// contacté ». Rien pour un invité venu ou parti : l'appel ne sert plus.
+  String? _contactLine(BuildContext context) {
+    final contact = guest.contact;
+    if (contact == null) return null;
+    if (!contact.contacted) {
+      return guest.attended || guest.left ? null : cp.notContacted;
+    }
+    final last = contact.lastAt;
+    return cp.contacted(
+      contact.times,
+      last == null ? null : DateFormat('dd/MM HH:mm').format(last),
+      contact.lastOutcome(
+          arabic: Directionality.of(context) == TextDirection.rtl),
+    );
+  }
+
   Future<void> _whatsapp(String phone) async {
     final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
     final uri = Uri.parse('https://wa.me/$digits');
@@ -806,6 +831,14 @@ class _GuestTile extends StatelessWidget {
                     '${guest.show}${guest.date != null ? ' · ${guest.date}' : ''}',
                     style: AppTypography.labelSmall
                         .copyWith(color: AppColors.textMuted)),
+                if (_contactLine(context) case final line?) ...[
+                  const SizedBox(height: 2),
+                  Text(line,
+                      style: AppTypography.labelSmall.copyWith(
+                          color: guest.contact!.contacted
+                              ? AppColors.textSecondary
+                              : AppColors.textMuted)),
+                ],
               ],
             ),
           ),
@@ -814,12 +847,22 @@ class _GuestTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               _StatusChip(
-                  label: _statusLabel(cp, guest.attended, guest.resStatus),
-                  statusKey: guest.attended
-                      ? 'checked_in'
-                      : (guest.resStatus ?? 'pending_review')),
+                  label: guest.left
+                      ? cp.statusLeft
+                      : _statusLabel(cp, guest.attended, guest.resStatus),
+                  statusKey: guest.left
+                      ? 'rejected'
+                      : guest.attended
+                          ? 'checked_in'
+                          : (guest.resStatus ?? 'pending_review')),
               const SizedBox(height: 4),
-              if (guest.attended && guest.amount != null)
+              // Parti avant la fin : rien pour le chargé public, et on le dit.
+              if (guest.left)
+                Text(cp.money(0),
+                    style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.errorDark,
+                        fontWeight: FontWeight.w600))
+              else if (guest.attended && guest.amount != null)
                 Text(cp.gain(guest.amount!),
                     style: AppTypography.labelSmall.copyWith(
                         color: AppColors.successDark,

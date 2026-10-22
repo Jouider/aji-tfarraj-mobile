@@ -12,6 +12,7 @@ void main() {
     String? ticket = 'AT-2026-000042',
     Map<String, dynamic>? departure,
     int pastExclusions = 0,
+    int? pastDepartures,
   }) =>
       {
         'kind': kind,
@@ -25,6 +26,7 @@ void main() {
         'departure': departure,
         'past_exclusions': pastExclusions,
         'last_exclusion_at': pastExclusions > 0 ? '2026-08-01T21:00:00+00:00' : null,
+        if (pastDepartures != null) 'past_departures': pastDepartures,
       };
 
   group('an attendee', () {
@@ -167,14 +169,34 @@ void main() {
     });
   });
 
+  group('💀 left an earlier recording before the end', () {
+    test('in the list', () {
+      expect(Attendee.fromJson(row(pastDepartures: 2)).pastDepartures, 2);
+      expect(Attendee.fromJson(row(pastDepartures: 2)).leftBefore, isTrue);
+      expect(Attendee.fromJson(row()).leftBefore, isFalse,
+          reason: 'an older server sends nothing: no skull');
+    });
+
+    test('survives a change of return point', () {
+      final a = Attendee.fromJson(row(pastDepartures: 1));
+      expect(a.withReturnPoint(null).pastDepartures, 1);
+    });
+  });
+
   group('the door preview', () {
-    Map<String, dynamic> lookup({Map<String, dynamic>? exclusions, Map<String, dynamic>? departure}) => {
+    Map<String, dynamic> lookup({
+      Map<String, dynamic>? exclusions,
+      Map<String, dynamic>? departure,
+      int? departures,
+    }) =>
+        {
           'status': 'can_check_in',
           'ticket_code': 'AT-2026-000042',
           'attendee': {
             'id': 5,
             'name': 'Amine Benali',
             if (exclusions != null) 'exclusions': exclusions,
+            if (departures != null) 'departures': departures,
           },
           'reservation': {'id': 12, 'seats': 1, 'departure': departure},
           'return_points': [],
@@ -209,15 +231,22 @@ void main() {
       expect(p.departure?.isExclusion, isTrue);
     });
 
+    test('💀 when they left an earlier recording before the end', () {
+      expect(TicketPreview.fromJson(lookup(departures: 3)).leftBefore, isTrue);
+      expect(TicketPreview.fromJson(lookup()).leftBefore, isFalse);
+    });
+
     /// The copies made while the scanner works must not drop the warning.
     test('the warning survives choosing a stop and replacing the photo', () {
       final p = TicketPreview.fromJson(lookup(
         exclusions: {'count': 2, 'last_at': null, 'last_show': null},
         departure: {'at': '2026-09-12T19:32:00+00:00', 'reason': 'left'},
+        departures: 1,
       ));
 
       for (final copy in [p.withReturnPoint(3), p.withAvatarUrl('https://x/y.jpg')]) {
         expect(copy.pastExclusions, 2);
+        expect(copy.pastDepartures, 1);
         expect(copy.departure, isNotNull);
       }
     });

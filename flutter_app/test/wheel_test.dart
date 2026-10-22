@@ -26,12 +26,17 @@ void main() {
   Map<String, dynamic> json({
     bool enabled = true,
     int left = 3,
+    int adLeft = 0,
+    bool adSpins = false,
     DateTime? resetsAt,
   }) =>
       {
         'enabled': enabled,
         'daily_spins': 3,
         'spins_left': left,
+        'ad_spins_left': adLeft,
+        'ad_spins_enabled': adSpins,
+        'free_spins': adSpins ? 1 : 3,
         'resets_at': (resetsAt ?? DateTime.now().add(const Duration(hours: 5)))
             .toUtc()
             .toIso8601String(),
@@ -78,6 +83,60 @@ void main() {
       expect(s.spinsLeftAt(reset.add(const Duration(minutes: 1))), 3);
     });
 
+    test('après l\'essai gratuit, une vidéo débloque le suivant', () {
+      final s = WheelStatus.fromJson(json(left: 0, adLeft: 2, adSpins: true));
+      final now = DateTime.now();
+
+      expect(s.spinsLeftAt(now), 0);
+      expect(s.adSpinsLeftAt(now), 2);
+      expect(s.videoUnlocksSpinAt(now), isTrue);
+    });
+
+    test('plus aucune vidéo à regarder : c\'est fini pour aujourd\'hui', () {
+      final s = WheelStatus.fromJson(json(left: 0, adSpins: true));
+      expect(s.videoUnlocksSpinAt(DateTime.now()), isFalse);
+    });
+
+    test('passé minuit, seuls les essais gratuits reviennent tout de suite',
+        () {
+      final reset = DateTime.now().add(const Duration(hours: 1));
+      final s = WheelStatus.fromJson(
+          json(left: 0, adLeft: 0, adSpins: true, resetsAt: reset));
+      final later = reset.add(const Duration(minutes: 1));
+
+      expect(s.spinsLeftAt(later), 1);
+      expect(s.adSpinsLeftAt(later), 2);
+    });
+
+    test('un ancien serveur, sans les champs vidéo, reste tout gratuit', () {
+      final s = WheelStatus.fromJson(json()
+        ..remove('ad_spins_left')
+        ..remove('ad_spins_enabled')
+        ..remove('free_spins'));
+
+      expect(s.adSpinsEnabled, isFalse);
+      expect(s.freeSpins, 3);
+      expect(s.videoUnlocksSpinAt(DateTime.now()), isFalse);
+    });
+
+    test('après le tour, le résultat dit s\'il reste une vidéo à regarder',
+        () {
+      final r = SpinResult.fromJson({
+        'outcome': 'retry',
+        'points': 0,
+        'slice': 1,
+        'spins_left': 0,
+        'ad_spins_left': 2,
+        'points_balance': 120,
+      });
+      final after =
+          WheelStatus.fromJson(json(left: 1, adLeft: 2, adSpins: true))
+              .after(r);
+
+      expect(r.videoUnlocksSpin, isTrue);
+      expect(after.videoUnlocksSpinAt(DateTime.now()), isTrue);
+    });
+
     test('fermée, la roue ne se montre pas', () {
       expect(WheelStatus.fromJson(json(enabled: false)).playable, isFalse);
     });
@@ -95,6 +154,54 @@ void main() {
       expect(after.spinsLeft, 2);
       expect(after.pointsBalance, 130);
       expect(after.slices, same(s.slices));
+    });
+  });
+
+  group('après la vidéo', () {
+    test('relit la roue jusqu\'à voir l\'essai débloqué', () async {
+      final repo = _SequenceRepository([
+        WheelStatus.fromJson(json(left: 0, adLeft: 2, adSpins: true)),
+        WheelStatus.fromJson(json(left: 0, adLeft: 2, adSpins: true)),
+        WheelStatus.fromJson(json(left: 1, adLeft: 1, adSpins: true)),
+      ]);
+      final container = ProviderContainer(overrides: [
+        wheelRepositoryProvider.overrideWithValue(repo),
+      ]);
+      addTearDown(container.dispose);
+      final sub = container.listen(wheelProvider, (_, __) {});
+      addTearDown(sub.close);
+      await container.read(wheelProvider.future);
+
+      final unlocked = await container
+          .read(wheelProvider.notifier)
+          .waitForUnlockedSpin(every: Duration.zero);
+
+      expect(unlocked, isTrue);
+      expect(container.read(wheelProvider).value!.spinsLeft, 1);
+      expect(repo.fetches, 3);
+    });
+
+    test('abandonne au bout du délai si le rappel n\'arrive pas', () async {
+      final repo = _SequenceRepository([
+        WheelStatus.fromJson(json(left: 0, adLeft: 2, adSpins: true)),
+      ]);
+      final container = ProviderContainer(overrides: [
+        wheelRepositoryProvider.overrideWithValue(repo),
+      ]);
+      addTearDown(container.dispose);
+      final sub = container.listen(wheelProvider, (_, __) {});
+      addTearDown(sub.close);
+      await container.read(wheelProvider.future);
+
+      final unlocked = await container
+          .read(wheelProvider.notifier)
+          .waitForUnlockedSpin(
+            every: const Duration(milliseconds: 5),
+            upTo: const Duration(milliseconds: 40),
+          );
+
+      expect(unlocked, isFalse);
+      expect(container.read(wheelProvider).value!.spinsLeft, 0);
     });
   });
 
@@ -218,6 +325,68 @@ void main() {
       expect(find.textContaining('Nouveaux essais dans'), findsOneWidget);
     });
 
+    testWidgets('plus d\'essai gratuit : une vidéo en propose un autre',
+        (tester) async {
+      final status =
+          WheelStatus.fromJson(json(left: 0, adLeft: 2, adSpins: true));
+      await pump(tester, const WheelScreen(),
+          wheel: () => _FakeWheel(status, null));
+
+      const c = WheelCopyFr();
+      expect(find.text('Tourner la roue'), findsNothing);
+      expect(find.text('Reviens demain'), findsNothing);
+      expect(find.text(c.watchVideo), findsOneWidget);
+      expect(find.text(c.videoSpinsLeft(2)), findsOneWidget);
+      expect(find.text(c.subtitleWithVideo(1)), findsOneWidget);
+    });
+
+    testWidgets('AD_REQUIRED : on dit de regarder une vidéo', (tester) async {
+      final status = WheelStatus.fromJson(json(left: 1));
+      await pump(tester, const WheelScreen(),
+          wheel: () => _FakeWheel(status, null,
+              failure: ApiException(message: 'non', code: 'AD_REQUIRED')));
+
+      await spinToTheEnd(tester, frames: 60);
+
+      expect(find.text(const WheelCopyFr().adRequired), findsOneWidget);
+    });
+
+    testWidgets('le résultat propose la vidéo quand c\'est la seule suite',
+        (tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
+          body: WheelResultDialog(
+            result: SpinResult(
+              outcome: WheelOutcome.retry,
+              points: 0,
+              slice: 1,
+              spinsLeft: 0,
+              adSpinsLeft: 1,
+              pointsBalance: 120,
+            ),
+            copy: WheelCopyFr(),
+            arabic: false,
+          ),
+        ),
+      ));
+
+      const c = WheelCopyFr();
+      expect(find.text(c.retryBodyVideo), findsOneWidget);
+      expect(find.text(c.watchVideoShort), findsOneWidget);
+      expect(find.text(c.again), findsNothing);
+    });
+
+    testWidgets('la carte d\'entrée annonce l\'essai en vidéo',
+        (tester) async {
+      final status =
+          WheelStatus.fromJson(json(left: 0, adLeft: 1, adSpins: true));
+      await pump(tester, const Scaffold(body: WheelEntryCard()),
+          wheel: () => _FakeWheel(status, null));
+
+      expect(find.text(const WheelCopyFr().entryVideoSpin), findsOneWidget);
+      expect(find.text('Jouer'), findsOneWidget);
+    });
+
     testWidgets('les chances ne sont pas montrées aux membres', (tester) async {
       final status = WheelStatus.fromJson(json());
       await pump(tester, const WheelScreen(),
@@ -270,6 +439,14 @@ void main() {
         c.retryBody(0),
         c.jackpotBody,
         c.noSpinsLeft,
+        c.subtitleWithVideo(1),
+        c.videoSpinsLeft(2),
+        c.watchVideo,
+        c.watchVideoShort,
+        c.retryBodyVideo,
+        c.unlockSlow,
+        c.adRequired,
+        c.entryVideoSpin,
       ]) {
         expect(text.trim(), isNotEmpty);
       }
@@ -299,4 +476,22 @@ class _FakeWheel extends WheelNotifier {
 
   @override
   void settle(SpinResult r) => state = AsyncData(status.after(r));
+}
+
+class _SequenceRepository implements WheelRepository {
+  _SequenceRepository(this.answers);
+
+  /// Les réponses successives ; la dernière se répète.
+  final List<WheelStatus> answers;
+  int fetches = 0;
+
+  @override
+  Future<WheelStatus> fetch() async {
+    final i = fetches < answers.length ? fetches : answers.length - 1;
+    fetches++;
+    return answers[i];
+  }
+
+  @override
+  Future<SpinResult> spin() => throw UnimplementedError();
 }

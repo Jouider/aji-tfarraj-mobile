@@ -40,6 +40,21 @@ abstract class WheelCopy {
   String get closed;
   String get noSpinsLeft;
   String get error;
+
+  // ─── Un essai de plus avec une vidéo ─────────────────────────────────
+  String subtitleWithVideo(int freeSpins);
+  String videoSpinsLeft(int n);
+  String get entryVideoSpin;
+  String get watchVideo;
+
+  /// Le même, en plus court, pour le bouton du résultat.
+  String get watchVideoShort;
+  String get retryBodyVideo;
+  String get videoLoading;
+  String get unlocking;
+  String get videoNotFinished;
+  String get unlockSlow;
+  String get adRequired;
 }
 
 class WheelCopyFr implements WheelCopy {
@@ -128,6 +143,35 @@ class WheelCopyFr implements WheelCopy {
       'Tu as utilisé tes essais d\'aujourd\'hui. Reviens demain !';
   @override
   String get error => 'La roue n\'a pas pu tourner. Réessaie.';
+
+  @override
+  String subtitleWithVideo(int freeSpins) => freeSpins == 1
+      ? '1 essai gratuit par jour, puis une vidéo par essai'
+      : '$freeSpins essais gratuits par jour, puis une vidéo par essai';
+  @override
+  String videoSpinsLeft(int n) => n == 1
+      ? '1 essai à débloquer avec une vidéo'
+      : '$n essais à débloquer avec une vidéo';
+  @override
+  String get entryVideoSpin => 'Un essai de plus avec une vidéo';
+  @override
+  String get watchVideo => 'Regarder une vidéo pour un nouvel essai';
+  @override
+  String get watchVideoShort => 'Nouvel essai avec une vidéo';
+  @override
+  String get retryBodyVideo => 'Regarde une vidéo pour un nouvel essai.';
+  @override
+  String get videoLoading => 'La vidéo arrive…';
+  @override
+  String get unlocking => 'Ton essai arrive…';
+  @override
+  String get videoNotFinished =>
+      'La vidéo n\'est pas allée jusqu\'au bout. Réessaie dans un instant.';
+  @override
+  String get unlockSlow =>
+      'Ton essai n\'est pas encore arrivé. Réessaie dans un instant.';
+  @override
+  String get adRequired => 'Regarde une vidéo pour tourner encore la roue.';
 }
 
 class WheelCopyAr implements WheelCopy {
@@ -211,4 +255,30 @@ class WheelCopyAr implements WheelCopy {
   String get noSpinsLeft => 'استعملت محاولاتك لليوم. ارجع غدًا!';
   @override
   String get error => 'لم تتمكن العجلة من الدوران. حاول مجددًا.';
+
+  @override
+  String subtitleWithVideo(int freeSpins) => freeSpins == 1
+      ? 'محاولة مجانية واحدة كل يوم، ثم فيديو لكل محاولة'
+      : '$freeSpins محاولات مجانية كل يوم، ثم فيديو لكل محاولة';
+  @override
+  String videoSpinsLeft(int n) =>
+      n == 1 ? 'محاولة واحدة تُفتح بفيديو' : '$n محاولات تُفتح بفيديو';
+  @override
+  String get entryVideoSpin => 'محاولة إضافية بفيديو';
+  @override
+  String get watchVideo => 'شاهد فيديو لمحاولة جديدة';
+  @override
+  String get watchVideoShort => 'محاولة جديدة بفيديو';
+  @override
+  String get retryBodyVideo => 'شاهد فيديو لمحاولة جديدة.';
+  @override
+  String get videoLoading => 'جارٍ تحميل الفيديو…';
+  @override
+  String get unlocking => 'محاولتك في الطريق…';
+  @override
+  String get videoNotFinished => 'لم يكتمل الفيديو. حاول بعد قليل.';
+  @override
+  String get unlockSlow => 'محاولتك لم تصل بعد. حاول بعد قليل.';
+  @override
+  String get adRequired => 'شاهد فيديو لتدير العجلة مرة أخرى.';
 }

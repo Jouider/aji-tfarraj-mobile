@@ -82,15 +82,26 @@ class StaffRepository {
   ///
   /// [pointId] null means "no shuttle needed" — plenty of people drive
   /// themselves, and the door must be able to say so.
-  Future<void> setReturnPoint({
+  ///
+  /// [detail] corrects the exact address, on nights the shuttle drops
+  /// everyone at home. Left out, the server keeps the one given at booking as
+  /// long as the stop does not change. Returns the address the server kept.
+  Future<String?> setReturnPoint({
     required int reservationId,
     required int? pointId,
+    String? detail,
   }) async {
     try {
-      await _apiClient.patch<Map<String, dynamic>>(
+      final response = await _apiClient.patch<Map<String, dynamic>>(
         '/api/staff/reservations/$reservationId/return-point',
-        data: {'return_point_id': pointId},
+        data: {
+          'return_point_id': pointId,
+          if (detail != null) 'return_point_detail': detail.trim(),
+        },
       );
+      final point = response.data?['return_point'];
+      final kept = point is Map ? point['detail'] : null;
+      return kept is String && kept.trim().isNotEmpty ? kept.trim() : null;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     } catch (e) {
@@ -315,17 +326,19 @@ class StaffCheckInNotifier extends StateNotifier<StaffCheckInState> {
 
   /// Record the drop-off choice and reflect it in the preview immediately, so
   /// the scanner sees it land without re-scanning.
-  Future<void> setReturnPoint(int? pointId) async {
+  Future<void> setReturnPoint(int? pointId, {String? detail}) async {
     final preview = state.preview;
     final reservationId = preview?.reservationId;
     if (preview == null || reservationId == null) return;
 
-    await _repository.setReturnPoint(
+    final kept = await _repository.setReturnPoint(
       reservationId: reservationId,
       pointId: pointId,
+      detail: detail,
     );
 
-    state = state.copyWith(preview: preview.withReturnPoint(pointId));
+    state = state.copyWith(
+        preview: preview.withReturnPoint(pointId, detail: kept));
   }
 
   /// Replace the attendee's photo without leaving the preview, so the scanner

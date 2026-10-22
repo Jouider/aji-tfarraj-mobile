@@ -63,4 +63,15 @@ abstract class DepartureCopy {
   String get returnNoMatch;
   String returnChangedAt(String time);
   String returnSaved(String point);
+
+  /// 💀 — earlier recordings left before the end, whatever the reason.
+  String leftBefore(int count);
+
+  // The exact address, on nights the shuttle drops everyone at home.
+  String get returnAddress;
+  String get returnAddressMissing;
+  String get returnAddressAdd;
+  String get returnAddressEdit;
+  String get returnAddressSave;
+  String get returnAddressSaved;
 }

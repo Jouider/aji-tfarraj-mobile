@@ -1375,6 +1375,17 @@ class ChargePublicCopyAr extends ChargePublicCopy {
   String get statusPending => 'قيد الانتظار';
   @override
   String get statusAbsent => 'غائب';
+  @override
+  String get statusLeft => 'غادر قبل النهاية';
+  @override
+  String contacted(int times, String? lastAt, String? outcome) =>
+      '📞 تم التواصل $times×'
+      '${lastAt != null ? ' · آخر مرة: $lastAt' : ''}'
+      '${outcome != null && outcome.isNotEmpty ? ' · $outcome' : ''}';
+  @override
+  String get notContacted => 'لم يتم التواصل بعد';
+  @override
+  String get negativeBalanceNote => 'سيُخصم هذا المبلغ من أرباحك القادمة.';
 
   @override
   String visitsCount(int n) => '$n حضور';
@@ -1479,4 +1490,21 @@ class DepartureCopyAr implements DepartureCopy {
   String returnChangedAt(String time) => 'تبدّلات ف $time';
   @override
   String returnSaved(String point) => 'محطة الرجوع: $point';
+
+  @override
+  String leftBefore(int count) =>
+      count > 1 ? '💀 خرج قبل النهاية ×$count' : '💀 خرج قبل النهاية';
+
+  @override
+  String get returnAddress => 'العنوان بالضبط';
+  @override
+  String get returnAddressMissing => 'ما عطاش العنوان';
+  @override
+  String get returnAddressAdd => 'زيد';
+  @override
+  String get returnAddressEdit => 'صحّح';
+  @override
+  String get returnAddressSave => 'سجّل';
+  @override
+  String get returnAddressSaved => 'تسجّل العنوان';
 }

@@ -97,6 +97,9 @@ class Attendee {
   final int pastExclusions;
   final DateTime? lastExclusionAt;
 
+  /// 💀 — earlier recordings left before the end, whatever the reason.
+  final int pastDepartures;
+
   /// Where the shuttle drops them, or null for "own means" — read only when
   /// [returnPointAnswered]: otherwise null just means nobody has asked yet.
   final int? returnPointId;
@@ -119,6 +122,7 @@ class Attendee {
     this.departure,
     this.pastExclusions = 0,
     this.lastExclusionAt,
+    this.pastDepartures = 0,
     this.returnPointId,
     this.returnPointName,
     this.returnPointAnswered = false,
@@ -143,6 +147,7 @@ class Attendee {
         departure: departure,
         pastExclusions: pastExclusions,
         lastExclusionAt: lastExclusionAt,
+        pastDepartures: pastDepartures,
         returnPointId: point?.id,
         returnPointName: point?.name,
         returnPointAnswered: true,
@@ -153,6 +158,8 @@ class Attendee {
       );
 
   bool get wasExcludedBefore => pastExclusions > 0;
+
+  bool get leftBefore => pastDepartures > 0;
 
   /// Same person, whatever changed about them.
   bool sameAs(Attendee other) => kind == other.kind && id == other.id;
@@ -172,6 +179,7 @@ class Attendee {
         lastExclusionAt:
             DateTime.tryParse(json['last_exclusion_at'] as String? ?? '')
                 ?.toLocal(),
+        pastDepartures: json['past_departures'] as int? ?? 0,
         returnPointId: (json['return_point'] as Map<String, dynamic>?)?['id'] as int?,
         returnPointName:
             (json['return_point'] as Map<String, dynamic>?)?['name'] as String?,

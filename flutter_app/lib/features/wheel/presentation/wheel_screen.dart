@@ -14,6 +14,8 @@ import 'package:aji_tfarraj/app/design_system/typography.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/app/routes.dart';
+import 'package:aji_tfarraj/features/ads/data/ads_service.dart';
+import 'package:aji_tfarraj/features/auth/data/auth_repository.dart';
 import 'package:aji_tfarraj/features/loyalty/data/loyalty_repository.dart';
 import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
 import 'package:aji_tfarraj/features/wheel/data/wheel_repository.dart';
@@ -23,6 +25,11 @@ import 'package:aji_tfarraj/features/wheel/presentation/wheel_painters.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/wheel_sheets.dart';
 
 /// La roue de la chance : trois essais par jour pour gagner des points.
+///
+/// Quand le serveur le demande, seuls les premiers essais sont gratuits : les
+/// suivants se débloquent un par un en regardant une vidéo. C'est le rappel
+/// signé de Google au serveur qui débloque l'essai ; l'écran ne fait que
+/// relire la roue jusqu'à le voir arriver.
 ///
 /// Le résultat vient du serveur. Au toucher, la roue s'élance tout de suite
 /// pendant que la requête part ; dès la réponse, elle ralentit et s'arrête
@@ -39,6 +46,9 @@ class WheelScreen extends ConsumerStatefulWidget {
 }
 
 enum _Phase { idle, spinUp, cruise, slowDown }
+
+/// La vidéo qui débloque un essai : rien, la vidéo, puis l'attente du serveur.
+enum _Video { none, playing, unlocking }
 
 class _WheelScreenState extends ConsumerState<WheelScreen>
     with TickerProviderStateMixin {
@@ -83,6 +93,8 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
   /// La roue s'ouvre arrêtée sur le gros lot : c'est lui qu'on a envie de
   /// viser. Une fois, au premier affichage.
   bool _placed = false;
+
+  _Video _video = _Video.none;
 
   bool get _spinning => _phase != _Phase.idle;
 
@@ -235,12 +247,15 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
 
     if (result == null) {
       final code = failure is ApiException ? failure.code : null;
-      if (code == 'NO_SPINS_LEFT' || code == 'CLOSED') {
+      if (code == 'NO_SPINS_LEFT' ||
+          code == 'CLOSED' ||
+          code == 'AD_REQUIRED') {
         ref.invalidate(wheelProvider);
       }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(switch (code) {
           'NO_SPINS_LEFT' => c.noSpinsLeft,
+          'AD_REQUIRED' => c.adRequired,
           'CLOSED' => c.closed,
           _ => c.error,
         }),
@@ -274,9 +289,45 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
       case WheelResultAction.again:
         final status = ref.read(wheelProvider).valueOrNull;
         if (status != null) _spin(status);
+      case WheelResultAction.watchVideo:
+        _watchVideo();
       case WheelResultAction.close:
       case null:
         break;
+    }
+  }
+
+  // ─── La vidéo ───────────────────────────────────────────────────────
+
+  Future<void> _watchVideo() async {
+    final userId = ref.read(loginAuthStateProvider).user?.id;
+    if (userId == null || _spinning || _video != _Video.none) return;
+
+    final c = ref.read(stringsProvider).wheel;
+    final messenger = ScaffoldMessenger.of(context);
+
+    setState(() => _video = _Video.playing);
+    try {
+      final earned = await ref
+          .read(adsServiceProvider)
+          .showRewardedForWheel(userId: userId);
+      if (!mounted) return;
+      if (!earned) {
+        messenger.showSnackBar(SnackBar(content: Text(c.videoNotFinished)));
+        return;
+      }
+
+      setState(() => _video = _Video.unlocking);
+      final unlocked =
+          await ref.read(wheelProvider.notifier).waitForUnlockedSpin();
+      if (!mounted) return;
+      if (unlocked) {
+        HapticFeedback.mediumImpact();
+      } else {
+        messenger.showSnackBar(SnackBar(content: Text(c.unlockSlow)));
+      }
+    } finally {
+      if (mounted) setState(() => _video = _Video.none);
     }
   }
 
@@ -362,6 +413,7 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
   Widget _buildWheel(WheelStatus status, WheelCopy c, bool arabic) {
     final now = DateTime.now();
     final left = status.spinsLeftAt(now);
+    final videoLeft = status.adSpinsLeftAt(now);
     final jackpot = status.jackpot;
 
     if (!_placed) {
@@ -393,7 +445,9 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                c.subtitle(status.dailySpins),
+                status.adSpinsEnabled
+                    ? c.subtitleWithVideo(status.freeSpins)
+                    : c.subtitle(status.dailySpins),
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMedium
                     .copyWith(color: AppColors.inkOnPhotoMuted),
@@ -414,8 +468,11 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
               const SizedBox(height: AppSpacing.xl),
               _SpinsLeft(
                 left: left,
+                locked: videoLeft,
                 total: status.dailySpins,
-                label: c.spinsLeft(left),
+                label: left == 0 && videoLeft > 0
+                    ? c.videoSpinsLeft(videoLeft)
+                    : c.spinsLeft(left),
               ),
               const SizedBox(height: AppSpacing.lg),
               if (left > 0 || _spinning)
@@ -423,6 +480,17 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
                   label: _spinning ? c.spinning : c.spin,
                   busy: _spinning,
                   onPressed: () => _spin(status),
+                )
+              else if (videoLeft > 0 || _video != _Video.none)
+                _SpinButton(
+                  icon: Icons.play_circle_fill_rounded,
+                  label: switch (_video) {
+                    _Video.none => c.watchVideo,
+                    _Video.playing => c.videoLoading,
+                    _Video.unlocking => c.unlocking,
+                  },
+                  busy: _video != _Video.none,
+                  onPressed: _watchVideo,
                 )
               else
                 _ComeBack(
@@ -486,11 +554,16 @@ class _BalancePill extends StatelessWidget {
 class _SpinsLeft extends StatelessWidget {
   const _SpinsLeft({
     required this.left,
+    required this.locked,
     required this.total,
     required this.label,
   });
 
   final int left;
+
+  /// Les essais qui suivent, à débloquer avec une vidéo : cerclés d'or,
+  /// encore vides.
+  final int locked;
   final int total;
   final String label;
 
@@ -515,7 +588,9 @@ class _SpinsLeft extends StatelessWidget {
                   border: Border.all(
                     color: i < left
                         ? WheelPalette.goldLight
-                        : Colors.white.withValues(alpha: 0.2),
+                        : i < left + locked
+                            ? WheelPalette.gold
+                            : Colors.white.withValues(alpha: 0.2),
                   ),
                 ),
               ),
@@ -534,11 +609,13 @@ class _SpinsLeft extends StatelessWidget {
 
 class _SpinButton extends StatelessWidget {
   const _SpinButton({
+    this.icon = Icons.casino_rounded,
     required this.label,
     required this.busy,
     required this.onPressed,
   });
 
+  final IconData icon;
   final String label;
   final bool busy;
   final VoidCallback onPressed;
@@ -564,13 +641,20 @@ class _SpinButton extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.casino_rounded,
-                      color: Colors.white, size: 22),
+                  Icon(icon, color: Colors.white, size: 22),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    label,
-                    style:
-                        AppTypography.buttonLarge.copyWith(color: Colors.white),
+                  // « Regarder une vidéo pour un nouvel essai » est long :
+                  // il rétrécit un peu plutôt que de se couper.
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        style: AppTypography.buttonLarge
+                            .copyWith(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ],
               ),
