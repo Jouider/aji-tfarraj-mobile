@@ -166,6 +166,30 @@ Vérifier l'IPA avant de la livrer :
   otool -l Payload/Runner.app/Frameworks/objective_c.framework/objective_c | grep -A3 LC_BUILD_VERSION
   ```
 
+## Vérifier un IPA avant de l'envoyer
+
+```bash
+unzip -q build/ios/ipa/aji_tfarraj.ipa -d /tmp/ipa && A=/tmp/ipa/Payload/Runner.app
+/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" -c "Print CFBundleVersion" $A/Info.plist
+ls $A/Frameworks            # objective_c.framework doit y être
+otool -l $A/Frameworks/objective_c.framework/objective_c | grep -A3 LC_BUILD_VERSION   # platform 2 = iPhone
+ls $A/PlugIns               # NotificationService.appex (depuis 1.1.21)
+/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $A/PlugIns/NotificationService.appex/Info.plist   # = celle de l'app
+```
+
+**Les symboles de `objective_c.framework`.** Flutter le construit sans dSYM, et
+Xcode avertit à l'envoi (« The archive did not include a dSYM for the
+objective_c.framework… »). Ce n'est qu'un avertissement ; pour l'éviter, avant
+de distribuer l'archive :
+
+```bash
+A=build/ios/archive/Runner.xcarchive
+xcrun dsymutil $A/Products/Applications/Runner.app/Frameworks/objective_c.framework/objective_c -o $A/dSYMs/objective_c.framework.dSYM
+```
+
+Le lancer sur le binaire du framework (pas sur le `.dylib` de `.dart_tool`),
+sinon le fichier DWARF porte le mauvais nom.
+
 ## Pièges
 
 - **Artefacts périmés.** Une build qui échoue laisse l'ancien `.aab` / `.ipa` à
