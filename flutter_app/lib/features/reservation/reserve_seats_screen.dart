@@ -27,6 +27,7 @@ import 'package:aji_tfarraj/features/reservation/booking_info_card_widget.dart';
 import 'package:aji_tfarraj/features/reservation/referral_code_input_widget.dart';
 import 'package:aji_tfarraj/features/reservation/terms_checkbox_widget.dart';
 import 'package:aji_tfarraj/features/reservation/booking_bottom_bar_widget.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_address_field.dart';
 import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
 import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
 
@@ -57,6 +58,9 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
   bool _returnAnswered = false;
   String? _errorMessage;
   final _referralCodeController = TextEditingController();
+
+  /// L'adresse exacte, les soirs où la navette dépose chacun chez lui.
+  final _returnAddressController = TextEditingController();
   bool _referralInitiallyExpanded = false;
 
   @override
@@ -90,6 +94,7 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
   @override
   void dispose() {
     _referralCodeController.dispose();
+    _returnAddressController.dispose();
     super.dispose();
   }
 
@@ -215,6 +220,20 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
                       _returnAnswered = true;
                     }),
                   ),
+                  if (_asksAddress(episode)) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    ReturnAddressField(
+                      controller: _returnAddressController,
+                      strings: s,
+                      enabled: !_isLoading,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      s.returnAddressWhy,
+                      style: AppTypography.caption
+                          .copyWith(color: AppColors.textMuted),
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     _returnAnswered
@@ -263,6 +282,10 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
     );
   }
 
+  /// Un arrêt est choisi, un soir où la navette dépose chacun chez lui.
+  bool _asksAddress(Episode? episode) =>
+      (episode?.asksReturnAddress ?? false) && _returnPointId != null;
+
   /// La question du retour est-elle réglée ?
   ///
   /// Vraie d'office quand aucune navette ne roule : on ne bloque pas sur une
@@ -302,6 +325,9 @@ class _ReserveSeatsScreenState extends ConsumerState<ReserveSeatsScreen> {
                 episodeId: episodeId,
                 referralCode: referralCode.isNotEmpty ? referralCode : null,
                 returnPointId: _returnPointId,
+                returnPointDetail: _asksAddress(episode)
+                    ? _returnAddressController.text
+                    : null,
                 // La question n'a été posée que si une navette roule ce soir-là.
                 returnPointAsked: episode?.returnPoints.isNotEmpty ?? false,
               );

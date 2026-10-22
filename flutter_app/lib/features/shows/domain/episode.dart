@@ -24,6 +24,10 @@ class Episode {
   /// navette ce soir-là, et la question du retour ne se pose pas.
   final List<ReturnPointOption> returnPoints;
 
+  /// Ce soir-là, la navette dépose chacun chez lui : l'app demande l'adresse
+  /// exacte quand un arrêt est choisi.
+  final bool asksReturnAddress;
+
   Episode({
     required this.id,
     required this.title,
@@ -41,6 +45,7 @@ class Episode {
     this.cityAr,
     this.studioAr,
     this.returnPoints = const [],
+    this.asksReturnAddress = false,
   });
 
   int get availableSeats => capacity - reservedSeats;
@@ -91,6 +96,7 @@ class Episode {
       cityAr: json['city_ar'] as String?,
       studioAr: json['studio_ar'] as String?,
       returnPoints: ReturnPointOption.listFrom(json['return_points']),
+      asksReturnAddress: json['asks_return_address'] == true,
     );
   }
 
@@ -112,6 +118,7 @@ class Episode {
       'city_ar': cityAr,
       'studio_ar': studioAr,
       'return_points': returnPoints.map((p) => p.toJson()).toList(),
+      'asks_return_address': asksReturnAddress,
     };
   }
 

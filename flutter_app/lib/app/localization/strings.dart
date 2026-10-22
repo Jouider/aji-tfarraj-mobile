@@ -1243,6 +1243,19 @@ class AppStrings {
   /// Sur le billet et la confirmation.
   String get returnPointChosen => locale == AppLocale.fr ? 'Retour' : 'الرجوع';
 
+  /// Les soirs où la navette dépose chacun chez lui (`asks_return_address`).
+  String get returnAddressLabel =>
+      locale == AppLocale.fr ? 'Adresse exacte' : 'العنوان بالضبط';
+
+  String get returnAddressHint => locale == AppLocale.fr
+      ? 'Rue, numéro, quartier, repère…'
+      : 'الزنقة، الرقم، الحي، علامة…';
+
+  /// Pourquoi on la demande ce soir-là, et pas les autres.
+  String get returnAddressWhy => locale == AppLocale.fr
+      ? 'Ce soir, la navette dépose chacun devant chez lui.'
+      : 'هاد الليلة، الطوبيس كينزّل كل واحد قدام دارو.';
+
   /// L'étape du même nom, à l'inscription sur place.
   String get onSiteStepReturn => locale == AppLocale.fr ? 'Retour' : 'الرجوع';
 

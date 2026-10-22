@@ -80,6 +80,15 @@ void main() {
       expect(parse({'return_points': []}).returnPoints, isEmpty);
     });
 
+    test('un soir de dépôt à domicile, l\'adresse exacte est demandée', () {
+      expect(parse({'asks_return_address': true}).asksReturnAddress, isTrue);
+      expect(parse({}).asksReturnAddress, isFalse);
+      expect(
+          Episode.fromJson(parse({'asks_return_address': true}).toJson())
+              .asksReturnAddress,
+          isTrue);
+    });
+
     test('ce qui est lu se relit après un aller-retour par le cache', () {
       final episode = parse({
         'return_points': [_stop(3, 'Sidi Maarouf')]
