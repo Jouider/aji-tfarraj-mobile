@@ -82,6 +82,10 @@ class TicketPreview {
   final DateTime? lastExclusionAt;
   final String? lastExclusionShow;
 
+  /// 💀 — earlier recordings left before the end, whatever the reason
+  /// (exclusions included).
+  final int pastDepartures;
+
   /// Set when this very ticket's holder already left tonight.
   final Departure? departure;
 
@@ -119,6 +123,13 @@ class TicketPreview {
   /// a changé d'avis en chemin.
   final bool returnPointConfirmed;
 
+  /// L'adresse exacte donnée en réservant, les soirs de dépôt à domicile.
+  final String? returnPointDetail;
+
+  /// Ce soir, la navette dépose chacun chez lui : la porte peut corriger
+  /// l'adresse.
+  final bool asksReturnAddress;
+
   // Episode / show
   final int? episodeId;
   final String? episodeTitle;
@@ -140,6 +151,7 @@ class TicketPreview {
     this.pastExclusions = 0,
     this.lastExclusionAt,
     this.lastExclusionShow,
+    this.pastDepartures = 0,
     this.departure,
     this.reservationId,
     this.seats = 1,
@@ -148,6 +160,8 @@ class TicketPreview {
     this.chosenReturnPointId,
     this.returnPointAnswered = false,
     this.returnPointConfirmed = false,
+    this.returnPointDetail,
+    this.asksReturnAddress = false,
     this.episodeId,
     this.episodeTitle,
     this.episodeStartsAt,
@@ -172,12 +186,20 @@ class TicketPreview {
 
   bool get wasExcludedBefore => pastExclusions > 0;
 
+  bool get leftBefore => pastDepartures > 0;
+
+  /// Un arrêt est choisi, un soir de dépôt à domicile : l'adresse compte.
+  bool get takesReturnAddress =>
+      asksReturnAddress && chosenReturnPointId != null;
+
   /// Whether to ask where they want to be dropped. No served stops means no
   /// shuttle tonight, so the question would be meaningless.
   bool get asksReturnPoint => returnPoints.isNotEmpty;
 
-  /// A copy carrying a freshly recorded drop-off choice.
-  TicketPreview withReturnPoint(int? pointId) => TicketPreview(
+  /// A copy carrying a freshly recorded drop-off choice, and the address the
+  /// server kept with it.
+  TicketPreview withReturnPoint(int? pointId, {String? detail}) =>
+      TicketPreview(
         status: status,
         reason: reason,
         ticketCode: ticketCode,
@@ -191,6 +213,7 @@ class TicketPreview {
         pastExclusions: pastExclusions,
         lastExclusionAt: lastExclusionAt,
         lastExclusionShow: lastExclusionShow,
+        pastDepartures: pastDepartures,
         departure: departure,
         reservationId: reservationId,
         seats: seats,
@@ -202,6 +225,8 @@ class TicketPreview {
         // que le staff doit poser avant de valider.
         returnPointAnswered: true,
         returnPointConfirmed: true,
+        returnPointDetail: detail,
+        asksReturnAddress: asksReturnAddress,
         episodeId: episodeId,
         episodeTitle: episodeTitle,
         episodeStartsAt: episodeStartsAt,
@@ -229,6 +254,7 @@ class TicketPreview {
         pastExclusions: pastExclusions,
         lastExclusionAt: lastExclusionAt,
         lastExclusionShow: lastExclusionShow,
+        pastDepartures: pastDepartures,
         departure: departure,
         reservationId: reservationId,
         seats: seats,
@@ -237,6 +263,8 @@ class TicketPreview {
         chosenReturnPointId: chosenReturnPointId,
         returnPointAnswered: returnPointAnswered,
         returnPointConfirmed: returnPointConfirmed,
+        returnPointDetail: returnPointDetail,
+        asksReturnAddress: asksReturnAddress,
         episodeId: episodeId,
         episodeTitle: episodeTitle,
         episodeStartsAt: episodeStartsAt,
@@ -272,6 +300,7 @@ class TicketPreview {
       pastExclusions: exclusions['count'] as int? ?? 0,
       lastExclusionAt: parse(exclusions['last_at']),
       lastExclusionShow: exclusions['last_show'] as String?,
+      pastDepartures: attendee['departures'] as int? ?? 0,
       departure: Departure.fromJson(reservation['departure']),
       reservationId: reservation['id'] as int?,
       seats: reservation['seats'] as int? ?? 1,
@@ -286,6 +315,9 @@ class TicketPreview {
       // l'ancien comportement plutôt que de bloquer toutes les entrées.
       returnPointConfirmed: reservation['return_point_confirmed'] as bool? ??
           (reservation['return_point_answered'] as bool? ?? false),
+      returnPointDetail: _blankToNull(
+          (reservation['return_point'] as Map<String, dynamic>?)?['detail']),
+      asksReturnAddress: episode['asks_return_address'] == true,
       episodeId: episode['id'] as int?,
       episodeTitle: episode['title'] as String?,
       episodeStartsAt: parse(episode['starts_at']),
@@ -293,4 +325,9 @@ class TicketPreview {
       showTitle: show['title'] as String? ?? '',
     );
   }
+}
+
+String? _blankToNull(Object? v) {
+  final text = v is String ? v.trim() : '';
+  return text.isEmpty ? null : text;
 }

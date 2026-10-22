@@ -1660,4 +1660,22 @@ class DepartureCopyFr implements DepartureCopy {
   String returnChangedAt(String time) => 'Changé à $time';
   @override
   String returnSaved(String point) => 'Point de retour : $point';
+
+  @override
+  String leftBefore(int count) => count > 1
+      ? '💀 $count sorties avant la fin'
+      : '💀 Sortie avant la fin';
+
+  @override
+  String get returnAddress => 'Adresse exacte';
+  @override
+  String get returnAddressMissing => 'Adresse non renseignée';
+  @override
+  String get returnAddressAdd => 'Ajouter';
+  @override
+  String get returnAddressEdit => 'Corriger';
+  @override
+  String get returnAddressSave => 'Enregistrer';
+  @override
+  String get returnAddressSaved => 'Adresse enregistrée';
 }

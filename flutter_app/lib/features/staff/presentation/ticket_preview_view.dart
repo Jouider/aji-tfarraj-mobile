@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:aji_tfarraj/app/design_system/colors.dart';
+import 'package:aji_tfarraj/features/return_points/presentation/return_address_field.dart';
 import 'package:aji_tfarraj/features/return_points/presentation/return_point_search.dart';
 import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
 import 'package:aji_tfarraj/app/design_system/spacing.dart';
@@ -51,6 +52,56 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
         setState(() => _returnPointError = e is ApiException
             ? e.message
             : ref.read(stringsProvider).staffReturnPointSaveError);
+      }
+    } finally {
+      if (mounted) setState(() => _savingReturnPoint = false);
+    }
+  }
+
+  /// Corrige l'adresse exacte, sans toucher à l'arrêt choisi.
+  Future<void> _editAddress(TicketPreview preview) async {
+    final s = ref.read(stringsProvider);
+    final c = s.departures;
+    final controller =
+        TextEditingController(text: preview.returnPointDetail ?? '');
+
+    final text = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(c.returnAddress),
+        content: ReturnAddressField(controller: controller, strings: s),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(c.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: Text(c.returnAddressSave),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (text == null || text.trim().isEmpty || !mounted) return;
+
+    setState(() {
+      _savingReturnPoint = true;
+      _returnPointError = null;
+    });
+    try {
+      await ref
+          .read(staffCheckInProvider.notifier)
+          .setReturnPoint(preview.chosenReturnPointId, detail: text);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(c.returnAddressSaved)));
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _returnPointError = e is ApiException
+            ? e.message
+            : s.staffReturnPointSaveError);
       }
     } finally {
       if (mounted) setState(() => _savingReturnPoint = false);
@@ -138,6 +189,14 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
                       icon: Icons.report_gmailerrorred_outlined,
                     ),
                   ],
+                  // 💀 Left an earlier recording before the end.
+                  if (preview.leftBefore) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    _Pill(
+                      label: s.departures.leftBefore(preview.pastDepartures),
+                      color: AppColors.error,
+                    ),
+                  ],
                   // This ticket's holder already left tonight.
                   if (preview.departure != null) ...[
                     const SizedBox(height: AppSpacing.xs),
@@ -168,6 +227,7 @@ class _TicketPreviewViewState extends ConsumerState<TicketPreviewView> {
                       saving: _savingReturnPoint,
                       error: _returnPointError,
                       onChoose: _chooseReturnPoint,
+                      onEditAddress: () => _editAddress(preview),
                     ),
                   ],
                 ],
@@ -396,11 +456,11 @@ class _Row extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({required this.label, required this.color, required this.icon});
+  const _Pill({required this.label, required this.color, this.icon});
 
   final String label;
   final Color color;
-  final IconData icon;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -415,8 +475,10 @@ class _Pill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: AppSpacing.xs),
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: AppSpacing.xs),
+          ],
           Text(label, style: AppTypography.labelSmall.copyWith(color: color)),
         ],
       ),
@@ -525,12 +587,14 @@ class _ReturnPointPicker extends ConsumerStatefulWidget {
     required this.saving,
     required this.error,
     required this.onChoose,
+    required this.onEditAddress,
   });
 
   final TicketPreview preview;
   final bool saving;
   final String? error;
   final ValueChanged<int?> onChoose;
+  final VoidCallback onEditAddress;
 
   @override
   ConsumerState<_ReturnPointPicker> createState() => _ReturnPointPickerState();
@@ -667,12 +731,84 @@ class _ReturnPointPickerState extends ConsumerState<_ReturnPointPicker> {
               enabled: !saving,
               onTap: () => onChoose(null),
             ),
+          // L'adresse exacte, les soirs de dépôt à domicile : lue à voix haute
+          // avec l'arrêt, et corrigée ici si elle est fausse ou manque.
+          if (preview.takesReturnAddress ||
+              preview.returnPointDetail != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _AddressRow(
+              detail: preview.returnPointDetail,
+              onEdit: preview.takesReturnAddress && !saving
+                  ? widget.onEditAddress
+                  : null,
+            ),
+          ],
           if (error != null) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(error,
                 style: AppTypography.bodySmall
                     .copyWith(color: AppColors.errorDark)),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AddressRow extends ConsumerWidget {
+  const _AddressRow({required this.detail, required this.onEdit});
+
+  final String? detail;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = ref.watch(stringsProvider).departures;
+    final missing = detail == null;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md, AppSpacing.sm, AppSpacing.xs, AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: missing
+            ? AppColors.warning.withValues(alpha: 0.08)
+            : AppColors.backgroundLight,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: missing
+              ? AppColors.warning.withValues(alpha: 0.5)
+              : AppColors.border,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.home_outlined, size: 18, color: AppColors.textMuted),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(c.returnAddress,
+                    style: AppTypography.caption
+                        .copyWith(color: AppColors.textMuted)),
+                const SizedBox(height: 2),
+                Text(
+                  detail ?? c.returnAddressMissing,
+                  style: missing
+                      ? AppTypography.bodySmall
+                          .copyWith(color: AppColors.textMuted)
+                      : AppTypography.bodyMedium
+                          .copyWith(fontWeight: AppTypography.semiBold),
+                ),
+              ],
+            ),
+          ),
+          if (onEdit != null)
+            TextButton(
+              onPressed: onEdit,
+              child: Text(
+                  missing ? c.returnAddressAdd : c.returnAddressEdit),
+            ),
         ],
       ),
     );

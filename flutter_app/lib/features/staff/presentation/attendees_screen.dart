@@ -309,6 +309,7 @@ class _AttendeeTile extends ConsumerWidget {
                     ),
                     if (departure != null ||
                         attendee.wasExcludedBefore ||
+                        attendee.leftBefore ||
                         attendee.returnPointChangedAt != null) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Wrap(
@@ -328,6 +329,12 @@ class _AttendeeTile extends ConsumerWidget {
                             _Tag(
                               icon: Icons.report_gmailerrorred_outlined,
                               label: c.excludedBefore(attendee.pastExclusions),
+                              color: AppColors.error,
+                            ),
+                          // 💀 Left an earlier recording before the end.
+                          if (attendee.leftBefore)
+                            _Tag(
+                              label: c.leftBefore(attendee.pastDepartures),
                               color: AppColors.error,
                             ),
                           // Moved after coming in: if the driver's sheet was
@@ -551,14 +558,26 @@ class _DepartureSheetState extends ConsumerState<DepartureSheet> {
                 ),
               ],
             ),
-            if (a.wasExcludedBefore) ...[
+            if (a.wasExcludedBefore || a.leftBefore) ...[
               const SizedBox(height: AppSpacing.sm),
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: _Tag(
-                  icon: Icons.report_gmailerrorred_outlined,
-                  label: c.excludedBefore(a.pastExclusions),
-                  color: AppColors.error,
+                child: Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    if (a.wasExcludedBefore)
+                      _Tag(
+                        icon: Icons.report_gmailerrorred_outlined,
+                        label: c.excludedBefore(a.pastExclusions),
+                        color: AppColors.error,
+                      ),
+                    if (a.leftBefore)
+                      _Tag(
+                        label: c.leftBefore(a.pastDepartures),
+                        color: AppColors.error,
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -781,9 +800,9 @@ class _Avatar extends StatelessWidget {
 }
 
 class _Tag extends StatelessWidget {
-  const _Tag({required this.icon, required this.label, required this.color});
+  const _Tag({this.icon, required this.label, required this.color});
 
-  final IconData icon;
+  final IconData? icon;
   final String label;
   final Color color;
 
@@ -798,8 +817,10 @@ class _Tag extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
+          ],
           Flexible(
             child: Text(label,
                 style: AppTypography.bodySmall

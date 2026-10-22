@@ -320,4 +320,62 @@ void main() {
       expect(TicketPreview.fromJson(json).awaitsReturnPoint, isFalse);
     });
   });
+
+  group('l\'adresse exacte, à la porte', () {
+    Map<String, dynamic> withAddress({String? detail, bool asks = true}) {
+      final json = payload(reservation: {
+        'id': 5933,
+        'seats': 1,
+        'return_point_answered': true,
+        'return_point': {'id': 4, 'name': 'Hay Hassani', 'detail': detail},
+      });
+      json['return_points'] = [
+        {'id': 4, 'name': 'Hay Hassani'},
+      ];
+      (json['episode'] as Map<String, dynamic>)['asks_return_address'] = asks;
+      return json;
+    }
+
+    test('l\'adresse donnée en réservant est lue', () {
+      final p = TicketPreview.fromJson(
+          withAddress(detail: '12 rue Ibn Sina, 3e étage'));
+
+      expect(p.returnPointDetail, '12 rue Ibn Sina, 3e étage');
+      expect(p.takesReturnAddress, isTrue);
+    });
+
+    test('une adresse vide se lit comme absente', () {
+      expect(TicketPreview.fromJson(withAddress(detail: '  ')).returnPointDetail,
+          isNull);
+    });
+
+    test('un soir sans dépôt à domicile, rien à corriger', () {
+      expect(TicketPreview.fromJson(withAddress(asks: false)).takesReturnAddress,
+          isFalse);
+    });
+
+    test('sans arrêt, pas d\'adresse à demander', () {
+      final p = TicketPreview.fromJson(withAddress(detail: 'x'))
+          .withReturnPoint(null);
+
+      expect(p.takesReturnAddress, isFalse);
+      expect(p.returnPointDetail, isNull);
+    });
+
+    test('l\'adresse gardée par le serveur suit le nouvel arrêt', () {
+      final p = TicketPreview.fromJson(withAddress(detail: 'ancienne'))
+          .withReturnPoint(4, detail: 'corrigée');
+
+      expect(p.returnPointDetail, 'corrigée');
+      expect(p.asksReturnAddress, isTrue);
+    });
+
+    test('changer la photo ne perd pas l\'adresse', () {
+      final p = TicketPreview.fromJson(withAddress(detail: 'chez moi'))
+          .withAvatarUrl('https://x/y.jpg');
+
+      expect(p.returnPointDetail, 'chez moi');
+      expect(p.takesReturnAddress, isTrue);
+    });
+  });
 }

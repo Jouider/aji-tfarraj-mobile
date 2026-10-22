@@ -1479,4 +1479,21 @@ class DepartureCopyAr implements DepartureCopy {
   String returnChangedAt(String time) => 'تبدّلات ف $time';
   @override
   String returnSaved(String point) => 'محطة الرجوع: $point';
+
+  @override
+  String leftBefore(int count) =>
+      count > 1 ? '💀 خرج قبل النهاية ×$count' : '💀 خرج قبل النهاية';
+
+  @override
+  String get returnAddress => 'العنوان بالضبط';
+  @override
+  String get returnAddressMissing => 'ما عطاش العنوان';
+  @override
+  String get returnAddressAdd => 'زيد';
+  @override
+  String get returnAddressEdit => 'صحّح';
+  @override
+  String get returnAddressSave => 'سجّل';
+  @override
+  String get returnAddressSaved => 'تسجّل العنوان';
 }
