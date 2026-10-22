@@ -74,6 +74,10 @@ abstract class WafacashCopy {
   String get statusCancelled;
   String get statusExpired;
 
+  /// Une demande annulée par le staff : la raison, et de quoi recommencer.
+  String cancelledByStaff(String amount, String reason);
+  String get requestAgain;
+
   String get genericError;
 }
 
@@ -210,6 +214,12 @@ class WafacashCopyFr implements WafacashCopy {
   String get statusExpired => 'Non retiré — rendu';
 
   @override
+  String cancelledByStaff(String amount, String reason) =>
+      'Ta demande de $amount a été annulée : $reason';
+  @override
+  String get requestAgain => 'Refaire une demande';
+
+  @override
   String get genericError => 'Impossible pour le moment. Réessaie.';
 }
 
@@ -339,6 +349,12 @@ class WafacashCopyAr implements WafacashCopy {
   String get statusCancelled => 'تلغى';
   @override
   String get statusExpired => 'ما تسحبش — رجع';
+
+  @override
+  String cancelledByStaff(String amount, String reason) =>
+      'الطلب ديال $amount تلغى: $reason';
+  @override
+  String get requestAgain => 'دير طلب جديد';
 
   @override
   String get genericError => 'ما قدرناش دابا. عاود جرب.';

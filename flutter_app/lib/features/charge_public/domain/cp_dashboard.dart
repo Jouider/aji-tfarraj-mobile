@@ -155,6 +155,46 @@ class CpShowRow {
       );
 }
 
+/// Ce que l'équipe a fait pour joindre un invité : appels et WhatsApp. Les
+/// notes de l'appel restent internes.
+class CpGuestContact {
+  final bool contacted;
+  final int calls;
+  final int whatsapp;
+  final DateTime? lastAt;
+  final String? lastOutcomeFr;
+  final String? lastOutcomeAr;
+
+  const CpGuestContact({
+    this.contacted = false,
+    this.calls = 0,
+    this.whatsapp = 0,
+    this.lastAt,
+    this.lastOutcomeFr,
+    this.lastOutcomeAr,
+  });
+
+  int get times => calls + whatsapp;
+
+  String? lastOutcome({required bool arabic}) {
+    final ar = lastOutcomeAr;
+    return arabic && ar != null && ar.isNotEmpty ? ar : lastOutcomeFr;
+  }
+
+  /// Null quand le serveur ne l'envoie pas encore.
+  static CpGuestContact? fromJson(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    return CpGuestContact(
+      contacted: json['contacted'] as bool? ?? false,
+      calls: (json['calls'] as num?)?.toInt() ?? 0,
+      whatsapp: (json['whatsapp'] as num?)?.toInt() ?? 0,
+      lastAt: DateTime.tryParse(json['last_at'] as String? ?? '')?.toLocal(),
+      lastOutcomeFr: json['last_outcome_fr'] as String?,
+      lastOutcomeAr: json['last_outcome_ar'] as String?,
+    );
+  }
+}
+
 class CpGuest {
   final String name;
   final String? avatarUrl;
@@ -162,9 +202,13 @@ class CpGuest {
   final String show;
   final String? date;
   final bool attended;
+
+  /// Pointé puis parti avant la fin : ni présent, ni payé.
+  final bool left;
   final String? resStatus;
   final int? amount;
   final int? visit;
+  final CpGuestContact? contact;
 
   const CpGuest({
     required this.name,
@@ -173,9 +217,11 @@ class CpGuest {
     this.show = '—',
     this.date,
     this.attended = false,
+    this.left = false,
     this.resStatus,
     this.amount,
     this.visit,
+    this.contact,
   });
 
   factory CpGuest.fromJson(Map<String, dynamic> j) => CpGuest(
@@ -185,9 +231,11 @@ class CpGuest {
         show: j['show'] as String? ?? '—',
         date: j['date'] as String?,
         attended: j['attended'] as bool? ?? false,
+        left: j['left'] as bool? ?? false,
         resStatus: j['res_status'] as String?,
         amount: (j['amount'] as num?)?.toInt(),
         visit: (j['visit'] as num?)?.toInt(),
+        contact: CpGuestContact.fromJson(j['contact']),
       );
 }
 

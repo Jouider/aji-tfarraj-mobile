@@ -188,6 +188,78 @@ void main() {
     });
   });
 
+  group('la liste des invités', () {
+    CpGuest parse(Map<String, dynamic> extra) => CpDashboard.fromRich({
+          'stats': <String, dynamic>{},
+          'guests': [
+            {
+              'name': 'Samira Bennani',
+              'show': 'Rachid Show',
+              'date': '20/10/2026',
+              'attended': false,
+              'res_status': 'checked_in',
+              'amount': null,
+              ...extra,
+            },
+          ],
+        }).guests.single;
+
+    test('parti avant la fin : ni présent, ni payé', () {
+      final g = parse({'left': true});
+      expect(g.left, isTrue);
+      expect(g.attended, isFalse);
+    });
+
+    test('ce que l\'équipe a fait pour le joindre', () {
+      final g = parse({
+        'contact': {
+          'contacted': true,
+          'calls': 2,
+          'whatsapp': 1,
+          'last_at': '2026-10-21T17:40:00+00:00',
+          'last_outcome': 'confirmed',
+          'last_outcome_fr': 'Confirmé',
+          'last_outcome_ar': 'مؤكد',
+        },
+      });
+      final c = g.contact!;
+
+      expect(c.contacted, isTrue);
+      expect(c.times, 3);
+      expect(c.lastAt, isNotNull);
+      expect(c.lastOutcome(arabic: false), 'Confirmé');
+      expect(c.lastOutcome(arabic: true), 'مؤكد');
+    });
+
+    test('pas encore contacté', () {
+      final g = parse({
+        'contact': {'contacted': false, 'calls': 0, 'whatsapp': 0},
+      });
+      expect(g.contact!.contacted, isFalse);
+    });
+
+    test('un vieux serveur : ni contact, ni sortie', () {
+      final g = parse({});
+      expect(g.contact, isNull);
+      expect(g.left, isFalse);
+    });
+
+    test('le solde peut être négatif', () {
+      final d = CpDashboard.fromRich({
+        'stats': {'unpaid_balance': -75},
+      });
+      expect(d.stats.unpaidBalance, -75);
+      expect(const ChargePublicCopyFr().money(-75), '-75 DH');
+    });
+
+    test('la ligne de contact, telle qu\'elle s\'affiche', () {
+      const fr = ChargePublicCopyFr();
+      expect(fr.contacted(3, '21/10 18:40', 'Confirmé'),
+          '📞 Contacté 3× · dernier : 21/10 18:40 · Confirmé');
+      expect(fr.contacted(1, null, null), '📞 Contacté 1×');
+    });
+  });
+
   test("« Public d'Abdellah », « Public de Youssef »", () {
     const fr = ChargePublicCopyFr();
     expect(fr.takenBy('Abdellah Jouider'), "Public d'Abdellah Jouider");

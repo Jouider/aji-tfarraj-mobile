@@ -156,6 +156,16 @@ class WafacashWithdrawal {
 
   bool get canCancel => status == WafacashWithdrawalStatus.requested;
 
+  /// Ce que le serveur écrit quand le chargé public annule lui-même.
+  static const _cancelledByCp = 'Annulé par le chargé public';
+
+  /// Annulée par le staff (solde à vérifier après un tournage) : ce n'est pas
+  /// un refus, le chargé public refait sa demande sur le solde corrigé.
+  bool get cancelledByStaff =>
+      status == WafacashWithdrawalStatus.cancelled &&
+      (closedReason ?? '').trim().isNotEmpty &&
+      closedReason!.trim() != _cancelledByCp;
+
   factory WafacashWithdrawal.fromJson(Map<String, dynamic> json) {
     DateTime? at(String key) =>
         DateTime.tryParse(json[key] as String? ?? '')?.toLocal();
@@ -227,6 +237,13 @@ class WafacashOverview {
   /// La demande encore en route, s'il y en a une — une seule à la fois.
   WafacashWithdrawal? get current =>
       withdrawals.where((w) => w.status.isOpen).firstOrNull;
+
+  /// La dernière demande, quand le staff l'a annulée et qu'aucune autre n'a
+  /// suivi : sa raison s'affiche avec « Refaire une demande ».
+  WafacashWithdrawal? get lastCancelledByStaff {
+    final last = withdrawals.firstOrNull;
+    return last != null && last.cancelledByStaff ? last : null;
+  }
 
   /// Le plus qu'on puisse demander maintenant.
   int get maxRequestable =>

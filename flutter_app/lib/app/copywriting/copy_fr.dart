@@ -1299,6 +1299,16 @@ abstract class ChargePublicCopy {
   /// A guest who did not come to a recording that has already happened.
   String get statusAbsent;
 
+  /// Pointé puis parti avant la fin : rien pour le chargé public.
+  String get statusLeft;
+
+  /// Ce que l'équipe a fait pour joindre l'invité.
+  String contacted(int times, String? lastAt, String? outcome);
+  String get notContacted;
+
+  /// Sous un solde négatif : une sortie notée après un retrait.
+  String get negativeBalanceNote;
+
   String visitsCount(int n);
   String gain(int v);
   String get totalEarned;
@@ -1436,6 +1446,18 @@ class ChargePublicCopyFr extends ChargePublicCopy {
   String get statusPending => 'En attente';
   @override
   String get statusAbsent => 'Absent';
+  @override
+  String get statusLeft => 'Parti avant la fin';
+  @override
+  String contacted(int times, String? lastAt, String? outcome) =>
+      '📞 Contacté $times×'
+      '${lastAt != null ? ' · dernier : $lastAt' : ''}'
+      '${outcome != null && outcome.isNotEmpty ? ' · $outcome' : ''}';
+  @override
+  String get notContacted => 'Pas encore contacté';
+  @override
+  String get negativeBalanceNote =>
+      'Ce montant sera retiré de tes prochains gains.';
 
   @override
   String visitsCount(int n) => '$n présence${n > 1 ? 's' : ''}';

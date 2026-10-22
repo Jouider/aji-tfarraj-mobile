@@ -32,7 +32,11 @@ class WafacashSection extends ConsumerWidget {
 
     return state.maybeWhen(
       data: (o) {
-        if (!o.open && o.current == null) return const SizedBox.shrink();
+        // Retraits fermés, rien en cours : rien à montrer — sauf une demande
+        // que le staff vient d'annuler, dont la raison doit être lue.
+        if (!o.open && o.current == null && o.lastCancelledByStaff == null) {
+          return const SizedBox.shrink();
+        }
 
         final current = o.current;
         final closed =
@@ -108,9 +112,22 @@ class _WithdrawCard extends ConsumerWidget {
     final pending = identity?.status == WafacashIdentityStatus.pending;
     final rejected = identity?.status == WafacashIdentityStatus.rejected;
     final verified = identity?.isVerified ?? false;
+    final cancelled = overview.lastCancelledByStaff;
 
     return _Card(
+      highlight: cancelled != null,
       children: [
+        // Pas un refus : le staff a annulé pour vérifier le solde après un
+        // tournage. La raison, puis de quoi recommencer sur le solde corrigé.
+        if (cancelled != null) ...[
+          _Notice(
+            icon: Icons.info_outline,
+            text: copy.cancelledByStaff(
+                copy.money(cancelled.grossAmount), cancelled.closedReason!),
+            color: AppColors.warningDark,
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
         Row(
           children: [
             const Icon(Icons.payments_outlined, color: AppColors.primaryAction),
@@ -127,7 +144,9 @@ class _WithdrawCard extends ConsumerWidget {
             style: AppTypography.bodySmall
                 .copyWith(color: AppColors.textSecondary)),
         const SizedBox(height: AppSpacing.md),
-        if (pending)
+        if (!overview.open)
+          const SizedBox.shrink()
+        else if (pending)
           _Notice(icon: Icons.hourglass_top, text: copy.identityPending)
         else ...[
           if (rejected) ...[
@@ -142,7 +161,9 @@ class _WithdrawCard extends ConsumerWidget {
             text: rejected
                 ? copy.resend
                 : verified
-                    ? copy.cardWithdraw
+                    ? (cancelled != null
+                        ? copy.requestAgain
+                        : copy.cardWithdraw)
                     : copy.identityStart,
             icon: verified ? Icons.arrow_downward : Icons.badge_outlined,
             // Vérifié mais sous le minimum : le bouton n'aurait rien à proposer.
@@ -563,7 +584,8 @@ class _HistoryRow extends StatelessWidget {
                 // Le montant payé par Aji Tfarraj, frais d'agence compris.
                 Text(copy.money(w.grossAmount),
                     style: AppTypography.labelMedium),
-                if (w.status == WafacashWithdrawalStatus.rejected &&
+                if ((w.status == WafacashWithdrawalStatus.rejected ||
+                        w.cancelledByStaff) &&
                     (w.closedReason ?? '').isNotEmpty)
                   Text(w.closedReason!,
                       style: AppTypography.caption

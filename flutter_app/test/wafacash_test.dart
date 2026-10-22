@@ -1,5 +1,13 @@
+import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
+import 'package:aji_tfarraj/app/localization/app_locale.dart';
+import 'package:aji_tfarraj/app/localization/locale_provider.dart';
+import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/app/push/push_router.dart';
+import 'package:aji_tfarraj/features/charge_public/data/charge_public_repository.dart';
 import 'package:aji_tfarraj/features/charge_public/domain/wafacash.dart';
+import 'package:aji_tfarraj/features/charge_public/presentation/wafacash_section.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Les retraits Wafacash côté app.
@@ -82,7 +90,9 @@ void main() {
   });
 
   group('une demande', () {
-    Map<String, dynamic> retrait(String status, {String? code}) => {
+    Map<String, dynamic> retrait(String status,
+            {String? code, String? reason}) =>
+        {
           'id': 7,
           'status': status,
           'gross_amount': 600,
@@ -90,8 +100,37 @@ void main() {
           'net_amount': 575,
           'legal_name': 'Karim Ouali',
           'code': code,
+          'closed_reason': reason,
           'requested_at': '2026-10-05T10:00:00Z',
         };
+
+    test('annulée par le staff : la raison, et on peut recommencer', () {
+      final o = WafacashOverview.fromJson(etat(withdrawals: [
+        retrait('cancelled',
+            reason: 'Ton solde est en cours de vérification après le tournage.'),
+        retrait('collected'),
+      ]));
+
+      expect(o.current, isNull);
+      expect(o.lastCancelledByStaff?.closedReason,
+          'Ton solde est en cours de vérification après le tournage.');
+    });
+
+    test('annulée par le chargé public lui-même : rien à expliquer', () {
+      final o = WafacashOverview.fromJson(etat(withdrawals: [
+        retrait('cancelled', reason: 'Annulé par le chargé public'),
+      ]));
+      expect(o.lastCancelledByStaff, isNull);
+    });
+
+    test('une demande refaite depuis efface le message', () {
+      final o = WafacashOverview.fromJson(etat(withdrawals: [
+        retrait('requested'),
+        retrait('cancelled', reason: 'Solde à vérifier'),
+      ]));
+      expect(o.lastCancelledByStaff, isNull);
+      expect(o.current?.status, WafacashWithdrawalStatus.requested);
+    });
 
     test('la demande en route est retrouvée, les closes non', () {
       final o = WafacashOverview.fromJson(etat(withdrawals: [
@@ -151,6 +190,70 @@ void main() {
     test('et même sans lien profond', () {
       expect(PushRouter.getRouteFromData({'type': 'wafacash'}),
           '/charge-public?tab=gains');
+    });
+  });
+
+  group('la carte, après une annulation du staff', () {
+    Future<void> pump(WidgetTester tester, Map<String, dynamic> json) async {
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          stringsProvider.overrideWithValue(const AppStrings(AppLocale.fr)),
+          wafacashProvider
+              .overrideWith((ref) async => WafacashOverview.fromJson(json)),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: WafacashSection(onChanged: () {}),
+            ),
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    Map<String, dynamic> annule({bool open = true}) => etat(
+          open: open,
+          identity: {
+            'status': 'verified',
+            'legal_name': 'Karim Ouali',
+            'cin_masked': 'AB12••',
+          },
+          withdrawals: [
+            {
+              'id': 9,
+              'status': 'cancelled',
+              'gross_amount': 600,
+              'fee_amount': 25,
+              'net_amount': 575,
+              'legal_name': 'Karim Ouali',
+              'closed_reason': 'Solde à vérifier après le tournage',
+            },
+          ],
+        );
+
+    testWidgets('dit pourquoi, et propose de refaire la demande',
+        (tester) async {
+      await pump(tester, annule());
+      const c = WafacashCopyFr();
+
+      expect(
+          find.text(c.cancelledByStaff(
+              '600 DH', 'Solde à vérifier après le tournage')),
+          findsOneWidget);
+      expect(find.text(c.requestAgain), findsOneWidget);
+    });
+
+    testWidgets('retraits fermés : la raison reste lisible, sans bouton',
+        (tester) async {
+      await pump(tester, annule(open: false));
+      const c = WafacashCopyFr();
+
+      expect(
+          find.text(c.cancelledByStaff(
+              '600 DH', 'Solde à vérifier après le tournage')),
+          findsOneWidget);
+      expect(find.text(c.requestAgain), findsNothing);
     });
   });
 }
