@@ -159,9 +159,11 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
   /// Ouvre la vidéo récompensée.
   ///
   /// Les points ne sont pas crédités ici : Google prévient le serveur de son
-  /// côté, et c'est lui qui écrit la ligne. D'où la relecture du solde une
-  /// paire de secondes plus tard, plutôt qu'un total ajusté à l'écran qui
-  /// mentirait si le rappel n'arrivait jamais.
+  /// côté, et c'est lui qui écrit la ligne. D'où la relecture du solde
+  /// jusqu'à le voir bouger, plutôt qu'un total ajusté à l'écran qui
+  /// mentirait si le rappel n'arrivait jamais. Le rappel arrive en général en
+  /// quelques secondes, parfois en plus d'une minute : une seule relecture
+  /// après trois secondes le manquait, et les points semblaient perdus.
   Future<void> _watchForPoints() async {
     final strings = ref.read(stringsProvider);
     final messenger = ScaffoldMessenger.of(context);
@@ -183,7 +185,19 @@ class _LoyaltyScreenState extends ConsumerState<LoyaltyScreen> {
 
     if (!earned) return;
 
-    await Future<void>.delayed(const Duration(seconds: 3));
+    final before = ref.read(myPointsProvider).valueOrNull?.balance;
+    final repo = ref.read(loyaltyRepositoryProvider);
+    // Environ une minute et demie, de plus en plus espacé.
+    for (final seconds in const [3, 4, 5, 8, 10, 15, 20, 25]) {
+      await Future<void>.delayed(Duration(seconds: seconds));
+      if (!mounted) return;
+      try {
+        final fresh = await repo.fetchMyPoints();
+        if (before == null || fresh.balance != before) break;
+      } catch (_) {
+        // Réseau : on relit au tour suivant.
+      }
+    }
     if (mounted) ref.invalidate(myPointsProvider);
   }
 
