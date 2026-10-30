@@ -15,6 +15,7 @@ import 'package:aji_tfarraj/app/design_system/states.dart';
 import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/features/shows/data/shows_repository.dart';
 import 'package:aji_tfarraj/features/shows/domain/show.dart';
+import 'package:aji_tfarraj/features/home/hero_show.dart';
 import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
@@ -267,35 +268,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     DateTime? effectiveDate(Show show) =>
         show.nextEpisode?.startsAt ?? show.startsAt;
 
-    // Hero show: first upcoming active show (prefer shows with upcoming episodes)
-    final Show heroShow = allShows.where((show) {
-          final date = effectiveDate(show);
-          return date != null &&
-              date.isAfter(now) &&
-              show.isActive &&
-              show.hasUpcomingEpisodes;
-        }).fold<Show?>(null, (prev, show) {
-          if (prev == null) return show;
-          return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
-              ? show
-              : prev;
-        }) ??
-        // Fallback: any active upcoming show (backward compat)
-        allShows.where((show) {
-          final date = effectiveDate(show);
-          return date != null && date.isAfter(now) && show.isActive;
-        }).fold<Show?>(null, (prev, show) {
-          if (prev == null) return show;
-          return effectiveDate(show)!.isBefore(effectiveDate(prev)!)
-              ? show
-              : prev;
-        }) ??
-        // No dated upcoming show at all (e.g. everything is "Date à confirmer").
-        // Still surface a hero so the home doesn't open on a cramped section
-        // header — prefer the most-reserved active show, else just the first.
-        (List<Show>.from(allShows)
-              ..sort((a, b) => b.reservedSeats.compareTo(a.reservedSeats)))
-            .firstWhere((show) => show.isActive, orElse: () => allShows.first);
+    // Hero show: the one « à la une », else the soonest upcoming one
+    final Show heroShow = pickHeroShow(allShows, now);
 
     // Upcoming within 60 days, excluding hero
     final prochains = allShows.where(
