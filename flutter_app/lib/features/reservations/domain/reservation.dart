@@ -16,6 +16,12 @@ class Reservation {
   final Show? show;
   final Ticket? ticket;
 
+  /// La liste d'attente du jour J, quand le plateau est complet : `waiting`
+  /// (on appelle si une place se libère) ou `coming` (la personne a dit
+  /// qu'elle peut venir, pas encore approuvée). Null sinon, et sur un vieux
+  /// serveur. Le `status` reste « En attente » dans les deux cas.
+  final String? waitlist;
+
   Reservation({
     required this.id,
     required this.userId,
@@ -29,7 +35,15 @@ class Reservation {
     this.updatedAt,
     this.show,
     this.ticket,
+    this.waitlist,
   });
+
+  /// Sur la liste d'attente, et seulement tant que la demande est en attente.
+  bool get onWaitlist =>
+      (waitlist == 'waiting' || waitlist == 'coming') &&
+      (status == 'pending_review' || status == 'contacting');
+
+  bool get waitlistComing => onWaitlist && waitlist == 'coming';
 
   /// Create Reservation from JSON (snake_case from API)
   factory Reservation.fromJson(Map<String, dynamic> json) {
@@ -71,6 +85,7 @@ class Reservation {
           : null,
       show: show,
       ticket: ticket,
+      waitlist: json['waitlist'] as String?,
     );
   }
 
@@ -89,6 +104,7 @@ class Reservation {
       'updated_at': updatedAt?.toIso8601String(),
       'show': show?.toJson(),
       'ticket': ticket?.toJson(),
+      'waitlist': waitlist,
     };
   }
 

@@ -45,6 +45,9 @@ abstract class WheelCopy {
   String subtitleWithVideo(int freeSpins);
   String videoSpinsLeft(int n);
   String get entryVideoSpin;
+
+  /// Le bouton sous la roue. Court : l'icône ▶ et la ligne juste au-dessus
+  /// (« 2 essais à débloquer avec une vidéo ») disent déjà que c'est une vidéo.
   String get watchVideo;
 
   /// Le même, en plus court, pour le bouton du résultat.
@@ -155,7 +158,7 @@ class WheelCopyFr implements WheelCopy {
   @override
   String get entryVideoSpin => 'Un essai de plus avec une vidéo';
   @override
-  String get watchVideo => 'Regarder une vidéo pour un nouvel essai';
+  String get watchVideo => 'Débloquer un essai';
   @override
   String get watchVideoShort => 'Nouvel essai avec une vidéo';
   @override
@@ -267,7 +270,7 @@ class WheelCopyAr implements WheelCopy {
   @override
   String get entryVideoSpin => 'محاولة إضافية بفيديو';
   @override
-  String get watchVideo => 'شاهد فيديو لمحاولة جديدة';
+  String get watchVideo => 'افتح محاولة جديدة';
   @override
   String get watchVideoShort => 'محاولة جديدة بفيديو';
   @override

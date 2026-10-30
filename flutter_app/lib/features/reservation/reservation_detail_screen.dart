@@ -14,6 +14,7 @@ import 'package:aji_tfarraj/app/design_system/loaders.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
 import 'package:aji_tfarraj/features/reservations/domain/reservation.dart';
 import 'package:aji_tfarraj/features/reservations/presentation/reservation_status.dart';
+import 'package:aji_tfarraj/features/reservations/presentation/waitlist_widgets.dart';
 
 /// Reservation Detail Screen — dark premium redesign
 class ReservationDetailScreen extends ConsumerWidget {
@@ -86,7 +87,12 @@ class ReservationDetailScreen extends ConsumerWidget {
                 // Status hero
                 _StatusCard(
                   statusHelper: statusHelper,
-                  message: _getStatusMessage(statusHelper, s),
+                  waitlist: reservation.onWaitlist ? reservation : null,
+                  message: reservation.onWaitlist
+                      ? (reservation.waitlistComing
+                          ? s.waitlist.comingBody
+                          : s.waitlist.waitingBody)
+                      : _getStatusMessage(statusHelper, s),
                   rejectionReason: statusHelper.isRejected
                       ? reservation.rejectionReason
                       : null,
@@ -283,23 +289,39 @@ class ReservationDetailScreen extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // FIX: Status banner — radius 20, theme-aware foreground, status-tinted border 25%, icon circle 20%
-class _StatusCard extends StatelessWidget {
+class _StatusCard extends ConsumerWidget {
   final ReservationStatusHelper statusHelper;
   final String message;
   final String? rejectionReason;
+
+  /// Sur la liste d'attente : son titre, son icône et ses couleurs à la place
+  /// de « En attente ».
+  final Reservation? waitlist;
 
   const _StatusCard({
     required this.statusHelper,
     required this.message,
     this.rejectionReason,
+    this.waitlist,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final look = waitlist != null ? WaitlistLook.of(waitlist!) : null;
+    final w = ref.watch(stringsProvider).waitlist;
     // FIX: Use theme-aware foreground for text/icon — readable in both modes
-    final fg = AppColors.getStatusForegroundColor(statusHelper.status);
-    final rawColor = AppColors.getStatusColor(statusHelper.status);
-    final statusBg = AppColors.getStatusBackgroundColor(statusHelper.status);
+    final fg = look?.foreground ??
+        AppColors.getStatusForegroundColor(statusHelper.status);
+    final rawColor =
+        look?.color ?? AppColors.getStatusColor(statusHelper.status);
+    final statusBg = look?.background ??
+        AppColors.getStatusBackgroundColor(statusHelper.status);
+    final icon = look?.icon ?? statusHelper.icon;
+    final title = waitlist == null
+        ? statusHelper.label
+        : waitlist!.waitlistComing
+            ? w.comingBadge
+            : w.waitingBadge;
 
     return Container(
       width: double.infinity,
@@ -319,12 +341,12 @@ class _StatusCard extends StatelessWidget {
               color: rawColor.withValues(alpha: 0.20),
               shape: BoxShape.circle,
             ),
-            child: Icon(statusHelper.icon, size: 28, color: fg),
+            child: Icon(icon, size: 28, color: fg),
           ),
           const SizedBox(height: AppSpacing.md),
           // FIX: Title — 20px w700 foreground color
           Text(
-            statusHelper.label,
+            title,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,

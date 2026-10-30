@@ -12,6 +12,8 @@ import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/widgets/reward_api_card.dart';
 import 'package:aji_tfarraj/features/tutorials/domain/tutorial.dart';
 import 'package:aji_tfarraj/features/tutorials/presentation/tutorial_widgets.dart';
+import 'package:aji_tfarraj/features/wheel/data/wheel_repository.dart';
+import 'package:aji_tfarraj/features/wheel/presentation/wheel_entry_card.dart';
 
 class RewardsScreen extends ConsumerWidget {
   const RewardsScreen({super.key});
@@ -46,23 +48,34 @@ class RewardsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(rewardsListProvider),
         ),
         data: (rewards) {
-          if (rewards.isEmpty) {
-            return Center(
-              child: EmptyState(
-                icon: Icons.card_giftcard_outlined,
-                title: strings.noRewardsYet,
-              ),
-            );
-          }
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(rewardsListProvider),
+            onRefresh: () async {
+              ref.invalidate(rewardsListProvider);
+              ref.invalidate(wheelProvider);
+            },
             color: AppColors.accentInk,
-            child: ListView.separated(
+            child: ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: rewards.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppSpacing.md),
-              itemBuilder: (_, i) => RewardApiCard(reward: rewards[i]),
+              children: [
+                // Pas encore assez de points ? La roue en donne, chaque jour.
+                // Elle se cache d'elle-même quand elle est fermée.
+                const WheelEntryCard(
+                  padding: EdgeInsets.only(bottom: AppSpacing.lg),
+                ),
+                if (rewards.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.xxl),
+                    child: EmptyState(
+                      icon: Icons.card_giftcard_outlined,
+                      title: strings.noRewardsYet,
+                    ),
+                  )
+                else
+                  for (final (i, reward) in rewards.indexed) ...[
+                    if (i > 0) const SizedBox(height: AppSpacing.md),
+                    RewardApiCard(reward: reward),
+                  ],
+              ],
             ),
           );
         },

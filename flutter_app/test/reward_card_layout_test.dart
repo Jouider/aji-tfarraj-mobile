@@ -11,6 +11,16 @@ import 'package:aji_tfarraj/features/notifications/data/notification_repository.
 import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
 import 'package:aji_tfarraj/features/rewards/domain/reward.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
+import 'package:aji_tfarraj/features/wheel/data/wheel_repository.dart';
+import 'package:aji_tfarraj/features/wheel/domain/wheel.dart';
+
+/// La carte de la roue, en haut de l'écran, ne doit pas appeler le réseau
+/// pendant le test : fermée, elle ne s'affiche pas.
+class _ClosedWheel extends WheelNotifier {
+  @override
+  Future<WheelStatus> build() async =>
+      WheelStatus.fromJson(const {'enabled': false});
+}
 
 const _rewards = [
   Reward(
@@ -45,6 +55,7 @@ Future<void> _pumpScreen(WidgetTester tester, {required TextDirection dir}) asyn
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         rewardsListProvider.overrideWith((ref) async => _rewards),
+        wheelProvider.overrideWith(_ClosedWheel.new),
       ],
       child: MaterialApp(
         home: Directionality(
