@@ -15,6 +15,10 @@ class Show {
   final String? imageUrl;
   final String? videoUrl;
   final bool isActive;
+
+  /// « À la une » — chosen from the dashboard for the home hero card. At
+  /// most one show has it; older backends don't send it.
+  final bool isFeatured;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -50,6 +54,7 @@ class Show {
     this.imageUrl,
     this.videoUrl,
     required this.isActive,
+    this.isFeatured = false,
     this.createdAt,
     this.updatedAt,
     this.nextEpisode,
@@ -114,6 +119,7 @@ class Show {
       imageUrl: json['image_url'] as String?,
       videoUrl: json['video_url'] as String?,
       isActive: json['is_active'] as bool? ?? true,
+      isFeatured: json['is_featured'] as bool? ?? false,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -162,6 +168,7 @@ class Show {
       'image_url': imageUrl,
       'video_url': videoUrl,
       'is_active': isActive,
+      'is_featured': isFeatured,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'next_episode': nextEpisode?.toJson(),
