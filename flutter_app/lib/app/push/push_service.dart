@@ -173,6 +173,13 @@ class PushService {
           ? Map<String, dynamic>.from(decoded)
           : <String, dynamic>{'deep_link': payload};
 
+      // Une notification qui ouvre le store, reçue app ouverte : même geste
+      // qu'app fermée (_handleMessageOpenedApp).
+      if (data['action'] == 'open_store') {
+        _openStore(data);
+        return;
+      }
+
       final notification = AppNotification.fromRemoteMessage(data);
       _handleNotificationTap(notification);
     } on FormatException {
@@ -276,6 +283,18 @@ class PushService {
         notificationTitle: message.notification?.title,
         notificationBody: message.notification?.body,
       );
+
+      // Ouvrir le store (mise à jour, avis après un tournage) : pas de page
+      // dans l'app, donc ni centre de notifications ni bandeau « Ouvrir »
+      // qui mènerait à l'accueil. La notification système garde le lien.
+      if (message.data['action'] == 'open_store') {
+        await _showLocalNotification(notification, extra: {
+          'action': 'open_store',
+          'ios_url': message.data['ios_url'],
+          'android_url': message.data['android_url'],
+        });
+        return;
+      }
 
       // Store notification
       await _storeNotification(notification);
@@ -428,7 +447,10 @@ class PushService {
   }
 
   /// Show local system notification
-  Future<void> _showLocalNotification(AppNotification notification) async {
+  Future<void> _showLocalNotification(
+    AppNotification notification, {
+    Map<String, Object?> extra = const {},
+  }) async {
     try {
       const androidDetails = AndroidNotificationDetails(
         'aji_tfarraj_notifications',
@@ -463,6 +485,7 @@ class PushService {
           'ticket_code': notification.ticketCode,
         'deep_link': notification.deepLink ??
             PushRouter.getRouteForNotification(notification),
+        ...extra,
       });
 
       await _localNotifications.show(

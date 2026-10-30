@@ -647,25 +647,31 @@ class _SpinButton extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
               onTap: busy ? null : onPressed,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, color: Colors.white, size: 22),
-                  const SizedBox(width: AppSpacing.sm),
-                  // « Regarder une vidéo pour un nouvel essai » est long :
-                  // il rétrécit un peu plutôt que de se couper.
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        style: AppTypography.buttonLarge
-                            .copyWith(color: Colors.white),
+              // La marge garde l'icône et le texte loin des bords arrondis :
+              // sans elle, un libellé long rétrécissait jusqu'à les toucher.
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, color: Colors.white, size: 22),
+                    const SizedBox(width: AppSpacing.sm),
+                    // Un libellé trop long (une langue plus bavarde, une
+                    // police agrandie) rétrécit plutôt que de se couper.
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          style: AppTypography.buttonLarge
+                              .copyWith(color: Colors.white),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

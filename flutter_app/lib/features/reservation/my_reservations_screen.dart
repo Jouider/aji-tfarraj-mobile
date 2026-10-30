@@ -18,6 +18,7 @@ import 'package:aji_tfarraj/features/reservations/data/reservations_repository.d
 import 'package:aji_tfarraj/features/reservations/domain/reservation.dart';
 import 'package:aji_tfarraj/features/reservations/presentation/reservation_status.dart';
 import 'package:aji_tfarraj/features/review/data/review_prompter.dart';
+import 'package:aji_tfarraj/features/reservations/presentation/waitlist_widgets.dart';
 
 /// My Reservations Screen with 3 tabs: Pending, Approved, Past
 class MyReservationsScreen extends ConsumerStatefulWidget {
@@ -511,7 +512,9 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                   Expanded(
                     child: Align(
                       alignment: AlignmentDirectional.centerStart,
-                      child: ReservationStatusBadge(status: reservation.status),
+                      child: reservation.onWaitlist
+                          ? WaitlistBadge(reservation: reservation)
+                          : ReservationStatusBadge(status: reservation.status),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -556,6 +559,13 @@ class _ReservationCardState extends ConsumerState<_ReservationCard> {
                 ],
               ),
             ),
+
+            // Plateau complet : on attend une place, téléphone allumé.
+            if (reservation.onWaitlist)
+              WaitlistNotice(
+                reservation: reservation,
+                margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+              ),
 
             // FIX: Rejection banner — errorLight bg, border, radius 12, italic, RTL-aware
             if (reservation.rejectionReason != null && statusHelper.isRejected)

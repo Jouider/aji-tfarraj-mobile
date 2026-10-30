@@ -9,6 +9,10 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/app/network/api_client.dart';
 import 'package:aji_tfarraj/features/notifications/data/notification_repository.dart';
+import 'package:aji_tfarraj/features/rewards/data/rewards_repository.dart';
+import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
+import 'package:aji_tfarraj/features/tutorials/data/tutorials_repository.dart'
+    show appConfigJsonProvider;
 import 'package:aji_tfarraj/features/wheel/data/wheel_repository.dart';
 import 'package:aji_tfarraj/features/wheel/domain/wheel.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/lucky_wheel_view.dart';
@@ -424,6 +428,68 @@ void main() {
             return w.padding == const EdgeInsets.all(16);
           }),
           isEmpty);
+    });
+
+    // Le libellé long d'avant (« Regarder une vidéo pour un nouvel essai »)
+    // rétrécissait jusqu'à toucher les bords arrondis du bouton. Les tests
+    // dessinent avec une police de carrés, qui ne dit rien de la vraie
+    // largeur : on tient donc la longueur du texte et la marge du bouton.
+    test('le bouton vidéo garde un libellé court', () {
+      for (final locale in AppLocale.values) {
+        expect(AppStrings(locale).wheel.watchVideo.length, lessThanOrEqualTo(20));
+      }
+    });
+
+    testWidgets('l\'icône du bouton vidéo reste loin du bord arrondi',
+        (tester) async {
+      final status =
+          WheelStatus.fromJson(json(left: 0, adLeft: 2, adSpins: true));
+      await pump(tester, const WheelScreen(),
+          wheel: () => _FakeWheel(status, null));
+
+      final label = find.text(const WheelCopyFr().watchVideo);
+      final button =
+          find.ancestor(of: label, matching: find.byType(InkWell)).first;
+      final icon =
+          find.descendant(of: button, matching: find.byType(Icon)).first;
+      expect(tester.getTopLeft(icon).dx - tester.getTopLeft(button).dx,
+          greaterThanOrEqualTo(20));
+      expect(tester.getTopRight(button).dx - tester.getTopRight(label).dx,
+          greaterThanOrEqualTo(20));
+    });
+
+    testWidgets('Récompenses : la roue en haut, même sans cadeau',
+        (tester) async {
+      final status = WheelStatus.fromJson(json(left: 2));
+      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          stringsProvider.overrideWithValue(const AppStrings(AppLocale.fr)),
+          wheelProvider.overrideWith(() => _FakeWheel(status, null)),
+          rewardsListProvider.overrideWith((ref) async => const []),
+          appConfigJsonProvider.overrideWith((ref) async => null),
+        ],
+        child: const MaterialApp(home: RewardsScreen()),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Roue de la chance'), findsOneWidget);
+      expect(find.text('Jouer'), findsOneWidget);
+      expect(
+          find.text(const AppStrings(AppLocale.fr).noRewardsYet), findsOneWidget);
+      expect(
+          tester.getTopLeft(find.text('Roue de la chance')).dy,
+          lessThan(tester
+              .getTopLeft(
+                  find.text(const AppStrings(AppLocale.fr).noRewardsYet))
+              .dy));
     });
   });
 

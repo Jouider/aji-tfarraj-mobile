@@ -23,6 +23,7 @@ import 'package:aji_tfarraj/features/charge_public/presentation/cp_mode_provider
 import 'package:aji_tfarraj/features/badges/presentation/level_badge_card.dart';
 import 'package:aji_tfarraj/app/design_system/image_viewer.dart';
 import 'package:aji_tfarraj/features/review/data/review_prompter.dart';
+import 'package:aji_tfarraj/features/social/presentation/follow_us_card.dart';
 
 // ─────────────────────────────────────────────
 // Profile Screen
@@ -359,6 +360,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
+
+          // ── Nos réseaux : seulement ceux tapés dans le tableau de bord ──
+          const FollowUsCard(
+            padding: EdgeInsets.only(bottom: AppSpacing.lg),
+          ),
 
           // ── Paramètres ───────────────────────────────
           _SettingsGroup(

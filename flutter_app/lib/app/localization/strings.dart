@@ -4,6 +4,8 @@ import 'package:aji_tfarraj/app/copywriting/copy_fr.dart';
 import 'package:aji_tfarraj/app/copywriting/copy_ar.dart';
 import 'package:aji_tfarraj/app/copywriting/casting_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/wheel_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/follow_us_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/waitlist_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/departure_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/support_chat_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
@@ -1478,6 +1480,14 @@ class AppStrings {
   /// La roue de la chance.
   WheelCopy get wheel =>
       locale == AppLocale.fr ? const WheelCopyFr() : const WheelCopyAr();
+
+  /// « Suis-nous » : nos comptes officiels, dans le Profil.
+  FollowUsCopy get followUs =>
+      locale == AppLocale.fr ? const FollowUsCopyFr() : const FollowUsCopyAr();
+
+  /// La liste d'attente, sur une réservation en attente.
+  WaitlistCopy get waitlist =>
+      locale == AppLocale.fr ? const WaitlistCopyFr() : const WaitlistCopyAr();
 
   // ============================================
   // Staff Check-in
