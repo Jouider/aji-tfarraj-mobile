@@ -169,7 +169,8 @@ class WheelCopyFr implements WheelCopy {
       'La vidéo n\'est pas allée jusqu\'au bout. Réessaie dans un instant.';
   @override
   String get unlockSlow =>
-      'Ton essai n\'est pas encore arrivé. Réessaie dans un instant.';
+      'Ta vidéo est bien comptée. Ton essai arrive dans quelques instants : '
+      'la roue se met à jour toute seule.';
   @override
   String get adRequired => 'Regarde une vidéo pour tourner encore la roue.';
 }
@@ -278,7 +279,8 @@ class WheelCopyAr implements WheelCopy {
   @override
   String get videoNotFinished => 'لم يكتمل الفيديو. حاول بعد قليل.';
   @override
-  String get unlockSlow => 'محاولتك لم تصل بعد. حاول بعد قليل.';
+  String get unlockSlow =>
+      'تم احتساب الفيديو. محاولتك ستصل بعد لحظات، وستتحدث العجلة تلقائيًا.';
   @override
   String get adRequired => 'شاهد فيديو لتدير العجلة مرة أخرى.';
 }

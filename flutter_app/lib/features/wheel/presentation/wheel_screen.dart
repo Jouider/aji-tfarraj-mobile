@@ -318,13 +318,22 @@ class _WheelScreenState extends ConsumerState<WheelScreen>
       }
 
       setState(() => _video = _Video.unlocking);
-      final unlocked =
-          await ref.read(wheelProvider.notifier).waitForUnlockedSpin();
+      final wheel = ref.read(wheelProvider.notifier);
+      final unlocked = await wheel.waitForUnlockedSpin(
+        upTo: const Duration(seconds: 20),
+      );
       if (!mounted) return;
       if (unlocked) {
         HapticFeedback.mediumImpact();
       } else {
+        // Google a parfois plus d'une minute de retard. La vidéo est vue :
+        // on rend la main, et la roue continue de relire en silence — le
+        // bouton « Tourner » apparaît tout seul quand l'essai arrive.
         messenger.showSnackBar(SnackBar(content: Text(c.unlockSlow)));
+        unawaited(wheel.waitForUnlockedSpin(
+          every: const Duration(seconds: 5),
+          upTo: const Duration(minutes: 3),
+        ));
       }
     } finally {
       if (mounted) setState(() => _video = _Video.none);
