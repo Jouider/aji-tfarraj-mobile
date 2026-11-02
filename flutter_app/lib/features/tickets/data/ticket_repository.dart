@@ -275,6 +275,13 @@ class TicketRepository {
     }
   }
 
+  /// When the door scanned this reservation's ticket, or null: not scanned, or
+  /// no answer. One request, cheap enough to ask every few seconds at the door.
+  Future<DateTime?> fetchCheckedInAt(int reservationId) async {
+    final reservation = await _fetchReservationDetail(reservationId);
+    return reservation?.ticket?.checkedInAt;
+  }
+
   /// Deduplicate tickets by ticket_code and sort by generatedAt descending
   List<Ticket> _deduplicateAndSortTickets(List<Ticket> tickets) {
     // Deduplicate by ticket_code (more reliable than id for cross-source dedup)
@@ -457,6 +464,24 @@ class MyTicketsNotifier extends AsyncNotifier<TicketsState> {
         state = AsyncError(e, stack);
       }
     }
+  }
+
+  /// Ask whether the door has just scanned [ticket]. Only touches that ticket,
+  /// and only once it has been scanned: a network hiccup changes nothing.
+  Future<void> syncCheckIn(Ticket ticket) async {
+    final at = await ref
+        .read(ticketRepositoryProvider)
+        .fetchCheckedInAt(ticket.reservationId);
+    if (at == null) return;
+
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(
+      tickets: [
+        for (final t in current.tickets)
+          t.id == ticket.id ? t.withCheckIn(at) : t,
+      ],
+    ));
   }
 
   /// Update current page (for swiper)

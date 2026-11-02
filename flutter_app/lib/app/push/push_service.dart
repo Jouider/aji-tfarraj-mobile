@@ -15,6 +15,7 @@ import 'package:aji_tfarraj/app/design_system/colors.dart';
 import 'package:aji_tfarraj/features/notifications/domain/app_notification.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:aji_tfarraj/features/reservations/data/reservations_repository.dart';
+import 'package:aji_tfarraj/features/tickets/data/ticket_repository.dart';
 import 'package:aji_tfarraj/features/support/data/support_service.dart'
     show openSupportTicketProvider, supportPushTickProvider;
 
@@ -302,6 +303,8 @@ class PushService {
       // Auto-refresh reservations when a reservation notification arrives
       if (notification.type == NotificationType.reservation) {
         _ref?.read(myReservationsProvider.notifier).refresh();
+        // A ticket just issued or scanned at the door shows right away.
+        _ref?.read(myTicketsProvider.notifier).refresh();
       }
 
       // A support reply: whatever shows support asks for it now, instead of

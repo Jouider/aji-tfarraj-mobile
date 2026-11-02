@@ -8,6 +8,7 @@ import 'package:aji_tfarraj/app/copywriting/follow_us_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/waitlist_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/departure_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/support_chat_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/ticket_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/staff_pay_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/account_deletion_copy.dart';
@@ -943,18 +944,6 @@ class AppStrings {
   String get ticketLoading =>
       locale == AppLocale.fr ? CopyFr.ticket.loading : CopyAr.ticket.loading;
 
-  String get ticketPendingTitle => locale == AppLocale.fr
-      ? CopyFr.ticket.pendingTitle
-      : CopyAr.ticket.pendingTitle;
-
-  String get ticketPendingDesc => locale == AppLocale.fr
-      ? CopyFr.ticket.pendingDesc
-      : CopyAr.ticket.pendingDesc;
-
-  String get ticketShowTickets => locale == AppLocale.fr
-      ? CopyFr.ticket.showTickets
-      : CopyAr.ticket.showTickets;
-
   String get ticketViewReservations => locale == AppLocale.fr
       ? CopyFr.ticket.viewReservations
       : CopyAr.ticket.viewReservations;
@@ -963,40 +952,9 @@ class AppStrings {
       ? CopyFr.ticket.rulesReminder
       : CopyAr.ticket.rulesReminder;
 
-  String get ticketRefresh =>
-      locale == AppLocale.fr ? CopyFr.ticket.refresh : CopyAr.ticket.refresh;
-
   String get ticketOfflineBanner => locale == AppLocale.fr
       ? CopyFr.ticket.offlineBanner
       : CopyAr.ticket.offlineBanner;
-
-  String get ticketCountSingle => locale == AppLocale.fr
-      ? CopyFr.ticket.countSingle
-      : CopyAr.ticket.countSingle;
-
-  String ticketCountMultiple(int idx, int total) => locale == AppLocale.fr
-      ? CopyFr.ticket.countMultiple(idx, total)
-      : CopyAr.ticket.countMultiple(idx, total);
-
-  String get ticketSwipeHint => locale == AppLocale.fr
-      ? CopyFr.ticket.swipeHint
-      : CopyAr.ticket.swipeHint;
-
-  String get ticketUsed => locale == AppLocale.fr
-      ? CopyFr.ticket.ticketUsed
-      : CopyAr.ticket.ticketUsed;
-
-  String get ticketValid => locale == AppLocale.fr
-      ? CopyFr.ticket.ticketValid
-      : CopyAr.ticket.ticketValid;
-
-  String get ticketCheckedInLabel => locale == AppLocale.fr
-      ? CopyFr.ticket.checkedInLabel
-      : CopyAr.ticket.checkedInLabel;
-
-  String get ticketUsedLabel => locale == AppLocale.fr
-      ? CopyFr.ticket.usedLabel
-      : CopyAr.ticket.usedLabel;
 
   String get ticketHolderLabel =>
       locale == AppLocale.fr ? 'Titulaire du billet' : 'صاحب التذكرة';
@@ -1307,24 +1265,13 @@ class AppStrings {
       ? 'Impossible d\'ouvrir la caméra.'
       : 'تعذّر فتح الكاميرا.';
 
-  String ticketSeats(int n) =>
-      locale == AppLocale.fr ? CopyFr.ticket.seats(n) : CopyAr.ticket.seats(n);
-
   String get ticketQrHintValid => locale == AppLocale.fr
       ? CopyFr.ticket.qrHintValid
       : CopyAr.ticket.qrHintValid;
 
-  String get ticketQrHintUsed => locale == AppLocale.fr
-      ? CopyFr.ticket.qrHintUsed
-      : CopyAr.ticket.qrHintUsed;
-
   String ticketCodeCopied(String code) => locale == AppLocale.fr
       ? CopyFr.ticket.codeCopied(code)
       : CopyAr.ticket.codeCopied(code);
-
-  String ticketCheckinAt(String date) => locale == AppLocale.fr
-      ? CopyFr.ticket.checkinAt(date)
-      : CopyAr.ticket.checkinAt(date);
 
   // ============================================
   // Browse
@@ -1460,6 +1407,10 @@ class AppStrings {
       locale == AppLocale.fr ? CopyFr.departures : CopyAr.departures;
 
   /// Wafacash withdrawals, in the charge public's space.
+  TicketScreenCopy get ticketScreen => locale == AppLocale.fr
+      ? const TicketScreenCopyFr()
+      : const TicketScreenCopyAr();
+
   WafacashCopy get wafacash => locale == AppLocale.fr
       ? const WafacashCopyFr()
       : const WafacashCopyAr();
@@ -2360,13 +2311,6 @@ class AppStrings {
   // ============================================
   // Support Tickets
   // ============================================
-
-
-
-
-
-
-
 
   String get supportProfileTitle => locale == AppLocale.fr
       ? CopyFr.support.profileTitle

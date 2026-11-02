@@ -39,6 +39,29 @@ class TicketReservationInfo {
   }
 }
 
+/// Where a ticket stands right now: the whole screen is written from this.
+enum TicketPhase {
+  /// A later day, or no date at all.
+  upcoming,
+
+  /// Today, before the recording starts.
+  today,
+
+  /// The recording has started and the door is still scanning latecomers.
+  live,
+
+  /// Scanned at the door, recording not over.
+  checkedIn,
+
+  /// Scanned at the door, recording over.
+  attended,
+
+  /// Recording over, never scanned.
+  missed;
+
+  bool get isPast => this == attended || this == missed;
+}
+
 /// Ticket model matching backend API response
 class Ticket {
   final int id;
@@ -102,6 +125,57 @@ class Ticket {
 
   /// Get seats count from reservation info
   int get seats => reservationInfo?.seats ?? 1;
+
+  /// How long before the start the door may already be scanning. Before that,
+  /// a check-in can't have happened and nothing needs asking the server.
+  static const Duration doorWindow = Duration(hours: 4);
+
+  /// Where this ticket stands at [now].
+  TicketPhase phaseAt(DateTime now) {
+    final over = !isUpcomingAt(now);
+    if (isCheckedIn) return over ? TicketPhase.attended : TicketPhase.checkedIn;
+    if (over) return TicketPhase.missed;
+
+    final start = show?.startsAt?.toLocal();
+    if (start == null) return TicketPhase.upcoming;
+    if (!now.isBefore(start)) return TicketPhase.live;
+
+    final local = now.toLocal();
+    final sameDay = start.year == local.year &&
+        start.month == local.month &&
+        start.day == local.day;
+    return sameDay ? TicketPhase.today : TicketPhase.upcoming;
+  }
+
+  /// Time left before the recording starts, or null once started or undated.
+  Duration? untilStart(DateTime now) {
+    final start = show?.startsAt;
+    if (start == null || !now.isBefore(start)) return null;
+    return start.difference(now);
+  }
+
+  /// Someone could be scanning this ticket about now: worth asking the server,
+  /// so the screen changes by itself at the door.
+  bool awaitsCheckInAt(DateTime now) {
+    if (isCheckedIn) return false;
+    final phase = phaseAt(now);
+    if (phase == TicketPhase.live) return true;
+    final left = untilStart(now);
+    return left != null && left <= doorWindow;
+  }
+
+  /// The same ticket, as the door now knows it.
+  Ticket withCheckIn(DateTime? at) => Ticket(
+        id: id,
+        reservationId: reservationId,
+        ticketCode: ticketCode,
+        qrToken: qrToken,
+        generatedAt: generatedAt,
+        checkedInAt: at,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        reservationInfo: reservationInfo,
+      );
 
   /// Create Ticket from JSON (snake_case from API)
   factory Ticket.fromJson(Map<String, dynamic> json) {

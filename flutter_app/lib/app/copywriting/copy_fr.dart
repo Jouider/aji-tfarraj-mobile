@@ -567,27 +567,11 @@ class TicketCopyFr {
 
   String get title => 'Mes billets';
   String get loading => 'Chargement de vos billets...';
-  String get pendingTitle => 'En attente de confirmation';
-  String get pendingDesc =>
-      'Vos billets seront disponibles ici une fois vos réservations approuvées par notre équipe.';
-  String get showTickets => 'Afficher mes billets';
   String get viewReservations => 'Voir mes réservations';
   String get rulesReminder => 'Rappel des règles';
-  String get refresh => 'Rafraîchir';
   String get offlineBanner => 'Mode hors ligne - Dernière version des billets';
-  String get countSingle => '1 billet approuvé';
-  String countMultiple(int idx, int total) =>
-      '${idx + 1} / $total billets approuvés';
-  String get swipeHint => 'Glissez pour voir vos autres billets';
-  String get ticketUsed => 'Billet utilisé';
-  String get ticketValid => 'Billet valide';
-  String get checkedInLabel => 'Entrée validée';
-  String get usedLabel => 'UTILISÉ';
-  String seats(int n) => '$n place${n > 1 ? 's' : ''}';
   String get qrHintValid => 'Présentez ce QR code à l\'entrée';
-  String get qrHintUsed => 'Ce billet a déjà été utilisé';
   String codeCopied(String code) => 'Code copié: $code';
-  String checkinAt(String date) => 'Check-in le $date';
 }
 
 /// Browse screen copy in French
@@ -1214,7 +1198,7 @@ class HowItWorksCopyFr {
         HowToStep(
           title: 'Gagne ta rémunération',
           body:
-              'Tu es payé pour chaque invité réellement présent au tournage. Plus tu remplis, plus tu gagnes.',
+              'Tu es payé pour chaque invité réellement présent au tournage. L\'argent se retire via Wafacash, les jours d\'ouverture de chaque mois.',
         ),
       ];
 }

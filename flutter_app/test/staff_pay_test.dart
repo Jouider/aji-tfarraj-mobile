@@ -217,6 +217,10 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.text(c.money(245)), findsWidgets);
         expect(find.text(c.position('tech')), findsOneWidget);
+        // Retraits fermés avec de l'argent sur le solde : la carte Wafacash le
+        // dit, et le détail passe sous le pli.
+        await tester.scrollUntilVisible(find.text(c.entries(120)), 200,
+            scrollable: find.byType(Scrollable).first);
         expect(find.text(c.entries(120)), findsOneWidget);
         expect(find.text(c.month(DateTime(2026, 10))), findsOneWidget);
       });
