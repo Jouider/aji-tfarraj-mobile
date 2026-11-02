@@ -173,15 +173,62 @@ void main() {
   group('copy', () {
     for (final c in const <StaffPayCopy>[StaffPayCopyFr(), StaffPayCopyAr()]) {
       test('${c.runtimeType} nomme chaque poste et chaque format', () {
-        for (final code in ['cp_supervisor', 'warm_up', 'tech']) {
+        const rates = StaffPayRates();
+        for (final code in ['cp_supervisor', 'warm_up', 'tech', 'door']) {
+          final p = StaffPosition(
+              position: code, startsOn: DateTime(2026, 10, 8), current: true);
+          final (big, small) = rates.amountsFor(p);
           expect(c.position(code), isNot(code));
-          expect(c.rateLine(code), isNotEmpty);
+          expect(c.rateLine(code, big: big, small: small), isNotEmpty);
         }
         expect(c.size('big'), isNot(c.size('small')));
         expect(c.size(null), isNot(c.size('big')));
         expect(c.month(DateTime(2026, 10, 1)), contains('2026'));
       });
     }
+  });
+
+  group('ce que touche un poste', () {
+    const c = StaffPayCopyFr();
+    final rates = StaffPayRates.fromJson(const {
+      'episode': {
+        'big': {'cp_supervisor': 300, 'warm_up': 200},
+        'small': {'cp_supervisor': 200, 'warm_up': 200},
+      },
+      'per_entry': 1,
+      'door_discount_percent': 20,
+    });
+
+    String line(Map<String, dynamic> json) {
+      final p = StaffPosition.fromJson(
+          {'starts_on': '2026-10-01', 'current': true, ...json});
+      final (big, small) = rates.amountsFor(p);
+      return c.rateLine(p.position,
+          big: big,
+          small: small,
+          show: p.show,
+          doorDiscountPercent: rates.doorDiscountPercent);
+    }
+
+    test('le montant convenu avec la personne remplace le tarif', () {
+      expect(line({'position': 'warm_up', 'rate': 100, 'show': 'Starlight'}),
+          '100 DH par épisode de Starlight.');
+      expect(line({'position': 'warm_up', 'rate': 120}), '120 DH par épisode.');
+    });
+
+    test('sans montant convenu : le tarif envoyé par le serveur', () {
+      expect(line({'position': 'warm_up'}), '200 DH par épisode.');
+      expect(line({'position': 'cp_supervisor'}),
+          '300 DH par épisode d\'une grande émission, 200 DH pour une petite.');
+      expect(line({'position': 'tech'}), startsWith('1 DH par personne'));
+      expect(line({'position': 'door'}), contains('20 %'));
+    });
+
+    test('une réponse sans tarifs garde les tarifs standard', () {
+      final pay = StaffPayOverview.fromJson(const {});
+      expect(pay.rates.forEpisode('big', 'warm_up'), 200);
+      expect(pay.rates.forEpisode('small', 'warm_up'), 200);
+    });
   });
 
   group('l\'écran', () {

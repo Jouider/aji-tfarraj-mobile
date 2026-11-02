@@ -9,11 +9,19 @@ abstract class StaffPayCopy {
   String get profileCardTitle;
   String get profileCardSubtitle;
 
-  /// `cp_supervisor` | `warm_up` | `tech`
+  /// `cp_supervisor` | `warm_up` | `tech` | `door`
   String position(String code);
 
-  /// Ce qu'un poste touche, en une ligne.
-  String rateLine(String code);
+  /// Ce qu'un poste touche, en une ligne. `big` / `small` : le montant par
+  /// épisode (par entrée pour `tech`) — le même quand il est convenu avec la
+  /// personne. `show` : l'émission pour laquelle elle est recrutée.
+  String rateLine(
+    String code, {
+    int? big,
+    int? small,
+    String? show,
+    int doorDiscountPercent = 20,
+  });
 
   /// `big` | `small` | null
   String size(String? code);
@@ -90,18 +98,34 @@ class StaffPayCopyFr implements StaffPayCopy {
         'cp_supervisor' => 'Superviseur des chargés publics',
         'warm_up' => 'Chauffeur de salle',
         'tech' => 'Équipe technique',
+        'door' => 'Inscription à la porte',
         _ => code,
       };
 
   @override
-  String rateLine(String code) => switch (code) {
-        'cp_supervisor' =>
-          '300 DH par épisode d\'une grande émission, 200 DH pour une petite.',
-        'warm_up' =>
-          '200 DH par épisode d\'une grande émission, 150 DH pour une petite.',
-        'tech' => '1 DH par personne entrée : billet scanné ou walk-in.',
-        _ => '',
-      };
+  String rateLine(
+    String code, {
+    int? big,
+    int? small,
+    String? show,
+    int doorDiscountPercent = 20,
+  }) {
+    final amount = big ?? small;
+    if (amount == null) return '';
+    switch (code) {
+      case 'tech':
+        final on = show != null ? ' sur $show' : '';
+        return '${money(amount)} par personne entrée$on : billet scanné ou walk-in.';
+      case 'door':
+        return 'Ta part de la remise de $doorDiscountPercent % sur les comptes ouverts à la porte, partagée à parts égales avec l\'équipe.';
+    }
+    if (big == null || small == null || big == small) {
+      final on = show != null ? ' de $show' : '';
+      return '${money(amount)} par épisode$on.';
+    }
+    final on = show != null ? '$show : ' : '';
+    return '$on${money(big)} par épisode d\'une grande émission, ${money(small)} pour une petite.';
+  }
 
   @override
   String size(String? code) => switch (code) {
@@ -171,18 +195,34 @@ class StaffPayCopyAr implements StaffPayCopy {
         'cp_supervisor' => 'مشرف المكلفين بالجمهور',
         'warm_up' => 'منشّط القاعة',
         'tech' => 'الفريق التقني',
+        'door' => 'التسجيل عند الباب',
         _ => code,
       };
 
   @override
-  String rateLine(String code) => switch (code) {
-        'cp_supervisor' =>
-          '300 درهم عن كل حلقة من برنامج كبير، و200 درهم لبرنامج صغير.',
-        'warm_up' =>
-          '200 درهم عن كل حلقة من برنامج كبير، و150 درهم لبرنامج صغير.',
-        'tech' => '1 درهم عن كل شخص دخل: تذكرة ممسوحة أو تسجيل في عين المكان.',
-        _ => '',
-      };
+  String rateLine(
+    String code, {
+    int? big,
+    int? small,
+    String? show,
+    int doorDiscountPercent = 20,
+  }) {
+    final amount = big ?? small;
+    if (amount == null) return '';
+    switch (code) {
+      case 'tech':
+        final on = show != null ? ' إلى $show' : '';
+        return '${money(amount)} عن كل شخص دخل$on: تذكرة ممسوحة أو تسجيل في عين المكان.';
+      case 'door':
+        return 'نصيبك من تخفيض $doorDiscountPercent% على الحسابات المفتوحة عند الباب، يُقسَّم بالتساوي مع الفريق.';
+    }
+    if (big == null || small == null || big == small) {
+      final on = show != null ? ' من $show' : '';
+      return '${money(amount)} عن كل حلقة$on.';
+    }
+    final on = show != null ? '$show: ' : '';
+    return '$on${money(big)} عن كل حلقة من برنامج كبير، و${money(small)} لبرنامج صغير.';
+  }
 
   @override
   String size(String? code) => switch (code) {

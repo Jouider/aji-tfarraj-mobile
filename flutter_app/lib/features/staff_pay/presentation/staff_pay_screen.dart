@@ -62,7 +62,7 @@ class StaffPayScreen extends ConsumerWidget {
               _TotalCard(pay: pay, copy: c),
               const SizedBox(height: AppSpacing.md),
               for (final p in pay.currentPositions) ...[
-                _PositionTile(position: p, copy: c),
+                _PositionTile(position: p, rates: pay.rates, copy: c),
                 const SizedBox(height: AppSpacing.sm),
               ],
               if (pay.pending > 0) ...[
@@ -172,13 +172,16 @@ class _TotalCard extends StatelessWidget {
 }
 
 class _PositionTile extends StatelessWidget {
-  const _PositionTile({required this.position, required this.copy});
+  const _PositionTile(
+      {required this.position, required this.rates, required this.copy});
 
   final StaffPosition position;
+  final StaffPayRates rates;
   final StaffPayCopy copy;
 
   @override
   Widget build(BuildContext context) {
+    final (big, small) = rates.amountsFor(position);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -192,6 +195,7 @@ class _PositionTile extends StatelessWidget {
             switch (position.position) {
               'tech' => Icons.qr_code_scanner,
               'warm_up' => Icons.mic_none_rounded,
+              'door' => Icons.how_to_reg_outlined,
               _ => Icons.groups_outlined,
             },
             color: AppColors.accentInk,
@@ -204,7 +208,12 @@ class _PositionTile extends StatelessWidget {
                 Text(copy.position(position.position),
                     style: AppTypography.labelLarge),
                 const SizedBox(height: 2),
-                Text(copy.rateLine(position.position),
+                Text(
+                    copy.rateLine(position.position,
+                        big: big,
+                        small: small,
+                        show: position.show,
+                        doorDiscountPercent: rates.doorDiscountPercent),
                     style: AppTypography.bodySmall
                         .copyWith(color: AppColors.textSecondary)),
                 const SizedBox(height: 2),

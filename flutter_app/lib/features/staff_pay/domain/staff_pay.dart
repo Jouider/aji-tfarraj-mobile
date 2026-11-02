@@ -1,9 +1,9 @@
 /// La paie du staff : `GET /api/me/staff-pay`.
 ///
-/// Trois postes payés par épisode — superviseur des chargés publics, chauffeur
-/// de salle (un montant selon que l'émission est grande ou petite), équipe
-/// technique (1 DH par personne entrée). Le serveur calcule tout ; l'app
-/// affiche. Le retrait passe par Wafacash, sur le même solde que les gains de
+/// Postes payés par épisode — superviseur des chargés publics, chauffeur de
+/// salle, équipe technique (par personne entrée), inscription à la porte. Un
+/// poste peut avoir un montant convenu avec la personne, et être limité à une
+/// émission. Le serveur calcule tout, tarifs compris ; l'app affiche. Le retrait passe par Wafacash, sur le même solde que les gains de
 /// chargé public.
 library;
 
@@ -14,13 +14,22 @@ class StaffPosition {
     required this.startsOn,
     this.endsOn,
     required this.current,
+    this.show,
+    this.rate,
   });
 
-  /// `cp_supervisor` | `warm_up` | `tech`
+  /// `cp_supervisor` | `warm_up` | `tech` | `door`
   final String position;
   final DateTime startsOn;
   final DateTime? endsOn;
   final bool current;
+
+  /// L'émission pour laquelle la personne est recrutée ; null : toutes.
+  final String? show;
+
+  /// Le montant convenu avec la personne, en DH par épisode (par entrée pour
+  /// l'équipe technique) ; null : le tarif standard.
+  final int? rate;
 
   factory StaffPosition.fromJson(Map<String, dynamic> json) => StaffPosition(
         position: json['position'] as String? ?? '',
@@ -28,7 +37,65 @@ class StaffPosition {
             DateTime(2026, 10, 8),
         endsOn: DateTime.tryParse(json['ends_on'] as String? ?? ''),
         current: json['current'] as bool? ?? false,
+        show: json['show'] as String?,
+        rate: (json['rate'] as num?)?.toInt(),
       );
+}
+
+/// Les tarifs standard, tels que le serveur les envoie (`rates`). Les valeurs
+/// par défaut ne servent que si la réponse ne les porte pas.
+class StaffPayRates {
+  const StaffPayRates({
+    this.episode = const {
+      'big': {'cp_supervisor': 300, 'warm_up': 200},
+      'small': {'cp_supervisor': 200, 'warm_up': 200},
+    },
+    this.perEntry = 1,
+    this.doorDiscountPercent = 20,
+  });
+
+  /// Par format (`big` | `small`), puis par poste, en DH par épisode.
+  final Map<String, Map<String, int>> episode;
+  final int perEntry;
+
+  /// La remise « sur place » dont le poste à la porte touche une part.
+  final int doorDiscountPercent;
+
+  int? forEpisode(String size, String position) => episode[size]?[position];
+
+  /// Ce que touche un poste, grande et petite émission — par entrée pour
+  /// l'équipe technique. Le montant convenu avec la personne remplace les deux.
+  (int?, int?) amountsFor(StaffPosition p) => switch (p.position) {
+        'tech' => (p.rate ?? perEntry, p.rate ?? perEntry),
+        'door' => (0, 0),
+        _ => (
+            p.rate ?? forEpisode('big', p.position),
+            p.rate ?? forEpisode('small', p.position),
+          ),
+      };
+
+  factory StaffPayRates.fromJson(Map<String, dynamic> json) {
+    const defaults = StaffPayRates();
+    final episode = <String, Map<String, int>>{};
+    final raw = json['episode'];
+    if (raw is Map) {
+      raw.forEach((size, rates) {
+        if (rates is Map) {
+          episode['$size'] = {
+            for (final e in rates.entries)
+              if (e.value is num) '${e.key}': (e.value as num).toInt(),
+          };
+        }
+      });
+    }
+
+    return StaffPayRates(
+      episode: episode.isEmpty ? defaults.episode : episode,
+      perEntry: (json['per_entry'] as num?)?.toInt() ?? defaults.perEntry,
+      doorDiscountPercent: (json['door_discount_percent'] as num?)?.toInt() ??
+          defaults.doorDiscountPercent,
+    );
+  }
 }
 
 /// Un épisode payé, pour un poste.
@@ -80,6 +147,7 @@ class StaffPayLine {
 class StaffPayOverview {
   const StaffPayOverview({
     required this.positions,
+    this.rates = const StaffPayRates(),
     required this.total,
     required this.episodes,
     required this.pending,
@@ -88,6 +156,7 @@ class StaffPayOverview {
   });
 
   final List<StaffPosition> positions;
+  final StaffPayRates rates;
 
   /// Gagné sur les postes du staff, depuis le début.
   final int total;
@@ -114,6 +183,10 @@ class StaffPayOverview {
 
     return StaffPayOverview(
       positions: list('positions').map(StaffPosition.fromJson).toList(),
+      rates: json['rates'] is Map
+          ? StaffPayRates.fromJson(
+              Map<String, dynamic>.from(json['rates'] as Map))
+          : const StaffPayRates(),
       total: (json['total'] as num?)?.toInt() ?? 0,
       episodes: (json['episodes'] as num?)?.toInt() ?? 0,
       pending: (json['pending'] as num?)?.toInt() ?? 0,
