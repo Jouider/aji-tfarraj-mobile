@@ -63,7 +63,14 @@ class AppButton extends StatelessWidget {
                     Icon(icon, size: isSmall ? 18 : 20),
                     SizedBox(width: AppSpacing.sm),
                   ],
-                  Text(text, style: textStyle),
+                  Flexible(
+                    child: Text(
+                      text,
+                      style: textStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
       ),
@@ -130,7 +137,14 @@ class AppButtonSecondary extends StatelessWidget {
                     Icon(icon, size: isSmall ? 18 : 20),
                     SizedBox(width: AppSpacing.sm),
                   ],
-                  Text(text, style: textStyle),
+                  Flexible(
+                    child: Text(
+                      text,
+                      style: textStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
       ),

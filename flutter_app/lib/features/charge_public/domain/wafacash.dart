@@ -1,16 +1,16 @@
 /// Les retraits Wafacash du chargé public.
 ///
-/// Le chargé public demande un montant ; les frais Wafacash en sont retirés et
-/// il voit le NET avant de confirmer. Le staff fait le transfert au guichet et
-/// saisit le code ; le chargé public le lit ici et retire l'argent avec sa CIN.
+/// Le chargé public demande un montant et c'est ce montant exact que Wafacash
+/// transfère : l'agence prend ses frais au guichet, quand il retire. L'équipe
+/// fait le transfert et saisit le code ; le chargé public le lit ici et retire
+/// l'argent avec sa CIN.
 ///
-/// Vient de `GET /api/me/wafacash`. Le serveur reste juge : le calcul des frais
-/// ici sert à l'affichage pendant la saisie, la demande est recalculée là-bas.
+/// Vient de `GET /api/me/wafacash`. Le serveur reste juge : les contrôles d'ici
+/// servent à guider la saisie, la demande est revérifiée là-bas.
 library;
 
-/// Un palier de la grille : « jusqu'à [upTo] DH → [fee] DH de frais ».
-/// Un palier de la grille, sur le montant ENVOYÉ : des frais fixes [fee], ou un
-/// pourcentage [percent] (Wafacash : 0,67 % au-delà de 10 000 DH).
+/// Un palier de la grille : des frais fixes [fee], ou un pourcentage [percent]
+/// (Wafacash : 0,67 % au-delà de 10 000 DH).
 class WafacashFeeBracket {
   final int upTo;
   final int? fee;
@@ -30,30 +30,6 @@ class WafacashFeeBracket {
         fee: (json['fee'] as num?)?.toInt(),
         percent: (json['percent'] as num?)?.toDouble(),
       );
-}
-
-/// Ce que coûte une demande et ce qu'on retire au guichet.
-class WafacashQuote {
-  /// Ce que le chargé public a tapé.
-  final int requested;
-
-  /// Ce qui part réellement du solde : envoyé + frais. Peut rester quelques
-  /// dirhams sous [requested], au bord d'un palier.
-  final int gross;
-  final int fee;
-
-  /// Ce qu'il retire au guichet.
-  final int net;
-
-  const WafacashQuote({
-    required this.requested,
-    required this.gross,
-    required this.fee,
-    required this.net,
-  });
-
-  /// Le débit diffère de la demande : il faut le dire avant la confirmation.
-  bool get debitDiffers => gross != requested;
 }
 
 enum WafacashIdentityStatus {
@@ -120,7 +96,8 @@ enum WafacashWithdrawalStatus {
       values.firstWhere((s) => s.key == key, orElse: () => unknown);
 
   /// Encore en route : bloque une nouvelle demande.
-  bool get isOpen => this == requested || this == processing || this == codeSent;
+  bool get isOpen =>
+      this == requested || this == processing || this == codeSent;
 }
 
 class WafacashWithdrawal {
@@ -136,6 +113,10 @@ class WafacashWithdrawal {
   final String? closedReason;
   final DateTime? requestedAt;
   final DateTime? codeSentAt;
+
+  /// Jusqu'à quand le code se retire chez Wafacash. Après, l'argent revient sur
+  /// le solde. Envoyé seulement tant que le code sert.
+  final DateTime? collectBefore;
   final DateTime? collectedAt;
   final DateTime? closedAt;
 
@@ -150,11 +131,35 @@ class WafacashWithdrawal {
     this.closedReason,
     this.requestedAt,
     this.codeSentAt,
+    this.collectBefore,
     this.collectedAt,
     this.closedAt,
   });
 
   bool get canCancel => status == WafacashWithdrawalStatus.requested;
+
+  /// Le code par groupes de trois, comme il se dicte au guichet :
+  /// `123 456 789 012`.
+  String? get formattedCode {
+    final raw = code;
+    if (raw == null) return null;
+    final buffer = StringBuffer();
+    for (var i = 0; i < raw.length; i++) {
+      if (i > 0 && i % 3 == 0) buffer.write(' ');
+      buffer.write(raw[i]);
+    }
+    return buffer.toString();
+  }
+
+  /// Les jours pleins qu'il reste pour retirer : 0 le dernier jour, négatif une
+  /// fois la date passée. Null si le serveur ne donne pas de date.
+  int? daysLeft(DateTime now) {
+    final limit = collectBefore;
+    if (limit == null) return null;
+    final today = DateTime(now.year, now.month, now.day);
+    final last = DateTime(limit.year, limit.month, limit.day);
+    return last.difference(today).inDays;
+  }
 
   /// Ce que le serveur écrit quand le chargé public annule lui-même.
   static const _cancelledByCp = 'Annulé par le chargé public';
@@ -181,8 +186,63 @@ class WafacashWithdrawal {
       closedReason: json['closed_reason'] as String?,
       requestedAt: at('requested_at'),
       codeSentAt: at('code_sent_at'),
+      collectBefore: at('collect_before'),
       collectedAt: at('collected_at'),
       closedAt: at('closed_at'),
+    );
+  }
+}
+
+/// Les jours du mois où une demande est possible, bornes comprises. Réglés dans
+/// le panneau : l'app lit ce que dit le serveur, elle n'écrit aucune date en dur.
+class WafacashWindow {
+  final int startDay;
+  final int endDay;
+
+  /// Une demande passe maintenant : jour d'ouverture, ou exception en cours.
+  final bool openNow;
+
+  /// Le dernier jour de l'ouverture en cours ; null hors ouverture.
+  final DateTime? closesAt;
+
+  /// Le prochain premier jour d'ouverture.
+  final DateTime? nextOpensAt;
+
+  /// Une exception accordée par le staff, pour une urgence : une demande,
+  /// jusqu'à cette date.
+  final DateTime? exceptionUntil;
+
+  const WafacashWindow({
+    required this.startDay,
+    required this.endDay,
+    required this.openNow,
+    this.closesAt,
+    this.nextOpensAt,
+    this.exceptionUntil,
+  });
+
+  /// Les jours de calendrier entre [now] et [day].
+  static int daysUntil(DateTime day, DateTime now) =>
+      DateTime(day.year, day.month, day.day)
+          .difference(DateTime(now.year, now.month, now.day))
+          .inDays;
+
+  static WafacashWindow? fromJson(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    DateTime? at(String key) =>
+        DateTime.tryParse(json[key] as String? ?? '')?.toLocal();
+
+    final start = (json['start_day'] as num?)?.toInt();
+    final end = (json['end_day'] as num?)?.toInt();
+    if (start == null || end == null) return null;
+
+    return WafacashWindow(
+      startDay: start,
+      endDay: end,
+      openNow: json['open_now'] as bool? ?? false,
+      closesAt: at('closes_at'),
+      nextOpensAt: at('next_opens_at'),
+      exceptionUntil: at('exception_until'),
     );
   }
 }
@@ -193,12 +253,22 @@ class WafacashBalance {
 
   /// Bloqué par une demande en cours, pas encore payé.
   final int reserved;
+
+  /// Gagné sur un tournage fini depuis moins de 24 h : compté dans le solde,
+  /// pas encore retirable, le temps de revoir les présences du soir.
+  final int held;
+
+  /// Gagné sur un tournage fait pendant l'ouverture en cours : se retire à
+  /// l'ouverture suivante.
+  final int deferred;
   final int available;
 
   const WafacashBalance({
     this.earned = 0,
     this.paid = 0,
     this.reserved = 0,
+    this.held = 0,
+    this.deferred = 0,
     this.available = 0,
   });
 
@@ -209,14 +279,21 @@ class WafacashBalance {
       earned: n('earned'),
       paid: n('paid'),
       reserved: n('reserved'),
+      held: n('held'),
+      deferred: n('deferred'),
       available: n('available'),
     );
   }
 }
 
 class WafacashOverview {
-  /// Le staff a ouvert les retraits ET rempli la grille des frais.
+  /// L'interrupteur général : le staff a ouvert les retraits ET rempli la
+  /// grille des frais. Les jours du mois sont dans [window].
   final bool open;
+
+  /// Null : pas de fenêtre, ou serveur plus ancien. Les retraits sont alors
+  /// ouverts tout le mois.
+  final WafacashWindow? window;
   final int minAmount;
   final int maxAmount;
   final List<WafacashFeeBracket> fees;
@@ -226,7 +303,8 @@ class WafacashOverview {
 
   const WafacashOverview({
     this.open = false,
-    this.minAmount = 100,
+    this.window,
+    this.minAmount = 50,
     this.maxAmount = 5000,
     this.fees = const [],
     this.balance = const WafacashBalance(),
@@ -245,6 +323,9 @@ class WafacashOverview {
     return last != null && last.cancelledByStaff ? last : null;
   }
 
+  /// Une demande passerait maintenant, côté calendrier.
+  bool get canRequestNow => open && (window?.openNow ?? true);
+
   /// Le plus qu'on puisse demander maintenant.
   int get maxRequestable =>
       balance.available < maxAmount ? balance.available : maxAmount;
@@ -252,57 +333,37 @@ class WafacashOverview {
   /// Assez pour atteindre le minimum : sinon le bouton n'a pas de sens.
   bool get hasEnough => balance.available >= minAmount;
 
-  /// Les frais Wafacash pour un montant ENVOYÉ, ou null hors de la grille.
+  /// Ce qu'il manque au disponible pour atteindre le minimum.
+  int get missingForMin => hasEnough
+      ? 0
+      : minAmount - (balance.available < 0 ? 0 : balance.available);
+
+  /// Les frais Wafacash pour un montant envoyé, ou null hors de la grille.
   int? feeFor(int sent) {
     final sorted = [...fees]..sort((a, b) => a.upTo.compareTo(b.upTo));
     final palier = sorted.where((b) => sent <= b.upTo).firstOrNull;
     return palier?.feeFor(sent);
   }
 
-  /// La même règle que le serveur : Wafacash facture sur ce qui PART, donc on
-  /// cherche le plus grand envoi N tel que N + frais(N) tienne dans la demande.
-  ///
-  /// Calculer sur la demande surfacturait aux bords : 1 020 DH demandés
-  /// tombaient dans le palier à 47 DH alors que les 983 DH envoyés ne coûtent
-  /// que 37. Null quand les frais avaleraient tout.
-  WafacashQuote? quote(int requested) {
-    if (requested <= 0) return null;
-    final sorted = [...fees]..sort((a, b) => a.upTo.compareTo(b.upTo));
+  /// La même règle que le serveur : le montant doit au moins couvrir les frais
+  /// de l'agence, sinon il n'y aurait rien à retirer.
+  bool covers(int amount) {
+    final fee = feeFor(amount);
+    return fee != null && fee < amount;
+  }
 
-    int? meilleur;
-    var bas = 1;
-    for (final b in sorted) {
-      int n;
-      if (b.percent != null) {
-        n = (requested / (1 + b.percent! / 100)).floor();
-        if (n > b.upTo) n = b.upTo;
-        while (n >= bas && n + b.feeFor(n) > requested) {
-          n--;
-        }
-      } else {
-        n = requested - (b.fee ?? 0);
-        if (n > b.upTo) n = b.upTo;
-      }
-      if (n >= bas && n >= 1 && (meilleur == null || n > meilleur)) {
-        meilleur = n;
-      }
-      bas = b.upTo + 1;
-    }
-
-    if (meilleur == null) return null;
-    final frais = feeFor(meilleur)!;
-    return WafacashQuote(
-      requested: requested,
-      gross: meilleur + frais,
-      fee: frais,
-      net: meilleur,
-    );
+  /// Les frais mangent au moins un cinquième du montant : ça vaut la peine de
+  /// le dire, sans chiffrer ce qui reste le tarif de Wafacash.
+  bool feesWeighHeavy(int amount) {
+    final fee = feeFor(amount);
+    return fee != null && fee < amount && fee * 5 >= amount;
   }
 
   factory WafacashOverview.fromJson(Map<String, dynamic> json) =>
       WafacashOverview(
         open: json['open'] as bool? ?? false,
-        minAmount: (json['min_amount'] as num?)?.toInt() ?? 100,
+        window: WafacashWindow.fromJson(json['window']),
+        minAmount: (json['min_amount'] as num?)?.toInt() ?? 50,
         maxAmount: (json['max_amount'] as num?)?.toInt() ?? 5000,
         fees: (json['fees'] as List<dynamic>? ?? const [])
             .whereType<Map<String, dynamic>>()

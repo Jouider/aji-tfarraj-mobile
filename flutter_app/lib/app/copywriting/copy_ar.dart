@@ -577,27 +577,11 @@ class TicketCopyAr {
 
   String get title => 'بطاقاتي';
   String get loading => 'جاري تحميل بطاقاتك...';
-  String get pendingTitle => 'في انتظار التأكيد';
-  String get pendingDesc =>
-      'ستتوفر بطاقاتك هنا بعد الموافقة على حجوزاتك من قِبل فريقنا.';
-  String get showTickets => 'عرض بطاقاتي';
   String get viewReservations => 'عرض حجوزاتي';
   String get rulesReminder => 'تذكير بالقواعد';
-  String get refresh => 'تحديث';
   String get offlineBanner => 'وضع عدم الاتصال — آخر نسخة من البطاقات';
-  String get countSingle => 'بطاقة 1 معتمدة';
-  String countMultiple(int idx, int total) =>
-      '${idx + 1} / $total بطاقات معتمدة';
-  String get swipeHint => 'اسحب لرؤية بطاقاتك الأخرى';
-  String get ticketUsed => 'بطاقة مستخدمة';
-  String get ticketValid => 'بطاقة صالحة';
-  String get checkedInLabel => 'تم التحقق من الدخول';
-  String get usedLabel => 'مُستخدَم';
-  String seats(int n) => '$n ${n == 1 ? 'مقعد' : 'مقاعد'}';
   String get qrHintValid => 'أظهر رمز QR هذا عند الدخول';
-  String get qrHintUsed => 'تم استخدام هذه البطاقة مسبقًا';
   String codeCopied(String code) => 'تم نسخ الرمز: $code';
-  String checkinAt(String date) => 'تسجيل الدخول بتاريخ $date';
 }
 
 /// Browse screen copy in Arabic
@@ -1141,7 +1125,7 @@ class HowItWorksCopyAr {
         HowToStep(
           title: 'اربح مقابلك',
           body:
-              'كتخلّص عن كل مدعو حاضر فعليًا في التصوير. كل ما عمّرت أكثر، ربحت أكثر.',
+              'كتخلّص عن كل مدعو حاضر فعليًا في التصوير. الفلوس كتسحب عبر وفاكاش، ف أيام الفتح ديال كل شهر.',
         ),
       ];
 }

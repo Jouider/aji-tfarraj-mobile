@@ -19,6 +19,7 @@ import 'package:aji_tfarraj/features/badges/domain/badge.dart';
 import 'package:aji_tfarraj/features/badges/presentation/level_badge_card.dart';
 import 'package:aji_tfarraj/features/charge_public/data/charge_public_repository.dart';
 import 'package:aji_tfarraj/features/charge_public/domain/cp_dashboard.dart';
+import 'package:aji_tfarraj/features/charge_public/presentation/wafacash_news.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/wafacash_section.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_mode_provider.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/cp_share_screen.dart';
@@ -254,6 +255,7 @@ class _AccueilTab extends StatelessWidget {
           also: const [TutorialTopic.cpGuests, TutorialTopic.cpEarnings],
           message: firstTime,
         ),
+        const WafacashNewsBanner(),
         if (cpBadge != null) ...[
           LevelBadgeCard(badge: cpBadge!, isCp: true),
           const SizedBox(height: AppSpacing.lg),
@@ -925,9 +927,10 @@ class _GainsTab extends StatelessWidget {
       // Le contenu file sous la barre d'onglets en verre.
       padding: _listPadding(context),
       children: [
+        const WafacashNewsBanner(),
         _BalanceCard(stats: s, cp: cp),
-        // Retirer ce solde, juste sous lui. Invisible tant que le staff n'a
-        // pas ouvert les retraits Wafacash.
+        // Retirer ce solde, juste sous lui. Invisible s'il n'y a rien à retirer
+        // et que le staff n'a pas ouvert les retraits Wafacash.
         Consumer(
           builder: (_, ref, __) => WafacashSection(
             onChanged: () => ref.invalidate(cpDashboardProvider),

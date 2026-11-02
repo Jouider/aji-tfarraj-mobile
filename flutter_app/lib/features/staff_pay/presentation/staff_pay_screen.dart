@@ -69,8 +69,8 @@ class StaffPayScreen extends ConsumerWidget {
                 _PendingNote(text: c.pendingNote(pay.pending)),
                 const SizedBox(height: AppSpacing.sm),
               ],
-              // Retirer, juste sous le total. Invisible tant que les retraits
-              // Wafacash ne sont pas ouverts.
+              // Retirer, juste sous le total. Invisible s'il n'y a rien à retirer
+              // et que les retraits Wafacash ne sont pas ouverts.
               WafacashSection(
                 onChanged: () {
                   ref.invalidate(staffPayProvider);
