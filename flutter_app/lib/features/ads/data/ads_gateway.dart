@@ -131,13 +131,12 @@ class AdMobGateway implements AdsGateway {
 
     if (ready != null) {
       _ready = null;
-      _show(ready);
-      return true;
+      return _show(ready);
     }
 
     await initialize();
 
-    final shown = Completer<bool>();
+    final loaded = Completer<InterstitialAd?>();
     var giveUp = false;
 
     await InterstitialAd.load(
@@ -151,28 +150,44 @@ class AdMobGateway implements AdsGateway {
             ad.dispose();
             return;
           }
-          _show(ad);
-          _complete(shown, true);
+          _complete(loaded, ad);
         },
         onAdFailedToLoad: (error) {
           if (kDebugMode) debugPrint('[Ads] interstitiel : ${error.message}');
-          _complete(shown, false);
+          _complete(loaded, null);
         },
       ),
     );
 
-    return shown.future.timeout(wait, onTimeout: () {
+    final ad = await loaded.future.timeout(wait, onTimeout: () {
       giveUp = true;
-      return false;
+      return null;
     });
+
+    if (ad == null) return false;
+    return _show(ad);
   }
 
-  void _show(InterstitialAd ad) {
+  /// Rend true quand la pub est vraiment à l'écran, false si elle n'a pas pu
+  /// s'ouvrir. Le délai entre deux pubs part de ce résultat : une pub jamais
+  /// vue ne doit pas consommer le créneau suivant.
+  Future<bool> _show(InterstitialAd ad) {
+    final opened = Completer<bool>();
+
     ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (ad) => _complete(opened, true),
       onAdDismissedFullScreenContent: (ad) => ad.dispose(),
-      onAdFailedToShowFullScreenContent: (ad, error) => ad.dispose(),
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        if (kDebugMode) debugPrint('[Ads] ouverture : ${error.message}');
+        ad.dispose();
+        _complete(opened, false);
+      },
     );
     ad.show();
+
+    // Sans réponse du SDK, la confirmation n'attend pas plus longtemps.
+    return opened.future
+        .timeout(const Duration(seconds: 3), onTimeout: () => false);
   }
 
   @override
@@ -223,7 +238,7 @@ class AdMobGateway implements AdsGateway {
         .timeout(const Duration(minutes: 5), onTimeout: () => earned);
   }
 
-  void _complete(Completer<bool> completer, bool value) {
+  void _complete<T>(Completer<T> completer, T value) {
     if (!completer.isCompleted) completer.complete(value);
   }
 }
