@@ -413,7 +413,7 @@ class _PrivacyPolicyLink extends ConsumerWidget {
   const _PrivacyPolicyLink();
 
   static const _url =
-      'https://aji-tfarraj-backend-production.up.railway.app/privacy';
+      'https://app.ajitfarraj.ma/privacy';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

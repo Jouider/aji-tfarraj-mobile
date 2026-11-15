@@ -69,7 +69,10 @@
 		<string>Utilisez Face ID pour déverrouiller l'application et protéger vos billets.</string>
 		<!-- Allow Railway media domain: TLS 1.3 uses CHACHA20-POLY1305 which is not
 	     in the legacy ATS cipher whitelist. NSExceptionRequiresForwardSecrecy=false
-	     relaxes the cipher requirement while keeping the connection HTTPS-only. -->
+	     relaxes the cipher requirement while keeping the connection HTTPS-only.
+	     The API now lives on app.ajitfarraj.ma (no exception needed there).
+	     Kept only for media URLs that may still point at Railway; remove once
+	     the API no longer returns any up.railway.app URL. -->
 		<key>NSAppTransportSecurity</key>
 		<dict>
 			<key>NSAllowsArbitraryLoads</key>

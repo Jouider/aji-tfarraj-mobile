@@ -8,7 +8,7 @@ class AppConfig {
 
   /// API Base URL - Production
   static const String apiBaseUrl =
-      'https://aji-tfarraj-backend-production.up.railway.app';
+      'https://app.ajitfarraj.ma';
 
   /// API Base URL - Local development
   static const String apiBaseUrlLocal = 'http://localhost:8000';
