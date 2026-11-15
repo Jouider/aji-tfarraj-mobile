@@ -1,4 +1,5 @@
 import 'dart:ui' show ImageFilter;
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -419,13 +420,12 @@ class _HeroShowCard extends StatelessWidget {
           children: [
             // Background image
             show.imageUrl != null
-                ? Image.network(
-                    show.imageUrl!,
+                ? CachedNetworkImage(
+                    imageUrl: show.imageUrl!,
                     fit: BoxFit.cover,
-                    loadingBuilder: (_, child, progress) => progress == null
-                        ? child
-                        : Container(color: AppColors.backgroundGrey),
-                    errorBuilder: (_, __, ___) => _HeroPlaceholder(),
+                    placeholder: (_, __) =>
+                        Container(color: AppColors.backgroundGrey),
+                    errorWidget: (_, __, ___) => _HeroPlaceholder(),
                   )
                 : _HeroPlaceholder(),
 
@@ -803,15 +803,12 @@ class _ShowHorizontalCard extends StatelessWidget {
                     children: [
                       // Image
                       show.imageUrl != null
-                          ? Image.network(
-                              show.imageUrl!,
+                          ? CachedNetworkImage(
+                              imageUrl: show.imageUrl!,
                               fit: BoxFit.cover,
-                              loadingBuilder: (_, child, progress) =>
-                                  progress == null
-                                      ? child
-                                      : Container(
+                              placeholder: (_, __) => Container(
                                           color: AppColors.backgroundGrey),
-                              errorBuilder: (_, __, ___) => Container(
+                              errorWidget: (_, __, ___) => Container(
                                 color: AppColors.backgroundGrey,
                                 child: Icon(
                                   Icons.tv,

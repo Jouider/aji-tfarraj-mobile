@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -47,14 +48,13 @@ class BookingShowSummaryCard extends ConsumerWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: show.imageUrl != null
-                ? Image.network(
-                    show.imageUrl!,
+                ? CachedNetworkImage(
+                    imageUrl: show.imageUrl!,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
-                    loadingBuilder: (_, child, progress) =>
-                        progress == null ? child : const _ThumbPlaceholder(),
-                    errorBuilder: (_, __, ___) => const _ThumbPlaceholder(),
+                    placeholder: (_, __) => const _ThumbPlaceholder(),
+                    errorWidget: (_, __, ___) => const _ThumbPlaceholder(),
                   )
                 : const _ThumbPlaceholder(),
           ),

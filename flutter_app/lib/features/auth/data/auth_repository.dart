@@ -179,7 +179,7 @@ class AuthRepository {
         '600996591716-kptab77521aol0t2svaeq4ms24doh0if.apps.googleusercontent.com';
     const redirectScheme = 'ajitfarraj';
     const redirectUri =
-        'https://aji-tfarraj-backend-production.up.railway.app/oauth/callback';
+        'https://app.ajitfarraj.ma/oauth/callback';
 
     final state = _generateRandomString(32);
     final nonce = _generateRandomString(32);
