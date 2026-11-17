@@ -61,6 +61,10 @@ arrivent »), l'écran relit le solde trois secondes plus tard.
   démarre. Le SDK démarre ~3 s après l'ouverture dès que le serveur allume la
   publicité (`adsWarmUpProvider`, regardé par la coquille) : la question ne
   tombe jamais au milieu d'une réservation.
+- iOS : `SKAdNetworkItems` porte l'identifiant de Google et ceux des acheteurs
+  tiers, soit 50 en tout, copiés le 04/11/2026 du guide iOS de Google. Ces
+  acheteurs enchérissent même sans médiation, et Google met la liste à jour :
+  la relire de temps en temps.
 
 **Reste, hors code :**
 
