@@ -110,6 +110,7 @@ class StaffPayLine {
     required this.entries,
     required this.amount,
     required this.pending,
+    this.unpaidShow = false,
   });
 
   final int episodeId;
@@ -128,6 +129,10 @@ class StaffPayLine {
   /// Format de l'émission pas encore choisi : dû, pas encore chiffré.
   final bool pending;
 
+  /// L'émission ne paie pas son staff ce soir-là (Jemaatna Zina) : 0 DH, ou
+  /// le seul 1 DH par entrée pour l'équipe technique.
+  final bool unpaidShow;
+
   bool get isTech => position == 'tech';
 
   factory StaffPayLine.fromJson(Map<String, dynamic> json) => StaffPayLine(
@@ -141,6 +146,7 @@ class StaffPayLine {
         entries: (json['entries'] as num?)?.toInt() ?? 0,
         amount: (json['amount'] as num?)?.toInt() ?? 0,
         pending: json['pending'] as bool? ?? false,
+        unpaidShow: json['unpaid_show'] as bool? ?? false,
       );
 }
 

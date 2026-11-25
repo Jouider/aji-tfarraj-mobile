@@ -75,6 +75,9 @@ class AppConfig {
   static const String wafacashWithdrawals = '/api/me/wafacash/withdrawals';
   static const String staffPay = '/api/me/staff-pay';
 
+  /// Les dépenses et la caisse de Hamza (rôle « Saisie des dépenses »).
+  static const String expenses = '/api/me/expenses';
+
   // Support Tickets
   static const String supportTickets = '/api/support/tickets';
   static const String mySupportTickets = '/api/me/support-tickets';

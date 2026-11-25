@@ -277,6 +277,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
           ],
+
+          // Ma caisse — Hamza (rôle « Saisie des dépenses ») : l'argent remis
+          // par Ayoub et chaque dépense des tournages.
+          if (user != null && user.expenses) ...[
+            _SpaceCard(
+              title: s.expenses.profileCardTitle,
+              subtitle: s.expenses.profileCardSubtitle,
+              icon: Icons.account_balance_wallet_outlined,
+              color: AppColors.primary,
+              colorDark: AppColors.primaryDark,
+              onTap: () => context.push(Routes.expenses),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           const SizedBox(height: AppSpacing.md),
 
           // ── Préférences ──────────────────────────────

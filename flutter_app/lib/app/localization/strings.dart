@@ -11,6 +11,7 @@ import 'package:aji_tfarraj/app/copywriting/support_chat_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/ticket_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/staff_pay_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/expenses_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/account_deletion_copy.dart';
 
 /// Localized strings accessor
@@ -1418,6 +1419,11 @@ class AppStrings {
   StaffPayCopy get staffPay => locale == AppLocale.fr
       ? const StaffPayCopyFr()
       : const StaffPayCopyAr();
+
+  /// « Ma caisse » : les dépenses de Hamza et l'argent remis par Ayoub.
+  ExpensesCopy get expenses => locale == AppLocale.fr
+      ? const ExpensesCopyFr()
+      : const ExpensesCopyAr();
 
   AccountDeletionCopy get accountDeletion => locale == AppLocale.fr
       ? const AccountDeletionCopyFr()

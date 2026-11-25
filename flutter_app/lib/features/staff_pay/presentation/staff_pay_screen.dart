@@ -273,7 +273,9 @@ class _LineRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final detail = [
       if (showPosition) copy.position(line.position),
-      line.isTech ? copy.entries(line.entries) : copy.size(line.size),
+      if (line.position != 'day_staff')
+        line.isTech ? copy.entries(line.entries) : copy.size(line.size),
+      if (line.unpaidShow) copy.unpaidShow,
     ].join(' · ');
 
     return Padding(

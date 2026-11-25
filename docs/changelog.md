@@ -4,6 +4,14 @@ Ce que chaque version a apporté, et ce qu'il faut savoir à son sujet. Les
 notes pour les stores s'écrivent à partir d'ici (Play : 500 caractères par
 langue).
 
+## Prochaine version
+
+- **« Ma caisse »** pour Hamza (rôle « Saisie des dépenses ») : le solde de
+  la caisse, une tuile par type de dépense, le total calculé en direct, les
+  reçus en photo, les dépenses refusées à corriger. Voir `expenses.md`.
+- **« Ma paie »** : la ligne « Staff du jour » (Jemaatna Zina) et les
+  épisodes d'une émission sans paie du staff.
+
 ## 1.1.21 (58) — à publier
 
 - **Glisser pour revenir** (iOS) partout : la réservation depuis une émission,

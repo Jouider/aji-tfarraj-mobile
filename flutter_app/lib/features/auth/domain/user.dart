@@ -37,6 +37,10 @@ class User {
   /// retrait Wafacash.
   final bool staffPay;
 
+  /// Backend `expenses` — le rôle « Saisie des dépenses » (Hamza) : sa
+  /// caisse et ses dépenses dans l'app.
+  final bool expenses;
+
   /// Gamification badges (attendance always present; charge_public/staff optional).
   final UserBadges? badges;
 
@@ -69,6 +73,7 @@ class User {
     this.referralCode,
     this.chargePublicEnabled = false,
     this.staffPay = false,
+    this.expenses = false,
     this.badges,
     this.instagram,
     this.tiktok,
@@ -111,6 +116,7 @@ class User {
       referralCode: json['referral_code'] as String?,
       chargePublicEnabled: json['is_charge_public'] as bool? ?? false,
       staffPay: json['staff_pay'] as bool? ?? false,
+      expenses: json['expenses'] as bool? ?? false,
       instagram: json['instagram'] as String?,
       tiktok: json['tiktok'] as String?,
       snapchat: json['snapchat'] as String?,
@@ -148,6 +154,7 @@ class User {
       'referral_code': referralCode,
       'is_charge_public': chargePublicEnabled,
       'staff_pay': staffPay,
+      'expenses': expenses,
       'badges': badges?.toJson(),
     };
   }
@@ -178,6 +185,7 @@ class User {
     String? referralCode,
     bool? chargePublicEnabled,
     bool? staffPay,
+    bool? expenses,
     UserBadges? badges,
     bool clearAvatar = false,
     bool clearPhoneVerification = false,
@@ -206,6 +214,7 @@ class User {
       referralCode: referralCode ?? this.referralCode,
       chargePublicEnabled: chargePublicEnabled ?? this.chargePublicEnabled,
       staffPay: staffPay ?? this.staffPay,
+      expenses: expenses ?? this.expenses,
       badges: badges ?? this.badges,
       instagram: instagram ?? this.instagram,
       tiktok: tiktok ?? this.tiktok,
