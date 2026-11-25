@@ -205,7 +205,7 @@ class ExpenseRow extends StatelessWidget {
                   if (e.isRefused && (e.reviewNote ?? '').isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
-                      child: Text('« ${e.reviewNote} »',
+                      child: Text(e.quotedReviewNote!,
                           style: AppTypography.caption
                               .copyWith(color: AppColors.errorDark)),
                     ),

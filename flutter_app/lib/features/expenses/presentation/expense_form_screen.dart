@@ -188,7 +188,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
           icon: Icons.error_outline,
           text: [
             c.refusedBy(e.reviewedBy),
-            if (e.reviewNote != null) '« ${e.reviewNote} »'
+            if (e.quotedReviewNote != null) e.quotedReviewNote!
           ].join(' : '),
         ),
       if (_locked)

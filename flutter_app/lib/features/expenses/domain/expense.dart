@@ -207,6 +207,11 @@ class Expense {
   final List<ExpensePhoto> photos;
   final bool editable;
 
+  /// Le motif d'Ayoub entre guillemets, isolé (FSI … PDI) : écrit en
+  /// français, il garde son sens de lecture dans l'app en arabe.
+  String? get quotedReviewNote =>
+      (reviewNote ?? '').isEmpty ? null : '\u2068« $reviewNote »\u2069';
+
   bool get isPending => status == ExpenseStatus.pending;
   bool get isValidated => status == ExpenseStatus.validated;
   bool get isRefused => status == ExpenseStatus.refused;
