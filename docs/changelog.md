@@ -4,8 +4,20 @@ Ce que chaque version a apporté, et ce qu'il faut savoir à son sujet. Les
 notes pour les stores s'écrivent à partir d'ici (Play : 500 caractères par
 langue).
 
-## Prochaine version
+## 1.1.29 (66) — à publier (stores le 28/11 au plus tard)
 
+- **Campagnes dans l'app** : une fenêtre à l'ouverture et des bannières sur
+  l'accueil, décidées par le serveur et créées dans le panneau sans nouvelle
+  version. Première : le casting Tri9 Attahadi (1er–15 décembre). Voir
+  `campaigns.md`.
+- **Roue de la chance sur l'accueil** : la carte devient une demi-roue qui
+  dépasse du bord de l'écran, en bas, au-dessus des onglets (à gauche en
+  arabe) — elle tourne, une pastille dit les essais du jour, un toucher ouvre
+  la roue. Elle rentre dans le bord pendant qu'on fait défiler. Fidélité et
+  Récompenses gardent la carte.
+- **Heures des épisodes** : début et fin (« 20:00 – 23:00 ») sur chaque
+  épisode de la fiche d'une émission, l'heure de fin dans « Heure » et au
+  moment de réserver.
 - **« Ma caisse »** pour Hamza (rôle « Saisie des dépenses ») : le solde de
   la caisse, une tuile par type de dépense, le total calculé en direct, les
   reçus en photo, les dépenses refusées à corriger. Voir `expenses.md`.

@@ -1,4 +1,5 @@
 import 'dart:ui' show ImageFilter;
+import 'package:aji_tfarraj/features/campaigns/presentation/campaign_banners.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,7 +22,7 @@ import 'package:aji_tfarraj/app/localization/locale_provider.dart';
 import 'package:aji_tfarraj/app/localization/strings.dart';
 import 'package:aji_tfarraj/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:aji_tfarraj/features/wheel/data/wheel_repository.dart';
-import 'package:aji_tfarraj/features/wheel/presentation/wheel_entry_card.dart';
+import 'package:aji_tfarraj/features/wheel/presentation/wheel_peek.dart';
 import 'package:aji_tfarraj/features/referral/data/referral_repository.dart'
     show pendingNavigationProvider;
 
@@ -100,7 +101,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: AppColors.backgroundWhite,
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(unreadCount, s),
-      body: _buildBody(showsState, s, isAr),
+      // La demi-roue de la chance, au bord de l'écran, au-dessus de la page.
+      body: Stack(
+        children: [
+          Positioned.fill(child: _buildBody(showsState, s, isAr)),
+          WheelPeek(scrollController: _scrollController),
+        ],
+      ),
     );
   }
 
@@ -315,15 +322,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SliverToBoxAdapter(
               child: _HeroShowCard(show: heroShow, s: s, isAr: isAr)),
 
-          // La roue de la chance, juste sous l'affiche : visible sans
-          // défiler, sans passer devant les émissions. Fermée, elle ne
-          // prend aucune place.
+          // Les bannières des campagnes (casting, nouvelle émission…),
+          // décidées par le serveur : sous l'affiche, pas au-dessus — la
+          // barre du haut est transparente et l'affiche doit y monter. Sans
+          // bannière, rien.
           const SliverToBoxAdapter(
-            child: WheelEntryCard(
+            child: CampaignBanners(
               padding: EdgeInsets.fromLTRB(
                   AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
             ),
           ),
+
+          // La roue de la chance n'est plus une carte ici : elle dépasse du
+          // bord de l'écran (WheelPeek, posée par-dessus la page), pour que
+          // l'affiche, la campagne et les émissions ne s'empilent pas.
 
           // Upcoming section
           if (prochains.isNotEmpty) ...[
@@ -806,8 +818,8 @@ class _ShowHorizontalCard extends StatelessWidget {
                           ? CachedNetworkImage(
                               imageUrl: show.imageUrl!,
                               fit: BoxFit.cover,
-                              placeholder: (_, __) => Container(
-                                          color: AppColors.backgroundGrey),
+                              placeholder: (_, __) =>
+                                  Container(color: AppColors.backgroundGrey),
                               errorWidget: (_, __, ___) => Container(
                                 color: AppColors.backgroundGrey,
                                 child: Icon(

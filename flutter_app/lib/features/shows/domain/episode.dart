@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:aji_tfarraj/features/return_points/domain/return_point_option.dart';
 
 /// Episode model — a single recording/filming session within a Show
@@ -66,6 +67,43 @@ class Episode {
   /// Returns null when not available (caller should fall back to formatting startsAt).
   String? localizedDate(bool isAr) =>
       (isAr && dateAr != null) ? dateAr : dateFr;
+
+  /// Les heures du tournage, à l'heure du téléphone : « 18:00 – 21:00 », ou
+  /// « 18:00 » sans fin connue (ou une fin incohérente). Null sans date.
+  /// Isolé de gauche à droite (LRI … PDI) : dans une ligne en arabe, les deux
+  /// heures ne s'inversent pas.
+  String? get hoursLabel {
+    final start = startsAt;
+    if (start == null) return null;
+    final f = DateFormat('HH:mm');
+    final end = endsAt;
+    final text = end != null && end.isAfter(start)
+        ? '${f.format(start.toLocal())} – ${f.format(end.toLocal())}'
+        : f.format(start.toLocal());
+    return '\u2066$text\u2069';
+  }
+
+  /// La date seule, sans l'heure, quand [hoursLabel] l'affiche à part : la
+  /// date du serveur en français finit par « à 20:00 », on la retire ; sans
+  /// date du serveur, « sam. 28 nov. ».
+  String? dateOnlyLabel(bool isAr) {
+    final server = localizedDate(isAr);
+    if (server != null) {
+      return server.replaceFirst(RegExp(r'\s+à\s+\d{1,2}[:h]\d{2}\s*$'), '');
+    }
+    final start = startsAt;
+    if (start == null) return null;
+    return DateFormat('EEE d MMM', isAr ? 'ar' : 'fr_FR')
+        .format(start.toLocal());
+  }
+
+  /// L'heure de fin seule (« 21:00 »), quand elle est connue et après le début.
+  String? get endTimeLabel {
+    final start = startsAt;
+    final end = endsAt;
+    if (start == null || end == null || !end.isAfter(start)) return null;
+    return DateFormat('HH:mm').format(end.toLocal());
+  }
 
   /// Localized city name — falls back to French if Arabic is null.
   String localizedCity(bool isAr) =>

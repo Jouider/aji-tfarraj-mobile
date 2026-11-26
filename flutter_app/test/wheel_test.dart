@@ -17,6 +17,7 @@ import 'package:aji_tfarraj/features/wheel/data/wheel_repository.dart';
 import 'package:aji_tfarraj/features/wheel/domain/wheel.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/lucky_wheel_view.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/wheel_entry_card.dart';
+import 'package:aji_tfarraj/features/wheel/presentation/wheel_peek.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/wheel_painters.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/wheel_screen.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/wheel_sheets.dart';
@@ -123,8 +124,7 @@ void main() {
       expect(s.videoUnlocksSpinAt(DateTime.now()), isFalse);
     });
 
-    test('après le tour, le résultat dit s\'il reste une vidéo à regarder',
-        () {
+    test('après le tour, le résultat dit s\'il reste une vidéo à regarder', () {
       final r = SpinResult.fromJson({
         'outcome': 'retry',
         'points': 0,
@@ -197,12 +197,11 @@ void main() {
       addTearDown(sub.close);
       await container.read(wheelProvider.future);
 
-      final unlocked = await container
-          .read(wheelProvider.notifier)
-          .waitForUnlockedSpin(
-            every: const Duration(milliseconds: 5),
-            upTo: const Duration(milliseconds: 40),
-          );
+      final unlocked =
+          await container.read(wheelProvider.notifier).waitForUnlockedSpin(
+                every: const Duration(milliseconds: 5),
+                upTo: const Duration(milliseconds: 40),
+              );
 
       expect(unlocked, isFalse);
       expect(container.read(wheelProvider).value!.spinsLeft, 0);
@@ -380,8 +379,7 @@ void main() {
       expect(find.text(c.again), findsNothing);
     });
 
-    testWidgets('la carte d\'entrée annonce l\'essai en vidéo',
-        (tester) async {
+    testWidgets('la carte d\'entrée annonce l\'essai en vidéo', (tester) async {
       final status =
           WheelStatus.fromJson(json(left: 0, adLeft: 1, adSpins: true));
       await pump(tester, const Scaffold(body: WheelEntryCard()),
@@ -410,6 +408,33 @@ void main() {
       expect(find.text('Jouer'), findsOneWidget);
     });
 
+    testWidgets('l\'accueil : une demi-roue au bord, avec les essais du jour',
+        (tester) async {
+      final status = WheelStatus.fromJson(json(left: 2));
+      await pump(tester, const Scaffold(body: Stack(children: [WheelPeek()])),
+          wheel: () => _FakeWheel(status, null));
+      // Elle arrive un peu après l'accueil.
+      await tester.pump(const Duration(milliseconds: 800));
+
+      expect(find.text('2'), findsOneWidget);
+      expect(
+          find.bySemanticsLabel(RegExp('Roue de la chance')), findsOneWidget);
+      // À moitié dans le bord : son côté droit dépasse de l'écran.
+      final box = tester.getRect(find.descendant(
+          of: find.byType(WheelPeek),
+          matching: find.byType(RotationTransition)));
+      expect(box.right, greaterThan(390));
+    });
+
+    testWidgets('fermée, la demi-roue n\'apparaît pas', (tester) async {
+      final status = WheelStatus.fromJson(json(enabled: false));
+      await pump(tester, const Scaffold(body: Stack(children: [WheelPeek()])),
+          wheel: () => _FakeWheel(status, null));
+      await tester.pump(const Duration(milliseconds: 800));
+
+      expect(find.byType(AnimatedSlide), findsNothing);
+    });
+
     testWidgets('fermée, la carte d\'entrée ne prend aucune place',
         (tester) async {
       final status = WheelStatus.fromJson(json(enabled: false));
@@ -436,7 +461,8 @@ void main() {
     // largeur : on tient donc la longueur du texte et la marge du bouton.
     test('le bouton vidéo garde un libellé court', () {
       for (final locale in AppLocale.values) {
-        expect(AppStrings(locale).wheel.watchVideo.length, lessThanOrEqualTo(20));
+        expect(
+            AppStrings(locale).wheel.watchVideo.length, lessThanOrEqualTo(20));
       }
     });
 
@@ -482,8 +508,8 @@ void main() {
 
       expect(find.text('Roue de la chance'), findsOneWidget);
       expect(find.text('Jouer'), findsOneWidget);
-      expect(
-          find.text(const AppStrings(AppLocale.fr).noRewardsYet), findsOneWidget);
+      expect(find.text(const AppStrings(AppLocale.fr).noRewardsYet),
+          findsOneWidget);
       expect(
           tester.getTopLeft(find.text('Roue de la chance')).dy,
           lessThan(tester

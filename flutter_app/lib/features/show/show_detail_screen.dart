@@ -803,8 +803,16 @@ class _DetailsCard extends ConsumerWidget {
         (show.startsAt != null
             ? fallbackDateFormat.format(show.startsAt!.toLocal())
             : s.homeDateTbc);
+    // L'heure de fin du prochain épisode (ou de l'émission), quand elle est
+    // connue : « 20:00 – 23:00 ».
+    final next = show.nextEpisode;
+    final end = (next != null && next.startsAt == show.startsAt)
+        ? next.endsAt
+        : show.endsAt;
     final timeValue = show.startsAt != null
-        ? timeFormat.format(show.startsAt!.toLocal())
+        ? (end != null && end.isAfter(show.startsAt!)
+            ? '\u2066${timeFormat.format(show.startsAt!.toLocal())} – ${timeFormat.format(end.toLocal())}\u2069'
+            : timeFormat.format(show.startsAt!.toLocal()))
         : (hasDate ? '—' : s.homeDateTbc);
 
     return Container(
@@ -1546,7 +1554,11 @@ class _EpisodeCard extends ConsumerWidget {
     final s = ref.watch(stringsProvider);
     final isAr = ref.watch(isRtlProvider);
     final isSoldOut = episode.isSoldOut;
-    final episodeDateStr = episode.localizedDate(isAr) ??
+    // Les heures ont leur ligne (début – fin) : la date se lit alors seule,
+    // sans être coupée.
+    final episodeDateStr = (episode.hoursLabel != null
+            ? episode.dateOnlyLabel(isAr)
+            : episode.localizedDate(isAr)) ??
         (episode.startsAt != null
             ? DateFormat('EEE d MMM • HH:mm', 'fr_FR')
                 .format(episode.startsAt!.toLocal())
@@ -1614,6 +1626,34 @@ class _EpisodeCard extends ConsumerWidget {
                     ),
                   ],
                 ),
+                // Les heures du tournage, début et fin : la date du serveur
+                // ne donne que le début en français, et rien en arabe.
+                if (episode.hoursLabel != null) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.schedule,
+                        size: 12,
+                        color:
+                            isPast ? AppColors.textLight : AppColors.secondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          episode.hoursLabel!,
+                          style: AppTypography.caption.copyWith(
+                            color: isPast
+                                ? AppColors.textLight
+                                : AppColors.textMuted,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 2),
                 Row(
                   children: [

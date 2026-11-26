@@ -131,7 +131,10 @@ class BookingShowSummaryCard extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         displayDate != null
-                            ? dateFormat.format(displayDate.toLocal())
+                            // L'heure de fin de l'épisode, quand elle est connue.
+                            ? (episode?.endTimeLabel != null
+                                ? '${dateFormat.format(displayDate.toLocal())} – \u2066${episode!.endTimeLabel}\u2069'
+                                : dateFormat.format(displayDate.toLocal()))
                             : '—',
                         style: AppTypography.bodySmall.copyWith(
                           color: AppColors.textSecondary,
