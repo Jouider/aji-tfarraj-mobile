@@ -45,6 +45,9 @@ abstract class StaffPayCopy {
 
   /// Le lien depuis l'onglet Gains du chargé public.
   String get gainsLink;
+
+  /// Une émission qui ne paie pas son staff (Jemaatna Zina).
+  String get unpaidShow;
 }
 
 const _moisFr = [
@@ -99,6 +102,7 @@ class StaffPayCopyFr implements StaffPayCopy {
         'warm_up' => 'Chauffeur de salle',
         'tech' => 'Équipe technique',
         'door' => 'Inscription à la porte',
+        'day_staff' => 'Staff du jour',
         _ => code,
       };
 
@@ -175,6 +179,8 @@ class StaffPayCopyFr implements StaffPayCopy {
   String get retry => 'Réessayer';
   @override
   String get gainsLink => 'Voir le détail de ma paie staff';
+  @override
+  String get unpaidShow => 'Émission sans paie du staff';
 }
 
 class StaffPayCopyAr implements StaffPayCopy {
@@ -196,6 +202,7 @@ class StaffPayCopyAr implements StaffPayCopy {
         'warm_up' => 'منشّط القاعة',
         'tech' => 'الفريق التقني',
         'door' => 'التسجيل عند الباب',
+        'day_staff' => 'ستاف النهار',
         _ => code,
       };
 
@@ -268,4 +275,6 @@ class StaffPayCopyAr implements StaffPayCopy {
   String get retry => 'أعد المحاولة';
   @override
   String get gainsLink => 'عرض تفاصيل أجري في الطاقم';
+  @override
+  String get unpaidShow => 'برنامج بلا أجر الستاف';
 }

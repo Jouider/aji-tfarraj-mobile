@@ -88,6 +88,16 @@ class PushRouter {
         return '${Routes.chargePublic}?tab=gains';
       }
 
+      // Les dépenses de Hamza : validées, refusées, caisse alimentée.
+      if (type == 'expenses') {
+        return Routes.expenses;
+      }
+
+      // Le staff du jour : 200 DH ajoutés à sa paie.
+      if (type == 'staff_pay') {
+        return Routes.staffPay;
+      }
+
       return Routes.home;
     } catch (e) {
       _debugLog('Error getting route from data: $e');

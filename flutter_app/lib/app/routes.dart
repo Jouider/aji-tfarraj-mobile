@@ -80,6 +80,12 @@ class Routes {
   /// « Ma paie » du staff payé (superviseur, chauffeur de salle, technique).
   static const staffPay = '/staff-pay';
 
+  /// « Ma caisse » : les dépenses de Hamza (rôle « Saisie des dépenses »).
+  static const expenses = '/expenses';
+
+  /// Une dépense à saisir ou à corriger (`extra` : ExpenseFormArgs).
+  static const expenseForm = '/expenses/form';
+
   // Referral / Parrainage
   static const referralStats = '/referral-stats';
   static const referralLinks = '/referral-links';

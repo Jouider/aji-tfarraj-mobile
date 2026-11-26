@@ -39,6 +39,8 @@ import 'package:aji_tfarraj/features/how_it_works/domain/how_to_track.dart';
 import 'package:aji_tfarraj/features/how_it_works/presentation/how_it_works_screen.dart';
 import 'package:aji_tfarraj/features/charge_public/presentation/charge_public_shell.dart';
 import 'package:aji_tfarraj/features/staff_pay/presentation/staff_pay_screen.dart';
+import 'package:aji_tfarraj/features/expenses/presentation/expenses_screen.dart';
+import 'package:aji_tfarraj/features/expenses/presentation/expense_form_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/rewards_screen.dart';
 import 'package:aji_tfarraj/features/rewards/presentation/my_rewards_screen.dart';
 import 'package:aji_tfarraj/features/wheel/presentation/wheel_screen.dart';
@@ -464,6 +466,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.staffPay,
         name: 'staffPay',
         builder: (context, state) => const StaffPayScreen(),
+      ),
+      GoRoute(
+        path: Routes.expenses,
+        name: 'expenses',
+        builder: (context, state) => const ExpensesScreen(),
+      ),
+      GoRoute(
+        path: Routes.expenseForm,
+        name: 'expenseForm',
+        builder: (context, state) => ExpenseFormScreen(
+          args: state.extra is ExpenseFormArgs
+              ? state.extra as ExpenseFormArgs
+              : const ExpenseFormArgs(),
+        ),
       ),
       GoRoute(
         path: Routes.rewards,
