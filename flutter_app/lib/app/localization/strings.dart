@@ -12,6 +12,7 @@ import 'package:aji_tfarraj/app/copywriting/ticket_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/wafacash_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/staff_pay_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/expenses_copy.dart';
+import 'package:aji_tfarraj/app/copywriting/campaigns_copy.dart';
 import 'package:aji_tfarraj/app/copywriting/account_deletion_copy.dart';
 
 /// Localized strings accessor
@@ -1424,6 +1425,11 @@ class AppStrings {
   ExpensesCopy get expenses => locale == AppLocale.fr
       ? const ExpensesCopyFr()
       : const ExpensesCopyAr();
+
+  /// Les campagnes : fenêtre à l'ouverture et bannières de l'accueil.
+  CampaignsCopy get campaigns => locale == AppLocale.fr
+      ? const CampaignsCopyFr()
+      : const CampaignsCopyAr();
 
   AccountDeletionCopy get accountDeletion => locale == AppLocale.fr
       ? const AccountDeletionCopyFr()
